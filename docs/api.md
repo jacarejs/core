@@ -256,9 +256,30 @@ export <view>
 </view>
 ```
 
-- If `greeting` is a **signal** → `bindText(node, greeting)`
+- If `greeting` is a **signal** → `bindText` in dev, CPW inline in production
 - If `greeting` is a **component prop** → `bindPropText(node, greeting)` (handles signals and plain strings)
 - Mixed template → `effect(() => { node.data = \`Hello ${name()}\` })`
+
+### Reactive CSS variables
+
+```javascript
+import { computed, signal } from '@jacare/core'
+
+const progress = signal(25)
+const pct = computed(() => progress() + '%')
+
+export <view>
+  <div class="track">
+    <div class="fill" style---pct=${pct} />
+  </div>
+</view>
+
+export <style>
+.fill { width: var(--pct); }
+</style>
+```
+
+`style---pct` and `style:pct` are equivalent. The compiler sets `--pct` on the element. In production, CPW emits `el.style.setProperty('--pct', …)` without importing `bindStyleVar`.
 
 ### Events
 
@@ -291,15 +312,44 @@ Runtime helpers imported only when the compiler needs them.
 
 | Helper | Use |
 |--------|-----|
-| `bindText(node, signal)` | Reactive text from signal |
+| `bindText(node, signal)` | Reactive text from signal (dev; prod uses CPW when possible) |
 | `bindPropText(node, prop)` | Component prop (signal or string) |
 | `bindAttribute(el, name, signal)` | Reactive attribute |
 | `bindModel(el, name, signal)` | Two-way `value` / `checked` |
 | `bindClass(el, className, signal)` | Toggle class |
+| `bindStyleVar(el, name, signal)` | Reactive CSS custom property (`--name`) |
 | `branch(anchor, fn)` | `#if` / `#elif` / `#else` |
 | `reconcileKeyedList(anchor, source, key, render)` | `#for` keyed lists |
 | `mountSlot(anchor, children, name?)` | Slot projection |
 | `ensureScopedStyle(scopeId, css)` | Inject scoped stylesheet |
+
+### Compile-Time Pulse Wiring (CPW)
+
+Production builds (`vite build`) enable CPW automatically via the Vite plugin. For static signal bindings, the compiler inlines:
+
+```javascript
+let _v = count.peek
+node.data = String(_v)
+_cleanups.push(count.subscribe(() => { /* update if changed */ }))
+```
+
+**Covered by CPW:** `${signal}`, `bind-*` (one-way), `class-*`, `style---*`.
+
+**Still runtime:** `bindModel`, mixed text, arrow expressions, component props, control flow.
+
+```javascript
+// vite.config.js
+import { jacare } from '@jacare/vite-plugin'
+
+export default {
+  plugins: [
+    jacare({
+      cpw: 'auto',    // default — true in production client builds
+      inspect: true,  // write .jacare/compiled/*.js
+    }),
+  ],
+}
+```
 
 ### Two-way binding
 
@@ -321,6 +371,17 @@ export <view>
 ```javascript
 export <view>
   <li class-done=${item.done} class-active=${selected}>${item.label}</li>
+</view>
+```
+
+### CSS variable binding
+
+```javascript
+const width = signal(50)
+const pct = computed(() => width() + '%')
+
+export <view>
+  <div class="bar" style---pct=${pct} />
 </view>
 ```
 
@@ -728,6 +789,7 @@ import { compile, parseModule, parseTemplate } from '@jacare/compiler'
 const result = compile(source, {
   filename: 'Card.jcr',
   mode: 'client',       // 'client' | 'server' | 'full'
+  cpw: true,            // inline pulse wiring (default false; Vite prod sets true)
   runtimeImport: '@jacare/core',
 })
 
@@ -809,6 +871,7 @@ export default {
   plugins: [
     jacare({
       emit: 'auto',           // 'auto' | 'client' | 'server' | 'full'
+      cpw: 'auto',            // 'auto' | true | false — prod client builds use CPW
       inspect: true,            // write compiled output to .jacare/compiled/
       runtimeImport: '@jacare/core',
     }),
@@ -837,7 +900,7 @@ declare module '*.jcr' {
 | Example | Path | Highlights |
 |---------|------|------------|
 | **Todo** | `examples/jacare-todo` | Nav, forms, tutorial, lifecycle, playground |
-| **Showcase** | `examples/jacare-showcase` | Components, slots, scoped CSS, cart computed |
+| **Showcase** | `examples/jacare-showcase` | CPW, `style---`, components, slots, cart |
 
 ```bash
 yarn example:dev    # todo app

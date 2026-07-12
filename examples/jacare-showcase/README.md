@@ -1,6 +1,6 @@
 # Jacaré Showcase
 
-A polished demo app showcasing the full potential of [Jacaré](https://github.com/jacarejs/core) — fine-grained reactivity, scoped CSS, slots, forms, file-based routing, and incremental DOM updates.
+A polished demo app showcasing the full potential of [Jacaré](https://github.com/jacarejs/core) — fine-grained reactivity, scoped CSS, slots, CPW, reactive CSS variables, forms, file-based routing, and incremental DOM updates.
 
 Live demo: [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/)
 
@@ -21,12 +21,16 @@ Live demo: [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/sh
 | **Components** | `<Card>` with `<slot />`, `export <style>` blocks |
 | **Forms** | `createForm()`, validation, `Field` component |
 | **Playground** | Keyed `#for` lists, immutable updates |
+| **Performance** | CPW, `style---pct`, `class-*` bindings, compiled output tips |
+| **Cart** | `computed` totals, cart state |
 
 ### Framework capabilities on display
 
 - **Zero VDOM** — direct DOM bindings via compiler
+- **CPW** — compile-time pulse wiring in production builds
+- **Reactive CSS vars** — `style---pct` for GPU-friendly animations
 - **Scoped CSS** — `export <style>` blocks per component
-- **Slots / children** — composable component APIs
+- **Slots / children** — `<Card>content</Card>` in parent, `<slot />` in child
 - **Lazy screens** — code-split page modules
 - **Brand theme** — palette extracted from the Jacaré logo
 
@@ -99,7 +103,9 @@ jacare-showcase/
       components.jcr       Slots demo
       forms.jcr            Form validation
       playground.jcr       Keyed list
-      not-found.jcr        404 screen
+      performance.jcr    CPW + style---pct demo
+      cart.jcr           Shopping cart
+      not-found.jcr      404 screen
   vite.config.js           @jacare/vite-plugin
   jacare.config.js
 ```

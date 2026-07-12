@@ -51,7 +51,8 @@ export default view`
 | `${expr}` | Reactive text (`bindText` or `effect`) |
 | `bind-href=${url}` / `:href=${url}` | `bindAttribute` |
 | `bind-value=${text}` / `bind-checked=${on}` | `bindModel` (signal) or `bindProperty` (expr) |
-| `class-active=${on}` / `class:active=${on}` | `bindClass` |
+| `class-active=${on}` / `class:active=${on}` | `bindClass` (dev) / CPW (prod) |
+| `style---pct=${pct}` / `style:pct=${pct}` | `bindStyleVar` (dev) / CPW (prod) |
 | `on-click=${handler}` / `@click=${handler}` | `addEventListener` + `removeEventListener` |
 | `#if` / `#elif` / `#else` / `#end` | `branch()` |
 | `#for items() as item (id)` / `#end` | `reconcileKeyedList()` |
@@ -100,7 +101,7 @@ generate() ──► mount / render / resume
 mount(target) ──► DOM + bindings
 ```
 
-### Generated output
+### Generated output (development)
 
 ```javascript
 import { signal, bindText } from '@jacare/core'
@@ -122,13 +123,42 @@ export function mount(target) {
 export default mount
 ```
 
+### Generated output (production — CPW)
+
+When `cpw: true` (default in `vite build` client mode), static signal bindings inline `peek` + `subscribe`:
+
+```javascript
+import { signal } from '@jacare/core'
+
+const count = signal(0)
+
+export function mount(target) {
+  const _cleanups = []
+  const _frag = document.createDocumentFragment()
+  const _el1 = document.createElement('p')
+  const _text1 = document.createTextNode('')
+  _el1.appendChild(_text1)
+  let _v2 = count.peek
+  _text1.data = String(_v2)
+  _cleanups.push(count.subscribe(() => {
+    const _v3 = count.peek
+    if (Object.is(_v3, _v2)) return
+    _v2 = _v3
+    _text1.data = String(_v3)
+  }))
+  _frag.appendChild(_el1)
+  target.appendChild(_frag)
+  return () => { for (const c of _cleanups) c() }
+}
+```
+
 Only runtime helpers referenced in the generated code appear in the import line.
 
 ### Binding optimizations
 
 The compiler recognizes simple patterns:
 
-- `count` or `count()` when `count` is a declared signal → `bindText(node, count)` — no closure overhead
+- `count` or `count()` when `count` is a declared signal → `bindText` in dev, CPW in production
 - Mixed text like `` `value = ${doubled}` `` → `` `value = ${doubled()}` `` inside an `effect`
 - Complex expressions → `effect(() => { ... })` — automatic tracking
 - Dynamic attributes like `href=${() => href(id)}` → `effect` that invokes the arrow and sets the attribute
@@ -155,13 +185,29 @@ The compiler recognizes simple patterns:
 
 ### Components
 
-PascalCase tags compile to imported module calls. Components must be self-closing:
+PascalCase tags compile to imported module calls. Parents can pass children between tags; the child projects them with `<slot />`:
 
 ```javascript
-import Field from './Field.jcr'
+import Card from './Card.jcr'
 
-view`<Field :label=${'Email'} :field=${form.fields.email} />`
+export <view>
+<Card :title=${'Hello'}>
+  <p>Slot content</p>
+</Card>
+</view>
 ```
+
+```javascript
+// Card.jcr
+export <view>
+<div class="card">
+  <h3>${title}</h3>
+  <slot />
+</div>
+</view>
+```
+
+Self-closing form still works: `<Field :label=${'Email'} />`.
 
 Props are inferred from `:name=${expr}` attributes and undeclared identifiers in the child template. Module imports (e.g. `import { topics } from './topics.js'`) are never treated as mount props.
 
@@ -229,6 +275,7 @@ packages/compiler/src/
 ├── parse-module.ts    — JavaScript module parser
 ├── flatten-literal.ts — view`...` → HTML + expressions
 ├── parse-template.ts  — HTML template parser
+├── codegen-cpw.ts     — CPW inline emission
 ├── codegen-client.ts  — mount() emission
 ├── codegen-ssr.ts     — render() + resume() emission
 ├── codegen-shared.ts  — resolveSignalExpr, CodegenContext
@@ -246,17 +293,19 @@ packages/vite-plugin/src/
 | Limitation | Detail |
 |------------|--------|
 | One `view` per file | `findViewTemplates` exists but is not used in the pipeline |
-| Components self-closing only | No `<Child>content</Child>` |
+| Named slots | `<slot name="footer" />` parses; `mountSlot` ignores `name` for now |
 | `detectProps` heuristic | Props from `:attr` and free identifiers in template |
 | No fragments | No `<>...</>` |
 | No HTML validation | Unclosed tags may produce invalid output |
 | No TypeScript in `.jcr` | Type annotations in module script are not stripped |
+| CPW v1 scope | `bindModel` and dynamic expressions stay on runtime helpers |
 
 ## Not yet implemented
 
 | Area | Detail |
 |------|--------|
-| Compile-time dependency graph | Remove runtime tracking in production builds |
+| ~~Compile-time dependency graph~~ | **CPW v1** — inline wiring in production for static bindings |
+| CPW for `bindModel` | Two-way inputs still use runtime helper |
 | TypeScript in `.jcr` | SWC transform for type annotations |
 | Component prop types | Inferred from template usage |
 | HTML validation | Actionable errors for unclosed tags |

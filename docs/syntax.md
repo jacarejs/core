@@ -182,6 +182,31 @@ Field components are regular `.jcr` modules — see `examples/jacare-todo/src/co
 view`<li class-done=${item.done}>${item.label}</li>`
 ```
 
+`class-active=${on}` toggles the `active` class when `on` is truthy. Compiles to `bindClass` in dev and CPW in production.
+
+### Reactive CSS variables
+
+Bind a signal to a CSS custom property with `style---name` or `style:name`:
+
+```javascript
+import { computed, signal } from '@jacare/core'
+
+const progress = signal(40)
+const pct = computed(() => progress() + '%')
+
+export <view>
+  <div class="bar" style---pct=${pct} />
+</view>
+
+export <style>
+.bar { width: var(--pct); transition: width 0.2s ease; }
+</style>
+```
+
+The compiler maps `style---pct` → `--pct` and emits `bindStyleVar` (dev) or inline `setProperty` (production CPW).
+
+Use `computed` when the value needs a unit (`50%`, `12rem`). Plain numbers stringify as-is.
+
 ## Control flow
 
 ### Conditionals
@@ -371,6 +396,19 @@ Props are inferred from `:name=${expr}` attributes.
 
 Every `.jcr` file compiles to `mount()`, `render()`, and `resume()`. The compiler imports only the runtime helpers each file uses (`bindText`, `bindModel`, `branch`, etc.).
 
+### Compile-Time Pulse Wiring (CPW)
+
+In **production** client builds, the Vite plugin sets `cpw: true` by default. Static signal bindings compile to inline `peek` + `subscribe` instead of `bindText` / `bindAttribute` / `bindClass` / `bindStyleVar`.
+
+| Mode | `${count}` on a signal | `style---pct=${pct}` |
+|------|------------------------|----------------------|
+| Dev (`vite dev`) | `bindText(node, count)` | `bindStyleVar(el, '--pct', pct)` |
+| Prod (`vite build`) | inline `count.peek` + `subscribe` | inline `setProperty('--pct', …)` |
+
+Override: `jacare({ cpw: false })` or `compile(source, { cpw: true })`.
+
+Inspect compiled output: `jacare({ inspect: true })` writes to `.jacare/compiled/`.
+
 ### Prop and signal detection
 
 - **Mount props** — identifiers used in the template but not declared in the module script (all `import` blocks are scanned)
@@ -380,14 +418,17 @@ Every `.jcr` file compiles to `mount()`, `render()`, and `resume()`. The compile
 
 ### Bindings
 
-| Pattern | Compiled as |
-|---------|-------------|
-| `${count}` when `count` is a signal | `bindText` |
-| `${title}` when `title` is a component prop | `bindPropText` |
-| `` `Total: ${total}` `` with signal `total` | `effect` with `` `Total: ${total()}` `` |
-| `bind-value=${draft}` on a signal | `bindModel` (two-way) |
-| `href=${() => href(id)}` | `effect` that invokes the expression |
-| `on-click=${handler}` | `addEventListener` + cleanup |
+| Pattern | Compiled as (dev) | Compiled as (prod CPW) |
+|---------|-------------------|------------------------|
+| `${count}` when `count` is a signal | `bindText` | inline `peek` + `subscribe` |
+| `${title}` when `title` is a component prop | `bindPropText` | `bindPropText` |
+| `` `Total: ${total}` `` with signal `total` | `effect` with `` `Total: ${total()}` `` | `effect` |
+| `bind-value=${draft}` on a signal | `bindModel` (two-way) | `bindModel` |
+| `bind-href=${url}` on a signal | `bindAttribute` | inline attribute wiring |
+| `class-active=${on}` on a signal | `bindClass` | inline `classList.toggle` |
+| `style---pct=${pct}` on a signal | `bindStyleVar` | inline `setProperty` |
+| `href=${() => href(id)}` | `effect` that invokes the expression | `effect` |
+| `on-click=${handler}` | `addEventListener` + cleanup | same |
 
 Compile errors report `filename:line:column` with a source snippet. Source maps map generated JS back to `.jcr` lines.
 

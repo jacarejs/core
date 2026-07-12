@@ -344,6 +344,25 @@
         color: var(--j-canopy);
       }
 
+      .progress-track {
+        height: 0.75rem;
+        border-radius: 999px;
+        background: var(--j-mint);
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--j-primary), var(--j-lime));
+        transition: width 0.15s ease;
+        width: var(--pct, 0%);
+      }
+
+      .btn.turbo {
+        box-shadow: 0 0 0 2px var(--j-lime);
+      }
+
       .code {
         margin: 0;
         padding: 1rem;

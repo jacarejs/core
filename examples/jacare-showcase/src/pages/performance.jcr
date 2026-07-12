@@ -1,0 +1,92 @@
+import { computed, signal } from '@jacare/core'
+import Card from '../components/Card.jcr'
+
+const progress = signal(35)
+const pct = computed(() => progress() + '%')
+const turbo = signal(false)
+
+function bump(delta) {
+  progress.update((n) => Math.min(100, Math.max(0, n + delta)))
+}
+
+function randomize() {
+  progress.set(Math.floor(Math.random() * 101))
+}
+
+const styleSample = `<div class="progress-fill" style---pct=\${pct} />`
+
+const cpwSample = `let _v = progress.peek
+_el.style.setProperty("--pct", String(_v))
+_cleanups.push(progress.subscribe(() => { ... }))`
+
+export <view>
+  <section class="page">
+    <div>
+      <h1 class="section-title">Performance &amp; CPW</h1>
+      <p class="section-lead">
+        Compile-Time Pulse Wiring inlines signal→DOM updates in production builds.
+        Reactive CSS variables animate on the GPU without layout thrashing.
+      </p>
+    </div>
+
+    <Card :title=${'Reactive CSS variables'} :subtitle=${'style---pct binds --pct to a signal'}>
+      <div class="demo-panel">
+        <div class="progress-track">
+          <div class="progress-fill" style---pct=${pct}></div>
+        </div>
+        <div class="demo-row">
+          <span class="demo-value">${progress}</span>
+          <span class="demo-label">percent</span>
+          <span class="pill">${pct}</span>
+        </div>
+        <div class="demo-row">
+          <button class="btn btn-primary" on-click=${() => bump(-10)}>−10</button>
+          <button class="btn btn-primary" on-click=${() => bump(10)}>+10</button>
+          <button class="btn btn-outline" on-click=${randomize}>Random</button>
+        </div>
+        <p class="demo-label">
+          Width is driven by <code>var(--pct)</code> — no inline <code>style.width</code> string rebuilds.
+        </p>
+      </div>
+    </Card>
+
+    <Card :title=${'Class bindings'} :subtitle=${'class-active toggles without string concat'}>
+      <div class="demo-panel">
+        <div class="demo-row">
+          <button
+            class="btn btn-primary"
+            class-turbo=${turbo}
+            on-click=${() => turbo.update((v) => !v)}
+          >
+            Turbo mode: ${turbo ? 'on' : 'off'}
+          </button>
+        </div>
+        <p class="demo-label">
+          <code>class-turbo=${'${turbo}'}</code> compiles to <code>bindClass</code> in dev and CPW in production.
+        </p>
+      </div>
+    </Card>
+
+    <div>
+      <h2 class="section-title">How it works</h2>
+      <p class="section-lead">
+        Dev uses runtime helpers (<code>bindText</code>, <code>bindStyleVar</code>) for easier debugging.
+        <code>vite build</code> enables CPW automatically — peek + subscribe wiring with no effect tracking on simple bindings.
+      </p>
+    </div>
+
+    <pre class="code"><code>// Template — reactive CSS variable
+${styleSample}
+
+// CSS
+.progress-fill { width: var(--pct); transition: width 0.15s ease; }
+
+// Production output (simplified)
+${cpwSample}</code></pre>
+
+    <p class="demo-label">
+      Run <code>yarn bench</code> in the monorepo to compare runtime vs CPW. Enable
+      <code>inspect: true</code> on the Vite plugin to write compiled output to <code>.jacare/compiled/</code>.
+    </p>
+  </section>
+</view>

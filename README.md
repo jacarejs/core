@@ -52,8 +52,9 @@ Jacaré is a **compile-time UI framework**. You write `.jcr` files — normal Ja
 Your .jcr file          Compiler                 Browser
 ─────────────          ────────                 ───────
 signal + logic    →    mount() function    →    real DOM nodes
-export <view>          bindText, branch,        updated one-by-one
-export <style>         reconcileKeyedList       when signals change
+export <view>          bindText (dev)           updated one-by-one
+export <style>         CPW inline (prod)        when signals change
+                       branch, reconcileKeyedList
 ```
 
 **What it is not:** a React/Vue clone, a runtime template parser, or a resumability-first meta-framework. Jacaré optimizes for **predictable incremental DOM updates** with a small runtime and zero reconciliation tree.
@@ -118,6 +119,7 @@ Live demos: [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](http
 | 5 — Nav | ✓ |
 | 6 — DevTools | ✓ |
 | 7 — Forms | ✓ |
+| 8 — CPW + CSS vars | ✓ |
 
 ## Packages
 
@@ -232,7 +234,7 @@ export <style>
 
 ### Template bindings
 
-Bindings are **compile-time**. The compiler picks the thinnest runtime helper for each pattern — `bindText` for signals, `bindModel` for two-way inputs, `branch` for `#if`, etc.
+Bindings are **compile-time**. The compiler picks the thinnest path for each pattern — runtime helpers in dev, **CPW** (inline `peek` + `subscribe`) in production builds.
 
 | Syntax | What it does | Why use it |
 |--------|--------------|------------|
@@ -242,8 +244,51 @@ Bindings are **compile-time**. The compiler picks the thinnest runtime helper fo
 | `bind-value=${field}` | Two-way input | Signal ↔ input stay synced — no `on-input` boilerplate |
 | `bind-checked=${on}` | Two-way checkbox | Same for checkboxes |
 | `class-active=${on}` | Toggle class | Conditional styling without string concatenation |
+| `style---pct=${pct}` | Reactive CSS variable | GPU-friendly animations via `var(--pct)` — no layout thrashing |
 | `#if` / `#elif` / `#else` / `#end` | Show/hide branches | Compiler emits `branch()` — only active DOM exists |
 | `#for … as item (key)` / `#end` | Keyed lists | Move/add/remove rows by key — no full list re-render |
+
+### Compile-Time Pulse Wiring (CPW)
+
+In **development**, simple signal bindings use runtime helpers (`bindText`, `bindAttribute`, `bindClass`, `bindStyleVar`) — easier to debug.
+
+In **production** (`vite build`), the Vite plugin enables **CPW** automatically. The compiler emits direct wiring:
+
+```javascript
+let _v = count.peek
+_text.data = String(_v)
+_cleanups.push(count.subscribe(() => {
+  const next = count.peek
+  if (Object.is(next, _v)) return
+  _v = next
+  _text.data = String(next)
+}))
+```
+
+**Benefits:** fewer imports in the bundle, no `effect` tracking on static bindings, ~2× faster micro-updates (see `yarn bench`).
+
+Opt out: `jacare({ cpw: false })`. Force on: `compile(source, { cpw: true })`.
+
+### Reactive CSS variables (`style---`)
+
+Bind a signal to a CSS custom property — ideal for progress bars, transforms, and transitions:
+
+```javascript
+import { computed, signal } from '@jacare/core'
+
+const progress = signal(35)
+const pct = computed(() => progress() + '%')
+
+export <view>
+  <div class="bar" style---pct=${pct} />
+</view>
+
+export <style>
+.bar { width: var(--pct); transition: width 0.2s ease; }
+</style>
+```
+
+Also supported: `style:pct=${pct}` (same as `style---pct`).
 
 ### Reactivity
 
@@ -390,6 +435,7 @@ Requires Node.js 20+. Clone the monorepo to hack on Jacaré itself:
 yarn install
 yarn build
 yarn test
+yarn bench          # CPW vs runtime microbenchmarks
 yarn typecheck
 yarn example:dev      # todo demo — http://localhost:3000
 yarn showcase:dev     # showcase — http://localhost:3001
@@ -414,6 +460,7 @@ cd demo && yarn install && yarn dev
 - [Phase 6 — DevTools](docs/phases/06-devtools.md)
 - [Phase 7 — Forms](docs/phases/07-forms.md)
 - [Testing guide](docs/testing.md)
+- [Benchmarks](benchmarks/README.md)
 - [Contributing & local development](docs/CONTRIBUTING.md)
 
 ## Roadmap
@@ -426,6 +473,9 @@ cd demo && yarn install && yarn dev
 6. ~~DevTools~~
 7. ~~Forms — validation, two-way bindings, field components~~
 8. ~~Publish — npm packages (`@jacare/*`, `create-jacare`) and starter templates~~
+9. ~~CPW v1 — compile-time pulse wiring in production~~
+10. ~~Reactive CSS variables (`style---`)~~
+11. Benchmarks — `pulse-update`, `pulse-fanout` (more scenarios planned)
 
 ## Install
 
@@ -447,7 +497,7 @@ jacare new my-app --template=todo
 | Demo | URL | What to explore |
 |------|-----|-----------------|
 | **Todo app** | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
-| **Showcase** | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | Reactivity, components, slots, scoped CSS, cart |
+| **Showcase** | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | CPW, `style---`, components, slots, cart |
 
 Run locally:
 

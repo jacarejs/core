@@ -157,9 +157,14 @@ const result = compile(source, { filename: 'app.jcr' })
 expect(result.code).toContain('export function mount(target)')
 expect(result.code).toContain('bindText')
 expect(result.code).not.toContain('showIf')
+
+const cpw = compile(source, { mode: 'client', cpw: true })
+expect(cpw.code).toContain('.peek')
+expect(cpw.code).toContain('.subscribe(')
+expect(cpw.code).not.toContain('bindText(')
 ```
 
-Use for binding selection (`bindText` vs `bindModel` vs `effect`), prop detection, and error positions.
+Use for binding selection (`bindText` vs `bindModel` vs CPW vs `effect`), prop detection, and error positions.
 
 ### 4. DevTools registry
 

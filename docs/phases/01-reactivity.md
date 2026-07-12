@@ -154,7 +154,7 @@ packages/runtime/src/
 ├── signal.ts     — signal(), untrack()
 ├── computed.ts   — computed() with memoization
 ├── effect.ts     — effect(), batch(), runUntracked()
-├── dom/bind.ts   — bindText, bindAttribute, bindProperty, bindClass
+├── dom/bind.ts   — bindText, bindAttribute, bindProperty, bindClass, bindStyleVar
 ├── dom/bind-model.ts — two-way bindModel with runUntracked initial sync
 ├── scope.ts      — registerScope for DevTools Scope panel
 ├── lifecycle.ts  — per-screen lifecycle hooks

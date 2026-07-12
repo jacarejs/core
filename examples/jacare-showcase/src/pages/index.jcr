@@ -13,6 +13,7 @@ const features = [
   { slug: 'components', title: 'Components & slots', summary: 'Composable UI with scoped CSS and child projection.' },
   { slug: 'forms', title: 'Forms', summary: 'Two-way bindings and validated fields out of the box.' },
   { slug: 'playground', title: 'Playground', summary: 'Keyed lists, branches, and live DOM reconciliation.' },
+  { slug: 'performance', title: 'Performance & CPW', summary: 'Compile-time pulse wiring and reactive CSS variables.' },
   { slug: 'cart', title: 'Shopping cart', summary: 'Add products and recalculate totals with computed signals.' },
 ]
 

@@ -120,7 +120,7 @@ Immutable updates (e.g. `{ ...item, done: true }` with the same `id`) are suppor
 | Comment anchors | No wrapper elements | Slightly more complex codegen |
 | Key required for optimal lists | O(1) reuse | Developer must supply keys |
 | Index fallback key | Works without `(key)` | Reorder on any change |
-| Self-closing components only | Simple codegen | No slot/children yet |
+| Children + default slot | Familiar `<Card>…</Card>` DX | Named slots not fully wired yet |
 | Auto prop detection | Less boilerplate | Heuristic-based |
 
 ## Implementation
@@ -151,7 +151,7 @@ yarn build && yarn test
 
 | Area | Detail |
 |------|--------|
-| Slots | `<Component>children</Component>` |
+| Slots | `<Component>children</Component>` with `<slot />` in child |
 | Keyed each fallback | Warn when key is missing |
 | Fragment roots | Multiple roots without wrapper `div` |
 | Dynamic components | `<{tag} />` |
