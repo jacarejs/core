@@ -1,0 +1,21 @@
+{
+  "name": "vite-starter",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "jacare check"
+  },
+  "dependencies": {
+    "@jacare/core": "JACARE_VERSION"
+  },
+  "devDependencies": {
+    "@jacare/cli": "JACARE_VERSION",
+    "@jacare/vite-plugin": "JACARE_VERSION",
+    "vite": "^6.0.3"
+  }
+}

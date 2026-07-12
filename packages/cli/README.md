@@ -89,12 +89,27 @@ Open `http://localhost:3000` — the dev server starts with hot reload for `.jcr
 | `jacare check` | Compile-check all `.jcr` files |
 | `jacare help` | Show help |
 
+### Vite-based templates
+
+These use `vite`, `vite build`, and `vite preview` instead of `jacare dev`:
+
+| Template | Description |
+|----------|-------------|
+| `vite-minimal` | Single-page counter |
+| `vite-nav` | Multi-page with routing |
+| `vite-todo` | Todo app with devtools |
+
+```bash
+jacare new my-app --template=vite-minimal
+npm create jacare@latest my-app -- --template vite-nav
+```
+
 ---
 
 ## Create a project
 
 ```bash
-jacare new <name> [--template=minimal|nav|todo]
+jacare new <name> [--template=minimal|nav|todo|vite-minimal|vite-nav|vite-todo]
 ```
 
 ### Examples
@@ -292,11 +307,14 @@ The CLI reads this file for `dev` and `build`. You can override the port with `-
 
 ## Templates
 
-| Template | Description |
-|----------|-------------|
-| `minimal` | Single-page counter app — best for learning |
-| `nav` | Multi-page app with routing, lazy loading, and shell layout |
-| `todo` | Full todo app with forms, filters, devtools, and nav |
+| Template | Dev command | Description |
+|----------|-------------|-------------|
+| `minimal` | `jacare dev` | Single-page counter app |
+| `nav` | `jacare dev` | Multi-page app with routing, lazy loading, and shell layout |
+| `todo` | `jacare dev` | Full todo app with forms, filters, devtools, and nav |
+| `vite-minimal` | `vite` | Same as minimal, standard Vite scripts |
+| `vite-nav` | `vite` | Same as nav, standard Vite scripts |
+| `vite-todo` | `vite` | Same as todo, standard Vite scripts |
 
 ### minimal
 

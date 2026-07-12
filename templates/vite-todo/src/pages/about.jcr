@@ -1,0 +1,8 @@
+import { view } from '@jacare/core'
+
+export default view`
+  <section class="page about">
+    <h2 class="page-title">About Jacaré</h2>
+    <p class="lead">Fine-grained reactivity with direct DOM updates.</p>
+  </section>
+`

@@ -1,0 +1,8 @@
+import { view } from '@jacare/core'
+
+export default view`
+  <section class="page">
+    <h2 class="page-title">Home</h2>
+    <p class="lead">Jacaré nav with layout, lazy screens, and warm preload.</p>
+  </section>
+`

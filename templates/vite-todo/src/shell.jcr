@@ -1,0 +1,19 @@
+import { view } from '@jacare/core'
+
+export default view`
+  <div class="app">
+    <div class="layout">
+      <header class="header">
+        <div class="brand">
+          <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
+          <span class="title">vite-starter</span>
+        </div>
+        <nav class="nav">
+          <a class="nav-link" jacare-go="/" href="/">Tasks</a>
+          <a class="nav-link" jacare-go="/about" href="/about">About</a>
+        </nav>
+      </header>
+      <main class="main" jacare-frame></main>
+    </div>
+  </div>
+`

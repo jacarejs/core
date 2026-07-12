@@ -9,10 +9,10 @@
     "build": "node ../../packages/cli/dist/index.js build"
   },
   "dependencies": {
-    "@jacare/core": "0.0.1"
+    "@jacare/core": "0.0.2"
   },
   "devDependencies": {
-    "@jacare/cli": "0.0.1",
-    "@jacare/devtools": "0.0.1"
+    "@jacare/cli": "0.0.2",
+    "@jacare/devtools": "0.0.2"
   }
 }

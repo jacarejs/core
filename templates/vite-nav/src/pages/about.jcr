@@ -1,0 +1,8 @@
+import { view } from '@jacare/core'
+
+export default view`
+  <section class="page">
+    <h2 class="page-title">About</h2>
+    <p class="lead">This screen was lazy-loaded.</p>
+  </section>
+`

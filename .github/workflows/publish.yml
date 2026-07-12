@@ -60,6 +60,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
+      - name: Publish create-jacare
+        run: npm publish --access public
+        working-directory: packages/create-jacare
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
+
       - name: Publish @jacare/cli
         run: npm publish --access public
         working-directory: packages/cli

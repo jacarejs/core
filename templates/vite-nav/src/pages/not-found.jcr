@@ -1,0 +1,9 @@
+import { view } from '@jacare/core'
+
+export default view`
+  <section class="page">
+    <h2 class="page-title">404</h2>
+    <p class="lead">Screen not found.</p>
+    <a class="nav-link" jacare-go="/" href="/">Back home</a>
+  </section>
+`

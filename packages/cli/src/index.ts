@@ -6,14 +6,20 @@ import { createJacareViteConfig, jacare } from '@jacare/vite-plugin'
 import { flagBool, flagNumber, flagString, parseArgv } from './args.js'
 import { runCheck } from './check.js'
 import { compileOnce, compileWatch } from './compile-cmd.js'
-import { buildScaffold, copyScaffoldAssets, type ScaffoldTemplate } from './templates.js'
+import { scaffoldFromDisk } from 'create-jacare/scaffold.js'
+import {
+  buildScaffold,
+  copyScaffoldAssets,
+  isViteScaffoldTemplate,
+  type ScaffoldTemplate,
+} from './templates.js'
 import { getJacareVersion } from './version.js'
 
 const help = `
 Jacaré — fine-grained UI, zero virtual DOM
 
 Usage:
-  jacare new <name> [--template=minimal|nav|todo]
+  jacare new <name> [--template=minimal|nav|todo|vite-minimal|vite-nav|vite-todo]
   jacare dev [--port=3000] [--open=false]
   jacare build
   jacare compile <file.jcr> [output.js] [--watch]
@@ -39,7 +45,9 @@ async function main(): Promise<void> {
     case 'new': {
       const name = positional[1]
       if (!name) {
-        console.error('Usage: jacare new <name> [--template=minimal|nav|todo]')
+        console.error(
+          'Usage: jacare new <name> [--template=minimal|nav|todo|vite-minimal|vite-nav|vite-todo]',
+        )
         process.exit(1)
       }
       const template = parseTemplate(flagString(flags, 'template'))
@@ -78,8 +86,16 @@ async function main(): Promise<void> {
 }
 
 function parseTemplate(value: string | undefined): ScaffoldTemplate {
-  if (value === 'nav' || value === 'todo' || value === 'minimal') {
-    return value
+  const templates: ScaffoldTemplate[] = [
+    'minimal',
+    'nav',
+    'todo',
+    'vite-minimal',
+    'vite-nav',
+    'vite-todo',
+  ]
+  if (value && templates.includes(value as ScaffoldTemplate)) {
+    return value as ScaffoldTemplate
   }
   if (value && value !== 'minimal') {
     console.warn(`Unknown template "${value}", using minimal`)
@@ -95,6 +111,17 @@ function createProject(name: string, template: ScaffoldTemplate): void {
   }
 
   const version = getJacareVersion()
+
+  if (isViteScaffoldTemplate(template)) {
+    scaffoldFromDisk(name, template, dir, version)
+    console.log(`Created ${name} (${template})`)
+    console.log('')
+    console.log(`  cd ${name}`)
+    console.log('  yarn install')
+    console.log('  yarn dev')
+    return
+  }
+
   const plan = buildScaffold(name, template, version)
 
   mkdirSync(join(dir, 'src'), { recursive: true })

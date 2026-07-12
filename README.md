@@ -28,6 +28,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | `@jacare/compiler` | Compiles `view\`...\`` templates |
 | `@jacare/vite-plugin` | Vite integration |
 | `@jacare/cli` | `jacare` command — create, dev, build |
+| `create-jacare` | `npm create jacare` — Vite-based scaffolds |
 | `@jacare/devtools` | Pulse Graph inspector panel |
 
 Nav (`createNav`) ships inside `@jacare/core`.
@@ -40,6 +41,25 @@ jacare dev            # start dev server
 jacare build          # production build
 jacare compile file   # compile one .jcr file
 jacare check          # compile all .jcr files in project
+```
+
+### Vite templates
+
+Use standard Vite scripts (`vite dev`, `vite build`):
+
+```bash
+npm create jacare@latest my-app
+npm create jacare@latest my-app -- --template vite-nav
+
+jacare new my-app --template=vite-minimal
+jacare new my-app --template=vite-nav
+jacare new my-app --template=vite-todo
+```
+
+Or with degit:
+
+```bash
+npx degit jacarejs/core/templates/vite-minimal my-app
 ```
 
 ## Project layout

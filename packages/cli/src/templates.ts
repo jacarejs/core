@@ -4,7 +4,19 @@ import { fileURLToPath } from 'node:url'
 
 const cliRoot = dirname(fileURLToPath(import.meta.url))
 
-export type ScaffoldTemplate = 'minimal' | 'nav' | 'todo'
+export type ScaffoldTemplate =
+  | 'minimal'
+  | 'nav'
+  | 'todo'
+  | 'vite-minimal'
+  | 'vite-nav'
+  | 'vite-todo'
+
+export const VITE_SCAFFOLD_TEMPLATES = ['vite-minimal', 'vite-nav', 'vite-todo'] as const
+
+export function isViteScaffoldTemplate(template: ScaffoldTemplate): boolean {
+  return VITE_SCAFFOLD_TEMPLATES.includes(template as (typeof VITE_SCAFFOLD_TEMPLATES)[number])
+}
 
 export interface ScaffoldPlan {
   files: Record<string, string>
