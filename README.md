@@ -92,91 +92,143 @@ my-app/
 
 ## Syntax
 
-### Module
+Jacaré files (`.jcr`) are plain JavaScript modules. Write your logic, then export a view block. Add scoped styles last.
 
-Use `export <view>` blocks (recommended) or tagged templates — both compile to the same output.
+Full reference: [docs/syntax.md](docs/syntax.md) · [docs/api.md](docs/api.md)
 
-**View block (recommended)**
+### Simple module
 
 ```javascript
-import { signal, computed } from '@jacare/core'
+import { signal } from '@jacare/core'
 
 const count = signal(0)
-const label = computed(() => `Count: ${count()}`)
 
 function increment() {
   count.update((n) => n + 1)
 }
 
 export <view>
-  <button on-click=${increment}>
-    ${label}
-  </button>
+  <div class="counter">
+    <p>${count}</p>
+    <button on-click=${increment}>+1</button>
+  </div>
 </view>
-```
 
-**Tagged template (legacy)**
-
-```javascript
-import { signal, computed, view } from '@jacare/core'
-
-const count = signal(0)
-const label = computed(() => `Count: ${count()}`)
-
-export default view`
-  <button on-click=${() => count.update((n) => n + 1)}>
-    ${label}
-  </button>
-`
-```
-
-**Scoped styles** — place `export <style>` last in the file:
-
-```javascript
 export <style>
-.counter { padding: 1rem; }
+.counter { display: grid; gap: 0.5rem; padding: 1rem; }
 </style>
 ```
 
-### Template
+| Block | Purpose |
+|-------|---------|
+| `import` / `const` / `function` | JavaScript logic |
+| `export <view>...</view>` | HTML template (required) |
+| `export <style>...</style>` | Scoped CSS (optional, last) |
+
+`export <style lang="scss">` is supported for preprocessor attributes. Tagged templates (`view\`...\`` / `style\`...\``) still work.
+
+### Template bindings
 
 | Syntax | Meaning |
 |--------|---------|
-| `${expr}` | Reactive text |
-| `on-click=${fn}` | DOM event |
-| `bind-href=${url}` | Attribute binding |
-| `bind-value=${text}` | Two-way input binding (signal) |
-| `bind-checked=${on}` | Two-way checkbox binding (signal) |
-| `class-active=${on}` | Toggle class |
-| `#if cond` / `#elif` / `#else` / `#end` | Conditional |
-| `#for items() as item (id)` / `#end` | Keyed list |
-| `<Field :prop=${value} />` | Component (self-closing) |
+| `${expr}` | Reactive text (signals update the DOM directly) |
+| `on-click=${fn}` | DOM event (`@click` alias) |
+| `bind-href=${url}` | Reactive attribute (`:href` alias) |
+| `bind-value=${field}` | Two-way input binding on a signal |
+| `bind-checked=${on}` | Two-way checkbox binding on a signal |
+| `class-active=${on}` | Toggle a CSS class (`class:active` alias) |
+| `#if cond` … `#elif` … `#else` … `#end` | Conditional blocks |
+| `#for items() as item (item.id)` … `#end` | Keyed list reconciliation |
 
 ### Reactivity
 
 | API | Role |
 |-----|------|
-| `signal(initial)` | Reactive value |
-| `computed(() => …)` | Derived value |
-| `effect(fn)` | Side effect |
+| `signal(initial)` | Mutable reactive value — read with `count()`, write with `count.set()` / `count.update()` |
+| `computed(() => …)` | Derived read-only value |
+| `effect(fn)` | Side effect when tracked signals change |
 
-`pulse`, `derive`, and `watch` remain available as aliases.
+Aliases: `pulse`, `derive`, `watch`.
+
+### Components and props
+
+Import a `.jcr` file and use it as a **PascalCase** tag. Props use `:name=${expr}`.
+
+**Child component** (`Badge.jcr`) — `text` is inferred as a mount prop:
+
+```javascript
+export <view>
+  <span class="badge">${text}</span>
+</view>
+
+export <style>
+.badge { padding: 0.25rem 0.65rem; border-radius: 999px; font-weight: 700; }
+</style>
+```
+
+**Parent page** — pass a signal or a string:
+
+```javascript
+import Badge from './components/Badge.jcr'
+import { signal } from '@jacare/core'
+
+const mood = signal('focused')
+
+export <view>
+  <Badge :text=${mood} />
+  <Badge :text=${'static label'} />
+</view>
+```
+
+| Prop style | Example | Compiled as |
+|------------|---------|-------------|
+| Reactive expression | `:text=${mood}` | `text: mood` |
+| String literal | `:title=${'Hello'}` | `title: 'Hello'` |
+| Static attribute | `type="email"` | `type: "email"` |
+
+**Component with slots** (`Card.jcr`):
+
+```javascript
+export <view>
+  <div class="card">
+    <h3 class="card-title">${title}</h3>
+    #if subtitle
+      <p class="card-subtitle">${subtitle}</p>
+    #end
+    <div class="card-body">
+      <slot />
+    </div>
+  </div>
+</view>
+```
+
+**Usage with children and props:**
+
+```javascript
+import Card from './components/Card.jcr'
+
+export <view>
+  <Card :title=${'Hello'} :subtitle=${'A reusable card'}>
+    <p>This content is projected into the default slot.</p>
+  </Card>
+</view>
+```
+
+Props used in the child template (`title`, `subtitle`) but not declared in the child script are automatically treated as mount props. Signal props stay reactive via `bindPropText`.
 
 ### Nav
 
 ```javascript
-import { createNav } from '@jacare/core'
+import { createNav, lazy } from '@jacare/core'
 import Shell from './shell.jcr'
-import Tasks from './pages/tasks.jcr'
-import NotFound from './pages/not-found.jcr'
 
 export const nav = createNav({
   layout: Shell,
   screens: {
-    '/': Tasks,
-    '/about': () => import('./pages/about.jcr'),
+    '/': () => import('./pages/home.jcr'),
+    '/about': lazy(() => import('./pages/about.jcr')),
   },
-  missing: NotFound,
+  missing: () => import('./pages/not-found.jcr'),
 })
 
 nav.attach(document.getElementById('app'))
@@ -184,53 +236,10 @@ nav.attach(document.getElementById('app'))
 
 ```html
 <a jacare-go="/about" href="/about">About</a>
-<a jacare-go="/about?tab=feedback" href="/about?tab=feedback">Feedback</a>
 <main jacare-frame></main>
 ```
 
-**Friendly URLs** — path params (`/tutorial/:topic`), query (`?tab=feedback`), and `routeHref()`:
-
-```javascript
-import { createNav, lazy, routeHref, screen } from '@jacare/core'
-
-export const nav = createNav({
-  screens: {
-    '/tutorial/:topic': lazy(() => import('./pages/tutorial.jcr').then(screen)),
-  },
-})
-
-nav.go('/tutorial/reactivity')
-nav.go('/about?tab=feedback')
-routeHref('/tutorial/:topic', { topic: 'forms' }) // → /tutorial/forms
-```
-
-**Lifecycle** — per-screen hooks and live Scope debug:
-
-```javascript
-import { createLifecycle, registerScope } from '@jacare/core'
-
-export const lifecycle = createLifecycle({
-  onActivate(ctx) {
-    return registerScope('form.name', 'Name', () => name())
-  },
-})
-
-// nav.where is Signal<NavPlace>
-nav.where()       // reactive read
-nav.where.peek    // untracked read
-```
-
-`connectJacareDevtools()` also opens the **Scope** panel (bottom-left) for live values registered with `registerScope()`.
-
-See `examples/jacare-todo` — **Tutorial**, **Playground**, and **About → Feedback** (`?tab=feedback`).
-
-### DevTools
-
-```javascript
-import { connectJacareDevtools } from '@jacare/devtools'
-
-connectJacareDevtools()
-```
+Path params, query strings, lazy screens, and guards — see [docs/api.md](docs/api.md#9-navigation).
 
 ### Forms
 
@@ -255,7 +264,15 @@ export <view>
 </view>
 ```
 
-`bind-value` and `bind-checked` on signals compile to two-way `bindModel` — no manual `on-input` required.
+### DevTools
+
+```javascript
+import { connectJacareDevtools } from '@jacare/devtools'
+
+connectJacareDevtools()
+```
+
+Opens the Pulse Graph and Scope panels in development.
 
 ## Quick start
 
