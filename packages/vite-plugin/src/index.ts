@@ -18,6 +18,7 @@ export interface JacarePluginOptions {
   configFile?: string
   inspect?: boolean
   emit?: JacareEmitMode
+  cpw?: boolean | 'auto'
 }
 
 export async function loadJacareConfig(
@@ -65,6 +66,7 @@ function writeInspectOutput(root: string, id: string, code: string): void {
 export function jacare(options: JacarePluginOptions = {}): Plugin {
   let jacareConfig: JacareConfig = {}
   let projectRoot = process.cwd()
+  let isProduction = false
 
   return {
     name: 'jacare',
@@ -80,6 +82,7 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
 
     async configResolved(resolved) {
       projectRoot = resolved.root
+      isProduction = resolved.isProduction
       jacareConfig = await loadJacareConfig(resolved.root, options.configFile)
     },
 
@@ -99,9 +102,16 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
 
       try {
         const mode = resolveCompileMode(options, transformOptions?.ssr)
+        const cpw =
+          options.cpw === true
+            ? true
+            : options.cpw === false
+              ? false
+              : isProduction && mode === 'client'
         const result = compile(code, {
           filename: id,
           mode,
+          cpw,
           ...(options.runtimeImport ? { runtimeImport: options.runtimeImport } : {}),
         })
 

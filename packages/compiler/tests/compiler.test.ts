@@ -108,6 +108,18 @@ describe('parseTemplate', () => {
       expect(input.attrs[0]?.value).toBe('(e) => filter.set(e.target.value)')
     }
   })
+
+  it('parses style--- custom property bindings', () => {
+    const ast = parseTemplate('<div style---pct={progress}></div>')
+    const div = ast.children[0]!
+    if (div.type === 'element') {
+      expect(div.attrs[0]).toEqual({
+        name: 'pct',
+        kind: 'style',
+        value: 'progress',
+      })
+    }
+  })
 })
 
 describe('compile', () => {
@@ -322,5 +334,35 @@ export default view\`<span>\${text}</span>\``
     expect(result.code).toContain('bindPropText(_text')
     expect(result.code).toContain('bindPropText')
     expect(result.code).toMatch(/import \{[^}]*bindPropText[^}]*\}/)
+  })
+
+  it('emits CPW inline wiring when cpw is enabled', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const count = signal(0)
+export default view\`<p>\${count}</p>\``
+    const result = compile(source, { mode: 'client', cpw: true })
+    expect(result.code).toContain('count.peek')
+    expect(result.code).toContain('count.subscribe(')
+    expect(result.code).not.toContain('bindText(')
+    expect(result.code).not.toContain('import { effect')
+  })
+
+  it('emits bindStyleVar for style--- custom properties', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const progress = signal(0)
+export default view\`<div class="bar" style---pct=\${progress}></div>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).toContain('bindStyleVar(')
+    expect(result.code).toContain('"--pct"')
+  })
+
+  it('emits CPW for style--- custom properties in production mode', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const progress = signal(50)
+export default view\`<div style---pct=\${progress}></div>\``
+    const result = compile(source, { mode: 'client', cpw: true })
+    expect(result.code).toContain('setProperty("--pct"')
+    expect(result.code).toContain('progress.subscribe(')
+    expect(result.code).not.toContain('bindStyleVar(')
   })
 })

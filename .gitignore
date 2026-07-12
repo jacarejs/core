@@ -63,3 +63,6 @@ bin/
 .jacare/
 .gitacc.json
 ChatGPT Image*.png
+
+# Private notes (local only — not committed)
+docs/private/

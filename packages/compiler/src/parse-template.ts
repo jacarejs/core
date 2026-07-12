@@ -518,6 +518,16 @@ function parseAttrs(source: string, isComponent: boolean): TemplateAttr[] {
       continue
     }
 
+    if (rawName.startsWith('style---')) {
+      attrs.push({ name: rawName.slice(8), kind: 'style', value })
+      continue
+    }
+
+    if (rawName.startsWith('style:')) {
+      attrs.push({ name: rawName.slice(6), kind: 'style', value })
+      continue
+    }
+
     if (rawName.startsWith(':')) {
       attrs.push({
         name: rawName.slice(1),

@@ -12,6 +12,7 @@ const RUNTIME_IMPORT_ORDER = [
   'bindProperty',
   'bindModel',
   'bindClass',
+  'bindStyleVar',
   'branch',
   'reconcileKeyedList',
   'resumeBindings',
@@ -38,6 +39,7 @@ export function generate(
     mode?: 'client' | 'server' | 'full'
     scopeId?: string
     scopedStyle?: string
+    cpw?: boolean
   } = {},
 ): { code: string; mappings: CodegenMapping[] } {
   const mode = options.mode ?? 'full'
@@ -71,6 +73,7 @@ export function generate(
       runtimeImports,
       props.length > 0 ? new Set(props) : undefined,
       signals,
+      options.cpw ?? false,
     )
     emitClient(ast, props, clientCtx, options.scopeId, options.scopedStyle)
     lines.push(...clientCtx.join())

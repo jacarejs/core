@@ -70,3 +70,20 @@ export function bindClass(
   runUntracked(update)
   return effect(update).dispose
 }
+
+export function bindStyleVar(
+  node: HTMLElement,
+  name: string,
+  source: ReadonlySignal<string | number | boolean | null | undefined>,
+): () => void {
+  const update = (): void => {
+    const value = source()
+    if (value === null || value === undefined) {
+      node.style.removeProperty(name)
+      return
+    }
+    node.style.setProperty(name, String(value))
+  }
+  runUntracked(update)
+  return effect(update).dispose
+}

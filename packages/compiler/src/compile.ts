@@ -24,6 +24,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     mode: options.mode ?? 'full',
     ...(scopeId ? { scopeId } : {}),
     ...(scopedStyle ? { scopedStyle } : {}),
+    ...(options.cpw ? { cpw: options.cpw } : {}),
   })
 
   const map = filename

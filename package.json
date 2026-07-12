@@ -23,6 +23,7 @@
     "example:build": "yarn workspace jacare-todo build",
     "showcase:dev": "yarn workspace jacare-showcase dev",
     "showcase:build": "yarn workspace jacare-showcase build",
+    "bench": "yarn build && node benchmarks/run.mjs",
     "jacare": "node packages/cli/dist/index.js"
   },
   "devDependencies": {

@@ -6,6 +6,12 @@ import type {
   TemplateNode,
   TextPart,
 } from './types.js'
+import {
+  emitCpwAttribute,
+  emitCpwClass,
+  emitCpwStyleVar,
+  emitCpwText,
+} from './codegen-cpw.js'
 import { append, CodegenContext, resolveSignalExpr, type EmitTarget } from './codegen-shared.js'
 
 const SIGNAL_REF_RE = /^([A-Za-z_$][\w$]*)$/
@@ -296,13 +302,38 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
   if (attr.kind === 'class') {
     const src = ctx.resolveSignal(attr.value)
     if (src) {
-      ctx.pushCleanup(`bindClass(${el}, ${JSON.stringify(attr.name)}, ${src})`)
+      if (ctx.cpw) {
+        emitCpwClass(ctx, el, attr.name, src)
+      } else {
+        ctx.pushCleanup(`bindClass(${el}, ${JSON.stringify(attr.name)}, ${src})`)
+      }
     } else if (/=>/.test(attr.value)) {
       ctx.pushCleanup(
         `effect(() => { ${el}.classList.toggle(${JSON.stringify(attr.name)}, !!(${attr.value})()) }).dispose`,
       )
     } else {
       ctx.pushCleanup(`effect(() => { ${el}.classList.toggle(${JSON.stringify(attr.name)}, !!(${attr.value})) }).dispose`)
+    }
+    return
+  }
+
+  if (attr.kind === 'style') {
+    const cssVar = `--${attr.name}`
+    const src = ctx.resolveSignal(attr.value)
+    if (src) {
+      if (ctx.cpw) {
+        emitCpwStyleVar(ctx, el, cssVar, src)
+      } else {
+        ctx.pushCleanup(`bindStyleVar(${el}, ${JSON.stringify(cssVar)}, ${src})`)
+      }
+    } else if (/=>/.test(attr.value)) {
+      ctx.pushCleanup(
+        `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String((${attr.value})())) }).dispose`,
+      )
+    } else {
+      ctx.pushCleanup(
+        `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String(${attr.value})) }).dispose`,
+      )
     }
     return
   }
@@ -317,6 +348,8 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
     if (source) {
       if (useProperty) {
         ctx.pushCleanup(`bindModel(${el}, ${JSON.stringify(attr.name)}, ${source})`)
+      } else if (ctx.cpw) {
+        emitCpwAttribute(ctx, el, attr.name, source)
       } else {
         ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${source})`)
       }
@@ -379,7 +412,11 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
     const expr = parts[0]!.value
     const src = ctx.resolveSignal(expr)
     if (src) {
-      ctx.pushCleanup(`bindText(${textNode}, ${src})`)
+      if (ctx.cpw) {
+        emitCpwText(ctx, textNode, src)
+      } else {
+        ctx.pushCleanup(`bindText(${textNode}, ${src})`)
+      }
       return
     }
     ctx.pushCleanup(`effect(() => { ${textNode}.data = String(${expr}) }).dispose`)

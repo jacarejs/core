@@ -87,4 +87,26 @@ export default view\`
     expect(result.code).toContain('mountSlot(')
     expect(result.code).toContain('const children = props["children"]')
   })
+
+  it('supports parent shorthand children with explicit slot in child', () => {
+    const parent = `import Card from './Card.jcr'
+import { view } from '@jacare/core'
+export default view\`
+<Card title="Stats">
+  <p>body</p>
+</Card>
+\``
+    const child = `import { view } from '@jacare/core'
+export default view\`
+<div class="card">
+  <h3>\${title}</h3>
+  <slot />
+</div>
+\``
+    const parentCode = compile(parent)
+    const childCode = compile(child, { filename: '/Card.jcr' })
+    expect(parentCode.code).toContain('children:')
+    expect(childCode.code).toContain('mountSlot(')
+    expect(childCode.code).toContain('props["title"]')
+  })
 })

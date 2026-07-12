@@ -4,6 +4,7 @@ export interface CompileOptions {
   viewStartLine?: number
   mode?: 'client' | 'server' | 'full'
   scopeId?: string
+  cpw?: boolean
 }
 
 export interface CompileResult {
@@ -32,7 +33,7 @@ export interface TemplateTextNode {
 
 export interface TemplateAttr {
   name: string
-  kind: 'static' | 'bind' | 'event' | 'class' | 'prop' | 'expr'
+  kind: 'static' | 'bind' | 'event' | 'class' | 'prop' | 'expr' | 'style'
   value: string
 }
 
