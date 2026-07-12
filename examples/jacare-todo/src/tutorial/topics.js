@@ -1,3 +1,5 @@
+import { appHref } from '../app-base.js'
+
 export const topics = [
   {
     slug: 'getting-started',
@@ -44,7 +46,7 @@ export const topics = [
 ]
 
 export function topicHref(slug) {
-  return `/tutorial/${slug}`
+  return appHref(`/tutorial/${slug}`)
 }
 
 export function topicNeighbors(slug) {

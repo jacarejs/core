@@ -1,4 +1,5 @@
 import { createLifecycle, pulse, registerScope, view } from '@jacare/core'
+import { appHref } from '../../app-base.js'
 import { topicNeighbors } from '../../tutorial/topics.js'
 import LessonNav from '../../components/LessonNav.jcr'
 
@@ -25,7 +26,7 @@ export const lifecycle = createLifecycle({
 
 export default view`
   <section class="page tutorial-lesson">
-    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <a class="text-link" jacare-go=${appHref('/tutorial')} href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Lifecycle</h2>
     <p class="lead">Screens can export hooks for mount, activate, and teardown — plus live Scope debugging.</p>
 

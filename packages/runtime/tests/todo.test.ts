@@ -98,3 +98,43 @@ describe('todo app', () => {
     dispose()
   })
 })
+
+const REACTIVITY_DEMO = `import { pulse, derive, view } from '@jacare/core'
+
+const demoCount = pulse(0)
+const demoDoubled = derive(() => demoCount() * 2)
+
+export default view\`
+  <p class="playground-output">doubled = \${demoDoubled}</p>
+\``
+
+describe('reactivity demo', () => {
+  it('renders derived values in mixed text', async () => {
+    const { code } = compile(REACTIVITY_DEMO)
+    const body = code
+      .replace(/^import[^\n]*\n/gm, '')
+      .replace(/^export default mount\s*/m, '')
+      .replace(/^export /gm, '')
+    const mod = new Function(
+      'runtime',
+      `const { signal, computed, pulse, derive, effect, bindText, resumeBindings } = runtime
+${body}
+return { mount, demoCount }`,
+    )(runtime) as {
+      mount: (target: HTMLElement) => () => void
+      demoCount: { update: (fn: (n: number) => number) => void }
+    }
+
+    const root = document.createElement('div')
+    const dispose = mod.mount(root)
+    const output = root.querySelector('.playground-output')
+
+    expect(output?.textContent).toBe('doubled = 0')
+
+    mod.demoCount.update((n) => n + 1)
+    await Promise.resolve()
+    expect(output?.textContent).toBe('doubled = 2')
+
+    dispose()
+  })
+})

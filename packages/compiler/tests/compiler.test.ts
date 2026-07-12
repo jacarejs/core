@@ -169,6 +169,14 @@ export default view\`<pre><code>\${code}</code></pre>\``
     expect(result.code).toContain('String(code)')
   })
 
+  it('ignores signal-like names inside template literal strings', () => {
+    const source = `import { view } from '@jacare/core'
+const code = \`const count = pulse(0)\`
+export default view\`<p>ok</p>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).not.toContain('bindText(_text')
+  })
+
   it('calls signals in mixed text templates', () => {
     const source = `import { pulse, derive, view } from '@jacare/core'
 const count = pulse(0)

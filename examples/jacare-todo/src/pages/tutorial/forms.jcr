@@ -1,4 +1,5 @@
 import { createForm, createLifecycle, registerScope, view } from '@jacare/core'
+import { appHref } from '../../app-base.js'
 import Field from '../../components/Field.jcr'
 import { topicNeighbors } from '../../tutorial/topics.js'
 import LessonNav from '../../components/LessonNav.jcr'
@@ -30,7 +31,7 @@ export const lifecycle = createLifecycle({
 
 export default view`
   <section class="page tutorial-lesson">
-    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <a class="text-link" jacare-go=${appHref('/tutorial')} href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Forms</h2>
     <p class="lead"><code>createForm</code> tracks dirty state, validation, and submit handling.</p>
 

@@ -1,4 +1,5 @@
 import { view } from '@jacare/core'
+import { appHref } from '../../app-base.js'
 import { topicHref, topicNeighbors } from '../../tutorial/topics.js'
 import LessonNav from '../../components/LessonNav.jcr'
 
@@ -23,7 +24,7 @@ const declarativeCode = `<a jacare-go="/tutorial" href="/tutorial">Tutorial</a>
 
 export default view`
   <section class="page tutorial-lesson">
-    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <a class="text-link" jacare-go=${appHref('/tutorial')} href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Navigation</h2>
     <p class="lead">Screens mount inside a persistent layout frame. URLs support params and query strings.</p>
 
@@ -36,7 +37,7 @@ export default view`
       <h3 class="lesson-heading">Friendly links</h3>
       <pre class="code-block"><code>${linksCode}</code></pre>
       <div class="lesson-links">
-        <a class="btn btn-primary" jacare-go="/about?tab=feedback" href="/about?tab=feedback">Open feedback tab</a>
+        <a class="btn btn-primary" jacare-go=${appHref('/about?tab=feedback')} href=${appHref('/about?tab=feedback')}>Open feedback tab</a>
         <a class="btn" jacare-go=${topicHref('forms')} href=${topicHref('forms')}>Go to Forms lesson</a>
       </div>
     </article>

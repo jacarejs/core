@@ -1,4 +1,5 @@
 import { view } from '@jacare/core'
+import { appHref } from '../../app-base.js'
 import { topicNeighbors } from '../../tutorial/topics.js'
 import LessonNav from '../../components/LessonNav.jcr'
 
@@ -25,7 +26,7 @@ const listCode = `view\`
 
 export default view`
   <section class="page tutorial-lesson">
-    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <a class="text-link" jacare-go=${appHref('/tutorial')} href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Templates</h2>
     <p class="lead">The compiler turns <code>view\`...\`</code> into direct DOM bindings — no virtual tree.</p>
 

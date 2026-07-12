@@ -8,6 +8,7 @@ import type { SourceMapInput } from 'rollup'
 export interface JacareConfig {
   title?: string
   port?: number
+  base?: string
 }
 
 export type JacareEmitMode = 'auto' | 'client' | 'server' | 'full'
@@ -33,6 +34,7 @@ export async function loadJacareConfig(
 
 export function createJacareViteConfig(config: JacareConfig = {}): UserConfig {
   return {
+    base: config.base ?? '/',
     plugins: [jacare()],
     optimizeDeps: {
       exclude: ['@jacare/core'],

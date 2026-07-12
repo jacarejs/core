@@ -1,4 +1,5 @@
 import { createForm, view } from '@jacare/core'
+import { appHref } from '../../app-base.js'
 import Field from '../../components/Field.jcr'
 import { topicNeighbors } from '../../tutorial/topics.js'
 import LessonNav from '../../components/LessonNav.jcr'
@@ -33,7 +34,7 @@ view\`
 
 export default view`
   <section class="page tutorial-lesson">
-    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <a class="text-link" jacare-go=${appHref('/tutorial')} href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Components</h2>
     <p class="lead">PascalCase tags compile to function calls. Props use the <code>:</code> prefix.</p>
 

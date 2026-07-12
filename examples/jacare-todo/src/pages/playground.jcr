@@ -31,7 +31,7 @@ export default view`
         <div class="playground-row">
           <button class="btn btn-primary" type="button" on-click=${() => count.update((n) => n + 1)}>Increment</button>
           <button class="btn" type="button" on-click=${() => count.set(0)}>Reset</button>
-          <span class="playground-value">count = ${count}</span>
+          <span class="playground-value">count = ${count()}</span>
         </div>
         <label class="field">
           <span class="field-label">Name</span>

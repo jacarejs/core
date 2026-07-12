@@ -1,19 +1,20 @@
 import { view } from '@jacare/core'
+import { appHref, assetUrl } from './app-base.js'
 
 export default view`
   <div class="app app-wide">
     <div class="layout layout-wide">
       <header class="header">
         <div class="brand">
-          <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
+          <img class="logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
           <span class="title">Jacaré</span>
         </div>
         <nav class="nav">
-          <a class="nav-link" jacare-go="/" href="/">Tasks</a>
-          <a class="nav-link" jacare-go="/tutorial" href="/tutorial">Tutorial</a>
-          <a class="nav-link" jacare-go="/playground" href="/playground">Playground</a>
-          <a class="nav-link" jacare-go="/about" href="/about">About</a>
-          <a class="nav-link" jacare-go="/about?tab=feedback" href="/about?tab=feedback">Feedback</a>
+          <a class="nav-link" jacare-go=${appHref('/')} href=${appHref('/')}>Tasks</a>
+          <a class="nav-link" jacare-go=${appHref('/tutorial')} href=${appHref('/tutorial')}>Tutorial</a>
+          <a class="nav-link" jacare-go=${appHref('/playground')} href=${appHref('/playground')}>Playground</a>
+          <a class="nav-link" jacare-go=${appHref('/about')} href=${appHref('/about')}>About</a>
+          <a class="nav-link" jacare-go=${appHref('/about?tab=feedback')} href=${appHref('/about?tab=feedback')}>Feedback</a>
         </nav>
       </header>
 

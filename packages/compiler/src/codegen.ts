@@ -158,9 +158,14 @@ export function detectProps(script: string, ast: TemplateAST): string[] {
   return [...used].filter((name) => !declared.has(name)).sort()
 }
 
+function stripTemplateLiterals(code: string): string {
+  return code.replace(/`(?:\\.|[^`\\])*`/g, '``')
+}
+
 export function detectSignals(script: string): Set<string> {
   const signals = new Set<string>()
-  for (const match of script.matchAll(
+  const source = stripTemplateLiterals(script)
+  for (const match of source.matchAll(
     /\b(?:const|let|var)\s+([\w$]+)\s*=\s*(?:signal|pulse|computed|derive)\s*\(/g,
   )) {
     signals.add(match[1]!)
