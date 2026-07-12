@@ -1,6 +1,6 @@
 # vite-starter
 
-Jacaré app scaffolded with Vite.
+Jacaré app scaffolded with Vite — counter demo with brand colors and scoped styles.
 
 ## Commands
 
@@ -12,9 +12,15 @@ npm run preview
 npm run check
 ```
 
+## Editor
+
+Install the [Jacaré VS Code extension](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) for `.jcr` syntax highlighting and file icons.
+
 ## Project layout
 
 ```
+public/
+  jacare-logo.png
 src/
   app.jcr       UI + state
   boot.js       entry — mounts the app

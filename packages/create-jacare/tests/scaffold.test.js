@@ -32,6 +32,7 @@ describe('scaffoldFromDisk', () => {
     expect(pkg.dependencies['@jacare/core']).toBe('0.0.2')
     expect(readFileSync(join(target, 'vite.config.js'), 'utf-8')).toContain('@jacare/vite-plugin')
     expect(readFileSync(join(target, 'src/app.jcr'), 'utf-8')).toContain('signal')
+    expect(readFileSync(join(target, 'public/jacare-logo.png'))).toBeTruthy()
   })
 
   it('scaffolds vite-todo with devtools', () => {

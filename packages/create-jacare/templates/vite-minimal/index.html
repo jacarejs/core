@@ -3,16 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Jacaré starter — reactive UI with fine-grained signals" />
     <title>vite-starter</title>
+    <link rel="icon" href="/jacare-logo.png" type="image/png" />
     <style>
+      :root {
+        --j-deep: #001818;
+        --j-forest: #003030;
+        --j-primary: #189030;
+        --j-leaf: #30a830;
+        --j-bright: #60a818;
+        --j-lime: #78c018;
+        --j-mint: #d8f3dc;
+        --j-surface: #f4fbf6;
+        --j-surface-2: #ffffff;
+        --j-border: #b8e0c4;
+        --j-text: #001818;
+        --j-muted: #3d6b52;
+        --j-radius: 12px;
+        --j-shadow: 0 12px 40px rgba(0, 24, 24, 0.12);
+        --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
       body {
-        font-family: system-ui, sans-serif;
         margin: 0;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
-        background: #0a0a0a;
-        color: #fafafa;
+        font-family: var(--font);
+        font-size: 16px;
+        line-height: 1.55;
+        color: var(--j-text);
+        background:
+          radial-gradient(ellipse 80% 50% at 50% -10%, rgba(120, 192, 24, 0.18), transparent),
+          linear-gradient(180deg, var(--j-surface) 0%, #eef8f0 100%);
+        -webkit-font-smoothing: antialiased;
       }
     </style>
   </head>

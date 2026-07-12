@@ -22,7 +22,7 @@ describe('buildScaffold', () => {
     const plan = buildScaffold('demo', 'minimal', '0.0.2')
     expect(plan.files['src/app.jcr']).toContain('signal')
     expect(plan.files['package.json']).toContain('"@jacare/cli": "0.0.2"')
-    expect(plan.assets).toHaveLength(0)
+    expect(plan.assets[0]?.name).toBe('jacare-logo.png')
   })
 
   it('creates nav template with pages', () => {

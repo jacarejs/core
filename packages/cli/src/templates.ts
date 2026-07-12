@@ -35,7 +35,7 @@ export function buildScaffold(
     case 'todo':
       return { files: { ...shared, ...todoFiles(name) }, assets: logoAsset() }
     default:
-      return { files: { ...shared, ...minimalFiles(name) }, assets: [] }
+      return { files: { ...shared, ...minimalFiles(name) }, assets: logoAsset() }
   }
 }
 
@@ -112,16 +112,41 @@ function minimalFiles(name: string): Record<string, string> {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Jacaré starter — reactive UI with fine-grained signals" />
     <title>${name}</title>
+    <link rel="icon" href="/jacare-logo.png" type="image/png" />
     <style>
+      :root {
+        --j-deep: #001818;
+        --j-forest: #003030;
+        --j-primary: #189030;
+        --j-leaf: #30a830;
+        --j-bright: #60a818;
+        --j-lime: #78c018;
+        --j-mint: #d8f3dc;
+        --j-surface: #f4fbf6;
+        --j-surface-2: #ffffff;
+        --j-border: #b8e0c4;
+        --j-text: #001818;
+        --j-muted: #3d6b52;
+        --j-radius: 12px;
+        --j-shadow: 0 12px 40px rgba(0, 24, 24, 0.12);
+        --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
       body {
-        font-family: system-ui, sans-serif;
         margin: 0;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
-        background: #0a0a0a;
-        color: #fafafa;
+        font-family: var(--font);
+        font-size: 16px;
+        line-height: 1.55;
+        color: var(--j-text);
+        background:
+          radial-gradient(ellipse 80% 50% at 50% -10%, rgba(120, 192, 24, 0.18), transparent),
+          linear-gradient(180deg, var(--j-surface) 0%, #eef8f0 100%);
+        -webkit-font-smoothing: antialiased;
       }
     </style>
   </head>
@@ -132,21 +157,194 @@ function minimalFiles(name: string): Record<string, string> {
 </html>
 `,
     'src/boot.js': bootMinimal(),
-    'src/app.jcr': `import { signal, computed, view } from '@jacare/core'
+    'src/app.jcr': `import { signal, computed } from '@jacare/core'
 
 const count = signal(0)
-const label = computed(() => \`Count: \${count()}\`)
+const label = computed(() => count())
+const mood = computed(() => {
+  const value = count()
+  if (value === 0) return 'Tap +1 to start'
+  if (value < 5) return 'Warming up'
+  if (value < 12) return 'Signals are live'
+  return 'Jacaré scales'
+})
 
-function add() {
+function increment() {
   count.update((n) => n + 1)
 }
 
-export default view\`
-  <main>
-    <p>\${label}</p>
-    <button on-click=\${add}>+1</button>
-  </main>
-\`
+function decrement() {
+  count.update((n) => Math.max(0, n - 1))
+}
+
+function reset() {
+  count.set(0)
+}
+
+export <view>
+  <div class="page">
+    <header class="header">
+      <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
+      <div class="brand">
+        <h1 class="title">${name}</h1>
+        <p class="subtitle">Reactive UI without the virtual DOM tax</p>
+      </div>
+    </header>
+
+    <section class="card counter-card">
+      <p class="eyebrow">Live signal</p>
+      <p class="count">\${label}</p>
+      <p class="hint">\${mood}</p>
+      <div class="actions">
+        <button class="btn btn-ghost" type="button" on-click=\${decrement}>−1</button>
+        <button class="btn btn-primary" type="button" on-click=\${increment}>+1</button>
+        <button class="btn btn-ghost" type="button" on-click=\${reset}>Reset</button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <a class="footer-link" href="https://github.com/jacarejs/core" target="_blank" rel="noreferrer">Docs</a>
+      <a class="footer-link" href="https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare" target="_blank" rel="noreferrer">VS Code extension</a>
+      <a class="footer-link" href="https://jacarejs.github.io/core/showcase/" target="_blank" rel="noreferrer">Showcase</a>
+    </footer>
+  </div>
+</view>
+
+export <style>
+.page {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 3rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--j-border);
+  border-radius: calc(var(--j-radius) + 4px);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--j-shadow);
+}
+
+.logo {
+  width: 4.5rem;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.brand { display: grid; gap: 0.2rem; }
+
+.title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--j-forest);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--j-muted);
+}
+
+.card {
+  border: 1px solid var(--j-border);
+  border-radius: calc(var(--j-radius) + 6px);
+  background: var(--j-surface-2);
+  box-shadow: var(--j-shadow);
+}
+
+.counter-card {
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: center;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--j-leaf);
+}
+
+.count {
+  margin: 0;
+  font-size: clamp(3.5rem, 16vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--j-deep);
+}
+
+.hint {
+  margin: 0;
+  color: var(--j-muted);
+  font-size: 0.95rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.65rem 1.2rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.btn:hover { transform: translateY(-1px); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--j-primary), var(--j-bright));
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(24, 144, 48, 0.28);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 10px 28px rgba(24, 144, 48, 0.34);
+}
+
+.btn-ghost {
+  background: var(--j-surface);
+  border-color: var(--j-border);
+  color: var(--j-forest);
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.footer-link {
+  color: var(--j-forest);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  color: var(--j-primary);
+  text-decoration: underline;
+}
+</style>
 `,
   }
 }
