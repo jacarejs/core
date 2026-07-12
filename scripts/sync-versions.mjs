@@ -87,6 +87,10 @@ function syncNpmVersion(version) {
   const examplePkg = readJson(join(ROOT, 'examples/jacare-todo/package.json'))
   setDependencyVersions(examplePkg, version)
   writeJson(join(ROOT, 'examples/jacare-todo/package.json'), examplePkg)
+
+  const showcasePkg = readJson(join(ROOT, 'examples/jacare-showcase/package.json'))
+  setDependencyVersions(showcasePkg, version)
+  writeJson(join(ROOT, 'examples/jacare-showcase/package.json'), showcasePkg)
 }
 
 function syncVscodeVersion(version) {
