@@ -53,7 +53,18 @@ jobs:
           cp -r examples/jacare-todo/dist/. site/todo/
           cp -r examples/jacare-showcase/dist/. site/showcase/
           cp scripts/gh-pages-404.html site/404.html
+          cp scripts/gh-pages-404.html site/todo/404.html
+          cp scripts/gh-pages-404.html site/showcase/404.html
           touch site/.nojekyll site/todo/.nojekyll site/showcase/.nojekyll
+
+      - name: Verify Pages artifact
+        run: |
+          test -f site/index.html
+          test -f site/404.html
+          test -f site/showcase/index.html
+          test -f site/todo/index.html
+          echo "Pages artifact:"
+          find site -maxdepth 2 -type f | sort
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

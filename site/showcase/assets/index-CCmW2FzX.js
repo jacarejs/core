@@ -1,0 +1,1 @@
+import{h as c}from"./index-CkEUp_W4.js";function a(e,t){const n=[];for(const o of t.bindings){const r=e.querySelector(`[data-jacare-bind="${o.id}"]`);if(r&&o.read){const i=d(r);n.push(c(i,o.read))}}return n}function d(e){for(const n of e.childNodes)if(n instanceof Text)return n;const t=document.createTextNode(e.textContent??"");return e.replaceChildren(t),t}export{a as r};
