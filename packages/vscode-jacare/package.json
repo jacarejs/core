@@ -2,7 +2,7 @@
   "name": "jacare",
   "displayName": "Jacaré",
   "description": "Syntax highlighting and icons for Jacaré .jcr files",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "heberalmeida",
   "author": {
     "name": "Heber Almeida"
@@ -73,26 +73,37 @@
           "textMateRules": [
             {
               "scope": "entity.name.tag.jacare",
-              "settings": { "foreground": "#569CD6" }
+              "settings": {
+                "foreground": "#569CD6"
+              }
             },
             {
               "scope": "keyword.control.jacare",
-              "settings": { "foreground": "#C586C0", "fontStyle": "bold" }
+              "settings": {
+                "foreground": "#C586C0",
+                "fontStyle": "bold"
+              }
             },
             {
               "scope": "entity.name.type.tag.jacare",
-              "settings": { "foreground": "#4EC9B0" }
+              "settings": {
+                "foreground": "#4EC9B0"
+              }
             },
             {
               "scope": [
                 "punctuation.section.embedded.begin.jacare",
                 "punctuation.section.embedded.end.jacare"
               ],
-              "settings": { "foreground": "#569CD6" }
+              "settings": {
+                "foreground": "#569CD6"
+              }
             },
             {
               "scope": "string.template.jacare",
-              "settings": { "foreground": "#CE9178" }
+              "settings": {
+                "foreground": "#CE9178"
+              }
             }
           ]
         },
@@ -100,26 +111,37 @@
           "textMateRules": [
             {
               "scope": "entity.name.tag.jacare",
-              "settings": { "foreground": "#569CD6" }
+              "settings": {
+                "foreground": "#569CD6"
+              }
             },
             {
               "scope": "keyword.control.jacare",
-              "settings": { "foreground": "#C586C0", "fontStyle": "bold" }
+              "settings": {
+                "foreground": "#C586C0",
+                "fontStyle": "bold"
+              }
             },
             {
               "scope": "entity.name.type.tag.jacare",
-              "settings": { "foreground": "#4EC9B0" }
+              "settings": {
+                "foreground": "#4EC9B0"
+              }
             },
             {
               "scope": [
                 "punctuation.section.embedded.begin.jacare",
                 "punctuation.section.embedded.end.jacare"
               ],
-              "settings": { "foreground": "#569CD6" }
+              "settings": {
+                "foreground": "#569CD6"
+              }
             },
             {
               "scope": "string.template.jacare",
-              "settings": { "foreground": "#CE9178" }
+              "settings": {
+                "foreground": "#CE9178"
+              }
             }
           ]
         },
@@ -127,26 +149,37 @@
           "textMateRules": [
             {
               "scope": "entity.name.tag.jacare",
-              "settings": { "foreground": "#800000" }
+              "settings": {
+                "foreground": "#800000"
+              }
             },
             {
               "scope": "keyword.control.jacare",
-              "settings": { "foreground": "#AF00DB", "fontStyle": "bold" }
+              "settings": {
+                "foreground": "#AF00DB",
+                "fontStyle": "bold"
+              }
             },
             {
               "scope": "entity.name.type.tag.jacare",
-              "settings": { "foreground": "#267F99" }
+              "settings": {
+                "foreground": "#267F99"
+              }
             },
             {
               "scope": [
                 "punctuation.section.embedded.begin.jacare",
                 "punctuation.section.embedded.end.jacare"
               ],
-              "settings": { "foreground": "#0000FF" }
+              "settings": {
+                "foreground": "#0000FF"
+              }
             },
             {
               "scope": "string.template.jacare",
-              "settings": { "foreground": "#A31515" }
+              "settings": {
+                "foreground": "#A31515"
+              }
             }
           ]
         },
@@ -154,41 +187,59 @@
           "textMateRules": [
             {
               "scope": "entity.name.tag.jacare",
-              "settings": { "foreground": "#800000" }
+              "settings": {
+                "foreground": "#800000"
+              }
             },
             {
               "scope": "keyword.control.jacare",
-              "settings": { "foreground": "#AF00DB", "fontStyle": "bold" }
+              "settings": {
+                "foreground": "#AF00DB",
+                "fontStyle": "bold"
+              }
             },
             {
               "scope": "entity.name.type.tag.jacare",
-              "settings": { "foreground": "#267F99" }
+              "settings": {
+                "foreground": "#267F99"
+              }
             },
             {
               "scope": [
                 "punctuation.section.embedded.begin.jacare",
                 "punctuation.section.embedded.end.jacare"
               ],
-              "settings": { "foreground": "#0000FF" }
+              "settings": {
+                "foreground": "#0000FF"
+              }
             },
             {
               "scope": "string.template.jacare",
-              "settings": { "foreground": "#A31515" }
+              "settings": {
+                "foreground": "#A31515"
+              }
             }
           ]
         },
         "textMateRules": [
           {
             "scope": "entity.name.tag.jacare",
-            "settings": { "foreground": "#569CD6" }
+            "settings": {
+              "foreground": "#569CD6"
+            }
           },
           {
             "scope": "keyword.control.jacare",
-            "settings": { "foreground": "#C586C0", "fontStyle": "bold" }
+            "settings": {
+              "foreground": "#C586C0",
+              "fontStyle": "bold"
+            }
           },
           {
             "scope": "entity.name.type.tag.jacare",
-            "settings": { "foreground": "#4EC9B0" }
+            "settings": {
+              "foreground": "#4EC9B0"
+            }
           }
         ]
       }
