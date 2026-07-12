@@ -1,0 +1,59 @@
+import { signal, view } from '@jacare/core'
+import { appHref } from '../app-base.js'
+import Stat from '../components/Stat.jcr'
+import Card from '../components/Card.jcr'
+import Badge from '../components/Badge.jcr'
+
+const renders = signal(0)
+const fps = signal(60)
+
+renders.update((n) => n + 1)
+
+const features = [
+  { slug: 'reactivity', title: 'Fine-grained reactivity', summary: 'Signals update only what changed — no virtual DOM diff.' },
+  { slug: 'components', title: 'Components & slots', summary: 'Composable UI with scoped CSS and child projection.' },
+  { slug: 'forms', title: 'Forms', summary: 'Two-way bindings and validated fields out of the box.' },
+  { slug: 'playground', title: 'Playground', summary: 'Keyed lists, branches, and live DOM reconciliation.' },
+]
+
+function featureHref(slug) {
+  return '/' + slug
+}
+
+export default view`
+  <section class="page">
+    <div class="hero">
+      <p class="hero-eyebrow">Jacaré Showcase</p>
+      <h1 class="hero-title">Reactive UI without the virtual DOM tax</h1>
+      <p class="hero-lead">
+        A polished demo of Jacaré — compile-time templates, incremental DOM updates,
+        file-based routing, and brand-native styling.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" jacare-go="/playground" href=${appHref('/playground')}>Open playground</a>
+        <a class="btn btn-ghost" jacare-go="/components" href=${appHref('/components')}>See components</a>
+      </div>
+      <div class="stats-row">
+        <Stat :value=${() => String(renders())} label="Screen mounts" />
+        <Stat :value=${() => String(fps())} label="Target FPS" />
+        <Stat :value="'0'" label="VDOM layers" />
+      </div>
+    </div>
+
+    <div>
+      <h2 class="section-title">What Jacaré demonstrates</h2>
+      <p class="section-lead">Each page highlights a core capability of the framework.</p>
+    </div>
+
+    <div class="feature-grid">
+      #for features as item (item.slug)
+        <Card :title=${item.title} :subtitle=${item.summary}>
+          <div class="demo-row">
+            <Badge :text=${item.slug} />
+            <a class="btn btn-primary" jacare-go=${featureHref(item.slug)} href=${appHref(featureHref(item.slug))}>Explore</a>
+          </div>
+        </Card>
+      #end
+    </div>
+  </section>
+`

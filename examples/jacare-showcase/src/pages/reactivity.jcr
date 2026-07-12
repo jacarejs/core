@@ -1,0 +1,57 @@
+import { computed, signal, view } from '@jacare/core'
+import Card from '../components/Card.jcr'
+
+const count = signal(0)
+const step = signal(1)
+const doubled = computed(() => count() * 2)
+const isEven = computed(() => count() % 2 === 0)
+
+function increment() {
+  count.update((n) => n + step())
+}
+
+function decrement() {
+  count.update((n) => n - step())
+}
+
+function reset() {
+  count.set(0)
+}
+
+export default view`
+  <section class="page">
+    <div>
+      <h1 class="section-title">Reactivity</h1>
+      <p class="section-lead">
+        Signals drive the DOM directly. Only bound nodes re-run — components and siblings stay untouched.
+      </p>
+    </div>
+
+    <Card title="Live counter" subtitle="computed() derives doubled; branches toggle parity badge">
+      <div class="demo-panel">
+        <div class="demo-row">
+          <span class="demo-value">${count}</span>
+          <span class="demo-label">count</span>
+          <span class="pill">doubled: ${doubled}</span>
+          #if isEven()
+            <span class="pill">even</span>
+          #else
+            <span class="pill">odd</span>
+          #end
+        </div>
+        <div class="demo-row">
+          <button class="btn btn-primary" on-click=${decrement}>−</button>
+          <button class="btn btn-primary" on-click=${increment}>+</button>
+          <button class="btn btn-outline" on-click=${reset}>Reset</button>
+        </div>
+        <label class="demo-label">
+          Step
+          <input class="input" type="number" bind-value=${step} min="1" max="10" />
+        </label>
+      </div>
+    </Card>
+
+    <pre class="code"><code>const count = signal(0)
+const doubled = computed(() =&gt; count() * 2)</code></pre>
+  </section>
+`

@@ -1,0 +1,38 @@
+import { createForm, signal, view } from '@jacare/core'
+import Card from '../components/Card.jcr'
+import Field from '../components/Field.jcr'
+
+const submitted = signal(false)
+
+const form = createForm({
+  name: { value: '', validate: (v) => (v.trim().length < 2 ? 'Name is too short' : null) },
+  email: { value: '', validate: (v) => (!v.includes('@') ? 'Invalid email' : null) },
+  message: { value: '', validate: (v) => (v.trim().length < 8 ? 'Tell us a bit more' : null) },
+})
+
+const onSubmit = form.handleSubmit(() => {
+  submitted.set(true)
+})
+
+export default view`
+  <section class="page">
+    <div>
+      <h1 class="section-title">Forms</h1>
+      <p class="section-lead">
+        Two-way <code>bind-value</code> on fields, blur validation, and submit handling without a form library.
+      </p>
+    </div>
+
+    <Card title="Contact" subtitle="createForm() + Field component">
+      <form class="demo-panel" on-submit=${onSubmit}>
+        <Field :label="'Name'" :field=${form.fields.name} :type="'text'" :placeholder="'Your name'" />
+        <Field :label="'Email'" :field=${form.fields.email} :type="'email'" :placeholder="'you@example.com'" />
+        <Field :label="'Message'" :field=${form.fields.message} :type="'text'" :placeholder="'What are you building?'" />
+        <button class="btn btn-primary" type="submit">Send</button>
+        #if submitted()
+          <p class="demo-label">Thanks — form is valid and ready to post.</p>
+        #end
+      </form>
+    </Card>
+  </section>
+`

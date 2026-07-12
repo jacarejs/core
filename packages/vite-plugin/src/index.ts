@@ -94,6 +94,8 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
 
     transform(code, id, transformOptions) {
       if (!id.endsWith('.jcr')) return
+      if (/export function mount\(/.test(code) || /export function render\(/.test(code)) return
+      if (!/\bview\s*`/.test(code)) return
 
       try {
         const mode = resolveCompileMode(options, transformOptions?.ssr)

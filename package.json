@@ -21,6 +21,8 @@
     "typecheck": "yarn workspace @jacare/core typecheck && yarn workspace @jacare/compiler typecheck && yarn workspace @jacare/vite-plugin typecheck && yarn workspace @jacare/meta typecheck && yarn workspace @jacare/cli typecheck && yarn workspace @jacare/devtools typecheck",
     "example:dev": "yarn workspace jacare-todo dev",
     "example:build": "yarn workspace jacare-todo build",
+    "showcase:dev": "yarn workspace jacare-showcase dev",
+    "showcase:build": "yarn workspace jacare-showcase build",
     "jacare": "node packages/cli/dist/index.js"
   },
   "devDependencies": {

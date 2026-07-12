@@ -1,0 +1,10 @@
+import { view } from '@jacare/core'
+import { appHref } from '../app-base.js'
+
+export default view`
+  <section class="page">
+    <h1 class="section-title">Page not found</h1>
+    <p class="section-lead">The route you requested was not found in this showcase.</p>
+    <a class="btn btn-primary" jacare-go="/" href=${appHref('/')}>Back home</a>
+  </section>
+`

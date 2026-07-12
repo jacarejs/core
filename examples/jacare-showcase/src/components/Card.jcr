@@ -1,0 +1,45 @@
+import { view } from '@jacare/core'
+
+export default view`
+<div class="card">
+  <header class="card-header">
+    <h3 class="card-title">${title}</h3>
+    #if subtitle
+      <p class="card-subtitle">${subtitle}</p>
+    #end
+  </header>
+  <div class="card-body">
+    <slot />
+  </div>
+</div>
+`
+style`
+.card {
+  display: grid;
+  gap: 0;
+  border: 1px solid #b8e0c4;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0, 48, 48, 0.08);
+}
+.card-header {
+  padding: 1rem 1.15rem;
+  background: linear-gradient(135deg, #f4fbf6, #e8f8ec);
+  border-bottom: 1px solid #b8e0c4;
+}
+.card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #003030;
+}
+.card-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #3d6b52;
+}
+.card-body {
+  padding: 1.15rem;
+}
+`

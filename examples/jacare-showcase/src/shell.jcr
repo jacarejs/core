@@ -1,0 +1,31 @@
+import { view } from '@jacare/core'
+import { appHref, assetUrl } from './app-base.js'
+
+export default view`
+  <div class="app">
+    <div class="layout">
+      <header class="header">
+        <a class="brand" jacare-go="/" href=${appHref('/')}>
+          <img class="logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
+          <span class="brand-text">
+            <span class="brand-title">Jacaré Showcase</span>
+            <span class="brand-tag">Zero VDOM · Fine-grained reactivity</span>
+          </span>
+        </a>
+        <nav class="nav">
+          <a class="nav-link" jacare-go="/" href=${appHref('/')}>Home</a>
+          <a class="nav-link" jacare-go="/reactivity" href=${appHref('/reactivity')}>Reactivity</a>
+          <a class="nav-link" jacare-go="/components" href=${appHref('/components')}>Components</a>
+          <a class="nav-link" jacare-go="/forms" href=${appHref('/forms')}>Forms</a>
+          <a class="nav-link" jacare-go="/playground" href=${appHref('/playground')}>Playground</a>
+        </nav>
+      </header>
+
+      <main class="main" jacare-frame></main>
+
+      <footer class="footer">
+        Built with Jacaré — by Heber Almeida · MIT License
+      </footer>
+    </div>
+  </div>
+`

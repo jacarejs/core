@@ -1,0 +1,31 @@
+import { view } from '@jacare/core'
+
+export default view`
+<div class="stat">
+  <span class="stat-value">${value}</span>
+  <span class="stat-label">${label}</span>
+</div>
+`
+style`
+.stat {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #d8f3dc;
+}
+.stat-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(216, 243, 220, 0.75);
+}
+`
