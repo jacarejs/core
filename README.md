@@ -105,7 +105,7 @@ Jacaré asks a different question: **why re-render anything when only one text n
 | DevTools | `@jacare/devtools` | Pulse Graph — visualize signal dependencies live |
 | Scaffolding | `create-jacare` | `npm create jacare@latest` |
 
-Live demos: [Todo app](https://jacarejs.github.io/core/) · [Showcase](https://jacarejs.github.io/core/showcase/)
+Live demos: [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/)
 
 ## Status
 
@@ -445,7 +445,7 @@ jacare new my-app --template=todo
 
 | Demo | URL | What to explore |
 |------|-----|-----------------|
-| **Todo app** | [jacarejs.github.io/core](https://jacarejs.github.io/core/) | Tasks, forms, keyed lists, tutorial routes |
+| **Todo app** | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
 | **Showcase** | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | Reactivity, components, slots, scoped CSS, cart |
 
 Run locally:

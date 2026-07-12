@@ -250,7 +250,7 @@ Tree-shaking removes `@jacare/devtools` from production bundles when the import 
 - [Repository](https://github.com/jacarejs/core)
 - [DevTools docs](https://github.com/jacarejs/core/blob/main/docs/phases/06-devtools.md)
 - [@jacare/core](https://www.npmjs.com/package/@jacare/core)
-- [Live demo](https://jacarejs.github.io/core/)
+- [Live demo](https://jacarejs.github.io/core/todo/)
 
 ## License
 

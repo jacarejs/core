@@ -468,7 +468,7 @@ SSR output includes `data-jacare-bind` markers for precise hydration targets.
 - [Repository](https://github.com/jacarejs/core)
 - [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
-- [Live demo](https://jacarejs.github.io/core/)
+- [Live demo](https://jacarejs.github.io/core/todo/)
 - [Example app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
 
 ## License

@@ -2,7 +2,7 @@
 
 Full-featured demo for the Jacaré framework: tasks, tutorial, playground, forms, and DevTools.
 
-Live demo: [jacarejs.github.io/core](https://jacarejs.github.io/core/)
+Live demo: [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/)
 
 ## Run locally
 
@@ -22,10 +22,10 @@ Open `http://localhost:3000`
 yarn example:build
 ```
 
-For GitHub Pages (subpath `/core/`):
+For GitHub Pages (subpath `/core/todo/`):
 
 ```bash
-JACARE_BASE=/core/ yarn build
+JACARE_BASE=/core/todo/ yarn build
 ```
 
 ## Project structure
@@ -52,7 +52,7 @@ Use **route-relative** paths for `jacare-go` and **base-aware** URLs for `href`:
 ```
 
 - `jacare-go` — internal route (no deploy base prefix)
-- `href` — browser fallback with Vite `base` (`/core/` on GitHub Pages)
+- `href` — browser fallback with Vite `base` (`/core/todo/` on GitHub Pages)
 
 ## Features demonstrated
 

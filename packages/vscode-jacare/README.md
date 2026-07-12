@@ -212,7 +212,7 @@ Optional `settings.json` for Jacaré projects:
 
 - [Jacaré repository](https://github.com/jacarejs/core)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
-- [Live demo](https://jacarejs.github.io/core/)
+- [Live demo](https://jacarejs.github.io/core/todo/)
 - [Compiler docs](https://github.com/jacarejs/core/blob/main/docs/phases/02-compiler.md)
 
 ---

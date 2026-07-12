@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Jacaré</title>
+    <script>
+      ;(function () {
+        var path = location.pathname
+        var search = location.search
+        var hash = location.hash
+        var href = path + search + hash
+        var isShowcase = path.indexOf('/core/showcase') === 0
+        var isTodo = path.indexOf('/core/todo') === 0
+        var base
+        var target
+
+        if (isShowcase) {
+          base = '/core/showcase/'
+          target = '/core/showcase/'
+        } else if (isTodo) {
+          base = '/core/todo/'
+          target = '/core/todo/'
+        } else if (path.indexOf('/core/') === 0 && path !== '/core/' && path !== '/core/index.html') {
+          base = '/core/todo/'
+          target = '/core/todo/'
+          href = '/core/todo' + path.slice('/core'.length) + search + hash
+        } else {
+          location.replace('/core/')
+          return
+        }
+
+        sessionStorage.setItem('jacare:spa-restore', JSON.stringify({ base: base, href: href }))
+        location.replace(target)
+      })()
+    </script>
+  </head>
+  <body></body>
+</html>

@@ -1,4 +1,5 @@
 import { nav } from './nav.js'
+import { restoreSpaPath } from './app-base.js'
 
 if (import.meta.env.DEV) {
   const { connectJacareDevtools } = await import('@jacare/devtools')
@@ -7,6 +8,8 @@ if (import.meta.env.DEV) {
 
 const root = document.getElementById('app')
 if (!root) throw new Error('Missing #app')
+
+restoreSpaPath()
 
 let dispose = nav.attach(root)
 

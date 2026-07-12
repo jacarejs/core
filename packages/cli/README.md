@@ -391,7 +391,7 @@ Run `npm install` in the project directory after `jacare new`.
 ## Links
 
 - [Repository](https://github.com/jacarejs/core)
-- [Live demo](https://jacarejs.github.io/core/)
+- [Live demo](https://jacarejs.github.io/core/todo/)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Example todo app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
 
