@@ -25,7 +25,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | Package | Description |
 |---------|-------------|
 | `@jacare/core` | Pulse graph, DOM bindings, SSR |
-| `@jacare/compiler` | Compiles `view\`...\`` templates |
+| `@jacare/compiler` | Compiles `view\`...\`` and `<view>...</view>` templates |
 | `@jacare/vite-plugin` | Vite integration |
 | `@jacare/cli` | `jacare` command — create, dev, build |
 | `create-jacare` | `npm create jacare` — Vite-based scaffolds |
@@ -94,6 +94,10 @@ my-app/
 
 ### Module
 
+Use either a tagged template or a `<view>` block — both compile to the same output.
+
+**Tagged template**
+
 ```javascript
 import { pulse, derive, view } from '@jacare/core'
 
@@ -105,6 +109,21 @@ export default view`
     ${label}
   </button>
 `
+```
+
+**View block** (HTML-style alternative — no `view` import required)
+
+```javascript
+import { pulse, derive } from '@jacare/core'
+
+const count = pulse(0)
+const label = derive(() => `Count: ${count()}`)
+
+export default <view>
+  <button on-click=${() => count.update((n) => n + 1)}>
+    ${label}
+  </button>
+</view>
 ```
 
 ### Template

@@ -68,6 +68,8 @@ Jacaré files are plain JavaScript modules. The extension highlights both the sc
 
 **JavaScript module**
 
+**Tagged template**
+
 ```javascript
 import { signal, view } from '@jacare/core'
 
@@ -83,6 +85,25 @@ export default view`
     <button on-click=${increment}>+1</button>
   </div>
 `
+```
+
+**View block** (HTML-style alternative)
+
+```javascript
+import { signal } from '@jacare/core'
+
+const count = signal(0)
+
+function increment() {
+  count.update((n) => n + 1)
+}
+
+export default <view>
+  <div class="counter">
+    <p>${count}</p>
+    <button on-click=${increment}>+1</button>
+  </div>
+</view>
 ```
 
 **Template directives**
@@ -126,7 +147,7 @@ style`
 |-------|----------|
 | `source.jacare` | Root language scope |
 | `keyword.control.jacare` | `#if`, `#for`, `#end`, `@each`, etc. |
-| `keyword.tag.jacare` | `view`, `style` tagged templates |
+| `keyword.tag.jacare` | `view`, `style` tagged templates and `<view>` blocks |
 | `entity.name.type.tag.jacare` | PascalCase components |
 | `entity.name.tag` | HTML elements (`div`, `slot`, `button`, …) |
 | `entity.other.attribute-name` | `bind-*`, `on-*`, `class-*`, `:prop` |

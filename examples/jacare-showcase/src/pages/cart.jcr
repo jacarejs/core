@@ -1,4 +1,4 @@
-import { computed, signal, view } from '@jacare/core'
+import { computed, signal } from '@jacare/core'
 import Card from '../components/Card.jcr'
 import Badge from '../components/Badge.jcr'
 
@@ -93,7 +93,7 @@ function clearCart() {
   coupon.set('')
 }
 
-export default view`
+export <view>
   <section class="page">
     <div>
       <h1 class="section-title">Shopping cart</h1>
@@ -104,7 +104,7 @@ export default view`
     </div>
 
     <div class="cart-layout">
-      <Card title="Catalog" subtitle="Click Add to put items in the cart">
+      <Card :title=${'Catalog'} :subtitle=${'Click Add to put items in the cart'}>
         <ul class="product-grid">
           #for catalog as product (product.id)
             <li class="product-card">
@@ -121,7 +121,7 @@ export default view`
         </ul>
       </Card>
 
-      <Card title="Your cart" subtitle="Live totals update as you shop">
+      <Card :title=${'Your cart'} :subtitle=${'Live totals update as you shop'}>
         <div class="demo-panel">
           <p class="demo-label">${itemCount} items in cart</p>
           #if isEmpty()
@@ -187,8 +187,9 @@ export default view`
   lines().reduce((sum, line) => sum + line.lineTotal, 0))
 const total = computed(() => taxable() + tax() + shipping())</code></pre>
   </section>
-`
-style`
+</view>
+
+export <style>
 .cart-layout {
   display: grid;
   gap: 1rem;
@@ -274,4 +275,4 @@ style`
   color: #189030;
   font-size: 1.25rem;
 }
-`
+</style>

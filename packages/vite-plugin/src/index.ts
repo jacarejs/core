@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { compile, formatCompileError, JacareCompileError } from '@jacare/compiler'
+import { compile, formatCompileError, JacareCompileError, hasViewSource } from '@jacare/compiler'
 import type { Plugin, UserConfig } from 'vite'
 import type { SourceMapInput } from 'rollup'
 
@@ -95,7 +95,7 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
     transform(code, id, transformOptions) {
       if (!id.endsWith('.jcr')) return
       if (/export function mount\(/.test(code) || /export function render\(/.test(code)) return
-      if (!/\bview\s*`/.test(code)) return
+      if (!hasViewSource(code)) return
 
       try {
         const mode = resolveCompileMode(options, transformOptions?.ssr)

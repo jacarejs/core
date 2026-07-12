@@ -11,6 +11,12 @@
     "script": {
       "patterns": [
         {
+          "include": "#style-blocks"
+        },
+        {
+          "include": "#view-block"
+        },
+        {
           "include": "#view-template"
         },
         {
@@ -21,13 +27,213 @@
         }
       ]
     },
-    "view-template": {
-      "begin": "(\\bview\\s*)(`)",
+    "style-blocks": {
+      "patterns": [
+        {
+          "include": "#style-block-scss"
+        },
+        {
+          "include": "#style-block-less"
+        },
+        {
+          "include": "#style-block-css"
+        }
+      ]
+    },
+    "style-block-css": {
+      "begin": "(\\bexport)(\\s+)(<)(style)\\b([^>]*)(>)",
       "beginCaptures": {
         "1": {
-          "name": "keyword.tag.jacare"
+          "name": "keyword.control.export.js"
         },
         "2": {
+          "name": "source.jacare"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "4": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "5": {
+          "patterns": [
+            {
+              "include": "#tag-attributes"
+            }
+          ]
+        },
+        "6": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "end": "(</)(style)(>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "2": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "name": "meta.style.jacare",
+      "contentName": "meta.embedded.block.css.jacare source.css",
+      "patterns": [
+        {
+          "include": "source.css"
+        }
+      ]
+    },
+    "style-block-scss": {
+      "begin": "(\\bexport)(\\s+)(<)(style)\\b([^>]*\\blang\\s*=\\s*['\"]scss['\"][^>]*)(>)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.export.js"
+        },
+        "2": {
+          "name": "source.jacare"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "4": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "5": {
+          "patterns": [
+            {
+              "include": "#tag-attributes"
+            }
+          ]
+        },
+        "6": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "end": "(</)(style)(>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "2": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "name": "meta.style.jacare",
+      "contentName": "meta.embedded.block.scss.jacare source.css.scss",
+      "patterns": [
+        {
+          "include": "source.css.scss"
+        }
+      ]
+    },
+    "style-block-less": {
+      "begin": "(\\bexport)(\\s+)(<)(style)\\b([^>]*\\blang\\s*=\\s*['\"]less['\"][^>]*)(>)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.export.js"
+        },
+        "2": {
+          "name": "source.jacare"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "4": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "5": {
+          "patterns": [
+            {
+              "include": "#tag-attributes"
+            }
+          ]
+        },
+        "6": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "end": "(</)(style)(>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "2": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "name": "meta.style.jacare",
+      "contentName": "meta.embedded.block.less.jacare source.css.less",
+      "patterns": [
+        {
+          "include": "source.css.less"
+        }
+      ]
+    },
+    "view-block": {
+      "begin": "(\\bexport(?:\\s+default)?|\\breturn)(\\s+)(<)(view)\\b([^>]*)(>)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.export.js"
+        },
+        "2": {
+          "name": "source.jacare"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "4": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "5": {
+          "patterns": [
+            {
+              "include": "#tag-attributes"
+            }
+          ]
+        },
+        "6": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "end": "(</)(view)(>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "2": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "name": "meta.template.jacare meta.embedded.block.html.jacare",
+      "contentName": "text.html.jacare",
+      "patterns": [
+        {
+          "include": "#template-body"
+        }
+      ]
+    },
+    "view-template": {
+      "begin": "(\\bview)(\\s+)(`)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.tag.jacare entity.name.tag"
+        },
+        "2": {
+          "name": "source.jacare"
+        },
+        "3": {
           "name": "string.template.jacare punctuation.definition.string.template.begin"
         }
       },
@@ -37,7 +243,7 @@
           "name": "string.template.jacare punctuation.definition.string.template.end"
         }
       },
-      "name": "string.template.jacare",
+      "name": "string.template.jacare meta.template.jacare",
       "patterns": [
         {
           "include": "#template-body"
@@ -45,12 +251,15 @@
       ]
     },
     "style-template": {
-      "begin": "(\\bstyle\\s*)(`)",
+      "begin": "(\\bstyle)(\\s+)(`)",
       "beginCaptures": {
         "1": {
-          "name": "keyword.tag.jacare"
+          "name": "entity.name.tag.jacare entity.name.tag"
         },
         "2": {
+          "name": "source.jacare"
+        },
+        "3": {
           "name": "string.template.jacare punctuation.definition.string.template.begin"
         }
       },
@@ -60,11 +269,49 @@
           "name": "string.template.jacare punctuation.definition.string.template.end"
         }
       },
-      "name": "string.template.jacare",
-      "contentName": "source.css",
+      "name": "string.template.jacare meta.style.jacare",
+      "contentName": "meta.embedded.block.css.jacare source.css",
       "patterns": [
         {
           "include": "source.css"
+        }
+      ]
+    },
+    "tag-attributes": {
+      "patterns": [
+        {
+          "match": "\\blang\\s*(=)\\s*(['\"])(scss|less|css|sass)(\\2)",
+          "captures": {
+            "1": {
+              "name": "punctuation.separator.key-value.html"
+            },
+            "2": {
+              "name": "string.quoted.double.html"
+            },
+            "3": {
+              "name": "entity.other.attribute-name.html"
+            },
+            "4": {
+              "name": "string.quoted.double.html"
+            }
+          }
+        },
+        {
+          "match": "\\b([:@A-Za-z_][\\w:.-]*)\\s*(=)\\s*(['\"])([^'\"]*)\\3",
+          "captures": {
+            "1": {
+              "name": "entity.other.attribute-name.html"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.html"
+            },
+            "3": {
+              "name": "string.quoted.double.html"
+            },
+            "4": {
+              "name": "string.quoted.double.html"
+            }
+          }
         }
       ]
     },
@@ -91,7 +338,7 @@
       "patterns": [
         {
           "match": "^\\s*(#if|#elif|#else|#end|#for|@if|@elseif|@else|@end|@each)\\b",
-          "name": "keyword.control.jacare"
+          "name": "keyword.control.jacare keyword.control.flow"
         }
       ]
     },
@@ -99,16 +346,17 @@
       "begin": "\\$\\{",
       "beginCaptures": {
         "0": {
-          "name": "punctuation.section.embedded.begin.jacare"
+          "name": "punctuation.section.embedded.begin.jacare punctuation.section.embedded"
         }
       },
       "end": "\\}",
       "endCaptures": {
         "0": {
-          "name": "punctuation.section.embedded.end.jacare"
+          "name": "punctuation.section.embedded.end.jacare punctuation.section.embedded"
         }
       },
-      "name": "meta.embedded.expression.jacare",
+      "name": "meta.embedded.expression.jacare meta.embedded.line.js",
+      "contentName": "source.js",
       "patterns": [
         {
           "include": "source.js"
@@ -118,30 +366,44 @@
     "html-tags": {
       "patterns": [
         {
-          "match": "(</?)([A-Z][\\w]*)(/?>)",
+          "match": "(</?)([A-Z][\\w]*)(\\s|/?>)",
           "captures": {
             "1": {
-              "name": "punctuation.definition.tag.begin"
+              "name": "punctuation.definition.tag.begin.html"
             },
             "2": {
               "name": "entity.name.type.tag.jacare support.class.component"
             },
             "3": {
-              "name": "punctuation.definition.tag.end"
+              "name": "punctuation.definition.tag.end.html"
             }
           }
         },
         {
-          "match": "(</?)(slot|div|span|p|a|button|input|label|ul|li|nav|main|header|footer|section|article|h[1-6]|form|select|option|textarea|pre|code|table|tr|td|th|thead|tbody|img|br|hr)(/?>)",
+          "match": "(</?)(slot|div|span|p|a|button|input|label|ul|ol|li|nav|main|header|footer|section|article|h[1-6]|form|select|option|textarea|pre|code|table|tr|td|th|thead|tbody|img|br|hr|dl|dt|dd|strong|em|small|figure|figcaption|template|view|style)(\\s|/?>)",
           "captures": {
             "1": {
-              "name": "punctuation.definition.tag.begin"
+              "name": "punctuation.definition.tag.begin.html"
             },
             "2": {
-              "name": "entity.name.tag"
+              "name": "entity.name.tag.html entity.name.tag"
             },
             "3": {
-              "name": "punctuation.definition.tag.end"
+              "name": "punctuation.definition.tag.end.html"
+            }
+          }
+        },
+        {
+          "match": "(</?)([a-z][\\w-]*)(\\s|/?>)",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin.html"
+            },
+            "2": {
+              "name": "entity.name.tag.html entity.name.tag"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end.html"
             }
           }
         }
@@ -150,10 +412,13 @@
     "html-attrs": {
       "patterns": [
         {
-          "match": "\\b(bind-[\\w-]+|class-[\\w-]+|on-[\\w-]+|@[\\w-]+|:?[\\w-]+)\\s*=",
+          "match": "\\b(bind-[\\w-]+|class-[\\w-]+|on-[\\w-]+|jacare-[\\w-]+|@[\\w-]+|:?[\\w-]+)\\s*(=)",
           "captures": {
             "1": {
-              "name": "entity.other.attribute-name"
+              "name": "entity.other.attribute-name.html entity.other.attribute-name"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.html"
             }
           }
         }
@@ -162,12 +427,12 @@
     "strings": {
       "patterns": [
         {
-          "match": "\"[^\"]*\"",
-          "name": "string.quoted.double"
+          "match": "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"",
+          "name": "string.quoted.double.html string.quoted.double"
         },
         {
-          "match": "'[^']*'",
-          "name": "string.quoted.single"
+          "match": "'[^'\\\\]*(?:\\\\.[^'\\\\]*)*'",
+          "name": "string.quoted.single.html string.quoted.single"
         }
       ]
     }

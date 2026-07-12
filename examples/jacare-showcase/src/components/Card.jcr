@@ -1,6 +1,4 @@
-import { view } from '@jacare/core'
-
-export default view`
+export <view>
 <div class="card">
   <header class="card-header">
     <h3 class="card-title">${title}</h3>
@@ -12,8 +10,9 @@ export default view`
     <slot />
   </div>
 </div>
-`
-style`
+</view>
+
+export <style>
 .card {
   display: grid;
   gap: 0;
@@ -42,4 +41,4 @@ style`
 .card-body {
   padding: 1.15rem;
 }
-`
+</style>

@@ -12,6 +12,7 @@ export interface CompileResult {
   template: string
   scopeId?: string
   scopedStyle?: string
+  styleLang?: string | null
   map?: import('source-map-js').RawSourceMap
 }
 

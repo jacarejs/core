@@ -20,6 +20,23 @@ export default view\`<p>\${count}</p>\``
     expect(result.map).toBeTruthy()
   })
 
+  it('transforms <view> block templates', () => {
+    const plugin = jacare()
+    const source = `import { signal } from '@jacare/core'
+const count = signal(0)
+export default <view>
+  <p>\${count}</p>
+</view>`
+
+    const result = plugin.transform!(source, '/src/block.jcr')
+    if (!result || typeof result === 'string') {
+      throw new Error('expected transform object')
+    }
+
+    expect(result.code).toContain('export function mount')
+    expect(result.code).toContain('bindText')
+  })
+
   it('applies title from jacare.config.js', async () => {
     const plugin = jacare()
     const hook = plugin.transformIndexHtml

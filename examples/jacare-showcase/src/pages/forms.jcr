@@ -1,4 +1,4 @@
-import { createForm, signal, view } from '@jacare/core'
+import { createForm, signal } from '@jacare/core'
 import Card from '../components/Card.jcr'
 import Field from '../components/Field.jcr'
 
@@ -14,7 +14,7 @@ const onSubmit = form.handleSubmit(() => {
   submitted.set(true)
 })
 
-export default view`
+export <view>
   <section class="page">
     <div>
       <h1 class="section-title">Forms</h1>
@@ -23,7 +23,7 @@ export default view`
       </p>
     </div>
 
-    <Card title="Contact" subtitle="createForm() + Field component">
+    <Card :title=${'Contact'} :subtitle=${'createForm() + Field component'}>
       <form class="demo-panel" on-submit=${onSubmit}>
         <Field :label="'Name'" :field=${form.fields.name} :type="'text'" :placeholder="'Your name'" />
         <Field :label="'Email'" :field=${form.fields.email} :type="'email'" :placeholder="'you@example.com'" />
@@ -35,4 +35,4 @@ export default view`
       </form>
     </Card>
   </section>
-`
+</view>

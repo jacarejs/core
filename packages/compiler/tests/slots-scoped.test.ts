@@ -13,6 +13,18 @@ style\`
     expect(mod.code).not.toContain('style`')
   })
 
+  it('extracts export <style> block from module', () => {
+    const mod = parseModule(`const x = 1
+export <view>
+<p>hi</p>
+</view>
+export <style>
+.title { color: red; }
+</style>`)
+    expect(mod.styleCss).toContain('.title')
+    expect(mod.code).not.toContain('<style>')
+  })
+
   it('scopes selectors with data attribute', () => {
     const scoped = scopeCss('.title { color: red; }\n.btn { padding: 4px; }', 'abc123')
     expect(scoped).toContain('[data-jacare-s="abc123"] .title')

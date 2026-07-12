@@ -1,4 +1,4 @@
-import { signal, view } from '@jacare/core'
+import { signal } from '@jacare/core'
 import Card from '../components/Card.jcr'
 
 const filter = signal('')
@@ -35,7 +35,7 @@ function remove(id) {
   items.update((list) => list.filter((item) => item.id !== id))
 }
 
-export default view`
+export <view>
   <section class="page">
     <div>
       <h1 class="section-title">Playground</h1>
@@ -44,7 +44,7 @@ export default view`
       </p>
     </div>
 
-    <Card title="Task stream" subtitle="reconcileKeyedList under the hood">
+    <Card :title=${'Task stream'} :subtitle=${'reconcileKeyedList under the hood'}>
       <div class="demo-panel">
         <div class="demo-row">
           <input class="input" placeholder="Filter or add task…" bind-value=${filter} />
@@ -63,4 +63,4 @@ export default view`
       </div>
     </Card>
   </section>
-`
+</view>

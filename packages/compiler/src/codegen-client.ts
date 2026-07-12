@@ -364,8 +364,9 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
     const trimmed = expr.trim()
     if (ctx.isComponentProp(trimmed)) {
       const text = ctx.nextId('text')
-      ctx.line(`const ${text} = document.createTextNode(String(${trimmed}))`)
+      ctx.line(`const ${text} = document.createTextNode('')`)
       append(ctx, target, text)
+      ctx.pushCleanup(`bindPropText(${text}, ${trimmed})`)
       return
     }
   }
@@ -388,6 +389,10 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
   const template = parts
     .map((p) => {
       if (p.type === 'static') return p.value
+      const trimmed = p.value.trim()
+      if (SIGNAL_REF_RE.test(trimmed) && ctx.isComponentProp(trimmed)) {
+        return `\${typeof ${trimmed} === 'function' ? ${trimmed}() : ${trimmed} ?? ''}`
+      }
       const src = ctx.resolveSignal(p.value)
       if (src) return `\${${src}()}`
       return `\${${p.value}}`

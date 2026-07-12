@@ -1,6 +1,4 @@
-import { view } from '@jacare/core'
-
-export default view`
+export <view>
 <label class="field">
   <span class="field-label">${label}</span>
   <input
@@ -15,8 +13,9 @@ export default view`
     <span class="field-error">${field.error()}</span>
   #end
 </label>
-`
-style`
+</view>
+
+export <style>
 .field {
   display: grid;
   gap: 0.35rem;
@@ -33,4 +32,4 @@ style`
   font-size: 0.8rem;
   color: #dc2626;
 }
-`
+</style>

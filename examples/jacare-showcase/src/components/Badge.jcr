@@ -1,9 +1,8 @@
-import { view } from '@jacare/core'
-
-export default view`
+export <view>
 <span class="badge">${text}</span>
-`
-style`
+</view>
+
+export <style>
 .badge {
   display: inline-flex;
   align-items: center;
@@ -17,4 +16,4 @@ style`
   background: linear-gradient(135deg, #d8f3dc, #c8f0d0);
   border: 1px solid #b8e0c4;
 }
-`
+</style>

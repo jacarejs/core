@@ -1,12 +1,11 @@
-import { view } from '@jacare/core'
-
-export default view`
+export <view>
 <div class="stat">
   <span class="stat-value">${value}</span>
   <span class="stat-label">${label}</span>
 </div>
-`
-style`
+</view>
+
+export <style>
 .stat {
   display: grid;
   gap: 0.2rem;
@@ -28,4 +27,4 @@ style`
   text-transform: uppercase;
   color: rgba(216, 243, 220, 0.75);
 }
-`
+</style>

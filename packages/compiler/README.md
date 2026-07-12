@@ -2,7 +2,7 @@
 
 The Jacaré compiler transforms `.jcr` modules into optimized JavaScript for the client, server, or both.
 
-A `.jcr` file is plain JavaScript with a `view\`...\`` tagged template. The compiler parses the template, detects reactive bindings, and emits fine-grained DOM code that uses `@jacare/core`.
+A `.jcr` file is plain JavaScript with a `view\`...\`` tagged template **or** an `<view>...</view>` block. The compiler parses the template, detects reactive bindings, and emits fine-grained DOM code that uses `@jacare/core`.
 
 ---
 
@@ -34,18 +34,18 @@ Usually installed as a dependency of `@jacare/vite-plugin` or `@jacare/cli`. Use
 
 ## What it compiles
 
-**Input** — a `.jcr` module:
+**Input** — a `.jcr` module (`view\`...\`` or `<view>...</view>`):
 
 ```javascript
-import { pulse, view } from '@jacare/core'
+import { pulse } from '@jacare/core'
 
 const count = pulse(0)
 
-export default view`
+export default <view>
   <button on-click=${() => count.update((n) => n + 1)}>
     Count: ${count}
   </button>
-`
+</view>
 ```
 
 **Output** — optimized JavaScript:

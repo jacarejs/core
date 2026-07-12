@@ -1,4 +1,4 @@
-import { signal, view } from '@jacare/core'
+import { signal } from '@jacare/core'
 import { appHref } from '../app-base.js'
 import Card from '../components/Card.jcr'
 import Badge from '../components/Badge.jcr'
@@ -20,7 +20,7 @@ function featureHref(slug) {
   return '/' + slug
 }
 
-export default view`
+export <view>
   <section class="page">
     <div class="hero">
       <p class="hero-eyebrow">Jacaré Showcase</p>
@@ -65,4 +65,4 @@ export default view`
       #end
     </div>
   </section>
-`
+</view>

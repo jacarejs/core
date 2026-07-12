@@ -35,6 +35,45 @@ describe('parseModule', () => {
     const flat = flattenViewLiteral('view`<p>${count}</p>`', 4)
     expect(flat.html).toBe('<p>{count}</p>')
   })
+
+  it('extracts <view> block templates', () => {
+    const source = `import { signal } from '@jacare/core'
+const count = signal(0)
+export <view>
+  <p>\${count}</p>
+</view>`
+    const mod = parseModule(source)
+    expect(mod.viewHtml).toContain('<p>{count}</p>')
+    expect(mod.code).toContain('const count = signal(0)')
+    expect(mod.code).not.toContain('<view>')
+  })
+
+  it('extracts export <style> block with lang', () => {
+    const source = `import { signal } from '@jacare/core'
+const count = signal(0)
+export <view>
+  <p>\${count}</p>
+</view>
+export <style lang="scss">
+.title { color: red; }
+</style>`
+    const mod = parseModule(source)
+    expect(mod.styleCss).toContain('.title')
+    expect(mod.styleLang).toBe('scss')
+    expect(mod.code).not.toContain('<style>')
+    expect(mod.code).not.toContain('<view>')
+  })
+
+  it('compiles <view> block templates', () => {
+    const source = `import { signal } from '@jacare/core'
+const count = signal(0)
+export <view>
+  <p>\${count}</p>
+</view>`
+    const result = compile(source)
+    expect(result.code).toContain('export function mount')
+    expect(result.code).toContain('bindText')
+  })
 })
 
 describe('parseTemplate', () => {
@@ -154,8 +193,9 @@ export default view\`
 \``
     const result = compile(source)
     expect(result.code).toContain('const label = props["label"]')
-    expect(result.code).toContain('createTextNode(String(label))')
-    expect(result.code).not.toContain('bindText(_text')
+    expect(result.code).toContain('bindPropText(_text')
+    expect(result.code).toContain(', label)')
+    expect(result.code).not.toContain('createTextNode(String(label))')
     expect(result.code).toContain('setAttribute("type", String(type))')
     expect(result.code).toContain('bindModel(')
   })
@@ -273,5 +313,14 @@ const renders = signal(0)
 export default view\`<Stat :value=\${() => String(renders())} label="Mounts" />\``
     const result = compile(source)
     expect(result.code).not.toContain('props["String"]')
+  })
+
+  it('renders component props with bindPropText', () => {
+    const source = `import { view } from '@jacare/core'
+export default view\`<span>\${text}</span>\``
+    const result = compile(source, { filename: '/Badge.jcr' })
+    expect(result.code).toContain('bindPropText(_text')
+    expect(result.code).toContain('bindPropText')
+    expect(result.code).toMatch(/import \{[^}]*bindPropText[^}]*\}/)
   })
 })

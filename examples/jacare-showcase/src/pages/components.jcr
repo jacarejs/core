@@ -1,4 +1,4 @@
-import { signal, view } from '@jacare/core'
+import { signal } from '@jacare/core'
 import Card from '../components/Card.jcr'
 import Badge from '../components/Badge.jcr'
 
@@ -6,12 +6,16 @@ const mood = signal('focused')
 
 const moods = ['focused', 'playful', 'shipping']
 
+const usageSample = `<Card :title="'Hello'">
+  <p>Slot content</p>
+</Card>`
+
 function cycleMood() {
   const index = moods.indexOf(mood())
   mood.set(moods[(index + 1) % moods.length])
 }
 
-export default view`
+export <view>
   <section class="page">
     <div>
       <h1 class="section-title">Components &amp; slots</h1>
@@ -21,21 +25,19 @@ export default view`
     </div>
 
     <div class="feature-grid">
-      <Card title="Card with slot" subtitle="Children render inside &lt;slot /&gt;">
+      <Card :title=${'Card with slot'} :subtitle=${'Children render inside <slot />'}>
         <p>This content is projected from the parent page into the Card component.</p>
         <div class="demo-row">
-          <Badge :text=${() => mood()} />
+          <Badge :text=${mood} />
           <button class="btn btn-primary" on-click=${cycleMood}>Cycle mood</button>
         </div>
       </Card>
 
-      <Card title="Scoped CSS" subtitle="Styles never leak to siblings">
-        <p>Each .jcr file can ship a <code>style\`...\`</code> block. Selectors are scoped with <code>data-jacare-s</code>.</p>
+      <Card :title=${'Scoped CSS'} :subtitle=${'Styles never leak to siblings'}>
+        <p>Each .jcr file can ship an <code>export &lt;style&gt;</code> block. Selectors are scoped with <code>data-jacare-s</code>.</p>
       </Card>
     </div>
 
-    <pre class="code"><code>Card :title="'Hello'"
-  p — slot content
-/Card</code></pre>
+    <pre class="code"><code>${usageSample}</code></pre>
   </section>
-`
+</view>

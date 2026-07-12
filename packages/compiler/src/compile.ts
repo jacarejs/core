@@ -36,6 +36,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     template: parsed.viewHtml!,
     ...(scopeId ? { scopeId } : {}),
     ...(scopedStyle ? { scopedStyle } : {}),
+    ...(parsed.styleLang ? { styleLang: parsed.styleLang } : {}),
     ...(map ? { map } : {}),
   }
 }

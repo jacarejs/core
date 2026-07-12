@@ -7,6 +7,7 @@ const RUNTIME_IMPORT_ORDER = [
   'effect',
   'runUntracked',
   'bindText',
+  'bindPropText',
   'bindAttribute',
   'bindProperty',
   'bindModel',
