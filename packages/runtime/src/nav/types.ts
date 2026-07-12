@@ -1,8 +1,9 @@
 import type { Signal } from '../types.js'
+import type { ScreenModule } from './screen.js'
 
 export type NavMount = (target: HTMLElement, ctx: NavContext) => () => void
 
-export type NavLoader = () => Promise<{ mount?: NavMount; default?: NavMount }>
+export type NavLoader = () => Promise<ScreenModule | NavMount>
 
 export interface NavContext {
   path: string

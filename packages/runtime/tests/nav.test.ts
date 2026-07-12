@@ -295,6 +295,56 @@ describe('createNav', () => {
     expect(target.textContent).toBe('lazy')
   })
 
+  it('handles subpath base for navigation and active links', async () => {
+    window.history.pushState({}, '', '/core/')
+    const Home = vi.fn((target: HTMLElement) => {
+      target.textContent = 'home'
+      return () => {}
+    })
+    const About = vi.fn((target: HTMLElement) => {
+      target.textContent = 'about'
+      return () => {}
+    })
+
+    const nav = createNav({
+      base: '/core',
+      screens: {
+        '/': Home,
+        '/about': About,
+      },
+    })
+
+    const tasksLink = document.createElement('a')
+    tasksLink.setAttribute('jacare-go', '/')
+    document.body.appendChild(tasksLink)
+
+    const feedbackLink = document.createElement('a')
+    feedbackLink.setAttribute('jacare-go', '/about?tab=feedback')
+    document.body.appendChild(feedbackLink)
+
+    const target = document.createElement('div')
+    nav.attach(target)
+    await flush()
+
+    expect(tasksLink.classList.contains('jacare-here')).toBe(true)
+    expect(normalizePath(window.location.pathname)).toBe('/core')
+
+    await nav.go('/about?tab=feedback')
+    await flush()
+
+    expect(About).toHaveBeenCalledTimes(1)
+    expect(normalizePath(window.location.pathname)).toBe('/core/about')
+    expect(feedbackLink.classList.contains('jacare-here')).toBe(true)
+
+    await nav.go('/core/about')
+    await flush()
+    expect(normalizePath(window.location.pathname)).toBe('/core/about')
+    expect(About).toHaveBeenCalledTimes(2)
+
+    tasksLink.remove()
+    feedbackLink.remove()
+  })
+
   it('mounts the missing screen for unknown paths', async () => {
     const Home = vi.fn((target: HTMLElement) => {
       target.textContent = 'home'

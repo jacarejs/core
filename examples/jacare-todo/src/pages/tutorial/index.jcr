@@ -1,5 +1,5 @@
 import { view } from '@jacare/core'
-import { topicHref, topics } from '../../tutorial/topics.js'
+import { topicHref, topicRoute, topics } from '../../tutorial/topics.js'
 
 export default view`
   <section class="page tutorial">
@@ -12,7 +12,7 @@ export default view`
     <ol class="lesson-list">
       #for topics as lesson (lesson.slug)
         <li>
-          <a class="lesson-link" jacare-go=${() => topicHref(lesson.slug)} href=${() => topicHref(lesson.slug)}>
+          <a class="lesson-link" jacare-go=${() => topicRoute(lesson.slug)} href=${() => topicHref(lesson.slug)}>
             <span class="lesson-index">${lesson.step}</span>
             <span class="lesson-body">
               <span class="lesson-title">${lesson.title}</span>

@@ -15,6 +15,15 @@ export function appHref(path = '/') {
   return `${root}${suffix}`
 }
 
+export function appRoute(path = '/') {
+  if (!path || path === '/') return '/'
+  const queryIndex = path.indexOf('?')
+  const pathname = queryIndex === -1 ? path : path.slice(0, queryIndex)
+  const query = queryIndex === -1 ? '' : path.slice(queryIndex)
+  const suffix = pathname.startsWith('/') ? pathname : `/${pathname}`
+  return `${suffix}${query}`
+}
+
 export function assetUrl(path) {
   return `${base}${path.replace(/^\//, '')}`
 }

@@ -1,6 +1,6 @@
 import { createForm, createLifecycle, derive, registerScope, signal, view } from '@jacare/core'
 import { appHref } from '../app-base.js'
-import { nav } from '../nav.js'
+import { route } from '../nav.js'
 import Field from '../components/Field.jcr'
 
 const form = createForm({
@@ -15,7 +15,7 @@ const form = createForm({
 })
 
 const submitted = signal(false)
-const activeTab = derive(() => nav.where().search.tab ?? 'overview')
+const activeTab = derive(() => route.search('tab')() ?? 'overview')
 
 function onSubmit() {
   submitted.set(true)
@@ -43,8 +43,8 @@ export default view`
     </p>
 
     <nav class="tab-nav" aria-label="About sections">
-      <a class="tab-link" jacare-go=${appHref('/about')} href=${appHref('/about')}>Overview</a>
-      <a class="tab-link" jacare-go=${appHref('/about?tab=feedback')} href=${appHref('/about?tab=feedback')}>Feedback</a>
+      <a class="tab-link" jacare-go="/about" href=${appHref('/about')}>Overview</a>
+      <a class="tab-link" jacare-go="/about?tab=feedback" href=${appHref('/about?tab=feedback')}>Feedback</a>
     </nav>
 
     #if activeTab() === 'feedback'

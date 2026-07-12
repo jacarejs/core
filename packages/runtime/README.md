@@ -384,26 +384,24 @@ Per-screen lifecycle for mount, activate, deactivate, and unmount:
 ```javascript
 import { createLifecycle } from '@jacare/core'
 
-const lifecycle = createLifecycle()
-
-lifecycle.onMount(() => {
-  console.log('screen mounted')
-})
-
-lifecycle.onActivate(() => {
-  console.log('screen visible')
-})
-
-lifecycle.onDeactivate(() => {
-  console.log('screen hidden')
-})
-
-lifecycle.onUnmount(() => {
-  console.log('screen destroyed')
+export const lifecycle = createLifecycle({
+  onMount() {
+    console.log('screen mounted')
+  },
+  onActivate(ctx) {
+    console.log('screen visible', ctx.path)
+    return () => {}
+  },
+  onDeactivate() {
+    console.log('screen hidden')
+  },
+  onUnmount() {
+    console.log('screen destroyed')
+  },
 })
 ```
 
-Pass lifecycle context through nav screen props or register inside screen modules.
+Export `lifecycle` from lazy-loaded `.jcr` screens. Nav wraps it automatically via `screen()`.
 
 ---
 

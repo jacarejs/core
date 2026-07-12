@@ -1,4 +1,4 @@
-import { createNav, lazy, screen } from '@jacare/core'
+import { createNav, createRoute, lazy, screen } from '@jacare/core'
 import { APP_BASE } from './app-base.js'
 import Shell from './shell.jcr'
 import Tasks from './pages/tasks.jcr'
@@ -26,3 +26,5 @@ export const nav = createNav({
 nav.warm('/about')
 nav.warm('/tutorial')
 nav.warm('/playground')
+
+export const route = createRoute(nav.where)

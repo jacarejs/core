@@ -217,7 +217,7 @@ view`
   <form on-submit=${form.handleSubmit((values) => console.log(values))}>
     <input bind-value=${form.fields.email} on-blur=${() => form.fields.email.blur()} />
     #if form.fields.email.error()
-      <span>${form.fields.email.error}</span>
+      <span>${form.fields.email.error()}</span>
     #end
     <button type="submit">Send</button>
   </form>

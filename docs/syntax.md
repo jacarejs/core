@@ -120,7 +120,7 @@ view`
   <form on-submit=${form.handleSubmit(save)}>
     <input bind-value=${form.fields.email} on-blur=${() => form.fields.email.blur()} />
     #if form.fields.email.error()
-      <span>${form.fields.email.error}</span>
+      <span>${form.fields.email.error()}</span>
     #end
   </form>
 `

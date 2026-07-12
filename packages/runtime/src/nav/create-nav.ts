@@ -58,7 +58,13 @@ export function createNav(options: NavOptions): Nav {
     const cached = warmed.get(key)
     if (cached) return cached
 
-    const pending = entry.load().then((mod) => resolveLoadedScreen(mod, key))
+    const pending = entry
+      .load()
+      .then((mod) => resolveLoadedScreen(mod, key))
+      .catch((error) => {
+        warmed.delete(key)
+        throw error
+      })
     warmed.set(key, pending)
     return pending
   }
@@ -90,8 +96,11 @@ export function createNav(options: NavOptions): Nav {
 
   function resolveUrl(path: string): string {
     if (path.startsWith('http://') || path.startsWith('https://')) return path
-    const url = path.startsWith('/') ? path : `/${path}`
-    return `${base === '/' ? '' : base}${url}`
+    const raw = path.startsWith('/') ? path : `/${path}`
+    const url = new URL(raw, 'http://local')
+    const route = stripBase(url.pathname, base)
+    const prefix = base === '/' ? '' : base
+    return `${prefix}${buildPath(route, parseSearch(url.search))}${url.hash}`
   }
 
   async function navigateOnce(path: string, mode: 'go' | 'swap'): Promise<void> {
@@ -210,26 +219,36 @@ export function createNav(options: NavOptions): Nav {
         host = target
       }
 
-      syncGoLinks(current)
+      syncGoLinks(current, base)
 
       if (!match) {
-        void mountMissingContent(current.path, host).then((dispose) => {
+        void mountMissingContent(current.path, host)
+          .then((dispose) => {
+            if (runId !== active) {
+              dispose()
+              return
+            }
+            screenDispose = dispose
+          })
+          .catch((error) => {
+            console.error(error)
+            host.textContent = 'Failed to load screen'
+          })
+        return
+      }
+
+      void mountScreenContent(host, match)
+        .then((dispose) => {
           if (runId !== active) {
             dispose()
             return
           }
           screenDispose = dispose
         })
-        return
-      }
-
-      void mountScreenContent(host, match).then((dispose) => {
-        if (runId !== active) {
-          dispose()
-          return
-        }
-        screenDispose = dispose
-      })
+        .catch((error) => {
+          console.error(error)
+          host.textContent = 'Failed to load screen'
+        })
     })
 
     return () => {
@@ -265,7 +284,7 @@ export function createNav(options: NavOptions): Nav {
       window.addEventListener('popstate', onPopState)
       document.addEventListener('click', onDocumentClick)
       renderDispose = startRender(target)
-      syncGoLinks(where.peek)
+      syncGoLinks(where.peek, base)
 
       return () => {
         window.removeEventListener('popstate', onPopState!)
@@ -324,11 +343,11 @@ function parseWindowPlace(
   return toPlaceObject(path, match?.params ?? {}, parseSearch(loc.search), loc.hash)
 }
 
-function syncGoLinks(place: NavPlace): void {
+function syncGoLinks(place: NavPlace, base: string): void {
   for (const link of document.querySelectorAll('[jacare-go]')) {
     if (!(link instanceof HTMLElement)) continue
     const href = link.getAttribute('jacare-go')
-    const here = href ? linkMatchesHref(href, place) : false
+    const here = href ? linkMatchesHref(href, place, base) : false
     link.classList.toggle('jacare-here', here)
     if (here) {
       link.setAttribute('aria-current', 'page')
@@ -338,18 +357,18 @@ function syncGoLinks(place: NavPlace): void {
   }
 }
 
-function linkMatchesHref(href: string, place: NavPlace): boolean {
+function linkMatchesHref(href: string, place: NavPlace, base: string): boolean {
   try {
     const url = new URL(href, window.location.origin)
-    const path = url.pathname.replace(/\/+$/, '') || '/'
+    const path = stripBase(url.pathname, base)
     const search = parseSearch(url.search)
     const hash = url.hash
-  return (
-    normalizePath(path) === place.path &&
-    JSON.stringify(search) === JSON.stringify(place.search) &&
-    hash === place.hash
-  )
+    return (
+      normalizePath(path) === place.path &&
+      JSON.stringify(search) === JSON.stringify(place.search) &&
+      hash === place.hash
+    )
   } catch {
-    return normalizePath(href) === place.path
+    return normalizePath(stripBase(href, base)) === place.path
   }
 }

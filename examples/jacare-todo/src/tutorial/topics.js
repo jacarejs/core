@@ -45,6 +45,10 @@ export const topics = [
   },
 ]
 
+export function topicRoute(slug) {
+  return `/tutorial/${slug}`
+}
+
 export function topicHref(slug) {
   return appHref(`/tutorial/${slug}`)
 }

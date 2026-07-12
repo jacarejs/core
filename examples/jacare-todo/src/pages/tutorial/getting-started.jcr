@@ -25,7 +25,7 @@ export default view\`
 
 export default view`
   <section class="page tutorial-lesson">
-    <a class="text-link" jacare-go=${appHref('/tutorial')} href=${appHref('/tutorial')}>← Tutorial</a>
+    <a class="text-link" jacare-go="/tutorial" href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Getting started</h2>
     <p class="lead">Jacaré apps are plain JavaScript modules. Markup lives in a <code>view</code> tagged template.</p>
 

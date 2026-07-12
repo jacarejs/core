@@ -10,11 +10,11 @@ export default view`
           <span class="title">Jacaré</span>
         </div>
         <nav class="nav">
-          <a class="nav-link" jacare-go=${appHref('/')} href=${appHref('/')}>Tasks</a>
-          <a class="nav-link" jacare-go=${appHref('/tutorial')} href=${appHref('/tutorial')}>Tutorial</a>
-          <a class="nav-link" jacare-go=${appHref('/playground')} href=${appHref('/playground')}>Playground</a>
-          <a class="nav-link" jacare-go=${appHref('/about')} href=${appHref('/about')}>About</a>
-          <a class="nav-link" jacare-go=${appHref('/about?tab=feedback')} href=${appHref('/about?tab=feedback')}>Feedback</a>
+          <a class="nav-link" jacare-go="/" href=${appHref('/')}>Tasks</a>
+          <a class="nav-link" jacare-go="/tutorial" href=${appHref('/tutorial')}>Tutorial</a>
+          <a class="nav-link" jacare-go="/playground" href=${appHref('/playground')}>Playground</a>
+          <a class="nav-link" jacare-go="/about" href=${appHref('/about')}>About</a>
+          <a class="nav-link" jacare-go="/about?tab=feedback" href=${appHref('/about?tab=feedback')}>Feedback</a>
         </nav>
       </header>
 
