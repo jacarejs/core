@@ -1,9 +1,10 @@
+import './app.css'
 import { nav } from './nav.js'
 import { restoreSpaPath } from './app-base.js'
 
 if (import.meta.env.DEV) {
   const { connectJacareDevtools } = await import('@jacare/devtools')
-  connectJacareDevtools()
+  connectJacareDevtools({ scope: false })
 }
 
 const root = document.getElementById('app')
