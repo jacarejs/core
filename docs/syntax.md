@@ -1,6 +1,8 @@
 # Jacaré Syntax
 
-Jacaré files are plain JavaScript modules. Markup lives in a `view` tagged template.
+Jacaré files are plain JavaScript modules. Markup lives in an `export <view>` block (recommended) or a `view` tagged template.
+
+**Full API walkthrough:** [api.md](api.md)
 
 ## File layout
 
@@ -14,6 +16,22 @@ jacare.config.js   optional config
 jacare.d.ts        TypeScript module types
 ```
 
+**Recommended module structure:**
+
+```javascript
+import { signal } from '@jacare/core'
+
+const count = signal(0)
+
+export <view>
+  <p>${count}</p>
+</view>
+
+export <style>
+.counter { padding: 1rem; }
+</style>
+```
+
 **With nav:**
 
 ```
@@ -25,6 +43,22 @@ src/
 index.html
 public/
 ```
+
+## View syntax
+
+### Block (recommended)
+
+```javascript
+import { signal } from '@jacare/core'
+
+const count = signal(0)
+
+export <view>
+  <button on-click=${() => count.update((n) => n + 1)}>${count}</button>
+</view>
+```
+
+Also supported: `export default <view>`, `return <view>`, and `export default view\`...\``.
 
 ## Reactivity
 
@@ -41,12 +75,12 @@ import { signal, computed, effect, view } from '@jacare/core'
 | `effect` | `watch` |
 
 ```javascript
-import { pulse, derive, watch, view } from '@jacare/core'
+import { signal, computed, effect } from '@jacare/core'
 
-const name = pulse('world')
-const greeting = derive(() => `Hello, ${name()}`)
+const name = signal('world')
+const greeting = computed(() => `Hello, ${name()}`)
 
-watch(() => {
+effect(() => {
   console.log(greeting())
 })
 ```
@@ -78,28 +112,38 @@ Prefer the canonical form in new code.
 ### Text
 
 ```javascript
-view`<p>${greeting}</p>`
+export <view>
+  <p>${greeting}</p>
+</view>
 ```
+
+Component props use `bindPropText` at runtime — signals and plain strings both work.
 
 ### Events
 
 ```javascript
-view`<button on-click=${save}>Save</button>`
+export <view>
+  <button on-click=${save}>Save</button>
+</view>
 ```
 
 ### Attributes
 
 ```javascript
-view`<a bind-href=${url}>Link</a>`
+export <view>
+  <a bind-href=${url}>Link</a>
+</view>
 ```
 
 ### Form controls
 
-`bind-value` and `bind-checked` on a signal compile to two-way `bindModel` — the DOM and signal stay in sync automatically:
+`bind-value` and `bind-checked` on a signal compile to two-way `bindModel`:
 
 ```javascript
 const text = signal('')
-view`<input bind-value=${text} />`
+export <view>
+  <input bind-value=${text} />
+</view>
 ```
 
 For one-way binding or non-signal expressions, the compiler falls back to `bindProperty`.
@@ -107,7 +151,7 @@ For one-way binding or non-signal expressions, the compiler falls back to `bindP
 ### Form validation
 
 ```javascript
-import { createForm, view } from '@jacare/core'
+import { createForm } from '@jacare/core'
 
 const form = createForm({
   email: {
@@ -116,14 +160,14 @@ const form = createForm({
   },
 })
 
-view`
+export <view>
   <form on-submit=${form.handleSubmit(save)}>
     <input bind-value=${form.fields.email} on-blur=${() => form.fields.email.blur()} />
     #if form.fields.email.error()
       <span>${form.fields.email.error()}</span>
     #end
   </form>
-`
+</view>
 ```
 
 Field components are regular `.jcr` modules — see `examples/jacare-todo/src/components/Field.jcr`.
@@ -139,7 +183,7 @@ view`<li class-done=${item.done}>${item.label}</li>`
 ### Conditionals
 
 ```javascript
-view`
+export <view>
 #if loading
   <p>Loading…</p>
 #elif error
@@ -147,19 +191,19 @@ view`
 #else
   <Content />
 #end
-`
+</view>
 ```
 
 ### Lists
 
 ```javascript
-view`
+export <view>
 <ul>
   #for items() as item (item.id)
     <li>${item.label}</li>
   #end
 </ul>
-`
+</view>
 ```
 
 The expression in parentheses is the key used for DOM reconciliation.
@@ -173,7 +217,9 @@ Import another `.jcr` or `.js` module and use it as a tag:
 ```javascript
 import TodoItem from './TodoItem.jcr'
 
-view`<TodoItem :item=${item} />`
+export <view>
+  <TodoItem :item=${item} />
+</view>
 ```
 
 With children (default slot):
@@ -181,39 +227,56 @@ With children (default slot):
 ```javascript
 import Card from './Card.jcr'
 
-view`
+export <view>
 <Card :title=${title}>
   <p>${body}</p>
 </Card>
-`
+</view>
 ```
 
 Inside the child component, project children with `<slot />`:
 
 ```javascript
-export default view`
+export <view>
 <div class="card">
   <h2>${title}</h2>
   <slot />
 </div>
-`
+</view>
 ```
 
 Props are inferred from attribute expressions. `children` is passed automatically when the parent has inner content.
 
 ## Scoped CSS
 
-Add a `style` tagged template after `view`:
+Add an `export <style>` block after the view (recommended):
 
 ```javascript
-export default view`
+export <view>
 <div class="card">
   <p class="title">${title}</p>
 </div>
-`
-style`
+</view>
+
+export <style>
 .card { padding: 1rem; border: 1px solid #ccc; }
 .title { font-weight: bold; }
+</style>
+```
+
+Preprocessor attribute (parsed; compilation deferred):
+
+```javascript
+export <style lang="scss">
+.title { color: $primary; }
+</style>
+```
+
+Legacy tagged template still supported:
+
+```javascript
+style`
+.card { padding: 1rem; }
 `
 ```
 
@@ -316,6 +379,7 @@ Every `.jcr` file compiles to `mount()`, `render()`, and `resume()`. The compile
 | Pattern | Compiled as |
 |---------|-------------|
 | `${count}` when `count` is a signal | `bindText` |
+| `${title}` when `title` is a component prop | `bindPropText` |
 | `` `Total: ${total}` `` with signal `total` | `effect` with `` `Total: ${total()}` `` |
 | `bind-value=${draft}` on a signal | `bindModel` (two-way) |
 | `href=${() => href(id)}` | `effect` that invokes the expression |

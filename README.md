@@ -25,7 +25,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | Package | Description |
 |---------|-------------|
 | `@jacare/core` | Pulse graph, DOM bindings, SSR |
-| `@jacare/compiler` | Compiles `view\`...\`` and `<view>...</view>` templates |
+| `@jacare/compiler` | Compiles `export <view>` / `export <style>` and `view\`...\`` templates |
 | `@jacare/vite-plugin` | Vite integration |
 | `@jacare/cli` | `jacare` command — create, dev, build |
 | `create-jacare` | `npm create jacare` — Vite-based scaffolds |
@@ -94,15 +94,34 @@ my-app/
 
 ### Module
 
-Use either a tagged template or a `<view>` block — both compile to the same output.
+Use `export <view>` blocks (recommended) or tagged templates — both compile to the same output.
 
-**Tagged template**
+**View block (recommended)**
 
 ```javascript
-import { pulse, derive, view } from '@jacare/core'
+import { signal, computed } from '@jacare/core'
 
-const count = pulse(0)
-const label = derive(() => `Count: ${count()}`)
+const count = signal(0)
+const label = computed(() => `Count: ${count()}`)
+
+function increment() {
+  count.update((n) => n + 1)
+}
+
+export <view>
+  <button on-click=${increment}>
+    ${label}
+  </button>
+</view>
+```
+
+**Tagged template (legacy)**
+
+```javascript
+import { signal, computed, view } from '@jacare/core'
+
+const count = signal(0)
+const label = computed(() => `Count: ${count()}`)
 
 export default view`
   <button on-click=${() => count.update((n) => n + 1)}>
@@ -111,19 +130,12 @@ export default view`
 `
 ```
 
-**View block** (HTML-style alternative — no `view` import required)
+**Scoped styles** — place `export <style>` last in the file:
 
 ```javascript
-import { pulse, derive } from '@jacare/core'
-
-const count = pulse(0)
-const label = derive(() => `Count: ${count()}`)
-
-export default <view>
-  <button on-click=${() => count.update((n) => n + 1)}>
-    ${label}
-  </button>
-</view>
+export <style>
+.counter { padding: 1rem; }
+</style>
 ```
 
 ### Template
@@ -144,11 +156,11 @@ export default <view>
 
 | API | Role |
 |-----|------|
-| `pulse(initial)` | Reactive value |
-| `derive(() => …)` | Computed value |
-| `watch(fn)` | Side effect |
+| `signal(initial)` | Reactive value |
+| `computed(() => …)` | Derived value |
+| `effect(fn)` | Side effect |
 
-`signal`, `computed`, and `effect` remain available as aliases.
+`pulse`, `derive`, and `watch` remain available as aliases.
 
 ### Nav
 
@@ -223,7 +235,7 @@ connectJacareDevtools()
 ### Forms
 
 ```javascript
-import { createForm, view } from '@jacare/core'
+import { createForm } from '@jacare/core'
 
 const form = createForm({
   email: {
@@ -232,7 +244,7 @@ const form = createForm({
   },
 })
 
-view`
+export <view>
   <form on-submit=${form.handleSubmit((values) => console.log(values))}>
     <input bind-value=${form.fields.email} on-blur=${() => form.fields.email.blur()} />
     #if form.fields.email.error()
@@ -240,7 +252,7 @@ view`
     #end
     <button type="submit">Send</button>
   </form>
-`
+</view>
 ```
 
 `bind-value` and `bind-checked` on signals compile to two-way `bindModel` — no manual `on-input` required.
@@ -275,6 +287,8 @@ yarn example:build
 
 ## Architecture
 
+- [**API reference**](docs/api.md) — step-by-step guide with examples
+- [Syntax reference](docs/syntax.md)
 - [Phase 1 — Reactivity](docs/phases/01-reactivity.md)
 - [Phase 2 — Compiler](docs/phases/02-compiler.md)
 - [Phase 3 — Incremental DOM](docs/phases/03-incremental-dom.md)
@@ -282,7 +296,6 @@ yarn example:build
 - [Phase 5 — Nav](docs/phases/05-nav.md)
 - [Phase 6 — DevTools](docs/phases/06-devtools.md)
 - [Phase 7 — Forms](docs/phases/07-forms.md)
-- [Syntax reference](docs/syntax.md)
 - [Contributing & local development](docs/CONTRIBUTING.md)
 
 ## Roadmap

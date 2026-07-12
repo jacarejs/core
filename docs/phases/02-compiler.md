@@ -19,16 +19,28 @@ Manual DOM with `bindText`, `bindAttribute`, and `effect` works, but repeats the
 
 ### `.jcr` format
 
-Jacaré files are **plain JavaScript modules**. Views use a `view` tagged template:
+Jacaré files are **plain JavaScript modules**. Views use `export <view>` blocks (recommended) or a `view` tagged template:
 
 ```javascript
-import { signal, view } from '@jacare/core'
+import { signal } from '@jacare/core'
 
 const count = signal(0)
 
-export default view`
+export <view>
   <p>${count}</p>
   <button on-click=${() => count.update((n) => n + 1)}>+</button>
+</view>
+
+export <style>
+.counter { padding: 1rem; }
+</style>
+```
+
+Tagged template (still supported):
+
+```javascript
+export default view`
+  <p>${count}</p>
 `
 ```
 
@@ -70,7 +82,7 @@ export default view`
 .jcr source (JavaScript module)
     │
     ▼
-parseModule() ──► view`...` literals + imports
+parseModule() ──► export <view> / view`...` + export <style> / style`...`
     │
     ▼
 flattenLiteral() ──► HTML template + expression slots

@@ -354,26 +354,25 @@ const link = routeHref('/about', { tab: 'feedback' })
 import { createForm } from '@jacare/core'
 
 const form = createForm({
-  initial: {
-    email: '',
-    message: '',
+  email: {
+    value: '',
+    validate: (value) => (value.includes('@') ? 'Invalid email' : null),
   },
-  validate: (values) => {
-    const errors = {}
-    if (!values.email.includes('@')) errors.email = 'Invalid email'
-    if (!values.message.trim()) errors.message = 'Required'
-    return errors
+  message: {
+    value: '',
+    validate: (value) => (!value.trim() ? 'Required' : null),
   },
 })
 
-// in template
-view`
-  <input bind-value=${form.fields.email} />
-  <span>${() => form.fields.email.error()}</span>
-`
+export <view>
+  <input bind-value=${form.fields.email} on-blur=${() => form.fields.email.blur()} />
+  #if form.fields.email.error()
+    <span>${form.fields.email.error()}</span>
+  #end
+</view>
 ```
 
-Each `form.fields.*` is a field object with `()`, `set()`, `blur()`, `error()`, and `touched()`.
+Each `form.fields.*` is a field signal with `error()`, `touched()`, `dirty()`, and `blur()`.
 
 ---
 
@@ -442,7 +441,7 @@ SSR output includes `data-jacare-bind` markers for precise hydration targets.
 `signal`, `pulse`, `computed`, `derive`, `effect`, `watch`, `untrack`, `batch`, `runUntracked`, `isTracking`
 
 ### DOM
-`view`, `bindText`, `bindAttribute`, `bindProperty`, `bindClass`, `bindModel`, `branch`, `reconcileKeyedList`, `showIf`
+`view`, `bindText`, `bindPropText`, `bindAttribute`, `bindProperty`, `bindClass`, `bindModel`, `branch`, `reconcileKeyedList`, `showIf`, `ensureScopedStyle`, `mountSlot`
 
 ### Nav
 `createNav`, `lazy`, `screen`, `adaptScreen`, `createRoute`, `routeHref`, `routeParam`, `routeSearch`, `screenProps`
@@ -467,6 +466,7 @@ SSR output includes `data-jacare-bind` markers for precise hydration targets.
 ## Links
 
 - [Repository](https://github.com/jacarejs/core)
+- [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Live demo](https://jacarejs.github.io/core/)
 - [Example app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
