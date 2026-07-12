@@ -328,7 +328,7 @@ Live demos:
 | Demo | URL | Description |
 |------|-----|-------------|
 | **Todo app** | [jacarejs.github.io/core](https://jacarejs.github.io/core/) | Full task manager with forms, keyed lists, and tutorial routes |
-| **Showcase** | [jacarejs.github.io/showcase](https://jacarejs.github.io/showcase/) | Polished walkthrough of reactivity, components, slots, and scoped CSS |
+| **Showcase** | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | Polished walkthrough of reactivity, components, slots, and scoped CSS |
 
 Run locally:
 

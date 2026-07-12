@@ -812,4 +812,4 @@ yarn example:dev    # todo app
 yarn showcase:dev   # showcase
 ```
 
-Live demos: [jacarejs.github.io/core](https://jacarejs.github.io/core/) · [jacarejs.github.io/showcase](https://jacarejs.github.io/showcase/)
+Live demos: [jacarejs.github.io/core](https://jacarejs.github.io/core/) · [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/)

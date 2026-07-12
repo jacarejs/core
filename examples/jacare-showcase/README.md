@@ -2,6 +2,8 @@
 
 A polished demo app showcasing the full potential of [Jacaré](https://github.com/jacarejs/core) — fine-grained reactivity, scoped CSS, slots, forms, file-based routing, and incremental DOM updates.
 
+Live demo: [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/)
+
 **Designed as a standalone repository:** [github.com/jacarejs/showcase](https://github.com/jacarejs/showcase)
 
 ![Jacaré brand colors](public/jacare-logo.png)
@@ -65,6 +67,12 @@ Inside the [jacarejs/core](https://github.com/jacarejs/core) monorepo:
 ```bash
 yarn showcase:dev
 yarn showcase:build
+```
+
+For GitHub Pages (subpath `/core/showcase/`):
+
+```bash
+JACARE_BASE=/core/showcase/ yarn build
 ```
 
 ---
