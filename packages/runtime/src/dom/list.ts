@@ -14,12 +14,35 @@ interface ListEntry<T> {
   dispose: () => void
 }
 
+function collectMountNode(nodes: Node[], node: Node): void {
+  if (node instanceof DocumentFragment) {
+    nodes.push(...Array.from(node.childNodes))
+    return
+  }
+  nodes.push(node)
+}
+
+function insertNode(parent: Node, node: Node, before: Node | null): Node | null {
+  if (node instanceof DocumentFragment) {
+    let last: Node | null = before
+    while (node.firstChild) {
+      const child = node.firstChild
+      parent.insertBefore(child, last)
+      last = child
+    }
+    return last
+  }
+  if (before !== null && before.parentNode !== parent) {
+    before = null
+  }
+  if (node.parentNode !== parent || node.nextSibling !== before) {
+    parent.insertBefore(node, before)
+  }
+  return node
+}
+
 export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void {
   const entries = new Map<string | number, ListEntry<T>>()
-
-  const insertBefore = (node: Node, before: Node | null): void => {
-    options.parent.insertBefore(node, before)
-  }
 
   const run = effect(() => {
     const items = options.items()
@@ -35,7 +58,7 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
       if (!entry) {
         const nodes: Node[] = []
         const mount = (node: Node): void => {
-          nodes.push(node)
+          collectMountNode(nodes, node)
         }
         const dispose = options.render(item, i, mount)
         entry = { item, nodes, dispose }
@@ -46,7 +69,7 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
         }
         const nodes: Node[] = []
         const mount = (node: Node): void => {
-          nodes.push(node)
+          collectMountNode(nodes, node)
         }
         const dispose = options.render(item, i, mount)
         entry = { item, nodes, dispose }
@@ -70,8 +93,10 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
       const key = options.getKey(item, i)
       const entry = next.get(key)!
       for (let j = entry.nodes.length - 1; j >= 0; j--) {
-        insertBefore(entry.nodes[j]!, before)
-        before = entry.nodes[j]!
+        const inserted = insertNode(options.parent, entry.nodes[j]!, before)
+        if (inserted) {
+          before = inserted
+        }
       }
     }
 

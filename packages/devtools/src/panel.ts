@@ -34,6 +34,21 @@ export function createPanel(host: HTMLElement): PanelHandle {
         overflow: hidden;
       }
 
+      .jacare-devtools--minimized {
+        width: auto;
+        max-height: none;
+        grid-template-rows: auto;
+      }
+
+      .jacare-devtools--minimized .jacare-devtools__body {
+        display: none;
+      }
+
+      .jacare-devtools--minimized .jacare-devtools__header {
+        border-bottom: none;
+        cursor: pointer;
+      }
+
       .jacare-devtools__header {
         display: flex;
         align-items: center;
@@ -42,6 +57,35 @@ export function createPanel(host: HTMLElement): PanelHandle {
         padding: 0.55rem 0.75rem;
         border-bottom: 1px solid #e4e4e7;
         background: #fafafa;
+      }
+
+      .jacare-devtools__header-main {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+      }
+
+      .jacare-devtools__toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        border: 1px solid #d4d4d8;
+        border-radius: 6px;
+        background: #fff;
+        color: #52525b;
+        font: inherit;
+        font-size: 0.875rem;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .jacare-devtools__toggle:hover {
+        background: #f4f4f5;
+        color: #18181b;
       }
 
       .jacare-devtools__title {
@@ -150,8 +194,11 @@ export function createPanel(host: HTMLElement): PanelHandle {
       }
     </style>
     <header class="jacare-devtools__header">
-      <span class="jacare-devtools__title">Pulse Graph</span>
-      <span class="jacare-devtools__meta" data-meta></span>
+      <div class="jacare-devtools__header-main">
+        <span class="jacare-devtools__title">Pulse Graph</span>
+        <span class="jacare-devtools__meta" data-meta></span>
+      </div>
+      <button class="jacare-devtools__toggle" type="button" data-toggle aria-label="Minimize Pulse Graph" title="Minimize">−</button>
     </header>
     <div class="jacare-devtools__body">
       <ul class="jacare-devtools__list" data-list></ul>
@@ -161,13 +208,35 @@ export function createPanel(host: HTMLElement): PanelHandle {
 
   host.appendChild(root)
 
+  const header = root.querySelector('.jacare-devtools__header') as HTMLElement
+  const toggle = root.querySelector('[data-toggle]') as HTMLButtonElement
   const meta = root.querySelector('[data-meta]') as HTMLElement
   const list = root.querySelector('[data-list]') as HTMLUListElement
   const detail = root.querySelector('[data-detail]') as HTMLElement
 
   let selectedId: number | null = null
   let lastUpdatedAt = 0
+  let minimized = false
   const pulsed = new Set<number>()
+
+  function setMinimized(next: boolean): void {
+    minimized = next
+    root.classList.toggle('jacare-devtools--minimized', minimized)
+    toggle.textContent = minimized ? '+' : '−'
+    toggle.setAttribute('aria-label', minimized ? 'Expand Pulse Graph' : 'Minimize Pulse Graph')
+    toggle.setAttribute('title', minimized ? 'Expand' : 'Minimize')
+  }
+
+  toggle.addEventListener('click', (event) => {
+    event.stopPropagation()
+    setMinimized(!minimized)
+  })
+
+  header.addEventListener('click', () => {
+    if (minimized) {
+      setMinimized(false)
+    }
+  })
 
   function formatValue(value: unknown): string {
     if (value === undefined) return '—'

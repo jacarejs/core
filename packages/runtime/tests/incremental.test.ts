@@ -121,6 +121,71 @@ describe('reconcileKeyedList', () => {
     expect(spy).not.toHaveBeenCalled()
   })
 
+  it('mounts multiple fragment roots on first run', () => {
+    const parent = document.createElement('div')
+    const anchor = document.createComment('each')
+    parent.appendChild(anchor)
+
+    const items = [
+      { id: 'a' },
+      { id: 'b' },
+      { id: 'c' },
+      { id: 'd' },
+      { id: 'e' },
+    ]
+
+    reconcileKeyedList({
+      parent,
+      anchor,
+      items: () => items,
+      getKey: (item) => item.id,
+      render: (item, _index, mount) => {
+        const frag = document.createDocumentFragment()
+        const el = document.createElement('span')
+        el.dataset.id = item.id
+        frag.appendChild(el)
+        mount(frag)
+        return () => {}
+      },
+    })
+
+    expect(parent.querySelectorAll('span')).toHaveLength(5)
+  })
+
+  it('supports document fragment roots across effect runs', () => {
+    const parent = document.createElement('div')
+    const anchor = document.createComment('each')
+    parent.appendChild(anchor)
+
+    const a = { id: 'a' }
+    const b = { id: 'b' }
+    const items = signal([a, b])
+    const counter = signal(0)
+
+    reconcileKeyedList({
+      parent,
+      anchor,
+      items: () => items(),
+      getKey: (item) => item.id,
+      render: (item, _index, mount) => {
+        counter.update((n) => n + 1)
+        const frag = document.createDocumentFragment()
+        const el = document.createElement('span')
+        el.dataset.id = item.id
+        frag.appendChild(el)
+        mount(frag)
+        return () => {}
+      },
+    })
+
+    expect(parent.querySelectorAll('span')).toHaveLength(2)
+    expect(counter()).toBe(2)
+
+    items.set([a, b])
+    expect(parent.querySelectorAll('span')).toHaveLength(2)
+    expect(counter()).toBe(2)
+  })
+
   it('re-renders when item identity changes at the same key', () => {
     const parent = document.createElement('ul')
     const anchor = document.createComment('each')

@@ -219,10 +219,12 @@ function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarge
   ctx.pushCleanupScope(itemScope)
 
   const root = ctx.nextId('item')
-  const hasSingleRoot = node.children.length === 1 && node.children[0]!.type === 'element'
+  const singleChild = node.children.length === 1 ? node.children[0]! : null
+  const hasSingleElement = singleChild?.type === 'element'
+  const hasSingleComponent = singleChild?.type === 'component'
 
-  if (hasSingleRoot) {
-    const child = node.children[0] as Extract<TemplateNode, { type: 'element' }>
+  if (hasSingleElement) {
+    const child = singleChild as Extract<TemplateNode, { type: 'element' }>
     ctx.line(`const ${root} = document.createElement('${child.tag}')`)
     for (const attr of child.attrs) {
       emitAttr(ctx, root, attr)
@@ -231,6 +233,8 @@ function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarge
       emitNode(ctx, grandchild, { kind: 'parent', name: root })
     }
     ctx.line(`mount(${root})`)
+  } else if (hasSingleComponent) {
+    emitNode(ctx, singleChild, { kind: 'mount', fn: 'mount' })
   } else {
     ctx.line(`const ${root} = document.createDocumentFragment()`)
     for (const child of node.children) {
