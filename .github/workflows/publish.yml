@@ -1,13 +1,23 @@
 name: Publish npm
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -16,6 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,8 +36,15 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: yarn
 
+      - name: Bump version
+        id: version
+        run: |
+          VERSION=$(node scripts/sync-versions.mjs bump "${{ inputs.bump }}")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Bumping to v$VERSION"
+
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Typecheck
         run: yarn typecheck
@@ -77,3 +96,14 @@ jobs:
         working-directory: packages/cli
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
+
+      - name: Commit version and tag release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: release v${{ steps.version.outputs.version }}"
+          git tag "v${{ steps.version.outputs.version }}"
+          git push
+          git push origin "v${{ steps.version.outputs.version }}"
