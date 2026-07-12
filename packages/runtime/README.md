@@ -1,6 +1,28 @@
 # @jacare/core
 
-Fine-grained reactivity runtime for [Jacaré](https://github.com/jacarejs/core). Zero Virtual DOM — updates flow directly to the DOM through a pulse graph.
+The runtime for [Jacaré](https://github.com/jacarejs/core) — a fine-grained reactive UI framework with **no Virtual DOM**.
+
+Jacaré compiles `.jcr` modules into direct DOM updates. When a value changes, only the nodes that depend on it update. This package provides the reactivity engine, DOM bindings, navigation, forms, SSR helpers, and lifecycle hooks.
+
+---
+
+## Table of contents
+
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Core concepts](#core-concepts)
+- [Reactivity API](#reactivity-api)
+- [Template bindings](#template-bindings)
+- [Components](#components)
+- [Navigation](#navigation)
+- [Forms](#forms)
+- [Lifecycle hooks](#lifecycle-hooks)
+- [Scope debugging](#scope-debugging)
+- [Server-side rendering](#server-side-rendering)
+- [API reference](#api-reference)
+- [Links](#links)
+
+---
 
 ## Install
 
@@ -8,7 +30,17 @@ Fine-grained reactivity runtime for [Jacaré](https://github.com/jacarejs/core).
 npm install @jacare/core
 ```
 
+For a full app with dev server and compiler, also install:
+
+```bash
+npm install @jacare/cli @jacare/vite-plugin
+```
+
+---
+
 ## Quick start
+
+Create a `.jcr` file — a plain JavaScript module with a `view` tagged template:
 
 ```javascript
 import { pulse, derive, view } from '@jacare/core'
@@ -17,40 +49,281 @@ const count = pulse(0)
 const label = derive(() => `Count: ${count()}`)
 
 export default view`
-  <button on-click=${() => count.update((n) => n + 1)}>
-    ${label}
-  </button>
+  <section class="counter">
+    <p>${label}</p>
+    <button on-click=${() => count.update((n) => n + 1)}>
+      Increment
+    </button>
+  </section>
 `
 ```
 
-Each `.jcr` module compiles to `mount()`, `render()`, and `resume()`.
+Mount it from `boot.js`:
 
-## Reactivity
+```javascript
+import App from './app.jcr'
 
-| API | Description |
-|-----|-------------|
-| `pulse(initial)` | Reactive value |
-| `derive(() => …)` | Computed value |
-| `watch(fn)` | Side effect |
+const root = document.getElementById('app')
+const dispose = App(root)
 
-Aliases: `signal`, `computed`, `effect`.
+// later: dispose() to clean up
+```
+
+Each `.jcr` module compiles to three functions:
+
+| Function | Purpose |
+|----------|---------|
+| `mount(target, props?)` | Client-side DOM mount |
+| `render(props?)` | SSR HTML string |
+| `resume(target, state, props?)` | Hydrate SSR output |
+
+---
+
+## Core concepts
+
+### Pulses (signals)
+
+State is stored in **pulses**. Reading a pulse inside a template or effect subscribes to it. Writing triggers only the dependents.
+
+```javascript
+const count = pulse(0)
+
+count()              // read → 0
+count.set(5)         // write
+count.update(n => n + 1)  // functional update
+```
+
+### Derived values
+
+Computed values re-run only when their dependencies change:
+
+```javascript
+const first = pulse(2)
+const second = pulse(3)
+const total = derive(() => first() + second())
+```
+
+### Effects
+
+Run side effects when tracked pulses change:
+
+```javascript
+import { watch } from '@jacare/core'
+
+watch(() => {
+  console.log('count is', count())
+})
+```
+
+### No Virtual DOM
+
+Jacaré does not diff a virtual tree. The compiler emits precise DOM operations — text updates, attribute bindings, keyed list reconciliation — wired directly to the pulse graph.
+
+---
+
+## Reactivity API
+
+### Canonical names
+
+| API | Alias | Description |
+|-----|-------|-------------|
+| `signal(initial)` | `pulse(initial)` | Reactive value |
+| `computed(fn)` | `derive(fn)` | Derived value |
+| `effect(fn)` | `watch(fn)` | Side effect |
+| `untrack(fn)` | — | Run without tracking |
+| `batch(fn)` | — | Batch multiple writes |
+| `runUntracked(fn)` | — | Untracked execution |
+
+### Example: todo list state
+
+```javascript
+import { pulse, derive, view } from '@jacare/core'
+
+const items = pulse([
+  { id: '1', label: 'Learn Jacaré', done: false },
+])
+
+const filter = pulse('')
+const filtered = derive(() => {
+  const q = filter().trim().toLowerCase()
+  if (!q) return items()
+  return items().filter((item) => item.label.toLowerCase().includes(q))
+})
+
+function addItem(label) {
+  items.update((list) => [
+    ...list,
+    { id: String(Date.now()), label, done: false },
+  ])
+}
+```
+
+---
+
+## Template bindings
+
+Use these inside `view\`...\``:
+
+### Text
+
+```javascript
+view`<p>${greeting}</p>`
+```
+
+Reactive pulses are read automatically. For mixed text:
+
+```javascript
+view`<p>Total: ${total()}</p>`
+```
+
+### Events
+
+```javascript
+view`<button on-click=${save}>Save</button>`
+view`<input on-input=${(e) => filter.set(e.target.value)} />`
+```
+
+Alias: `@click=${fn}`
+
+### Attributes
+
+```javascript
+view`<a bind-href=${url}>Link</a>`
+```
+
+Alias: `:href=${url}`
+
+### Two-way form bindings
+
+```javascript
+view`
+  <input bind-value=${text} />
+  <input type="checkbox" bind-checked=${done} />
+`
+```
+
+`bind-value` and `bind-checked` compile to `bindModel` — DOM and signal stay in sync.
+
+### Conditional classes
+
+```javascript
+view`<li class-done=${() => item.done}>...</li>`
+```
+
+Alias: `class:done=${() => item.done}`
+
+### Conditionals
+
+```javascript
+view`
+  #if show()
+    <p>Visible</p>
+  #elif loading()
+    <p>Loading…</p>
+  #else
+    <p>Hidden</p>
+  #end
+`
+```
+
+Alias: `@if` / `@elseif` / `@else` / `@end`
+
+### Lists
+
+```javascript
+view`
+  #for items() as item (item.id)
+    <li>${item.label}</li>
+  #end
+`
+```
+
+- `item.id` is the **key** for efficient DOM reconciliation
+- Alias: `@each items() as item (item.id)` / `@end`
+
+---
+
+## Components
+
+Import another `.jcr` module and use it as a self-closing tag:
+
+```javascript
+import Field from './Field.jcr'
+
+export default view`
+  <Field :label=${'Email'} :field=${form.fields.email} :type=${'email'} />
+`
+```
+
+Props are passed with `:propName=${value}`. Inside the child component, props appear as variables in scope.
+
+---
 
 ## Navigation
 
+Client-side routing with lazy-loaded screens:
+
 ```javascript
 import { createNav, lazy, screen } from '@jacare/core'
+import Shell from './shell.jcr'
+import Home from './pages/home.jcr'
+import NotFound from './pages/not-found.jcr'
 
 export const nav = createNav({
+  base: '/',
   layout: Shell,
   screens: {
     '/': screen(Home),
     '/about': lazy(() => import('./pages/about.jcr')),
+    '/users/:id': lazy(() => import('./pages/user.jcr')),
   },
   missing: NotFound,
 })
+
+// in boot.js
+nav.attach(document.getElementById('app'))
 ```
 
-Use `jacare-go` on links and `jacare-frame` in the layout shell.
+### Layout shell
+
+```javascript
+export default view`
+  <header>...</header>
+  <main jacare-frame></main>
+  <footer>...</footer>
+`
+```
+
+Active screen content mounts inside `jacare-frame`.
+
+### Declarative links
+
+```html
+<a jacare-go="/about" href="/about">About</a>
+```
+
+Jacaré intercepts clicks and syncs the `jacare-here` class on the active link.
+
+### Programmatic navigation
+
+```javascript
+await nav.go('/about')
+await nav.swap('/settings')  // replace history entry
+nav.undo()                   // history.back()
+await nav.warm('/about')     // prefetch lazy screen
+```
+
+### Route helpers
+
+```javascript
+import { routeParam, routeSearch, routeHref } from '@jacare/core'
+
+const userId = routeParam('id')
+const tab = routeSearch('tab')
+const link = routeHref('/about', { tab: 'feedback' })
+```
+
+---
 
 ## Forms
 
@@ -58,23 +331,124 @@ Use `jacare-go` on links and `jacare-frame` in the layout shell.
 import { createForm } from '@jacare/core'
 
 const form = createForm({
-  initial: { email: '' },
-  validate: (values) => ({ email: values.email ? null : 'Required' }),
+  initial: {
+    email: '',
+    message: '',
+  },
+  validate: (values) => {
+    const errors = {}
+    if (!values.email.includes('@')) errors.email = 'Invalid email'
+    if (!values.message.trim()) errors.message = 'Required'
+    return errors
+  },
+})
+
+// in template
+view`
+  <input bind-value=${form.fields.email} />
+  <span>${() => form.fields.email.error()}</span>
+`
+```
+
+Each `form.fields.*` is a field object with `()`, `set()`, `blur()`, `error()`, and `touched()`.
+
+---
+
+## Lifecycle hooks
+
+Per-screen lifecycle for mount, activate, deactivate, and unmount:
+
+```javascript
+import { createLifecycle } from '@jacare/core'
+
+const lifecycle = createLifecycle()
+
+lifecycle.onMount(() => {
+  console.log('screen mounted')
+})
+
+lifecycle.onActivate(() => {
+  console.log('screen visible')
+})
+
+lifecycle.onDeactivate(() => {
+  console.log('screen hidden')
+})
+
+lifecycle.onUnmount(() => {
+  console.log('screen destroyed')
 })
 ```
 
-Bind fields with `bind-value=${form.fields.email}`.
+Pass lifecycle context through nav screen props or register inside screen modules.
 
-## SSR
+---
+
+## Scope debugging
+
+Register values for live inspection (used by `@jacare/devtools`):
+
+```javascript
+import { registerScope, pulse } from '@jacare/core'
+
+const draft = pulse('')
+
+registerScope('draft', () => draft())
+```
+
+---
+
+## Server-side rendering
 
 ```javascript
 import { renderToString, renderToStream } from '@jacare/core'
+import { render, resume } from './app.jcr'
+
+// server
+const html = renderToString(() => render())
+
+// client hydration
+const dispose = resume(root, state)
 ```
+
+SSR output includes `data-jacare-bind` markers for precise hydration targets.
+
+---
+
+## API reference
+
+### Reactivity
+`signal`, `pulse`, `computed`, `derive`, `effect`, `watch`, `untrack`, `batch`, `runUntracked`, `isTracking`
+
+### DOM
+`view`, `bindText`, `bindAttribute`, `bindProperty`, `bindClass`, `bindModel`, `branch`, `reconcileKeyedList`, `showIf`
+
+### Nav
+`createNav`, `lazy`, `screen`, `adaptScreen`, `createRoute`, `routeHref`, `routeParam`, `routeSearch`, `screenProps`
+
+### Forms
+`createForm`
+
+### Lifecycle
+`createLifecycle`
+
+### Scope
+`registerScope`, `clearScope`, `getScopeSnapshot`, `subscribeScope`, `startScopePulse`
+
+### SSR
+`renderToString`, `renderToStream`, `resumeBindings`, `escapeHtml`
+
+### DevTools hooks
+`enableDevtools`, `getPulseGraph`, `subscribePulseGraph`
+
+---
 
 ## Links
 
 - [Repository](https://github.com/jacarejs/core)
-- [Docs](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
+- [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
+- [Live demo](https://jacarejs.github.io/core/)
+- [Example app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
 
 ## License
 
