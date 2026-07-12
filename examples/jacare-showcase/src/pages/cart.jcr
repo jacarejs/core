@@ -275,4 +275,21 @@ export <style>
   color: #189030;
   font-size: 1.25rem;
 }
+@media (max-width: 768px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+  .cart-line {
+    align-items: stretch;
+  }
+  .cart-line .demo-row {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .cart-line-total {
+    flex: 1 1 100%;
+    text-align: left;
+    margin-top: 0.25rem;
+  }
+}
 </style>

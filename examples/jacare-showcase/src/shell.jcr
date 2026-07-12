@@ -1,24 +1,41 @@
+import { computed, signal } from '@jacare/core'
 import { appHref, assetUrl } from './app-base.js'
+
+const menuOpen = signal(false)
+const menuLabel = computed(() => (menuOpen() ? 'Close' : 'Menu'))
+
+function toggleMenu() {
+  menuOpen.update((open) => !open)
+}
+
+function closeMenu() {
+  menuOpen.set(false)
+}
 
 export <view>
   <div class="app">
     <div class="layout">
       <header class="header">
-        <a class="brand" jacare-go="/" href=${appHref('/')}>
-          <img class="logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
-          <span class="brand-text">
-            <span class="brand-title">Jacaré Showcase</span>
-            <span class="brand-tag">Zero VDOM · Fine-grained reactivity</span>
-          </span>
-        </a>
-        <nav class="nav">
-          <a class="nav-link" jacare-go="/" href=${appHref('/')}>Home</a>
-          <a class="nav-link" jacare-go="/reactivity" href=${appHref('/reactivity')}>Reactivity</a>
-          <a class="nav-link" jacare-go="/components" href=${appHref('/components')}>Components</a>
-          <a class="nav-link" jacare-go="/forms" href=${appHref('/forms')}>Forms</a>
-          <a class="nav-link" jacare-go="/playground" href=${appHref('/playground')}>Playground</a>
-          <a class="nav-link" jacare-go="/performance" href=${appHref('/performance')}>Performance</a>
-          <a class="nav-link" jacare-go="/cart" href=${appHref('/cart')}>Cart</a>
+        <div class="header-top">
+          <a class="brand" jacare-go="/" href=${appHref('/')} on-click=${closeMenu}>
+            <img class="logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
+            <span class="brand-text">
+              <span class="brand-title">Jacaré Showcase</span>
+              <span class="brand-tag">Zero VDOM · Fine-grained reactivity</span>
+            </span>
+          </a>
+          <button type="button" class="nav-toggle btn btn-outline" on-click=${toggleMenu}>
+            ${menuLabel}
+          </button>
+        </div>
+        <nav class="nav" class-nav-open=${menuOpen}>
+          <a class="nav-link" jacare-go="/" href=${appHref('/')} on-click=${closeMenu}>Home</a>
+          <a class="nav-link" jacare-go="/reactivity" href=${appHref('/reactivity')} on-click=${closeMenu}>Reactivity</a>
+          <a class="nav-link" jacare-go="/components" href=${appHref('/components')} on-click=${closeMenu}>Components</a>
+          <a class="nav-link" jacare-go="/forms" href=${appHref('/forms')} on-click=${closeMenu}>Forms</a>
+          <a class="nav-link" jacare-go="/playground" href=${appHref('/playground')} on-click=${closeMenu}>Playground</a>
+          <a class="nav-link" jacare-go="/performance" href=${appHref('/performance')} on-click=${closeMenu}>Performance</a>
+          <a class="nav-link" jacare-go="/cart" href=${appHref('/cart')} on-click=${closeMenu}>Cart</a>
         </nav>
       </header>
 
