@@ -79,6 +79,9 @@ flattenLiteral() ──► HTML template + expression slots
 parseTemplate() ──► TemplateAST
     │
     ▼
+detectProps() + detectSignals() ──► mount props + reactive names
+    │
+    ▼
 generate() ──► mount / render / resume
     │
     ▼
@@ -113,11 +116,30 @@ Only runtime helpers referenced in the generated code appear in the import line.
 
 The compiler recognizes simple patterns:
 
-- `count` or `count()` → `bindText(node, count)` — no closure overhead
+- `count` or `count()` when `count` is a declared signal → `bindText(node, count)` — no closure overhead
+- Mixed text like `` `value = ${doubled}` `` → `` `value = ${doubled()}` `` inside an `effect`
 - Complex expressions → `effect(() => { ... })` — automatic tracking
+- Dynamic attributes like `href=${() => href(id)}` → `effect` that invokes the arrow and sets the attribute
 - Event handlers → `addEventListener` with `removeEventListener` in dispose
 - `bind-value` / `bind-checked` on a signal → `bindModel` (two-way)
 - `#if` / `#elif` / `#else` → `branch` (not `showIf`)
+
+### Prop and signal detection
+
+**`detectProps(script, ast)`** collects identifiers used in the template that are not declared in the module script:
+
+- Walks all `import { … } from` blocks with `matchAll` (not only the first import)
+- Skips `const` / `let` / `var` declarations and default imports
+- Names used only in the template become `mount(target, props)` parameters
+
+**`detectSignals(script)`** finds reactive values declared with `signal`, `pulse`, `computed`, or `derive`:
+
+- Strips `view\`…\`` template literals before scanning so string constants like `` const code = `pulse(0)` `` are not treated as signals
+
+**`resolveSignalExpr(expr, signals)`** maps template expressions to direct signal bindings:
+
+- `${count}` or `${count()}` → `bindText` / `bindModel` when `count` is a known signal
+- String constants and component props fall through to `effect` or `bindProperty`
 
 ### Components
 
@@ -129,7 +151,7 @@ import Field from './Field.jcr'
 view`<Field :label=${'Email'} :field=${form.fields.email} />`
 ```
 
-Props are inferred from `:name=${expr}` attributes and undeclared identifiers in the child template.
+Props are inferred from `:name=${expr}` attributes and undeclared identifiers in the child template. Module imports (e.g. `import { topics } from './topics.js'`) are never treated as mount props.
 
 ### Compile modes
 
@@ -141,7 +163,7 @@ Props are inferred from `:name=${expr}` attributes and undeclared identifiers in
 
 ### Errors and source maps
 
-`JacareCompileError` reports `filename:line:column` with a source snippet. `compile()` emits source maps mapping generated JS back to `.jcr` lines.
+`JacareCompileError` reports `filename:line:column` with a source snippet. `compile()` emits source maps mapping generated JS back to `.jcr` lines. The Vite plugin forwards `loc` and `frame` to the dev-server error overlay.
 
 ## Vite integration
 
@@ -153,6 +175,18 @@ import jacare from '@jacare/vite-plugin'
 
 export default defineConfig({
   plugins: [jacare()],
+})
+```
+
+Or use the helper:
+
+```typescript
+import { createJacareViteConfig } from '@jacare/vite-plugin'
+
+export default createJacareViteConfig({
+  title: 'My App',
+  port: 3000,
+  base: '/',
 })
 ```
 
@@ -185,8 +219,8 @@ packages/compiler/src/
 ├── parse-template.ts  — HTML template parser
 ├── codegen-client.ts  — mount() emission
 ├── codegen-ssr.ts     — render() + resume() emission
-├── codegen-shared.ts  — shared codegen helpers
-├── codegen.ts         — generate() + import ordering
+├── codegen-shared.ts  — resolveSignalExpr, CodegenContext
+├── codegen.ts         — generate() + detectProps/detectSignals
 ├── errors.ts          — JacareCompileError
 ├── compile.ts         — Pipeline entry
 └── index.ts
@@ -204,6 +238,18 @@ packages/vite-plugin/src/
 | `detectProps` heuristic | Props from `:attr` and free identifiers in template |
 | No fragments | No `<>...</>` |
 | No HTML validation | Unclosed tags may produce invalid output |
+| No TypeScript in `.jcr` | Type annotations in module script are not stripped |
+
+## Not yet implemented
+
+| Area | Detail |
+|------|--------|
+| Compile-time dependency graph | Remove runtime tracking in production builds |
+| TypeScript in `.jcr` | SWC transform for type annotations |
+| Component prop types | Inferred from template usage |
+| HTML validation | Actionable errors for unclosed tags |
+| Pluggable directives | Custom attribute transforms via plugin API |
+| Branch tree-shaking | `#if import.meta.env.DEV` eliminated at build time |
 
 ## Tests
 
@@ -217,13 +263,10 @@ yarn build && yarn test
 - Import only used runtime helpers (no `showIf` when only `branch` is emitted)
 - `JacareCompileError` with file position
 - Source maps in `compile()` output
-
-## Future Work
-
-1. **Compile-time dependency graph** — Remove runtime tracking in production
-2. **TypeScript in `.jcr`** — SWC transform for type annotations
-3. **Component prop types** — Inferred from template usage
-4. **HTML validation** — Actionable errors for unclosed tags
+- `detectProps` ignores secondary module imports
+- `detectSignals` ignores signal-like text inside string literals
+- Mixed text and dynamic attributes invoke signals correctly
+- `bindModel` for `bind-value` / `bind-checked`
 
 ---
 

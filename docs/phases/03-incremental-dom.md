@@ -147,14 +147,15 @@ yarn build && yarn test
 - Parse and codegen for `#if`, `#for`, components
 - Prop auto-detection
 
-## Future Work
+## Not yet implemented
 
-1. **Slots** — `<Component>children</Component>`
-2. **Keyed each fallback** — warn when key is missing
-3. **`<#each>` immutable mode** — optimize frozen arrays
-4. **Fragment roots** — multiple roots without wrapper `div`
-5. **Dynamic components** — `<{tag} />`
-6. **SSR list serialization** — emit markers for resumability
+| Area | Detail |
+|------|--------|
+| Slots | `<Component>children</Component>` |
+| Keyed each fallback | Warn when key is missing |
+| Fragment roots | Multiple roots without wrapper `div` |
+| Dynamic components | `<{tag} />` |
+| SSR list serialization | Markers for list resumability |
 
 ---
 

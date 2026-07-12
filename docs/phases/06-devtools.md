@@ -112,14 +112,16 @@ Fixed panel (bottom-right):
 - Value updates after `set`
 - Stale flag on derived nodes
 
-## Future Work
+## Not yet implemented
 
-1. **Source names** — map nodes to `.jcr` bindings via compiler metadata
-2. **Time travel** — snapshot log with scrubber
-3. **Chrome extension** — native DevTools panel via `postMessage`
-4. **Highlight flashes** — pulse animation on updated nodes
-5. **SSR graph** — inspect server-side pulses during hydration
+| Area | Detail |
+|------|--------|
+| Source names | Map nodes to `.jcr` bindings via compiler metadata |
+| Time travel | Snapshot log with scrubber |
+| Chrome extension | Native DevTools panel via `postMessage` |
+| Highlight flashes | Pulse animation on updated nodes |
+| SSR graph | Inspect server-side pulses during hydration |
 
 ---
 
-**Next:** Publish `@jacare/*` to npm — see [Phase 7 — Forms](07-forms.md).
+**Next:** [Forms](07-forms.md)

@@ -271,4 +271,20 @@ yarn example:build
 5. ~~Nav~~
 6. ~~DevTools~~
 7. ~~Forms — validation, two-way bindings, field components~~
-8. Publish — npm packages and starter templates
+8. ~~Publish — npm packages (`@jacare/*`, `create-jacare`) and starter templates~~
+
+## Install
+
+```bash
+npm install @jacare/core
+npm install -D @jacare/cli @jacare/vite-plugin vite
+```
+
+Or scaffold a new project:
+
+```bash
+npm create jacare@latest my-app
+jacare new my-app --template=todo
+```
+
+Live demo: [jacarejs.github.io/core](https://jacarejs.github.io/core/)

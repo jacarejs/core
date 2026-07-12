@@ -156,13 +156,15 @@ yarn build && yarn test
 - `escapeHtml` neutralizes markup in SSR output
 - `renderToString` and `renderToStream`
 
-## Future Work
+## Not yet implemented
 
-1. **Chunked streaming** — yield HTML per top-level node
-2. **Islands** — `resume` per component region
-3. **TypeScript in `.jcr`** — SWC transform for `<script>`-less TS
-4. **Serialized signal graph** — full state transfer for resumability
-5. **SSR component composition** — nested `render()` chaining
+| Area | Detail |
+|------|--------|
+| Nested streaming | Yield HTML per nested node (top-level chunks work) |
+| Islands | `resume` per component region |
+| TypeScript in `.jcr` | SWC transform for module script |
+| Serialized signal graph | Full state transfer for resumability |
+| SSR component composition | Nested `render()` chaining |
 
 ---
 

@@ -16,9 +16,22 @@ yarn test
 yarn example:dev
 ```
 
-## Use Jacaré packages locally in another project
+## Use Jacaré in another project
 
-Until `@jacare/*` is published to npm, link from the monorepo:
+### From npm
+
+```bash
+npm install @jacare/core
+npm install -D @jacare/cli @jacare/vite-plugin vite
+```
+
+Or scaffold with:
+
+```bash
+npm create jacare@latest my-app
+```
+
+### Local development (yarn link)
 
 ```bash
 cd /path/to/core
@@ -41,7 +54,8 @@ Or use `file:` dependencies in `package.json`:
     "@jacare/core": "file:../core/packages/runtime"
   },
   "devDependencies": {
-    "@jacare/cli": "file:../core/packages/cli"
+    "@jacare/cli": "file:../core/packages/cli",
+    "@jacare/vite-plugin": "file:../core/packages/vite-plugin"
   }
 }
 ```
@@ -63,6 +77,7 @@ src/
   boot.js
   app.jcr
 index.html
+vite.config.js       # when using Vite templates
 jacare.config.js
 public/
 ```
@@ -71,10 +86,34 @@ public/
 
 ```bash
 yarn build          # build all packages
-yarn test           # run tests
+yarn test           # run tests (102 tests)
 yarn typecheck      # TypeScript check
 yarn example:build  # build jacare-todo example
-jacare check          # compile all .jcr files (from app root)
+jacare check        # compile all .jcr files (from app root)
 ```
 
-CI (`.github/workflows/ci.yml`) runs the same checks on every push/PR to `main`.
+## CI and publish
+
+- **CI** — `.github/workflows/ci.yml` runs on every push/PR to `main`
+- **npm** — `.github/workflows/publish.yml` publishes all packages on tag `v*`
+
+Published packages:
+
+| Package | npm |
+|---------|-----|
+| `@jacare/core` | Runtime |
+| `@jacare/compiler` | Compiler |
+| `@jacare/vite-plugin` | Vite plugin |
+| `@jacare/cli` | CLI |
+| `@jacare/devtools` | DevTools |
+| `create-jacare` | `npm create jacare` scaffolds |
+
+## Templates
+
+| Command | Templates |
+|---------|-----------|
+| `jacare new` | `minimal`, `nav`, `todo`, `vite-minimal`, `vite-nav`, `vite-todo` |
+| `npm create jacare` | `vite-minimal`, `vite-nav`, `vite-todo` |
+| `npx degit jacarejs/core/templates/vite-minimal` | Vite template from GitHub |
+
+Vite templates use `vite dev` / `vite build`. Jacaré CLI templates use `jacare dev` / `jacare build`.

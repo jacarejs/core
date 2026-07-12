@@ -120,11 +120,13 @@ public/
 - Layout frame mounting (layout persists across navigations)
 - Navigation queue for rapid `go` calls
 
-## Future Work
+## Not yet implemented
 
-1. **Compiler `jacare-go`** — wire clicks at compile time
-2. **Screen transitions** — enter/leave hooks
-3. **Scroll restoration** — per-screen scroll position
+| Area | Detail |
+|------|--------|
+| Compiler `jacare-go` | Wire clicks at compile time |
+| Screen transitions | Enter/leave hooks |
+| Scroll restoration | Per-screen scroll position |
 
 ---
 

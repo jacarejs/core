@@ -175,14 +175,15 @@ Phase 1 coverage:
 - Batch coalescing
 - Untrack
 
-## Future Work
+## Not yet implemented
 
-1. **Priority lanes** — High-priority effects (input) vs low-priority (analytics)
-2. **Compile-time graph** — Compiler emits static wiring, removes runtime tracking
-3. **Structural sharing** — Computed arrays/objects with persistent data structures
-4. **Async computed** — Native suspense with `pending` / `resolved` / `error` states
-5. **Resource signals** — Fetch/cache with automatic invalidation
-6. **DevTools protocol** — `enableDevtools()`, `getPulseGraph()` (see Phase 6)
+| Area | Detail |
+|------|--------|
+| Priority lanes | High-priority effects (input) vs low-priority (analytics) |
+| Compile-time graph | Compiler emits static wiring, removes runtime tracking |
+| Structural sharing | Computed arrays/objects with persistent data structures |
+| Async computed | Native suspense with `pending` / `resolved` / `error` states |
+| Resource signals | Fetch/cache with automatic invalidation |
 
 ## Comparison
 

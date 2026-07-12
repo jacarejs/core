@@ -114,13 +114,14 @@ See `examples/jacare-todo`:
 - `src/pages/about.jcr` — feedback form with `createForm`
 - `src/components/Field.jcr` — reusable field component
 
-## Future Work
+## Not yet implemented
 
-1. **Nested fields** — `form.field('user.email')` or path-based schema
-2. **Async validators** — debounced server-side checks
-3. **SSR forms** — hydrate field state from server
-4. **Zod adapter** — optional bridge without bundling Zod in core
-5. **`bind-model` alias** — sugar for arbitrary two-way props
+| Area | Detail |
+|------|--------|
+| Nested fields | `form.field('user.email')` or path-based schema |
+| Async validators | Debounced server-side checks |
+| SSR forms | Hydrate field state from server |
+| Zod adapter | Optional bridge without bundling Zod in core |
 
 ---
 

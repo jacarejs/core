@@ -227,6 +227,23 @@ Props are inferred from `:name=${expr}` attributes.
 
 Every `.jcr` file compiles to `mount()`, `render()`, and `resume()`. The compiler imports only the runtime helpers each file uses (`bindText`, `bindModel`, `branch`, etc.).
 
+### Prop and signal detection
+
+- **Mount props** — identifiers used in the template but not declared in the module script (all `import` blocks are scanned)
+- **Signals** — names assigned with `signal`, `pulse`, `computed`, or `derive` in the module script
+- **Module imports** — values imported from other files (e.g. `topics` from `./topics.js`) are never treated as mount props
+- **String literals** — signal-like text inside `` `...` `` strings in the script is ignored during signal detection
+
+### Bindings
+
+| Pattern | Compiled as |
+|---------|-------------|
+| `${count}` when `count` is a signal | `bindText` |
+| `` `Total: ${total}` `` with signal `total` | `effect` with `` `Total: ${total()}` `` |
+| `bind-value=${draft}` on a signal | `bindModel` (two-way) |
+| `href=${() => href(id)}` | `effect` that invokes the expression |
+| `on-click=${handler}` | `addEventListener` + cleanup |
+
 Compile errors report `filename:line:column` with a source snippet. Source maps map generated JS back to `.jcr` lines.
 
 ```bash
@@ -235,7 +252,7 @@ jacare compile src/app.jcr --watch
 jacare check
 ```
 
-See [Phase 2 — Compiler](docs/phases/02-compiler.md).
+See [Phase 2 — Compiler](phases/02-compiler.md).
 
 ## SSR
 
