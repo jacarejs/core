@@ -1,13 +1,26 @@
 {
   "iconDefinitions": {
-    "_jacare_file": {
-      "iconPath": "./jacare-logo.png"
+    "_file": {
+      "iconPath": "./file.svg"
+    },
+    "_folder": {
+      "iconPath": "./folder.svg"
+    },
+    "_folder_open": {
+      "iconPath": "./folder-open.svg"
+    },
+    "_jacare": {
+      "iconPath": "./jacare-128.png"
     }
   },
+  "file": "_file",
+  "folder": "_folder",
+  "folderExpanded": "_folder_open",
   "fileExtensions": {
-    "jcr": "_jacare_file"
+    "jcr": "_jacare"
   },
   "languageIds": {
-    "jacare": "_jacare_file"
-  }
+    "jacare": "_jacare"
+  },
+  "showLanguageModeIcons": true
 }

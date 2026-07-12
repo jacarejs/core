@@ -1,0 +1,37 @@
+name: Publish VS Code Extension
+
+on:
+  push:
+    tags:
+      - 'vscode-v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build extension
+        run: yarn build
+        working-directory: packages/vscode-jacare
+
+      - name: Publish to Visual Studio Marketplace
+        run: npx @vscode/vsce publish --no-dependencies
+        working-directory: packages/vscode-jacare
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

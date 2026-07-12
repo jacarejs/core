@@ -2,9 +2,13 @@
   "name": "jacare",
   "displayName": "Jacaré",
   "description": "Syntax highlighting and icons for Jacaré .jcr files",
-  "version": "0.0.2",
-  "publisher": "jacarejs",
+  "version": "0.0.4",
+  "publisher": "heberalmeida",
+  "author": {
+    "name": "Heber Almeida"
+  },
   "license": "MIT",
+  "icon": "icons/jacare-256.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/jacarejs/core.git",
@@ -18,6 +22,9 @@
     "Themes"
   ],
   "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:jacare"
+  ],
   "contributes": {
     "languages": [
       {
@@ -32,8 +39,8 @@
         ],
         "configuration": "./language-configuration.json",
         "icon": {
-          "light": "./icons/jacare-logo.png",
-          "dark": "./icons/jacare-logo.png"
+          "light": "./icons/jacare-128.png",
+          "dark": "./icons/jacare-128.png"
         }
       }
     ],
@@ -50,15 +57,20 @@
         "label": "Jacaré Icons",
         "path": "./icons/jacare-icon-theme.json"
       }
-    ]
+    ],
+    "configurationDefaults": {
+      "workbench.iconTheme": "jacare-icons"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "package": "vsce package",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.1",
     "typescript": "^5.7.2"
   }
 }
