@@ -1,25 +1,25 @@
-import { pulse, derive, view } from '@jacare/core'
+import { computed, signal } from '@jacare/core'
 
-const items = pulse([
+const items = signal([
   { id: '1', label: 'Learn Jacaré syntax', done: false },
   { id: '2', label: 'Build something fast', done: false },
   { id: '3', label: 'Ship to production', done: false },
 ])
 
-const filter = pulse('')
-const draft = pulse('')
-const selectedId = pulse(null)
+const filter = signal('')
+const draft = signal('')
+const selectedId = signal(null)
 
-const filtered = derive(() => {
+const filtered = computed(() => {
   const q = filter().trim().toLowerCase()
   if (!q) return items()
   return items().filter((item) => item.label.toLowerCase().includes(q))
 })
 
-const total = derive(() => items().length)
-const active = derive(() => items().filter((item) => !item.done).length)
-const isEmpty = derive(() => items().length === 0)
-const noMatches = derive(() => filter().trim().length > 0 && filtered().length === 0)
+const total = computed(() => items().length)
+const active = computed(() => items().filter((item) => !item.done).length)
+const isEmpty = computed(() => items().length === 0)
+const noMatches = computed(() => filter().trim().length > 0 && filtered().length === 0)
 
 function addItem() {
   const label = draft().trim()
@@ -49,7 +49,7 @@ function onDraftKeydown(e) {
   if (e.key === 'Enter') addItem()
 }
 
-export default view`
+export <view>
   <section class="page">
     <div class="stats">
       <div class="stat">
@@ -135,4 +135,4 @@ export default view`
       #end
     </section>
   </section>
-`
+</view>

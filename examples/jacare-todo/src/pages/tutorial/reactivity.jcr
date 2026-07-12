@@ -1,26 +1,26 @@
-import { pulse, derive, view } from '@jacare/core'
+import { computed, signal } from '@jacare/core'
 import { appHref } from '../../app-base.js'
 import { topicNeighbors } from '../../tutorial/topics.js'
 import LessonNav from '../../components/LessonNav.jcr'
 
 const neighbors = topicNeighbors('reactivity')
 
-const demoCount = pulse(0)
-const demoDoubled = derive(() => demoCount() * 2)
+const demoCount = signal(0)
+const demoDoubled = computed(() => demoCount() * 2)
 
-const signalCode = `import { pulse } from '@jacare/core'
+const signalCode = `import { signal } from '@jacare/core'
 
-const count = pulse(0)
+const count = signal(0)
 count.set(1)
 count.update((n) => n + 1)`
 
-const deriveCode = `const doubled = derive(() => count() * 2)`
+const deriveCode = `const doubled = computed(() => count() * 2)`
 
-export default view`
+export <view>
   <section class="page tutorial-lesson">
     <a class="text-link" jacare-go="/tutorial" href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Reactivity</h2>
-    <p class="lead">State is a pulse graph. Reads subscribe; writes update only what depends on them.</p>
+    <p class="lead">State is a signal graph. Reads subscribe; writes update only what depends on them.</p>
 
     <article class="lesson">
       <h3 class="lesson-heading">Signals</h3>
@@ -43,4 +43,4 @@ export default view`
 
     <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
   </section>
-`
+</view>

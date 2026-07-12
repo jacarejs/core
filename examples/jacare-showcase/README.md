@@ -14,14 +14,14 @@ A polished demo app showcasing the full potential of [Jacaré](https://github.co
 |------|----------------|
 | **Home** | Hero, live stats, feature cards with slots |
 | **Reactivity** | `signal`, `computed`, `#if`, two-way bindings |
-| **Components** | `<Card>` with `<slot />`, scoped `style` blocks |
+| **Components** | `<Card>` with `<slot />`, `export <style>` blocks |
 | **Forms** | `createForm()`, validation, `Field` component |
 | **Playground** | Keyed `#for` lists, immutable updates |
 
 ### Framework capabilities on display
 
 - **Zero VDOM** — direct DOM bindings via compiler
-- **Scoped CSS** — `style` tagged templates per component
+- **Scoped CSS** — `export <style>` blocks per component
 - **Slots / children** — composable component APIs
 - **Lazy screens** — code-split page modules
 - **Brand theme** — palette extracted from the Jacaré logo

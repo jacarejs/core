@@ -1,4 +1,3 @@
-import { view } from '@jacare/core'
 import { appHref } from '../../app-base.js'
 import { topicHref, topicRoute, topicNeighbors } from '../../tutorial/topics.js'
 import LessonNav from '../../components/LessonNav.jcr'
@@ -22,7 +21,7 @@ topicHref('forms') // → /tutorial/forms`
 const declarativeCode = `<a jacare-go="/tutorial" href="/tutorial">Tutorial</a>
 <main jacare-frame></main>`
 
-export default view`
+export <view>
   <section class="page tutorial-lesson">
     <a class="text-link" jacare-go="/tutorial" href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Navigation</h2>
@@ -49,4 +48,4 @@ export default view`
 
     <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
   </section>
-`
+</view>

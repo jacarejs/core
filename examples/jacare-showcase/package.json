@@ -15,7 +15,7 @@
     "dev": "node ../../packages/cli/dist/index.js dev",
     "build": "node ../../packages/cli/dist/index.js build",
     "check": "node ../../packages/cli/dist/index.js check",
-    "preview": "node ../../packages/cli/dist/index.js preview"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@jacare/core": "0.1.0"
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@jacare/cli": "0.1.0",
     "@jacare/devtools": "0.1.0",
-    "@jacare/vite-plugin": "0.1.0"
+    "@jacare/vite-plugin": "0.1.0",
+    "vite": "^6.0.3"
   }
 }

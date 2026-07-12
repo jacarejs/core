@@ -1,34 +1,34 @@
-import { view } from '@jacare/core'
 import { appHref } from '../../app-base.js'
 import { topicNeighbors } from '../../tutorial/topics.js'
 import LessonNav from '../../components/LessonNav.jcr'
 
 const neighbors = topicNeighbors('templates')
 
-const textEventsCode = `view\`
+const viewOpen = 'export ' + '<view>'
+const textEventsCode = `${viewOpen}
   <p>\${message}</p>
   <button on-click=\${save}>Save</button>
-\``
+</view>`
 
-const conditionalCode = `view\`
+const conditionalCode = `${viewOpen}
   #if isOpen()
     <panel />
   #else
     <button on-click=\${open}>Open</button>
   #end
-\``
+</view>`
 
-const listCode = `view\`
+const listCode = `${viewOpen}
   #for items() as item (item.id)
     <li>\${item.label}</li>
   #end
-\``
+</view>`
 
-export default view`
+export <view>
   <section class="page tutorial-lesson">
     <a class="text-link" jacare-go="/tutorial" href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Templates</h2>
-    <p class="lead">The compiler turns <code>view\`...\`</code> into direct DOM bindings — no virtual tree.</p>
+    <p class="lead">The compiler turns <code>&lt;view&gt;</code> blocks into direct DOM bindings — no virtual tree.</p>
 
     <article class="lesson">
       <h3 class="lesson-heading">Text and events</h3>
@@ -48,4 +48,4 @@ export default view`
 
     <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
   </section>
-`
+</view>

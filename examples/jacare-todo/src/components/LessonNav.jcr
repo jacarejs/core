@@ -1,7 +1,6 @@
-import { view } from '@jacare/core'
 import { topicHref, topicRoute } from '../tutorial/topics.js'
 
-export default view`
+export <view>
 <nav class="lesson-nav" aria-label="Lesson navigation">
   #if prev
     <a class="lesson-nav-link" jacare-go=${() => topicRoute(prev.slug)} href=${() => topicHref(prev.slug)}>
@@ -16,4 +15,4 @@ export default view`
     </a>
   #end
 </nav>
-`
+</view>

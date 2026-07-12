@@ -1,4 +1,4 @@
-import { createForm, view } from '@jacare/core'
+import { createForm } from '@jacare/core'
 import { appHref } from '../../app-base.js'
 import Field from '../../components/Field.jcr'
 import { topicNeighbors } from '../../tutorial/topics.js'
@@ -13,26 +13,27 @@ const form = createForm({
   },
 })
 
+const viewOpen = 'export ' + '<view>'
 const fieldCode = `// Field.jcr
-export default view\`
+${viewOpen}
   <label class="field">
     <span>\${label}</span>
     <input bind-value=\${field} />
   </label>
-\``
+</view>`
 
 const useFieldCode = `import Field from './Field.jcr'
 
-view\`
+${viewOpen}
   <Field
     :label=\${'Title'}
     :field=\${form.fields.title}
     :type=\${'text'}
     :placeholder=\${'Enter a title'}
   />
-\``
+</view>`
 
-export default view`
+export <view>
   <section class="page tutorial-lesson">
     <a class="text-link" jacare-go="/tutorial" href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Components</h2>
@@ -55,4 +56,4 @@ export default view`
 
     <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
   </section>
-`
+</view>

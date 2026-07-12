@@ -1,4 +1,4 @@
-import { createForm, createLifecycle, derive, registerScope, signal, view } from '@jacare/core'
+import { computed, createForm, createLifecycle, registerScope, signal } from '@jacare/core'
 import { appHref } from '../app-base.js'
 import { route } from '../nav.js'
 import Field from '../components/Field.jcr'
@@ -15,7 +15,7 @@ const form = createForm({
 })
 
 const submitted = signal(false)
-const activeTab = derive(() => route.search('tab')() ?? 'overview')
+const activeTab = computed(() => route.search('tab')() ?? 'overview')
 
 function onSubmit() {
   submitted.set(true)
@@ -34,7 +34,7 @@ export const lifecycle = createLifecycle({
   },
 })
 
-export default view`
+export <view>
   <section class="page about">
     <h2 class="page-title">About Jacaré</h2>
     <p class="lead">
@@ -82,4 +82,4 @@ export default view`
       </dl>
     #end
   </section>
-`
+</view>

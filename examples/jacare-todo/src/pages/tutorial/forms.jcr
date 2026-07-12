@@ -1,4 +1,4 @@
-import { createForm, createLifecycle, registerScope, view } from '@jacare/core'
+import { createForm, createLifecycle, registerScope } from '@jacare/core'
 import { appHref } from '../../app-base.js'
 import Field from '../../components/Field.jcr'
 import { topicNeighbors } from '../../tutorial/topics.js'
@@ -33,7 +33,7 @@ function onSubmit(values) {
   console.log('Submitted', values)
 }
 
-export default view`
+export <view>
   <section class="page tutorial-lesson">
     <a class="text-link" jacare-go="/tutorial" href=${appHref('/tutorial')}>← Tutorial</a>
     <h2 class="page-title">Forms</h2>
@@ -60,4 +60,4 @@ export default view`
 
     <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
   </section>
-`
+</view>

@@ -1,8 +1,8 @@
-import { createLifecycle, derive, pulse, registerScope, view } from '@jacare/core'
+import { computed, createLifecycle, registerScope, signal } from '@jacare/core'
 
-const count = pulse(0)
-const message = pulse('')
-const preview = derive(() => {
+const count = signal(0)
+const message = signal('')
+const preview = computed(() => {
   const text = message().trim()
   return text ? `Hello, ${text}!` : 'Type a name below…'
 })
@@ -20,7 +20,7 @@ export const lifecycle = createLifecycle({
   },
 })
 
-export default view`
+export <view>
   <section class="page playground">
     <h2 class="page-title">Playground</h2>
     <p class="lead">Edit state live. Values stream to the Scope panel while you interact.</p>
@@ -46,4 +46,4 @@ export default view`
       </section>
     </div>
   </section>
-`
+</view>

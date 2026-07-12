@@ -1,7 +1,6 @@
-import { view } from '@jacare/core'
 import { appHref, assetUrl } from './app-base.js'
 
-export default view`
+export <view>
   <div class="app app-wide">
     <div class="layout layout-wide">
       <header class="header">
@@ -25,4 +24,4 @@ export default view`
       </footer>
     </div>
   </div>
-`
+</view>
