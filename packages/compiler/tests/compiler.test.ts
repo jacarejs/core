@@ -365,4 +365,21 @@ export default view\`<div style---pct=\${progress}></div>\``
     expect(result.code).toContain('progress.subscribe(')
     expect(result.code).not.toContain('bindStyleVar(')
   })
+
+  it('calls signals inside ternary text expressions', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const turbo = signal(false)
+export default view\`<button>Turbo: \${turbo ? 'on' : 'off'}</button>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).toContain('turbo() ?')
+    expect(result.code).not.toMatch(/`\$\{turbo \?/)
+  })
+
+  it('does not treat reserved words in braced text as mount props', () => {
+    const source = `import { view } from '@jacare/core'
+export default view\`<pre>.x { width: var(--pct); }</pre>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).not.toContain('props["var"]')
+    expect(result.code).not.toContain('const var')
+  })
 })

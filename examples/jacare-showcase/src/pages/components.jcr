@@ -18,7 +18,7 @@ function cycleMood() {
 export <view>
   <section class="page">
     <div>
-      <h1 class="section-title">Components &amp; slots</h1>
+      <h1 class="section-title">Components & slots</h1>
       <p class="section-lead">
         PascalCase components, default slots, and co-located scoped <code>style</code> blocks per file.
       </p>

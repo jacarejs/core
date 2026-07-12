@@ -419,7 +419,7 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
       }
       return
     }
-    ctx.pushCleanup(`effect(() => { ${textNode}.data = String(${expr}) }).dispose`)
+    ctx.pushCleanup(`effect(() => { ${textNode}.data = String(${ctx.rewriteExprForEffect(expr)}) }).dispose`)
     return
   }
 
@@ -432,7 +432,7 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
       }
       const src = ctx.resolveSignal(p.value)
       if (src) return `\${${src}()}`
-      return `\${${p.value}}`
+      return `\${${ctx.rewriteExprForEffect(p.value)}}`
     })
     .join('')
 

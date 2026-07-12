@@ -4,6 +4,7 @@ import Card from '../components/Card.jcr'
 const progress = signal(35)
 const pct = computed(() => progress() + '%')
 const turbo = signal(false)
+const turboLabel = computed(() => (turbo() ? 'on' : 'off'))
 
 function bump(delta) {
   progress.update((n) => Math.min(100, Math.max(0, n + delta)))
@@ -13,16 +14,25 @@ function randomize() {
   progress.set(Math.floor(Math.random() * 101))
 }
 
-const styleSample = `<div class="progress-fill" style---pct=\${pct} />`
+const cssVarName = 'var(--pct)'
 
-const cpwSample = `let _v = progress.peek
+const codeBlock = `// Template — reactive CSS variable
+<div class="progress-fill" style---pct={pct} />
+
+// CSS
+.progress-fill { width: var(--pct); transition: width 0.15s ease; }
+
+// Production output (simplified)
+let _v = progress.peek
 _el.style.setProperty("--pct", String(_v))
 _cleanups.push(progress.subscribe(() => { ... }))`
+
+const classBindingSample = 'class-turbo={turbo}'
 
 export <view>
   <section class="page">
     <div>
-      <h1 class="section-title">Performance &amp; CPW</h1>
+      <h1 class="section-title">Performance & CPW</h1>
       <p class="section-lead">
         Compile-Time Pulse Wiring inlines signal→DOM updates in production builds.
         Reactive CSS variables animate on the GPU without layout thrashing.
@@ -45,7 +55,7 @@ export <view>
           <button class="btn btn-outline" on-click=${randomize}>Random</button>
         </div>
         <p class="demo-label">
-          Width is driven by <code>var(--pct)</code> — no inline <code>style.width</code> string rebuilds.
+          Width is driven by <code>${cssVarName}</code> — no inline <code>style.width</code> string rebuilds.
         </p>
       </div>
     </Card>
@@ -56,13 +66,13 @@ export <view>
           <button
             class="btn btn-primary"
             class-turbo=${turbo}
-            on-click=${() => turbo.update((v) => !v)}
+            on-click=${() => turbo.set(!turbo())}
           >
-            Turbo mode: ${turbo ? 'on' : 'off'}
+            Turbo mode: ${turboLabel}
           </button>
         </div>
         <p class="demo-label">
-          <code>class-turbo=${'${turbo}'}</code> compiles to <code>bindClass</code> in dev and CPW in production.
+          <code>${classBindingSample}</code> compiles to <code>bindClass</code> in dev and CPW in production.
         </p>
       </div>
     </Card>
@@ -75,14 +85,7 @@ export <view>
       </p>
     </div>
 
-    <pre class="code"><code>// Template — reactive CSS variable
-${styleSample}
-
-// CSS
-.progress-fill { width: var(--pct); transition: width 0.15s ease; }
-
-// Production output (simplified)
-${cpwSample}</code></pre>
+    <pre class="code"><code>${codeBlock}</code></pre>
 
     <p class="demo-label">
       Run <code>yarn bench</code> in the monorepo to compare runtime vs CPW. Enable

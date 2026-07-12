@@ -21,6 +21,19 @@ export function resolveSignalExpr(
   return null
 }
 
+export function rewriteSignalsInExpr(
+  expr: string,
+  signals?: ReadonlySet<string>,
+): string {
+  if (!signals || signals.size === 0) return expr
+  let out = expr
+  for (const name of [...signals].sort((a, b) => b.length - a.length)) {
+    const re = new RegExp(`(?<![.\\w$])${name}(?!\\s*\\()`, 'g')
+    out = out.replace(re, `${name}()`)
+  }
+  return out
+}
+
 export function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -61,6 +74,10 @@ export class CodegenContext {
 
   resolveSignal(expr: string): string | null {
     return resolveSignalExpr(expr, this.signals)
+  }
+
+  rewriteExprForEffect(expr: string): string {
+    return rewriteSignalsInExpr(expr, this.signals)
   }
 
   useRuntime(name: string): void {

@@ -155,6 +155,48 @@ const BUILTIN_GLOBALS = new Set([
   'console',
 ])
 
+const RESERVED_WORDS = new Set([
+  'await',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'false',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'import',
+  'in',
+  'instanceof',
+  'let',
+  'new',
+  'null',
+  'return',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'typeof',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+])
+
 export function detectProps(script: string, ast: TemplateAST): string[] {
   const declared = new Set<string>()
 
@@ -179,7 +221,12 @@ export function detectProps(script: string, ast: TemplateAST): string[] {
   }
 
   const used = collectRefs(ast)
-  return [...used].filter((name) => !declared.has(name) && !BUILTIN_GLOBALS.has(name)).sort()
+  return [...used]
+    .filter(
+      (name) =>
+        !declared.has(name) && !BUILTIN_GLOBALS.has(name) && !RESERVED_WORDS.has(name),
+    )
+    .sort()
 }
 
 function stripTemplateLiterals(code: string): string {
