@@ -1,0 +1,15 @@
+import { signal, computed, view } from '@jacare/core'
+
+const count = signal(0)
+const label = computed(() => `Count: ${count()}`)
+
+function add() {
+  count.update((n) => n + 1)
+}
+
+export default view`
+  <main>
+    <p>${label}</p>
+    <button on-click=${add}>+1</button>
+  </main>
+`

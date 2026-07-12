@@ -1,6 +1,6 @@
 {
   "name": "@jacare/compiler",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Jacaré compiler — .jcr templates to optimized DOM code",
   "license": "MIT",
   "repository": {

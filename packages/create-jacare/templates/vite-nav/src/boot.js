@@ -1,0 +1,14 @@
+import { nav } from './nav.js'
+
+const root = document.getElementById('app')
+if (!root) throw new Error('Missing #app')
+
+let dispose = nav.attach(root)
+
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    dispose?.()
+    dispose = nav.attach(root)
+  })
+  import.meta.hot.dispose(() => dispose?.())
+}

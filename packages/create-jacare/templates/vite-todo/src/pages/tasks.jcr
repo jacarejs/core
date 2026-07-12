@@ -1,0 +1,49 @@
+import { signal, view } from '@jacare/core'
+
+const items = signal([
+  { id: '1', label: 'Learn Jacaré syntax', done: false },
+  { id: '2', label: 'Build something fast', done: false },
+])
+
+const draft = signal('')
+
+function addItem() {
+  const label = draft().trim()
+  if (!label) return
+  items.update((list) => [...list, { id: String(Date.now()), label, done: false }])
+  draft.set('')
+}
+
+function toggleItem(id) {
+  items.update((list) =>
+    list.map((item) => (item.id === id ? { ...item, done: !item.done } : item)),
+  )
+}
+
+function removeItem(id) {
+  items.update((list) => list.filter((item) => item.id !== id))
+}
+
+export default view`
+  <section class="page">
+    <div class="add-row">
+      <input
+        type="text"
+        class="input add-input"
+        placeholder="What needs to be done?"
+        bind-value=${draft}
+      />
+      <button class="btn btn-primary" on-click=${addItem}>Add</button>
+    </div>
+
+    <ul class="list">
+      #for items() as item (item.id)
+        <li class-done=${item.done}>
+          <button class="check" on-click=${() => toggleItem(item.id)}></button>
+          <span class="label">${item.label}</span>
+          <button class="remove" on-click=${() => removeItem(item.id)}>×</button>
+        </li>
+      #end
+    </ul>
+  </section>
+`

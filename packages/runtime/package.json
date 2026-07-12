@@ -1,6 +1,6 @@
 {
   "name": "@jacare/core",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Jacaré runtime — fine-grained reactivity engine",
   "license": "MIT",
   "repository": {
