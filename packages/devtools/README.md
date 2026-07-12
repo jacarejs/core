@@ -168,10 +168,16 @@ interface PulseGraphSnapshot {
 interface PulseNode {
   id: string
   kind: 'signal' | 'computed' | 'effect'
-  name?: string
   value: unknown
+  stale?: boolean
+  subscribers?: number
+  disposed?: boolean
 }
+```
 
+`name` (e.g. `pulse#count` from compiler metadata) is planned — see [docs/phases/06-devtools.md](https://github.com/jacarejs/core/blob/main/docs/phases/06-devtools.md#compiler-node-names).
+
+```typescript
 interface PulseEdge {
   from: string
   to: string

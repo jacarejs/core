@@ -86,11 +86,21 @@ public/
 
 ```bash
 yarn build          # build all packages
-yarn test           # run tests (103 tests)
+yarn test           # run tests (127 tests)
 yarn typecheck      # TypeScript check
 yarn example:build  # build jacare-todo example
+yarn showcase:build # build jacare-showcase example
 jacare check        # compile all .jcr files (from app root)
 ```
+
+## Testing
+
+See [testing.md](testing.md) for Vitest + happy-dom patterns:
+
+- Runtime unit tests (`signal`, `bindText`, `createNav`, …)
+- Compile `.jcr` then `mount()` integration tests
+- Compiler output assertions
+- Planned `@jacare/testing` package
 
 ## CI and publish
 

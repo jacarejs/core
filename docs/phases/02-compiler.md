@@ -263,6 +263,18 @@ packages/vite-plugin/src/
 | Pluggable directives | Custom attribute transforms via plugin API |
 | Branch tree-shaking | `#if import.meta.env.DEV` eliminated at build time |
 
+### Pulse analysis
+
+Compile-time diagnostics when a binding could be more efficient:
+
+| Pattern | Today | Diagnostic (planned) |
+|---------|-------|----------------------|
+| `${count()}` with bare signal | Emits `bindText` when detected | Warn if written as call when bare reference works |
+| `${label()}` inside mixed text | Falls back to `effect` | Suggest splitting or using computed |
+| Signal read in event handler | Correct — not a binding | No warning |
+
+The compiler already uses `detectSignals()` and `resolveSignalExpr()` to choose `bindText`, `bindModel`, or `effect`. Pulse analysis will expose these decisions as warnings during `jacare compile` and `jacare check`.
+
 ## Tests
 
 ```bash

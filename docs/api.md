@@ -28,6 +28,7 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 14. [Compiler API](#14-compiler-api)
 15. [CLI](#15-cli)
 16. [Vite plugin](#16-vite-plugin)
+17. [Testing](#17-testing)
 
 ---
 
@@ -694,6 +695,27 @@ Panels:
 
 Zero runtime cost when DevTools are not connected.
 
+### Pulse Graph nodes
+
+Each node in the graph has:
+
+| Field | Description |
+|-------|-------------|
+| `id` | Stable numeric id |
+| `kind` | `signal` · `computed` · `effect` |
+| `value` | Last known value |
+| `stale` | Derived node marked dirty |
+| `subscribers` | Downstream dependency count |
+| `disposed` | Effect cleaned up |
+
+The in-app panel labels nodes as `Pulse #1`, `Derive #2`, `Watch #3` based on `kind` and `id`.
+
+### Compiler node names (planned)
+
+The compiler will attach source metadata so DevTools can show names like `count` or `items` instead of numeric ids — e.g. `pulse#count` mapped to the `signal` declared in the `.jcr` module. This requires the compiler to emit binding metadata alongside generated `mount()` code.
+
+See [Phase 6 — DevTools](phases/06-devtools.md#compiler-node-names).
+
 ---
 
 ## 14. Compiler API
@@ -733,6 +755,12 @@ npx jacare-compile src/app.jcr dist/app.js
 jacare compile src/app.jcr --watch
 jacare check
 ```
+
+### Pulse analysis (planned)
+
+The compiler will warn when a template binding is suboptimal — for example `${count()}` where `${count}` is enough (bare signal → `bindText` instead of a full `effect`). Today the compiler silently picks the best binding; diagnostics will surface these cases at compile time.
+
+See [Phase 2 — Compiler](phases/02-compiler.md#pulse-analysis).
 
 ---
 
@@ -817,3 +845,26 @@ yarn showcase:dev   # showcase
 ```
 
 Live demos: [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) · [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/)
+
+---
+
+## 17. Testing
+
+Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
+
+| Approach | When to use |
+|----------|-------------|
+| Runtime unit tests | Signals, bindings, nav, forms without compiling templates |
+| Compile + mount | Full `.jcr` integration — compile source, call `mount(root)` |
+| Compiler assertions | Verify generated `bindText` / `bindModel` / `branch` output |
+| DevTools registry | `enableDevtools()` + `getPulseGraph()` in tests |
+
+```bash
+yarn test          # monorepo — 127 tests
+```
+
+Full guide: [testing.md](testing.md)
+
+### `@jacare/testing` (planned)
+
+A dedicated package will provide `render()`, query helpers, and `cleanup()` around the compile-and-mount flow. Until it ships, use the patterns in [testing.md](testing.md).

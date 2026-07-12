@@ -122,6 +122,26 @@ Two fixed panels (bottom-right):
 | Highlight flashes | Pulse animation on updated nodes |
 | SSR graph | Inspect server-side pulses during hydration |
 
+### Compiler node names
+
+Today the Pulse Graph shows generic labels (`Pulse #3`, `Derive #2`). The compiler will emit metadata mapping each runtime cell to its source declaration:
+
+```
+.jcr source          Compiler metadata       DevTools label
+──────────          ─────────────────       ──────────────
+const count = …  →  pulse#count         →  count (signal)
+const total = …  →  derive#total        →  total (computed)
+effect(() => …)  →  watch#titleSync     →  titleSync (effect)
+```
+
+Implementation path:
+
+1. Compiler records signal/computed/effect variable names during codegen
+2. Runtime registry accepts optional `name` on register hooks
+3. DevTools panel displays `name` when present, falls back to `Pulse #N`
+
+Bindings in templates (`${count}` on a `<p>`) may also map to DOM node labels for easier debugging.
+
 ---
 
 **Next:** [Forms](07-forms.md)

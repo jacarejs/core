@@ -413,6 +413,7 @@ cd demo && yarn install && yarn dev
 - [Phase 5 — Nav](docs/phases/05-nav.md)
 - [Phase 6 — DevTools](docs/phases/06-devtools.md)
 - [Phase 7 — Forms](docs/phases/07-forms.md)
+- [Testing guide](docs/testing.md)
 - [Contributing & local development](docs/CONTRIBUTING.md)
 
 ## Roadmap
