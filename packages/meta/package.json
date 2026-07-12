@@ -1,0 +1,43 @@
+{
+  "name": "@jacare/meta",
+  "version": "0.0.2",
+  "description": "File-based routing and app conventions for Jacaré",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jacarejs/core.git",
+    "directory": "packages/meta"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "yarn build"
+  },
+  "dependencies": {
+    "@jacare/core": "0.0.2"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.3"
+  },
+  "sideEffects": false
+}

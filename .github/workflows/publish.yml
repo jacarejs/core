@@ -54,6 +54,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
+      - name: Publish @jacare/meta
+        run: npm publish --access public
+        working-directory: packages/meta
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
+
       - name: Publish @jacare/devtools
         run: npm publish --access public
         working-directory: packages/devtools

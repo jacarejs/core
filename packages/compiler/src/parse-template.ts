@@ -10,7 +10,7 @@ import { JacareCompileError } from './errors.js'
 
 const VOID_TAGS = new Set([
   'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-  'link', 'meta', 'param', 'source', 'track', 'wbr',
+  'link', 'meta', 'param', 'source', 'track', 'wbr', 'slot',
 ])
 
 const CLOSE_TAG_RE = /^<\/([a-zA-Z][\w-]*)>/
@@ -207,11 +207,39 @@ function parseElement(source: string, pos: number): { node: TemplateNode; pos: n
   const afterOpen = tagEnd + 1
 
   if (isComponent) {
-    if (!selfClosing) {
-      fail(`component <${tag}> must be self-closing`, pos)
+    if (selfClosing) {
+      return {
+        node: { type: 'component', name: tagName, attrs, children: [], selfClosing: true },
+        pos: afterOpen,
+      }
     }
+
+    const inner = parseNodes(source, afterOpen)
+    const closeTag = `</${tagName}>`
+    if (!source.startsWith(closeTag, inner.pos)) {
+      fail(`expected </${tagName}>`, pos)
+    }
+
     return {
-      node: { type: 'component', name: tagName, attrs, selfClosing: true },
+      node: {
+        type: 'component',
+        name: tagName,
+        attrs,
+        children: inner.nodes,
+        selfClosing: false,
+      },
+      pos: inner.pos + closeTag.length,
+    }
+  }
+
+  if (tagName === 'slot') {
+    const slotName = attrs.find((a) => a.name === 'name' && a.kind === 'static')?.value
+    return {
+      node: {
+        type: 'slot',
+        ...(slotName ? { name: slotName } : {}),
+        sourceLine: templateLineAt(pos),
+      },
       pos: afterOpen,
     }
   }

@@ -1,0 +1,13 @@
+{
+  "iconDefinitions": {
+    "_jacare_file": {
+      "iconPath": "./jacare-logo.png"
+    }
+  },
+  "fileExtensions": {
+    "jcr": "_jacare_file"
+  },
+  "languageIds": {
+    "jacare": "_jacare_file"
+  }
+}

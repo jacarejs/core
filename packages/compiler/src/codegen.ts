@@ -15,6 +15,8 @@ const RUNTIME_IMPORT_ORDER = [
   'reconcileKeyedList',
   'resumeBindings',
   'escapeHtml',
+  'ensureScopedStyle',
+  'mountSlot',
 ] as const
 
 const DECL_RE = /\b(?:const|let|var|function)\s+([\w$]+)/g
@@ -29,7 +31,13 @@ export function orderRuntimeImports(imports: Iterable<string>): string[] {
 export function generate(
   ast: TemplateAST,
   moduleCode: string,
-  options: { runtimeImport?: string; viewStartLine?: number; mode?: 'client' | 'server' | 'full' } = {},
+  options: {
+    runtimeImport?: string
+    viewStartLine?: number
+    mode?: 'client' | 'server' | 'full'
+    scopeId?: string
+    scopedStyle?: string
+  } = {},
 ): { code: string; mappings: CodegenMapping[] } {
   const mode = options.mode ?? 'full'
   const runtime = options.runtimeImport ?? '@jacare/core'
@@ -50,7 +58,7 @@ export function generate(
   let mappings: CodegenMapping[] = []
 
   if (mode === 'server' || mode === 'full') {
-    lines.push(...emitSSR(ast, props, runtimeImports, signals))
+    lines.push(...emitSSR(ast, props, runtimeImports, signals, options.scopeId, options.scopedStyle))
     lines.push('')
   }
 
@@ -63,7 +71,7 @@ export function generate(
       props.length > 0 ? new Set(props) : undefined,
       signals,
     )
-    emitClient(ast, props, clientCtx)
+    emitClient(ast, props, clientCtx, options.scopeId, options.scopedStyle)
     lines.push(...clientCtx.join())
     mappings = clientCtx.getMappings()
     lines.push('')
@@ -93,7 +101,7 @@ function cleanupImports(code: string): string {
     const names = spec
       .split(',')
       .map((part) => part.trim())
-      .filter((part) => part.length > 0 && part !== 'view')
+      .filter((part) => part.length > 0 && part !== 'view' && part !== 'style')
     return `import { ${names.join(', ')} }`
   })
 }
@@ -111,7 +119,7 @@ function extractUserRuntimeImport(
     const userRuntimeSymbols = match[1]!
       .split(',')
       .map((part) => part.trim())
-      .filter((part) => part.length > 0 && part !== 'view')
+      .filter((part) => part.length > 0 && part !== 'view' && part !== 'style')
     const body = moduleCode.replace(importRe, '').trim()
     return { userRuntimeSymbols, body }
   }
@@ -200,6 +208,9 @@ function collectRefs(ast: TemplateAST): Set<string> {
               collectExprRefs(attr.value, refs)
             }
           }
+          walk(node.children)
+          break
+        case 'slot':
           break
         case 'if':
           for (const branch of node.branches) {
@@ -220,7 +231,32 @@ function collectRefs(ast: TemplateAST): Set<string> {
   }
 
   walk(ast.children)
+  if (hasSlotNode(ast)) {
+    refs.add('children')
+  }
   return refs
+}
+
+function hasSlotNode(ast: TemplateAST): boolean {
+  let found = false
+  const walk = (nodes: TemplateNode[]): void => {
+    for (const node of nodes) {
+      if (found) return
+      if (node.type === 'slot') {
+        found = true
+        return
+      }
+      if (node.type === 'element') walk(node.children)
+      if (node.type === 'component') walk(node.children)
+      if (node.type === 'if') {
+        for (const branch of node.branches) walk(branch.children)
+        walk(node.elseChildren)
+      }
+      if (node.type === 'each') walk(node.children)
+    }
+  }
+  walk(ast.children)
+  return found
 }
 
 function collectExprRefs(expr: string, refs: Set<string>): void {

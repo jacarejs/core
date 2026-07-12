@@ -5,6 +5,7 @@ import { generate } from './codegen.js'
 import type { CodegenMapping } from './codegen-shared.js'
 import { parseModule } from './parse-module.js'
 import { parseTemplate } from './parse-template.js'
+import { scopeCss, scopeIdFromFilename } from './scope-css.js'
 import type { CompileOptions, CompileResult } from './types.js'
 
 export function compile(source: string, options: CompileOptions = {}): CompileResult {
@@ -14,10 +15,15 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     ...(filename ? { filename } : {}),
     baseLine: parsed.viewStartLine,
   })
+  const scopeId = options.scopeId ?? (filename ? scopeIdFromFilename(filename) : undefined)
+  const scopedStyle =
+    parsed.styleCss && scopeId ? scopeCss(parsed.styleCss, scopeId) : undefined
   const generated = generate(ast, parsed.code, {
     ...(options.runtimeImport ? { runtimeImport: options.runtimeImport } : {}),
     viewStartLine: parsed.viewStartLine,
     mode: options.mode ?? 'full',
+    ...(scopeId ? { scopeId } : {}),
+    ...(scopedStyle ? { scopedStyle } : {}),
   })
 
   const map = filename
@@ -28,6 +34,8 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     code: generated.code,
     script: parsed.code,
     template: parsed.viewHtml!,
+    ...(scopeId ? { scopeId } : {}),
+    ...(scopedStyle ? { scopedStyle } : {}),
     ...(map ? { map } : {}),
   }
 }

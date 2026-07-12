@@ -168,7 +168,7 @@ When an item keeps the same key but changes identity (immutable updates with spr
 
 ## Components
 
-Import another `.jcr` or `.js` module and use it as a self-closing tag:
+Import another `.jcr` or `.js` module and use it as a tag:
 
 ```javascript
 import TodoItem from './TodoItem.jcr'
@@ -176,7 +176,84 @@ import TodoItem from './TodoItem.jcr'
 view`<TodoItem :item=${item} />`
 ```
 
-Props are inferred from attribute expressions.
+With children (default slot):
+
+```javascript
+import Card from './Card.jcr'
+
+view`
+<Card :title=${title}>
+  <p>${body}</p>
+</Card>
+`
+```
+
+Inside the child component, project children with `<slot />`:
+
+```javascript
+export default view`
+<div class="card">
+  <h2>${title}</h2>
+  <slot />
+</div>
+`
+```
+
+Props are inferred from attribute expressions. `children` is passed automatically when the parent has inner content.
+
+## Scoped CSS
+
+Add a `style` tagged template after `view`:
+
+```javascript
+export default view`
+<div class="card">
+  <p class="title">${title}</p>
+</div>
+`
+style`
+.card { padding: 1rem; border: 1px solid #ccc; }
+.title { font-weight: bold; }
+`
+```
+
+The compiler scopes selectors with `[data-jacare-s]` on the mount target and injects styles at runtime.
+
+Use `:global(.shared)` inside `style` to opt out of scoping for a selector.
+
+## Meta-framework
+
+`@jacare/meta` adds file-based routing via a Vite plugin:
+
+```javascript
+// vite.config.js
+import { jacare } from '@jacare/vite-plugin'
+import { jacareMeta } from '@jacare/meta'
+
+export default {
+  plugins: [jacareMeta(), jacare()],
+}
+```
+
+```javascript
+// src/nav.js
+import { createJacareAppFromRoutes } from '@jacare/meta'
+import { routeLoaders } from 'virtual:jacare-routes'
+import Shell from './shell.jcr'
+import NotFound from './pages/not-found.jcr'
+
+export const nav = createJacareAppFromRoutes({
+  layout: Shell,
+  missing: NotFound,
+  routeLoaders,
+})
+```
+
+| File | Route |
+|------|-------|
+| `src/pages/index.jcr` | `/` |
+| `src/pages/about.jcr` | `/about` |
+| `src/pages/tutorial/[slug].jcr` | `/tutorial/:slug` |
 
 ## Nav
 

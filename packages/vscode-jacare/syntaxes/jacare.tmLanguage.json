@@ -1,0 +1,175 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Jacaré",
+  "scopeName": "source.jacare",
+  "patterns": [
+    {
+      "include": "#script"
+    }
+  ],
+  "repository": {
+    "script": {
+      "patterns": [
+        {
+          "include": "#view-template"
+        },
+        {
+          "include": "#style-template"
+        },
+        {
+          "include": "source.js"
+        }
+      ]
+    },
+    "view-template": {
+      "begin": "(\\bview\\s*)(`)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.tag.jacare"
+        },
+        "2": {
+          "name": "string.template.jacare punctuation.definition.string.template.begin"
+        }
+      },
+      "end": "`",
+      "endCaptures": {
+        "0": {
+          "name": "string.template.jacare punctuation.definition.string.template.end"
+        }
+      },
+      "name": "string.template.jacare",
+      "patterns": [
+        {
+          "include": "#template-body"
+        }
+      ]
+    },
+    "style-template": {
+      "begin": "(\\bstyle\\s*)(`)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.tag.jacare"
+        },
+        "2": {
+          "name": "string.template.jacare punctuation.definition.string.template.begin"
+        }
+      },
+      "end": "`",
+      "endCaptures": {
+        "0": {
+          "name": "string.template.jacare punctuation.definition.string.template.end"
+        }
+      },
+      "name": "string.template.jacare",
+      "contentName": "source.css",
+      "patterns": [
+        {
+          "include": "source.css"
+        }
+      ]
+    },
+    "template-body": {
+      "patterns": [
+        {
+          "include": "#directives"
+        },
+        {
+          "include": "#template-expr"
+        },
+        {
+          "include": "#html-tags"
+        },
+        {
+          "include": "#html-attrs"
+        },
+        {
+          "include": "#strings"
+        }
+      ]
+    },
+    "directives": {
+      "patterns": [
+        {
+          "match": "^\\s*(#if|#elif|#else|#end|#for|@if|@elseif|@else|@end|@each)\\b",
+          "name": "keyword.control.jacare"
+        }
+      ]
+    },
+    "template-expr": {
+      "begin": "\\$\\{",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.begin.jacare"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.embedded.end.jacare"
+        }
+      },
+      "name": "meta.embedded.expression.jacare",
+      "patterns": [
+        {
+          "include": "source.js"
+        }
+      ]
+    },
+    "html-tags": {
+      "patterns": [
+        {
+          "match": "(</?)([A-Z][\\w]*)(/?>)",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin"
+            },
+            "2": {
+              "name": "entity.name.type.tag.jacare support.class.component"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end"
+            }
+          }
+        },
+        {
+          "match": "(</?)(slot|div|span|p|a|button|input|label|ul|li|nav|main|header|footer|section|article|h[1-6]|form|select|option|textarea|pre|code|table|tr|td|th|thead|tbody|img|br|hr)(/?>)",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.tag.begin"
+            },
+            "2": {
+              "name": "entity.name.tag"
+            },
+            "3": {
+              "name": "punctuation.definition.tag.end"
+            }
+          }
+        }
+      ]
+    },
+    "html-attrs": {
+      "patterns": [
+        {
+          "match": "\\b(bind-[\\w-]+|class-[\\w-]+|on-[\\w-]+|@[\\w-]+|:?[\\w-]+)\\s*=",
+          "captures": {
+            "1": {
+              "name": "entity.other.attribute-name"
+            }
+          }
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "match": "\"[^\"]*\"",
+          "name": "string.quoted.double"
+        },
+        {
+          "match": "'[^']*'",
+          "name": "string.quoted.single"
+        }
+      ]
+    }
+  }
+}

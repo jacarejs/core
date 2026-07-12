@@ -7,6 +7,7 @@ export default defineConfig({
       '@jacare/core': resolve(__dirname, 'packages/runtime/dist/index.js'),
       '@jacare/compiler': resolve(__dirname, 'packages/compiler/dist/index.js'),
       '@jacare/vite-plugin': resolve(__dirname, 'packages/vite-plugin/dist/index.js'),
+      '@jacare/meta': resolve(__dirname, 'packages/meta/dist/index.js'),
       '@jacare/devtools': resolve(__dirname, 'packages/devtools/dist/index.js'),
     },
   },

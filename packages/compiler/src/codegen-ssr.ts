@@ -6,6 +6,8 @@ export function emitSSR(
   props: string[],
   runtimeImports?: Set<string>,
   signals?: ReadonlySet<string>,
+  scopeId?: string,
+  scopedStyle?: string,
 ): string[] {
   const ctx = new CodegenContext(0, 1, runtimeImports, undefined, signals)
 
@@ -23,6 +25,10 @@ export function emitSSR(
 
   ctx.line('let _html = ""')
   ctx.line('const _bindings = []')
+
+  if (scopedStyle && scopeId) {
+    ctx.line(`_html += '<style data-jacare-s="${scopeId}">' + ${JSON.stringify(scopedStyle)} + '</style>'`)
+  }
 
   for (const child of ast.children) {
     emitSSRNode(ctx, child)
@@ -69,6 +75,9 @@ function emitSSRNode(ctx: CodegenContext, node: TemplateNode): void {
       break
     case 'component':
       ctx.line(`_html += ${node.name}.render ? ${node.name}.render().html : ""`)
+      break
+    case 'slot':
+      ctx.line(`_html += '<span data-jacare-slot="default"></span>'`)
       break
     case 'if':
       emitSSRIf(ctx, node)

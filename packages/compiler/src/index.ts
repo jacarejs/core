@@ -4,6 +4,7 @@ export { parseModule, findViewTemplates } from './parse-module.js'
 export { flattenViewLiteral } from './flatten-literal.js'
 export { parseTemplate } from './parse-template.js'
 export { generate } from './codegen.js'
+export { scopeCss, scopeIdFromFilename } from './scope-css.js'
 export type {
   CompileOptions,
   CompileResult,
@@ -13,6 +14,7 @@ export type {
   TemplateEachNode,
   TemplateElementNode,
   TemplateIfNode,
+  TemplateSlotNode,
   TemplateNode,
   TemplateTextNode,
   TextPart,

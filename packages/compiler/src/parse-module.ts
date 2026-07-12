@@ -4,6 +4,7 @@ import { JacareCompileError } from './errors.js'
 export interface ParsedModule {
   code: string
   viewHtml: string | null
+  styleCss: string | null
   viewStartLine: number
   viewEndLine: number
   moduleLineMap: number[]
@@ -12,6 +13,7 @@ export interface ParsedModule {
 const SFC_SCRIPT_RE = /<script(?:\s[^>]*)?>/i
 const EXPORT_VIEW_RE = /export\s+default\s+view\s*`/
 const VIEW_RE = /\bview\s*`/
+const STYLE_RE = /\bstyle\s*`/
 
 export function parseModule(source: string, filename?: string): ParsedModule {
   if (SFC_SCRIPT_RE.test(source)) {
@@ -39,14 +41,25 @@ export function parseModule(source: string, filename?: string): ParsedModule {
 
   const backtick = viewMatch.index + viewMatch[0].length - 1
   const flat = flattenViewLiteral(source, backtick, filename)
-  const code = source.slice(0, viewMatch.index) + source.slice(flat.end)
+  let code = source.slice(0, viewMatch.index) + source.slice(flat.end)
   const viewStartLine = lineAt(source, viewMatch.index)
   const viewEndLine = lineAt(source, flat.end)
+
+  let styleCss: string | null = null
+  const styleMatch = STYLE_RE.exec(code)
+  if (styleMatch) {
+    const styleBacktick = styleMatch.index + styleMatch[0].length - 1
+    const styleFlat = flattenViewLiteral(code, styleBacktick, filename)
+    styleCss = styleFlat.html
+    code = code.slice(0, styleMatch.index) + code.slice(styleFlat.end)
+  }
+
   const moduleLineMap = buildModuleLineMap(source, viewStartLine, viewEndLine)
 
   return {
     code: code.trim(),
     viewHtml: flat.html,
+    styleCss,
     viewStartLine,
     viewEndLine,
     moduleLineMap,

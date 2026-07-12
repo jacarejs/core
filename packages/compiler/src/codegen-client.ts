@@ -10,7 +10,13 @@ import { append, CodegenContext, resolveSignalExpr, type EmitTarget } from './co
 
 const SIGNAL_REF_RE = /^([A-Za-z_$][\w$]*)$/
 
-export function emitClient(ast: TemplateAST, props: string[], ctx: CodegenContext): void {
+export function emitClient(
+  ast: TemplateAST,
+  props: string[],
+  ctx: CodegenContext,
+  scopeId?: string,
+  scopedStyle?: string,
+): void {
   if (props.length > 0) {
     ctx.line('export function mount(target, props = {}) {')
     ctx.indent()
@@ -21,6 +27,14 @@ export function emitClient(ast: TemplateAST, props: string[], ctx: CodegenContex
   } else {
     ctx.line('export function mount(target) {')
     ctx.indent()
+  }
+
+  if (scopeId) {
+    ctx.line(`target.setAttribute('data-jacare-s', ${JSON.stringify(scopeId)})`)
+    if (scopedStyle) {
+      ctx.useRuntime('ensureScopedStyle')
+      ctx.line(`ensureScopedStyle(${JSON.stringify(scopeId)}, ${JSON.stringify(scopedStyle)})`)
+    }
   }
 
   ctx.line('const _cleanups = []')
@@ -46,6 +60,9 @@ function emitNode(ctx: CodegenContext, node: TemplateNode, target: EmitTarget): 
       break
     case 'component':
       emitComponent(ctx, node, target)
+      break
+    case 'slot':
+      emitSlot(ctx, node, target)
       break
     case 'if':
       emitIf(ctx, node, target)
@@ -75,6 +92,25 @@ function emitElement(
   append(ctx, target, el)
 }
 
+function emitSlot(
+  ctx: CodegenContext,
+  node: Extract<TemplateNode, { type: 'slot' }>,
+  target: EmitTarget,
+): void {
+  const anchor = ctx.nextId('slot')
+  ctx.line(`const ${anchor} = document.createElement('span')`, node.sourceLine)
+  append(ctx, target, anchor)
+  ctx.useRuntime('mountSlot')
+  const slotKey = node.name ? JSON.stringify(node.name) : 'undefined'
+  ctx.line(`if (typeof children === 'function') {`)
+  ctx.indent()
+  const dispose = ctx.nextId('slotDispose')
+  ctx.line(`const ${dispose} = mountSlot(${anchor}, children, ${slotKey})`)
+  ctx.line(`if (${dispose}) _cleanups.push(${dispose})`)
+  ctx.dedent()
+  ctx.line('}')
+}
+
 function emitComponent(
   ctx: CodegenContext,
   node: Extract<TemplateNode, { type: 'component' }>,
@@ -89,6 +125,23 @@ function emitComponent(
     if (attr.kind === 'prop' || attr.kind === 'event') {
       propsList.push(`${attr.name}: ${attr.value}`)
     }
+  }
+
+  if (node.children.length > 0) {
+    const slotFn = ctx.nextId('slotFn')
+    const slotScope = ctx.nextId('slotCleanups')
+    ctx.line(`const ${slotFn} = (slotTarget) => {`)
+    ctx.indent()
+    ctx.line(`const ${slotScope} = []`)
+    ctx.pushCleanupScope(slotScope)
+    for (const child of node.children) {
+      emitNode(ctx, child, { kind: 'parent', name: 'slotTarget' })
+    }
+    ctx.popCleanupScope()
+    ctx.line(`return () => { for (const c of ${slotScope}) c() }`)
+    ctx.dedent()
+    ctx.line('}')
+    propsList.push(`children: ${slotFn}`)
   }
 
   const propsArg = propsList.length > 0 ? `{ ${propsList.join(', ')} }` : '{}'

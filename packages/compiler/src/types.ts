@@ -3,12 +3,15 @@ export interface CompileOptions {
   runtimeImport?: string
   viewStartLine?: number
   mode?: 'client' | 'server' | 'full'
+  scopeId?: string
 }
 
 export interface CompileResult {
   code: string
   script: string
   template: string
+  scopeId?: string
+  scopedStyle?: string
   map?: import('source-map-js').RawSourceMap
 }
 
@@ -45,7 +48,14 @@ export interface TemplateComponentNode {
   type: 'component'
   name: string
   attrs: TemplateAttr[]
+  children: TemplateNode[]
   selfClosing: boolean
+}
+
+export interface TemplateSlotNode {
+  type: 'slot'
+  name?: string
+  sourceLine?: number
 }
 
 export interface TemplateIfBranch {
@@ -74,6 +84,7 @@ export type TemplateNode =
   | TemplateTextNode
   | TemplateElementNode
   | TemplateComponentNode
+  | TemplateSlotNode
   | TemplateIfNode
   | TemplateEachNode
 
