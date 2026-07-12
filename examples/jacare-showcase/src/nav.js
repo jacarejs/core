@@ -13,6 +13,7 @@ export const nav = createNav({
     '/components': lazy(() => import('./pages/components.jcr')),
     '/forms': lazy(() => import('./pages/forms.jcr')),
     '/playground': lazy(() => import('./pages/playground.jcr')),
+    '/cart': lazy(() => import('./pages/cart.jcr')),
   },
   missing: NotFound,
 })
@@ -20,3 +21,4 @@ export const nav = createNav({
 nav.warm('/reactivity')
 nav.warm('/components')
 nav.warm('/playground')
+nav.warm('/cart')

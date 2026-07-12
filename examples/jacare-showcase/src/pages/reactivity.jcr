@@ -7,11 +7,11 @@ const doubled = computed(() => count() * 2)
 const isEven = computed(() => count() % 2 === 0)
 
 function increment() {
-  count.update((n) => n + step())
+  count.update((n) => n + Number(step()))
 }
 
 function decrement() {
-  count.update((n) => n - step())
+  count.update((n) => n - Number(step()))
 }
 
 function reset() {
@@ -52,6 +52,6 @@ export default view`
     </Card>
 
     <pre class="code"><code>const count = signal(0)
-const doubled = computed(() =&gt; count() * 2)</code></pre>
+const doubled = computed(() => count() * 2)</code></pre>
   </section>
 `

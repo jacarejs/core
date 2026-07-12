@@ -34,22 +34,54 @@ jobs:
       - name: Build packages
         run: yarn build
 
-      - name: Build demo app
+      - name: Build todo demo
         working-directory: examples/jacare-todo
         env:
           JACARE_BASE: /core/
         run: yarn build
 
-      - name: Prepare SPA fallback
-        working-directory: examples/jacare-todo/dist
+      - name: Build showcase demo
+        working-directory: examples/jacare-showcase
+        env:
+          JACARE_BASE: /showcase/
+        run: yarn build
+
+      - name: Prepare Pages site
         run: |
-          cp index.html 404.html
-          touch .nojekyll
+          mkdir -p site/core site/showcase
+          cp -r examples/jacare-todo/dist/. site/core/
+          cp -r examples/jacare-showcase/dist/. site/showcase/
+          cp examples/jacare-todo/dist/index.html site/core/404.html
+          cp examples/jacare-showcase/dist/index.html site/showcase/404.html
+          touch site/.nojekyll site/core/.nojekyll site/showcase/.nojekyll
+          cat > site/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>Jacaré Demos</title>
+              <style>
+                :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+                body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #001818; color: #d8f3dc; }
+                main { display: grid; gap: 1rem; padding: 2rem; text-align: center; }
+                a { color: #78c018; font-weight: 700; }
+              </style>
+            </head>
+            <body>
+              <main>
+                <h1>Jacaré live demos</h1>
+                <p><a href="./core/">Todo app</a> — tasks, forms, and tutorial routes</p>
+                <p><a href="./showcase/">Showcase</a> — reactivity, components, slots, and playground</p>
+              </main>
+            </body>
+          </html>
+          EOF
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: examples/jacare-todo/dist
+          path: site
 
   deploy:
     needs: build

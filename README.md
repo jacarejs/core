@@ -291,4 +291,16 @@ npm create jacare@latest my-app
 jacare new my-app --template=todo
 ```
 
-Live demo: [jacarejs.github.io/core](https://jacarejs.github.io/core/)
+Live demos:
+
+| Demo | URL | Description |
+|------|-----|-------------|
+| **Todo app** | [jacarejs.github.io/core](https://jacarejs.github.io/core/) | Full task manager with forms, keyed lists, and tutorial routes |
+| **Showcase** | [jacarejs.github.io/showcase](https://jacarejs.github.io/showcase/) | Polished walkthrough of reactivity, components, slots, and scoped CSS |
+
+Run locally:
+
+```bash
+yarn showcase:dev   # http://localhost:3001
+yarn example:dev    # jacare-todo dev server
+```

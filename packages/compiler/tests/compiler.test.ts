@@ -256,4 +256,22 @@ export default view\`<Field :field={field} />\``
     expect(result.code).toContain('runUntracked(() => {')
     expect(result.code).toContain('Field(')
   })
+
+  it('passes static attributes as component props', () => {
+    const source = `import Card from './Card.jcr'
+import { view } from '@jacare/core'
+export default view\`<Card title="Hello" subtitle="World" />\``
+    const result = compile(source)
+    expect(result.code).toContain('title: "Hello"')
+    expect(result.code).toContain('subtitle: "World"')
+  })
+
+  it('does not treat global builtins as component props', () => {
+    const source = `import Stat from './Stat.jcr'
+import { signal, view } from '@jacare/core'
+const renders = signal(0)
+export default view\`<Stat :value=\${() => String(renders())} label="Mounts" />\``
+    const result = compile(source)
+    expect(result.code).not.toContain('props["String"]')
+  })
 })

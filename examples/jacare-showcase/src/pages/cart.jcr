@@ -1,0 +1,277 @@
+import { computed, signal, view } from '@jacare/core'
+import Card from '../components/Card.jcr'
+import Badge from '../components/Badge.jcr'
+
+function formatMoney(value) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+}
+
+const catalog = [
+  { id: 'mug', name: 'Jacaré Mug', price: 24.9, tag: 'gear' },
+  { id: 'tee', name: 'Logo T-Shirt', price: 39.9, tag: 'apparel' },
+  { id: 'sticker', name: 'Sticker Pack', price: 9.9, tag: 'gear' },
+  { id: 'hoodie', name: 'Forest Hoodie', price: 64.9, tag: 'apparel' },
+  { id: 'cap', name: 'Canvas Cap', price: 29.9, tag: 'apparel' },
+  { id: 'notebook', name: 'Dev Notebook', price: 18.5, tag: 'gear' },
+].map((product) => ({ ...product, priceLabel: formatMoney(product.price) }))
+
+const cart = signal([])
+const coupon = signal('')
+
+const lines = computed(() =>
+  cart()
+    .map((line) => {
+      const product = catalog.find((item) => item.id === line.productId)
+      if (!product) return null
+      const lineTotal = product.price * line.qty
+      return {
+        ...line,
+        product,
+        lineTotal,
+        unitLabel: product.priceLabel,
+        totalLabel: formatMoney(lineTotal),
+      }
+    })
+    .filter(Boolean),
+)
+
+const itemCount = computed(() => cart().reduce((sum, line) => sum + line.qty, 0))
+const subtotal = computed(() => lines().reduce((sum, line) => sum + line.lineTotal, 0))
+const volumeDiscount = computed(() => (subtotal() >= 100 ? subtotal() * 0.1 : 0))
+const couponDiscount = computed(() => {
+  const code = coupon().trim().toUpperCase()
+  if (!code) return 0
+  if (code === 'JACARE10') return subtotal() * 0.1
+  if (code === 'SHIPFREE') return 0
+  return 0
+})
+const discount = computed(() => Math.min(subtotal(), volumeDiscount() + couponDiscount()))
+const taxable = computed(() => Math.max(0, subtotal() - discount()))
+const tax = computed(() => taxable() * 0.08)
+const shipping = computed(() => {
+  if (itemCount() === 0) return 0
+  if (coupon().trim().toUpperCase() === 'SHIPFREE' || subtotal() >= 75) return 0
+  return 6.9
+})
+const total = computed(() => taxable() + tax() + shipping())
+const isEmpty = computed(() => itemCount() === 0)
+
+const subtotalLabel = computed(() => formatMoney(subtotal()))
+const discountLabel = computed(() => formatMoney(discount()))
+const taxLabel = computed(() => formatMoney(tax()))
+const shippingLabel = computed(() => formatMoney(shipping()))
+const totalLabel = computed(() => formatMoney(total()))
+
+function addToCart(productId) {
+  cart.update((items) => {
+    const existing = items.find((item) => item.productId === productId)
+    if (existing) {
+      return items.map((item) =>
+        item.productId === productId ? { ...item, qty: item.qty + 1 } : item,
+      )
+    }
+    return [...items, { productId, qty: 1 }]
+  })
+}
+
+function changeQty(productId, delta) {
+  cart.update((items) =>
+    items
+      .map((item) =>
+        item.productId === productId ? { ...item, qty: item.qty + delta } : item,
+      )
+      .filter((item) => item.qty > 0),
+  )
+}
+
+function removeFromCart(productId) {
+  cart.update((items) => items.filter((item) => item.productId !== productId))
+}
+
+function clearCart() {
+  cart.set([])
+  coupon.set('')
+}
+
+export default view`
+  <section class="page">
+    <div>
+      <h1 class="section-title">Shopping cart</h1>
+      <p class="section-lead">
+        Add products, adjust quantities, and watch <code>computed()</code> recalculate subtotal,
+        discounts, tax, and shipping in real time.
+      </p>
+    </div>
+
+    <div class="cart-layout">
+      <Card title="Catalog" subtitle="Click Add to put items in the cart">
+        <ul class="product-grid">
+          #for catalog as product (product.id)
+            <li class="product-card">
+              <div class="product-meta">
+                <strong class="product-name">${product.name}</strong>
+                <span class="product-price">${product.priceLabel}</span>
+              </div>
+              <div class="demo-row">
+                <Badge :text=${product.tag} />
+                <button class="btn btn-primary" on-click=${() => addToCart(product.id)}>Add</button>
+              </div>
+            </li>
+          #end
+        </ul>
+      </Card>
+
+      <Card title="Your cart" subtitle="Live totals update as you shop">
+        <div class="demo-panel">
+          <p class="demo-label">${itemCount} items in cart</p>
+          #if isEmpty()
+            <p class="demo-label">Cart is empty — add something from the catalog.</p>
+          #else
+            <ul class="list">
+              #for lines() as line (line.productId)
+                <li class="list-item cart-line">
+                  <div class="cart-line-info">
+                    <strong>${line.product.name}</strong>
+                    <span class="demo-label">${line.unitLabel} each</span>
+                  </div>
+                  <div class="demo-row">
+                    <button class="btn btn-outline" on-click=${() => changeQty(line.productId, -1)}>−</button>
+                    <span class="demo-value cart-qty">${line.qty}</span>
+                    <button class="btn btn-outline" on-click=${() => changeQty(line.productId, 1)}>+</button>
+                    <span class="cart-line-total">${line.totalLabel}</span>
+                    <button class="btn btn-outline" on-click=${() => removeFromCart(line.productId)}>Remove</button>
+                  </div>
+                </li>
+              #end
+            </ul>
+          #end
+
+          <label class="demo-label">
+            Coupon
+            <input class="input" placeholder="Try JACARE10 or SHIPFREE" bind-value=${coupon} />
+          </label>
+
+          <dl class="cart-summary">
+            <div class="cart-summary-row">
+              <dt>Subtotal</dt>
+              <dd>${subtotalLabel}</dd>
+            </div>
+            <div class="cart-summary-row">
+              <dt>Discount</dt>
+              <dd>−${discountLabel}</dd>
+            </div>
+            <div class="cart-summary-row">
+              <dt>Tax (8%)</dt>
+              <dd>${taxLabel}</dd>
+            </div>
+            <div class="cart-summary-row">
+              <dt>Shipping</dt>
+              <dd>${shippingLabel}</dd>
+            </div>
+            <div class="cart-summary-row cart-summary-total">
+              <dt>Total</dt>
+              <dd>${totalLabel}</dd>
+            </div>
+          </dl>
+
+          <div class="demo-row">
+            <button class="btn btn-primary" on-click=${clearCart} disabled=${isEmpty}>Clear cart</button>
+            <span class="pill">10% off orders over $100</span>
+            <span class="pill">Free shipping over $75</span>
+          </div>
+        </div>
+      </Card>
+    </div>
+
+    <pre class="code"><code>const subtotal = computed(() =>
+  lines().reduce((sum, line) => sum + line.lineTotal, 0))
+const total = computed(() => taxable() + tax() + shipping())</code></pre>
+  </section>
+`
+style`
+.cart-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+.product-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+.product-card {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border: 1px solid #b8e0c4;
+  border-radius: 12px;
+  background: #f8fcf9;
+}
+.product-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.product-name {
+  color: #003030;
+}
+.product-price {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #189030;
+}
+.cart-line {
+  flex-wrap: wrap;
+}
+.cart-line-info {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 8rem;
+}
+.cart-qty {
+  font-size: 1rem;
+  min-width: 1.5rem;
+  text-align: center;
+}
+.cart-line-total {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #003030;
+  min-width: 4.5rem;
+  text-align: right;
+}
+.cart-summary {
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+.cart-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+.cart-summary-row dt {
+  margin: 0;
+  color: #3d6b52;
+}
+.cart-summary-row dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #003030;
+}
+.cart-summary-total {
+  padding-top: 0.5rem;
+  border-top: 1px solid #b8e0c4;
+  font-size: 1.05rem;
+}
+.cart-summary-total dd {
+  color: #189030;
+  font-size: 1.25rem;
+}
+`

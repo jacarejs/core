@@ -139,6 +139,18 @@ function buildRuntimeImport(
   return `import { ${merged.join(', ')} } from '${runtime}'`
 }
 
+const BUILTIN_GLOBALS = new Set([
+  'Array',
+  'Boolean',
+  'Date',
+  'JSON',
+  'Math',
+  'Number',
+  'Object',
+  'String',
+  'console',
+])
+
 export function detectProps(script: string, ast: TemplateAST): string[] {
   const declared = new Set<string>()
 
@@ -163,7 +175,7 @@ export function detectProps(script: string, ast: TemplateAST): string[] {
   }
 
   const used = collectRefs(ast)
-  return [...used].filter((name) => !declared.has(name)).sort()
+  return [...used].filter((name) => !declared.has(name) && !BUILTIN_GLOBALS.has(name)).sort()
 }
 
 function stripTemplateLiterals(code: string): string {

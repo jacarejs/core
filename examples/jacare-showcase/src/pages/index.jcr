@@ -1,6 +1,5 @@
 import { signal, view } from '@jacare/core'
 import { appHref } from '../app-base.js'
-import Stat from '../components/Stat.jcr'
 import Card from '../components/Card.jcr'
 import Badge from '../components/Badge.jcr'
 
@@ -14,6 +13,7 @@ const features = [
   { slug: 'components', title: 'Components & slots', summary: 'Composable UI with scoped CSS and child projection.' },
   { slug: 'forms', title: 'Forms', summary: 'Two-way bindings and validated fields out of the box.' },
   { slug: 'playground', title: 'Playground', summary: 'Keyed lists, branches, and live DOM reconciliation.' },
+  { slug: 'cart', title: 'Shopping cart', summary: 'Add products and recalculate totals with computed signals.' },
 ]
 
 function featureHref(slug) {
@@ -34,9 +34,18 @@ export default view`
         <a class="btn btn-ghost" jacare-go="/components" href=${appHref('/components')}>See components</a>
       </div>
       <div class="stats-row">
-        <Stat :value=${() => String(renders())} label="Screen mounts" />
-        <Stat :value=${() => String(fps())} label="Target FPS" />
-        <Stat :value="'0'" label="VDOM layers" />
+        <div class="stat">
+          <span class="stat-value">${renders}</span>
+          <span class="stat-label">Screen mounts</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">${fps}</span>
+          <span class="stat-label">Target FPS</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">0</span>
+          <span class="stat-label">VDOM layers</span>
+        </div>
       </div>
     </div>
 

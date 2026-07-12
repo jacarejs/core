@@ -54,7 +54,7 @@ export default view`
           #for visible() as item (item.id)
             <li class="list-item" class-done=${item.done}>
               <button class="btn btn-outline" on-click=${() => toggle(item.id)}>
-                ${() => (item.done ? '✓ ' : '○ ') + item.label}
+                ${item.done ? '✓ ' : '○ '}${item.label}
               </button>
               <button class="btn btn-outline" on-click=${() => remove(item.id)}>Remove</button>
             </li>

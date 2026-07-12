@@ -124,6 +124,8 @@ function emitComponent(
   for (const attr of node.attrs) {
     if (attr.kind === 'prop' || attr.kind === 'event') {
       propsList.push(`${attr.name}: ${attr.value}`)
+    } else if (attr.kind === 'static') {
+      propsList.push(`${attr.name}: ${JSON.stringify(attr.value)}`)
     }
   }
 

@@ -18,6 +18,7 @@ export default view`
           <a class="nav-link" jacare-go="/components" href=${appHref('/components')}>Components</a>
           <a class="nav-link" jacare-go="/forms" href=${appHref('/forms')}>Forms</a>
           <a class="nav-link" jacare-go="/playground" href=${appHref('/playground')}>Playground</a>
+          <a class="nav-link" jacare-go="/cart" href=${appHref('/cart')}>Cart</a>
         </nav>
       </header>
 
