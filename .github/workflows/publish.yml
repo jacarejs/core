@@ -28,6 +28,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Sync with remote
+        run: git pull --rebase origin main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -56,44 +60,37 @@ jobs:
         run: yarn build
 
       - name: Publish @jacare/core
-        run: npm publish --access public
-        working-directory: packages/runtime
+        run: node scripts/publish-package.mjs packages/runtime
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
       - name: Publish @jacare/compiler
-        run: npm publish --access public
-        working-directory: packages/compiler
+        run: node scripts/publish-package.mjs packages/compiler
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
       - name: Publish @jacare/vite-plugin
-        run: npm publish --access public
-        working-directory: packages/vite-plugin
+        run: node scripts/publish-package.mjs packages/vite-plugin
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
       - name: Publish @jacare/meta
-        run: npm publish --access public
-        working-directory: packages/meta
+        run: node scripts/publish-package.mjs packages/meta
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
       - name: Publish @jacare/devtools
-        run: npm publish --access public
-        working-directory: packages/devtools
+        run: node scripts/publish-package.mjs packages/devtools
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
       - name: Publish create-jacare
-        run: npm publish --access public
-        working-directory: packages/create-jacare
+        run: node scripts/publish-package.mjs packages/create-jacare
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
       - name: Publish @jacare/cli
-        run: npm publish --access public
-        working-directory: packages/cli
+        run: node scripts/publish-package.mjs packages/cli
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TOKEN_NPM }}
 
@@ -104,6 +101,7 @@ jobs:
           git add -A
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "chore: release v${{ steps.version.outputs.version }}"
-          git tag "v${{ steps.version.outputs.version }}"
+          git tag -f "v${{ steps.version.outputs.version }}"
+          git pull --rebase origin main
           git push
-          git push origin "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}" --force

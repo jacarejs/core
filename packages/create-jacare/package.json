@@ -1,6 +1,6 @@
 {
   "name": "create-jacare",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Scaffold Jacaré apps with Vite",
   "license": "MIT",
   "repository": {
