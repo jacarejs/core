@@ -169,7 +169,17 @@ export default view\`<pre><code>\${code}</code></pre>\``
     expect(result.code).toContain('String(code)')
   })
 
-  it('invokes arrow functions in dynamic attributes', () => {
+  it('calls signals in mixed text templates', () => {
+    const source = `import { pulse, derive, view } from '@jacare/core'
+const count = pulse(0)
+const doubled = derive(() => count() * 2)
+export default view\`<p>value = \${doubled}</p>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).toContain('`value = ${doubled()}`')
+    expect(result.code).not.toContain('`value = ${doubled}`')
+  })
+
+  it('calls signals in dynamic attributes', () => {
     const source = `import { view } from '@jacare/core'
 const id = 'x'
 const href = (id) => '/item/' + id

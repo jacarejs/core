@@ -327,7 +327,12 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
   }
 
   const template = parts
-    .map((p) => (p.type === 'static' ? p.value : `\${${p.value}}`))
+    .map((p) => {
+      if (p.type === 'static') return p.value
+      const src = ctx.resolveSignal(p.value)
+      if (src) return `\${${src}()}`
+      return `\${${p.value}}`
+    })
     .join('')
 
   ctx.pushCleanup(`effect(() => { ${textNode}.data = \`${template}\` }).dispose`)

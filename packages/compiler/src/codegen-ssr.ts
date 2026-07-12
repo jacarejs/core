@@ -163,9 +163,12 @@ function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
   }
 
   const template = parts
-    .map((p) =>
-      p.type === 'static' ? escapeHtml(p.value) : `' + escapeHtml(String(${p.value})) + '`,
-    )
+    .map((p) => {
+      if (p.type === 'static') return escapeHtml(p.value)
+      const src = ctx.resolveSignal(p.value)
+      if (src) return `' + escapeHtml(String(${src}())) + '`
+      return `' + escapeHtml(String(${p.value})) + '`
+    })
     .join('')
 
   ctx.line(`_html += \`${template}\``)
