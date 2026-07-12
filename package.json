@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jacarejs/core.git"
+    "url": "git+https://github.com/jacarejs/core.git"
   },
   "workspaces": [
     "packages/*",
@@ -24,7 +24,7 @@
     "jacare": "node packages/cli/dist/index.js"
   },
   "devDependencies": {
-    "@jacare/cli": "0.0.2",
+    "@jacare/cli": "0.0.3",
     "@types/node": "^22.10.0",
     "happy-dom": "^15.11.7",
     "typescript": "^5.7.2",
