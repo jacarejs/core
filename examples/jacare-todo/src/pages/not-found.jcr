@@ -1,0 +1,10 @@
+import { view } from '@jacare/core'
+
+export default view`
+  <section class="page missing">
+    <h2 class="page-title">404</h2>
+    <p class="lead">This screen does not exist.</p>
+    <p class="missing-path">The path you requested was not found.</p>
+    <a class="btn btn-primary" jacare-go="/" href="/">Back to tasks</a>
+  </section>
+`

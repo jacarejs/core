@@ -1,0 +1,45 @@
+import { pulse, derive, view } from '@jacare/core'
+import { topicNeighbors } from '../../tutorial/topics.js'
+import LessonNav from '../../components/LessonNav.jcr'
+
+const neighbors = topicNeighbors('reactivity')
+
+const demoCount = pulse(0)
+const demoDoubled = derive(() => demoCount() * 2)
+
+const signalCode = `import { pulse } from '@jacare/core'
+
+const count = pulse(0)
+count.set(1)
+count.update((n) => n + 1)`
+
+const deriveCode = `const doubled = derive(() => count() * 2)`
+
+export default view`
+  <section class="page tutorial-lesson">
+    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <h2 class="page-title">Reactivity</h2>
+    <p class="lead">State is a pulse graph. Reads subscribe; writes update only what depends on them.</p>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Signals</h3>
+      <pre class="code-block"><code>${signalCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Derived values</h3>
+      <pre class="code-block"><code>${deriveCode}</code></pre>
+      <p class="lesson-text">Derived values recompute only when their dependencies change.</p>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Live demo</h3>
+      <div class="lesson-demo">
+        <p class="playground-output">doubled = ${demoDoubled}</p>
+        <button class="btn btn-primary" type="button" on-click=${() => demoCount.update((n) => n + 1)}>Increment</button>
+      </div>
+    </article>
+
+    <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
+  </section>
+`

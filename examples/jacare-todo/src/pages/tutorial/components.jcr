@@ -1,0 +1,57 @@
+import { createForm, view } from '@jacare/core'
+import Field from '../../components/Field.jcr'
+import { topicNeighbors } from '../../tutorial/topics.js'
+import LessonNav from '../../components/LessonNav.jcr'
+
+const neighbors = topicNeighbors('components')
+
+const form = createForm({
+  title: {
+    value: 'Jacaré field',
+    validate: (value) => (value.trim() ? undefined : 'Required'),
+  },
+})
+
+const fieldCode = `// Field.jcr
+export default view\`
+  <label class="field">
+    <span>\${label}</span>
+    <input bind-value=\${field} />
+  </label>
+\``
+
+const useFieldCode = `import Field from './Field.jcr'
+
+view\`
+  <Field
+    :label=\${'Title'}
+    :field=\${form.fields.title}
+    :type=\${'text'}
+    :placeholder=\${'Enter a title'}
+  />
+\``
+
+export default view`
+  <section class="page tutorial-lesson">
+    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <h2 class="page-title">Components</h2>
+    <p class="lead">PascalCase tags compile to function calls. Props use the <code>:</code> prefix.</p>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Define a component</h3>
+      <pre class="code-block"><code>${fieldCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Use it</h3>
+      <pre class="code-block"><code>${useFieldCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Live demo</h3>
+      <Field :label=${'Title'} :field=${form.fields.title} :type=${'text'} :placeholder=${'Try typing here'} />
+    </article>
+
+    <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
+  </section>
+`

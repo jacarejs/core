@@ -1,0 +1,235 @@
+import type { TemplateAST, TemplateNode } from './types.js'
+import { emitClient } from './codegen-client.js'
+import { emitResume, emitSSR } from './codegen-ssr.js'
+import { CodegenContext, type CodegenMapping } from './codegen-shared.js'
+
+const RUNTIME_IMPORT_ORDER = [
+  'effect',
+  'runUntracked',
+  'bindText',
+  'bindAttribute',
+  'bindProperty',
+  'bindModel',
+  'bindClass',
+  'branch',
+  'reconcileKeyedList',
+  'resumeBindings',
+  'escapeHtml',
+] as const
+
+const DECL_RE = /\b(?:const|let|var|function)\s+([\w$]+)/g
+
+export type RuntimeImport = (typeof RUNTIME_IMPORT_ORDER)[number]
+
+export function orderRuntimeImports(imports: Iterable<string>): string[] {
+  const used = new Set(imports)
+  return RUNTIME_IMPORT_ORDER.filter((name) => used.has(name))
+}
+
+export function generate(
+  ast: TemplateAST,
+  moduleCode: string,
+  options: { runtimeImport?: string; viewStartLine?: number; mode?: 'client' | 'server' | 'full' } = {},
+): { code: string; mappings: CodegenMapping[] } {
+  const mode = options.mode ?? 'full'
+  const runtime = options.runtimeImport ?? '@jacare/core'
+  const props = detectProps(moduleCode, ast)
+  const signals = detectSignals(moduleCode)
+  const runtimeImports = new Set<string>()
+  const { userRuntimeSymbols, body } = extractUserRuntimeImport(
+    cleanupModule(moduleCode),
+    runtime,
+  )
+
+  const lines: string[] = []
+  if (body) {
+    lines.push(body)
+    lines.push('')
+  }
+
+  let mappings: CodegenMapping[] = []
+
+  if (mode === 'server' || mode === 'full') {
+    lines.push(...emitSSR(ast, props, runtimeImports, signals))
+    lines.push('')
+  }
+
+  if (mode === 'client' || mode === 'full') {
+    const codegenOffset = lines.length
+    const clientCtx = new CodegenContext(
+      codegenOffset,
+      options.viewStartLine ?? 1,
+      runtimeImports,
+      props.length > 0 ? new Set(props) : undefined,
+      signals,
+    )
+    emitClient(ast, props, clientCtx)
+    lines.push(...clientCtx.join())
+    mappings = clientCtx.getMappings()
+    lines.push('')
+    lines.push(...emitResume(ast, props, runtimeImports))
+    lines.push('')
+  }
+
+  const orderedImports = orderRuntimeImports(runtimeImports)
+  const importLine = buildRuntimeImport(runtime, userRuntimeSymbols, orderedImports)
+  lines.unshift(importLine, '')
+
+  if (mode === 'server') {
+    lines.push('export default render')
+  } else {
+    lines.push('export default mount')
+  }
+
+  return { code: lines.join('\n'), mappings }
+}
+
+function cleanupModule(code: string): string {
+  return cleanupImports(code.trim())
+}
+
+function cleanupImports(code: string): string {
+  return code.replace(/import\s*\{([^}]*)\}/g, (_match, spec: string) => {
+    const names = spec
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0 && part !== 'view')
+    return `import { ${names.join(', ')} }`
+  })
+}
+
+function extractUserRuntimeImport(
+  moduleCode: string,
+  runtime: string,
+): { userRuntimeSymbols: string[]; body: string } {
+  const importRe = new RegExp(
+    `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${runtime.replace('/', '\\/')}['"]\\s*;?`,
+  )
+  const match = moduleCode.match(importRe)
+
+  if (match) {
+    const userRuntimeSymbols = match[1]!
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0 && part !== 'view')
+    const body = moduleCode.replace(importRe, '').trim()
+    return { userRuntimeSymbols, body }
+  }
+
+  return { userRuntimeSymbols: [], body: moduleCode }
+}
+
+function buildRuntimeImport(
+  runtime: string,
+  userRuntimeSymbols: string[],
+  runtimeHelpers: string[],
+): string {
+  const merged = [...new Set([...userRuntimeSymbols, ...runtimeHelpers])]
+  if (merged.length === 0) {
+    return `import { signal } from '${runtime}'`
+  }
+  return `import { ${merged.join(', ')} } from '${runtime}'`
+}
+
+export function detectProps(script: string, ast: TemplateAST): string[] {
+  const declared = new Set<string>()
+
+  for (const match of script.matchAll(DECL_RE)) {
+    declared.add(match[1]!)
+  }
+
+  for (const match of script.matchAll(/\bimport\s+\{([^}]+)\}\s*from/g)) {
+    for (const part of match[1]!.split(',')) {
+      const trimmed = part.trim()
+      if (!trimmed) continue
+      const alias = trimmed.match(/([\w$]+)(?:\s+as\s+([\w$]+))?/)
+      if (alias) {
+        declared.add(alias[2] ?? alias[1]!)
+      }
+    }
+  }
+
+  const defaultImport = script.match(/\bimport\s+([\w$]+)\s+from/)
+  if (defaultImport) {
+    declared.add(defaultImport[1]!)
+  }
+
+  const used = collectRefs(ast)
+  return [...used].filter((name) => !declared.has(name)).sort()
+}
+
+export function detectSignals(script: string): Set<string> {
+  const signals = new Set<string>()
+  for (const match of script.matchAll(
+    /\b(?:const|let|var)\s+([\w$]+)\s*=\s*(?:signal|pulse|computed|derive)\s*\(/g,
+  )) {
+    signals.add(match[1]!)
+  }
+  return signals
+}
+
+function collectRefs(ast: TemplateAST): Set<string> {
+  const refs = new Set<string>()
+
+  const walk = (nodes: TemplateNode[]): void => {
+    for (const node of nodes) {
+      switch (node.type) {
+        case 'text':
+          for (const part of node.parts) {
+            if (part.type === 'expr') {
+              collectExprRefs(part.value, refs)
+            }
+          }
+          break
+        case 'element':
+          for (const attr of node.attrs) {
+            if (attr.kind !== 'static') {
+              collectExprRefs(attr.value, refs)
+            }
+          }
+          walk(node.children)
+          break
+        case 'component':
+          for (const attr of node.attrs) {
+            if (attr.kind !== 'static') {
+              collectExprRefs(attr.value, refs)
+            }
+          }
+          break
+        case 'if':
+          for (const branch of node.branches) {
+            collectExprRefs(branch.condition, refs)
+            walk(branch.children)
+          }
+          walk(node.elseChildren)
+          break
+        case 'each':
+          collectExprRefs(node.source, refs)
+          if (node.keyExpr) {
+            collectExprRefs(node.keyExpr, refs)
+          }
+          walk(node.children)
+          break
+      }
+    }
+  }
+
+  walk(ast.children)
+  return refs
+}
+
+function collectExprRefs(expr: string, refs: Set<string>): void {
+  const trimmed = expr.trim()
+  const bare = /^(?!\.)([A-Za-z_$][\w$]*)$/.exec(trimmed)
+  if (bare) {
+    refs.add(bare[1]!)
+    return
+  }
+  const re = /(?<![.\w$])([A-Za-z_$][\w$]*)\s*\(/g
+  let match: RegExpExecArray | null
+  while ((match = re.exec(expr)) !== null) {
+    refs.add(match[1]!)
+  }
+}
+
+export { resolveSignalExpr } from './codegen-shared.js'

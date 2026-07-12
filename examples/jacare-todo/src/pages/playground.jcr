@@ -1,0 +1,49 @@
+import { createLifecycle, derive, pulse, registerScope, view } from '@jacare/core'
+
+const count = pulse(0)
+const message = pulse('')
+const preview = derive(() => {
+  const text = message().trim()
+  return text ? `Hello, ${text}!` : 'Type a name below…'
+})
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    const stops = [
+      registerScope('playground.count', 'count', () => count()),
+      registerScope('playground.message', 'message', () => message()),
+      registerScope('playground.preview', 'preview', () => preview()),
+    ]
+    return () => {
+      for (const stop of stops) stop()
+    }
+  },
+})
+
+export default view`
+  <section class="page playground">
+    <h2 class="page-title">Playground</h2>
+    <p class="lead">Edit state live. Values stream to the Scope panel while you interact.</p>
+
+    <div class="playground-grid">
+      <section class="playground-panel">
+        <h3 class="section-title">Controls</h3>
+        <div class="playground-row">
+          <button class="btn btn-primary" type="button" on-click=${() => count.update((n) => n + 1)}>Increment</button>
+          <button class="btn" type="button" on-click=${() => count.set(0)}>Reset</button>
+          <span class="playground-value">count = ${count}</span>
+        </div>
+        <label class="field">
+          <span class="field-label">Name</span>
+          <input class="input" bind-value=${message} placeholder="Your name" />
+        </label>
+      </section>
+
+      <section class="playground-panel playground-preview">
+        <h3 class="section-title">Preview</h3>
+        <p class="playground-output">${preview}</p>
+        <p class="hint">Try <code>/playground</code> with DevTools open — Scope shows each keystroke.</p>
+      </section>
+    </div>
+  </section>
+`

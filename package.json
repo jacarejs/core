@@ -1,0 +1,36 @@
+{
+  "name": "jacare",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Next-generation front-end framework",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jacarejs/core.git"
+  },
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "yarn workspace @jacare/core build && yarn workspace @jacare/compiler build && yarn workspace @jacare/vite-plugin build && yarn workspace @jacare/cli build && yarn workspace @jacare/devtools build",
+    "pretest": "yarn build",
+    "pretypecheck": "yarn workspace @jacare/core build && yarn workspace @jacare/compiler build && yarn workspace @jacare/vite-plugin build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "yarn workspace @jacare/core typecheck && yarn workspace @jacare/compiler typecheck && yarn workspace @jacare/vite-plugin typecheck && yarn workspace @jacare/cli typecheck && yarn workspace @jacare/devtools typecheck",
+    "example:dev": "yarn workspace jacare-todo dev",
+    "example:build": "yarn workspace jacare-todo build",
+    "jacare": "node packages/cli/dist/index.js"
+  },
+  "devDependencies": {
+    "@jacare/cli": "0.0.1",
+    "@types/node": "^22.10.0",
+    "happy-dom": "^15.11.7",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

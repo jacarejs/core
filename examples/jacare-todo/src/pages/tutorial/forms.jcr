@@ -1,0 +1,57 @@
+import { createForm, createLifecycle, registerScope, view } from '@jacare/core'
+import Field from '../../components/Field.jcr'
+import { topicNeighbors } from '../../tutorial/topics.js'
+import LessonNav from '../../components/LessonNav.jcr'
+
+const neighbors = topicNeighbors('forms')
+
+const form = createForm({
+  email: {
+    value: '',
+    validate: (value) => (value.includes('@') ? undefined : 'Enter a valid email'),
+  },
+})
+
+const schemaCode = `const form = createForm({
+  email: {
+    value: '',
+    validate: (v) => (v.includes('@') ? undefined : 'Invalid'),
+  },
+})`
+
+const bindingCode = `<input bind-value=\${form.fields.email} />
+<span>\${form.fields.email.error}</span>`
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    return registerScope('tutorial.forms.email', 'Email', () => form.fields.email())
+  },
+})
+
+export default view`
+  <section class="page tutorial-lesson">
+    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <h2 class="page-title">Forms</h2>
+    <p class="lead"><code>createForm</code> tracks dirty state, validation, and submit handling.</p>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Schema</h3>
+      <pre class="code-block"><code>${schemaCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Two-way binding</h3>
+      <pre class="code-block"><code>${bindingCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Try it</h3>
+      <p class="hint">Watch the Scope panel while typing.</p>
+      <form class="form" on-submit=${(e) => e.preventDefault()}>
+        <Field :label=${'Email'} :field=${form.fields.email} :type=${'email'} :placeholder=${'you@jacare.dev'} />
+      </form>
+    </article>
+
+    <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
+  </section>
+`

@@ -1,0 +1,19 @@
+import { view } from '@jacare/core'
+import { topicHref } from '../tutorial/topics.js'
+
+export default view`
+<nav class="lesson-nav" aria-label="Lesson navigation">
+  #if prev
+    <a class="lesson-nav-link" jacare-go=${() => topicHref(prev.slug)} href=${() => topicHref(prev.slug)}>
+      ← ${prev.title}
+    </a>
+  #else
+    <span></span>
+  #end
+  #if next
+    <a class="lesson-nav-link lesson-nav-next" jacare-go=${() => topicHref(next.slug)} href=${() => topicHref(next.slug)}>
+      ${next.title} →
+    </a>
+  #end
+</nav>
+`

@@ -1,0 +1,27 @@
+import { view } from '@jacare/core'
+
+export default view`
+  <div class="app app-wide">
+    <div class="layout layout-wide">
+      <header class="header">
+        <div class="brand">
+          <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
+          <span class="title">Jacaré</span>
+        </div>
+        <nav class="nav">
+          <a class="nav-link" jacare-go="/" href="/">Tasks</a>
+          <a class="nav-link" jacare-go="/tutorial" href="/tutorial">Tutorial</a>
+          <a class="nav-link" jacare-go="/playground" href="/playground">Playground</a>
+          <a class="nav-link" jacare-go="/about" href="/about">About</a>
+          <a class="nav-link" jacare-go="/about?tab=feedback" href="/about?tab=feedback">Feedback</a>
+        </nav>
+      </header>
+
+      <main class="main" jacare-frame></main>
+
+      <footer class="footer">
+        Built with Jacaré — zero VDOM, fine-grained reactivity
+      </footer>
+    </div>
+  </div>
+`

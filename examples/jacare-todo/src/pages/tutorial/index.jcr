@@ -1,0 +1,26 @@
+import { view } from '@jacare/core'
+import { topicHref, topics } from '../../tutorial/topics.js'
+
+export default view`
+  <section class="page tutorial">
+    <h2 class="page-title">Tutorial</h2>
+    <p class="lead">
+      Learn Jacaré step by step. Each topic is a dedicated route — for example
+      <code>/tutorial/reactivity</code>.
+    </p>
+
+    <ol class="lesson-list">
+      #for topics as lesson (lesson.slug)
+        <li>
+          <a class="lesson-link" jacare-go=${() => topicHref(lesson.slug)} href=${() => topicHref(lesson.slug)}>
+            <span class="lesson-index">${lesson.step}</span>
+            <span class="lesson-body">
+              <span class="lesson-title">${lesson.title}</span>
+              <span class="lesson-summary">${lesson.summary}</span>
+            </span>
+          </a>
+        </li>
+      #end
+    </ol>
+  </section>
+`

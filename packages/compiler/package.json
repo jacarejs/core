@@ -1,0 +1,30 @@
+{
+  "name": "@jacare/compiler",
+  "version": "0.0.1",
+  "description": "Jacaré compiler — .jcr templates to optimized DOM code",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "jacare-compile": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "source-map-js": "^1.2.1"
+  }
+}

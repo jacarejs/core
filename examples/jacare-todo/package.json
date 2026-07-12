@@ -1,0 +1,18 @@
+{
+  "name": "jacare-todo",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "node ../../packages/cli/dist/index.js dev",
+    "build": "node ../../packages/cli/dist/index.js build"
+  },
+  "dependencies": {
+    "@jacare/core": "0.0.1"
+  },
+  "devDependencies": {
+    "@jacare/cli": "0.0.1",
+    "@jacare/devtools": "0.0.1"
+  }
+}

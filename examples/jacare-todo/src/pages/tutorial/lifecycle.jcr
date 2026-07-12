@@ -1,0 +1,53 @@
+import { createLifecycle, pulse, registerScope, view } from '@jacare/core'
+import { topicNeighbors } from '../../tutorial/topics.js'
+import LessonNav from '../../components/LessonNav.jcr'
+
+const neighbors = topicNeighbors('lifecycle')
+
+const draft = pulse('')
+
+const hooksCode = `export const lifecycle = createLifecycle({
+  onMount() { /* setup */ },
+  onActivate(ctx) { /* route entered */ },
+  onDeactivate() { /* route left */ },
+  onUnmount() { /* cleanup */ },
+})`
+
+const scopeCode = `onActivate() {
+  return registerScope('draft', 'Draft', () => draft())
+}`
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    return registerScope('tutorial.lifecycle.draft', 'Draft', () => draft())
+  },
+})
+
+export default view`
+  <section class="page tutorial-lesson">
+    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <h2 class="page-title">Lifecycle</h2>
+    <p class="lead">Screens can export hooks for mount, activate, and teardown — plus live Scope debugging.</p>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Screen hooks</h3>
+      <pre class="code-block"><code>${hooksCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Scope panel</h3>
+      <pre class="code-block"><code>${scopeCode}</code></pre>
+      <p class="lesson-text">Registered values appear in the Scope panel (bottom-left) during development.</p>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Try it</h3>
+      <label class="field">
+        <span class="field-label">Draft</span>
+        <input class="input" bind-value=${draft} placeholder="Type to update Scope" />
+      </label>
+    </article>
+
+    <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
+  </section>
+`

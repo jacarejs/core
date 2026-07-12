@@ -1,0 +1,49 @@
+import { view } from '@jacare/core'
+import { topicNeighbors } from '../../tutorial/topics.js'
+import LessonNav from '../../components/LessonNav.jcr'
+
+const neighbors = topicNeighbors('getting-started')
+
+const layoutCode = `src/
+  shell.jcr       layout + jacare-frame
+  pages/           screens
+  nav.js           route map
+  boot.js          entry point
+index.html         global styles
+public/            static assets`
+
+const firstModuleCode = `import { pulse, view } from '@jacare/core'
+
+const count = pulse(0)
+
+export default view\`
+  <button on-click=\${() => count.update((n) => n + 1)}>
+    Count: \${count}
+  </button>
+\``
+
+export default view`
+  <section class="page tutorial-lesson">
+    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <h2 class="page-title">Getting started</h2>
+    <p class="lead">Jacaré apps are plain JavaScript modules. Markup lives in a <code>view</code> tagged template.</p>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Project layout</h3>
+      <pre class="code-block"><code>${layoutCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">First module</h3>
+      <pre class="code-block"><code>${firstModuleCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Run the example</h3>
+      <pre class="code-block"><code>yarn example:dev</code></pre>
+      <p class="lesson-text">Open <code>/tutorial</code> to follow the rest of the guides.</p>
+    </article>
+
+    <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
+  </section>
+`

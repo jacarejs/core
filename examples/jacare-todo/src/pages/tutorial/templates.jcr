@@ -1,0 +1,50 @@
+import { view } from '@jacare/core'
+import { topicNeighbors } from '../../tutorial/topics.js'
+import LessonNav from '../../components/LessonNav.jcr'
+
+const neighbors = topicNeighbors('templates')
+
+const textEventsCode = `view\`
+  <p>\${message}</p>
+  <button on-click=\${save}>Save</button>
+\``
+
+const conditionalCode = `view\`
+  #if isOpen()
+    <panel />
+  #else
+    <button on-click=\${open}>Open</button>
+  #end
+\``
+
+const listCode = `view\`
+  #for items() as item (item.id)
+    <li>\${item.label}</li>
+  #end
+\``
+
+export default view`
+  <section class="page tutorial-lesson">
+    <a class="text-link" jacare-go="/tutorial" href="/tutorial">← Tutorial</a>
+    <h2 class="page-title">Templates</h2>
+    <p class="lead">The compiler turns <code>view\`...\`</code> into direct DOM bindings — no virtual tree.</p>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Text and events</h3>
+      <pre class="code-block"><code>${textEventsCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Conditionals</h3>
+      <pre class="code-block"><code>${conditionalCode}</code></pre>
+    </article>
+
+    <article class="lesson">
+      <h3 class="lesson-heading">Lists</h3>
+      <pre class="code-block"><code>${listCode}</code></pre>
+      <p class="lesson-text">Keyed lists reconcile DOM nodes instead of re-rendering the whole list.</p>
+    </article>
+
+    <LessonNav :prev=${neighbors.prev} :next=${neighbors.next} />
+  </section>
+`

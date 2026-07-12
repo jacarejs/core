@@ -1,0 +1,84 @@
+import { createForm, createLifecycle, derive, registerScope, signal, view } from '@jacare/core'
+import { nav } from '../nav.js'
+import Field from '../components/Field.jcr'
+
+const form = createForm({
+  name: {
+    value: '',
+    validate: (value) => (value.trim() ? undefined : 'Name is required'),
+  },
+  email: {
+    value: '',
+    validate: (value) => (value.includes('@') ? undefined : 'Enter a valid email'),
+  },
+})
+
+const submitted = signal(false)
+const activeTab = derive(() => nav.where().search.tab ?? 'overview')
+
+function onSubmit() {
+  submitted.set(true)
+}
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    const stops = [
+      registerScope('about.tab', 'URL tab', () => activeTab()),
+      registerScope('about.name', 'Name', () => form.fields.name()),
+      registerScope('about.email', 'Email', () => form.fields.email()),
+    ]
+    return () => {
+      for (const stop of stops) stop()
+    }
+  },
+})
+
+export default view`
+  <section class="page about">
+    <h2 class="page-title">About Jacaré</h2>
+    <p class="lead">
+      Jacaré compiles views into direct DOM updates — no virtual tree, no diffing.
+      State flows through signals and derived values; the runtime patches only what changed.
+    </p>
+
+    <nav class="tab-nav" aria-label="About sections">
+      <a class="tab-link" jacare-go="/about" href="/about">Overview</a>
+      <a class="tab-link" jacare-go="/about?tab=feedback" href="/about?tab=feedback">Feedback</a>
+    </nav>
+
+    #if activeTab() === 'feedback'
+      <section class="feedback">
+        <h3 class="section-title">Send feedback</h3>
+        <p class="hint">Open the Scope panel (bottom-left) to watch live field values as you type.</p>
+        #if submitted()
+          <p class="form-success">Thanks — we received your message.</p>
+        #else
+          <form class="form" on-submit=${form.handleSubmit(onSubmit)}>
+            <Field :label=${'Name'} :field=${form.fields.name} :type=${'text'} :placeholder=${'Your name'} />
+            <Field :label=${'Email'} :field=${form.fields.email} :type=${'email'} :placeholder=${'you@example.com'} />
+            <button class="btn btn-primary" type="submit">Send</button>
+          </form>
+        #end
+      </section>
+    #else
+      <dl class="specs">
+        <div>
+          <dt>Reactivity</dt>
+          <dd>Pulse graph with fine-grained subscriptions</dd>
+        </div>
+        <div>
+          <dt>Rendering</dt>
+          <dd>Incremental DOM, keyed lists, conditional branches</dd>
+        </div>
+        <div>
+          <dt>Navigation</dt>
+          <dd>Layout frames, lazy screens, friendly URLs with params and query</dd>
+        </div>
+        <div>
+          <dt>Forms</dt>
+          <dd>Two-way bindings, validation, field components</dd>
+        </div>
+      </dl>
+    #end
+  </section>
+`
