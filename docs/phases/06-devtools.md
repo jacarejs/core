@@ -99,11 +99,11 @@ Edges run **from source → consumer** (pulse feeds derive, derive feeds watch).
 
 ## UI
 
-Fixed panel (bottom-right):
+Two fixed panels (bottom-right):
 
-- Node list grouped by kind
-- Selected node value + metadata
-- Upstream / downstream dependency lists
+**Pulse Graph** — reactive nodes grouped by kind, selected node value, upstream/downstream edges.
+
+**Scope** — live values registered with `registerScope()` from `@jacare/core`. Enabled by default in `connectJacareDevtools()`.
 
 ## Tests
 

@@ -183,6 +183,10 @@ export const lifecycle = createLifecycle({
     return registerScope('form.name', 'Name', () => name())
   },
 })
+
+// nav.where is Signal<NavPlace>
+nav.where()       // reactive read
+nav.where.peek    // untracked read
 ```
 
 `connectJacareDevtools()` also opens the **Scope** panel (bottom-left) for live values registered with `registerScope()`.

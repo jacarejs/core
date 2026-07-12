@@ -210,7 +210,7 @@ nav.warm('/about')
 | `undo()` | `history.back()` |
 | `warm(path)` | Preload lazy screen modules |
 | `missing` | 404 screen when no URL matches |
-| `where()` | Reactive current place |
+| `where` | `Signal<NavPlace>` — reactive current place (`.peek` for untracked read) |
 
 `createNav({ base: '/app' })` sets the URL prefix for all screens.
 

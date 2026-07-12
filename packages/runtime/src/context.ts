@@ -140,6 +140,7 @@ export function flushPending(): void {
 
 export class DependencyCell {
   private subs: Subscriber[] = []
+  private readonly subSet = new Set<Subscriber>()
   private subCount = 0
 
   get subscriberCount(): number {
@@ -147,7 +148,7 @@ export class DependencyCell {
   }
 
   has(fn: Subscriber): boolean {
-    return this.subs.includes(fn)
+    return this.subSet.has(fn)
   }
 
   notify(): void {
@@ -161,11 +162,14 @@ export class DependencyCell {
 
   subscribe(fn: Subscriber): () => void {
     this.subs.push(fn)
+    this.subSet.add(fn)
     this.subCount++
     return () => this.unlink(fn)
   }
 
   private unlink(fn: Subscriber): void {
+    if (!this.subSet.has(fn)) return
+    this.subSet.delete(fn)
     const idx = this.subs.indexOf(fn)
     if (idx === -1) return
     this.subs[idx] = this.subs[this.subCount - 1]!

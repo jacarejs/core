@@ -128,10 +128,12 @@ This prevents memory leaks without `WeakRef` (which has its own overhead).
 | Aspect | Typical signals | Jacaré |
 |--------|-----------------|------|
 | Subscriber storage | Linked list | Array with O(1) swap-remove |
+| Membership check | O(n) scan | `Set` for O(1) `has()` |
 | Equality check | `===` | `Object.is` (NaN-safe) |
 | Owner cleanup | Manual `onCleanup` | Automatic via owner tree |
-| Batch | Global `batch()` | `batch()` + future priority lanes |
+| Batch | Global `batch()` | `batch()` coalesces pending notifications |
 | Callable signals | Yes | Yes (the function is the signal) |
+| Untracked reads | Manual | `untrack()`, `runUntracked()`, `.peek` |
 
 ## Trade-offs
 
@@ -151,10 +153,25 @@ packages/runtime/src/
 ├── context.ts    — Tracking context, OwnerNode, DependencyCell, batch queue
 ├── signal.ts     — signal(), untrack()
 ├── computed.ts   — computed() with memoization
-├── effect.ts     — effect(), batch()
+├── effect.ts     — effect(), batch(), runUntracked()
 ├── dom/bind.ts   — bindText, bindAttribute, bindProperty, bindClass
+├── dom/bind-model.ts — two-way bindModel with runUntracked initial sync
+├── scope.ts      — registerScope for DevTools Scope panel
+├── lifecycle.ts  — per-screen lifecycle hooks
+├── forms/        — createForm validation API
+├── nav/          — createNav, lazy, route helpers
+├── ssr/          — renderToString, renderToStream, resumeBindings
+├── devtools/     — Pulse Graph registry (opt-in)
 └── index.ts      — Public API
 ```
+
+### DependencyCell
+
+Each signal and computed owns a `DependencyCell` that stores subscribers in an array (for fast `notify`) and a `Set` (for O(1) duplicate checks during tracking). Unsubscribe uses swap-remove on the array — O(1) amortized.
+
+### DOM bindings
+
+`bindText`, `bindAttribute`, `bindProperty`, and `bindClass` run their first update with `runUntracked()` so the initial DOM write does not create a subscription loop. `bindModel` uses the same pattern for two-way form controls.
 
 **Estimated size (gzip):** ~1.2 KB (core reactivity only, without DOM bindings)
 
@@ -174,6 +191,7 @@ Phase 1 coverage:
 - User cleanup
 - Batch coalescing
 - Untrack
+- `DependencyCell` membership via `Set`
 
 ## Not yet implemented
 

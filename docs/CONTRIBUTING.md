@@ -86,7 +86,7 @@ public/
 
 ```bash
 yarn build          # build all packages
-yarn test           # run tests (102 tests)
+yarn test           # run tests (103 tests)
 yarn typecheck      # TypeScript check
 yarn example:build  # build jacare-todo example
 jacare check        # compile all .jcr files (from app root)

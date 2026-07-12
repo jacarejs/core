@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { batch, computed, effect, signal, untrack } from '../src/index.js'
+import { DependencyCell } from '../src/context.js'
 
 describe('signal', () => {
   it('reads and writes values', () => {
@@ -119,6 +120,23 @@ describe('batch', () => {
     expect(spy).toHaveBeenCalledTimes(1)
     expect(a()).toBe(1)
     expect(b()).toBe(1)
+  })
+})
+
+describe('DependencyCell', () => {
+  it('deduplicates subscribers with O(1) membership checks', () => {
+    const cell = new DependencyCell()
+    const spy = vi.fn()
+    const run = (): void => {
+      spy()
+    }
+
+    cell.subscribe(run)
+    expect(cell.has(run)).toBe(true)
+    expect(cell.subscriberCount).toBe(1)
+
+    cell.notify()
+    expect(spy).toHaveBeenCalledTimes(1)
   })
 })
 

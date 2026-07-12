@@ -1,3 +1,5 @@
+import type { Signal } from '../types.js'
+
 export type NavMount = (target: HTMLElement, ctx: NavContext) => () => void
 
 export type NavLoader = () => Promise<{ mount?: NavMount; default?: NavMount }>
@@ -40,7 +42,7 @@ export interface ScreenMatch {
 }
 
 export interface Nav {
-  readonly where: () => NavPlace
+  readonly where: Signal<NavPlace>
   attach(target: HTMLElement): () => void
   go(path: string): Promise<void>
   swap(path: string): Promise<void>

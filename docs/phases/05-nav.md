@@ -86,9 +86,14 @@ missing: () => import('./pages/not-found.jcr')
 
 ### Nav pulse
 
+`nav.where` is a `Signal<NavPlace>`:
+
 ```javascript
-nav.where() // { path, params, search, hash }
+nav.where()       // reactive read — { path, params, search, hash }
+nav.where.peek    // untracked read (use in guards, sync code)
 ```
+
+Use `where()` inside templates and effects. Use `where.peek` when you need the current place without subscribing (e.g. inside `beforeGo` comparisons).
 
 | Method | Role |
 |--------|------|

@@ -132,9 +132,25 @@ Jacaré does not diff a virtual tree. The compiler emits precise DOM operations 
 | `effect(fn)` | `watch(fn)` | Side effect |
 | `untrack(fn)` | — | Run without tracking |
 | `batch(fn)` | — | Batch multiple writes |
-| `runUntracked(fn)` | — | Untracked execution |
+| `runUntracked(fn)` | — | Untracked execution (used by DOM bindings) |
 
-### Example: todo list state
+### Untracked reads
+
+| API | Use when |
+|-----|----------|
+| `signal.peek` / `computed.peek` | Read current value without subscribing |
+| `untrack(fn)` | Temporarily disable tracking inside an effect |
+| `runUntracked(fn)` | Same as untrack — used internally by `bindText`, `bindModel`, etc. |
+
+### Pulse graph internals
+
+Each `signal` and `computed` owns a `DependencyCell`:
+
+- Subscribers stored in an array for fast `notify()`
+- A `Set` provides O(1) duplicate checks during dependency tracking
+- Unsubscribe uses swap-remove — O(1) amortized
+
+Effects and computeds use an `OwnerNode` tree. Disposing an owner clears dependencies and runs cleanups automatically.
 
 ```javascript
 import { pulse, derive, view } from '@jacare/core'
@@ -311,6 +327,13 @@ await nav.go('/about')
 await nav.swap('/settings')  // replace history entry
 nav.undo()                   // history.back()
 await nav.warm('/about')     // prefetch lazy screen
+```
+
+`nav.where` is a `Signal<NavPlace>`:
+
+```javascript
+nav.where()       // reactive — re-runs dependents on navigation
+nav.where.peek    // untracked — current place without subscribing
 ```
 
 ### Route helpers

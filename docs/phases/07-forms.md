@@ -19,7 +19,7 @@ Controlled inputs need manual `on-input` handlers paired with `bind-value`. Vali
 
 `bind-value=${draft}` compiles to `bindModel(node, 'value', draft)`:
 
-- Signal → DOM via `bindProperty`
+- Signal → DOM via reactive effect (initial write uses `runUntracked` to avoid focus loss)
 - DOM → signal via `input` / `change` listeners
 - Cleanup on dispose (HMR, unmount)
 
