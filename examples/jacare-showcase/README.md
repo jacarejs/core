@@ -6,7 +6,9 @@ Live demo: [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/sh
 
 **Designed as a standalone repository:** [github.com/jacarejs/showcase](https://github.com/jacarejs/showcase)
 
-![Jacaré brand colors](public/jacare-logo.png)
+<p align="center">
+  <img src="public/jacare-logo.png" width="120" alt="Jacaré logo" />
+</p>
 
 ---
 

@@ -1,12 +1,111 @@
 # Jacaré
 
 <p align="center">
-  <img src="packages/cli/assets/jacare-logo.png" width="96" alt="Jacaré logo" />
+  <img src="packages/cli/assets/jacare-logo.png" width="140" alt="Jacaré logo" />
 </p>
 
-Next-generation front-end framework. Zero Virtual DOM. Fine-grained reactivity. JavaScript-first modules.
+**Jacaré** is a front-end framework for building fast, reactive web apps with plain JavaScript — no Virtual DOM, no component re-renders, no proprietary file format.
 
 Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
+
+## Quick start
+
+```bash
+npm create jacare@latest my-app
+cd my-app && npm install && npm run dev
+```
+
+Open `http://localhost:5173` — a reactive counter is already running.
+
+**How small is it?**
+
+| | |
+|---|---|
+| First screen | **~15 lines** in `src/app.jcr` |
+| Scaffold | **8 files** — `app.jcr`, `boot.js`, `index.html`, Vite config |
+| Runtime | **~1.2 KB gzip** (core reactivity; DOM helpers added per use) |
+
+```javascript
+import { signal } from '@jacare/core'
+
+const count = signal(0)
+
+export <view>
+  <main>
+    <p>Count: ${count}</p>
+    <button on-click=${() => count.update((n) => n + 1)}>+1</button>
+  </main>
+</view>
+```
+
+Templates: `minimal` (counter), `nav` (multi-page), `todo` (forms + devtools).
+
+```bash
+npm create jacare@latest my-app -- --template vite-nav
+```
+
+## What is Jacaré?
+
+Jacaré is a **compile-time UI framework**. You write `.jcr` files — normal JavaScript modules with an HTML-like template — and a compiler turns them into direct DOM operations. When state changes, only the nodes that depend on that state update. The rest of the page is untouched.
+
+```
+Your .jcr file          Compiler                 Browser
+─────────────          ────────                 ───────
+signal + logic    →    mount() function    →    real DOM nodes
+export <view>          bindText, branch,        updated one-by-one
+export <style>         reconcileKeyedList       when signals change
+```
+
+**What it is not:** a React/Vue clone, a runtime template parser, or a resumability-first meta-framework. Jacaré optimizes for **predictable incremental DOM updates** with a small runtime and zero reconciliation tree.
+
+## Why use Jacaré?
+
+### The problem with re-rendering
+
+Most frameworks treat UI as `UI = f(state)` and re-run `f` on every change — often diffing a virtual tree across a whole component subtree. That works, but it means:
+
+- Updating one counter re-executes every hook and child in that component
+- Lists re-diff even when only one row changed
+- Memory is allocated for virtual nodes on every pass
+- Performance depends on memoization (`useMemo`, `React.memo`, `v-memo`) to stay acceptable
+
+Jacaré asks a different question: **why re-render anything when only one text node changed?**
+
+### What Jacaré does instead
+
+| Concern | Typical VDOM framework | Jacaré |
+|---------|------------------------|--------|
+| State → UI | Re-run component, diff tree | Signal notifies bound nodes only |
+| List updates | Reconcile by key in virtual tree | `reconcileKeyedList` patches real DOM |
+| Templates | Runtime parser or JSX transform | Compile-time → static `createElement` calls |
+| Styles | Global CSS or CSS-in-JS runtime | Co-located `export <style>`, scoped at compile time |
+| Bundle | Framework + reconciler | Small runtime; imports only what each file uses |
+
+### When Jacaré is a good fit
+
+- **Interactive dashboards** — many independent values updating without cascading re-renders
+- **Forms and live data** — two-way `bind-value` on signals, field-level validation
+- **Lists and tables** — keyed `#for` reconciles rows by id, not by re-mounting the list
+- **Multi-page apps** — built-in `createNav` with lazy screens, no router library required
+- **Teams that want JavaScript first** — no new language, no JSX pragma, no SFC magic; just modules + templates
+
+### When to consider something else
+
+- You need the largest ecosystem of third-party components (React/Vue win today)
+- Your team is standardized on JSX or Single-File Components and migration cost is high
+- You rely heavily on a specific meta-framework (Next, Nuxt, etc.) — Jacaré ships its own nav and SSR primitives instead
+
+## What you get out of the box
+
+| Layer | Package | Purpose |
+|-------|---------|---------|
+| Runtime | `@jacare/core` | Signals, DOM bindings, nav, forms, SSR |
+| Compiler | `@jacare/compiler` | `.jcr` → `mount` / `render` / `resume` |
+| Tooling | `@jacare/cli`, `@jacare/vite-plugin` | `jacare dev`, `jacare build`, HMR |
+| DevTools | `@jacare/devtools` | Pulse Graph — visualize signal dependencies live |
+| Scaffolding | `create-jacare` | `npm create jacare@latest` |
+
+Live demos: [Todo app](https://jacarejs.github.io/core/) · [Showcase](https://jacarejs.github.io/core/showcase/)
 
 ## Status
 
@@ -92,11 +191,15 @@ my-app/
 
 ## Syntax
 
-Jacaré files (`.jcr`) are plain JavaScript modules. Write your logic, then export a view block. Add scoped styles last.
+Jacaré files (`.jcr`) are **plain JavaScript modules**. You keep all business logic in normal JS — `import`, `const`, `function` — and describe the UI in an `export <view>` block. Styles live in `export <style>` at the end of the file.
+
+**Why this shape?** One file = one feature. The compiler reads the template at build time, infers props and signals, and emits optimized DOM code. You never parse HTML strings at runtime.
 
 Full reference: [docs/syntax.md](docs/syntax.md) · [docs/api.md](docs/api.md)
 
 ### Simple module
+
+A minimal app: a signal holds state, the template binds to it, a click handler mutates it. Only the `<p>` text node re-runs when `count` changes — not the button, not the wrapper.
 
 ```javascript
 import { signal } from '@jacare/core'
@@ -121,40 +224,46 @@ export <style>
 
 | Block | Purpose |
 |-------|---------|
-| `import` / `const` / `function` | JavaScript logic |
-| `export <view>...</view>` | HTML template (required) |
-| `export <style>...</style>` | Scoped CSS (optional, last) |
+| `import` / `const` / `function` | JavaScript logic — runs once at module load |
+| `export <view>...</view>` | Declarative UI — compiled to `mount()` |
+| `export <style>...</style>` | Scoped CSS — selectors rewritten with `[data-jacare-s]` |
 
-`export <style lang="scss">` is supported for preprocessor attributes. Tagged templates (`view\`...\`` / `style\`...\``) still work.
+`export <style lang="scss">` accepts a `lang` attribute for preprocessors. Legacy tagged templates (`view\`...\`` / `style\`...\``) still compile to the same output.
 
 ### Template bindings
 
-| Syntax | Meaning |
-|--------|---------|
-| `${expr}` | Reactive text (signals update the DOM directly) |
-| `on-click=${fn}` | DOM event (`@click` alias) |
-| `bind-href=${url}` | Reactive attribute (`:href` alias) |
-| `bind-value=${field}` | Two-way input binding on a signal |
-| `bind-checked=${on}` | Two-way checkbox binding on a signal |
-| `class-active=${on}` | Toggle a CSS class (`class:active` alias) |
-| `#if cond` … `#elif` … `#else` … `#end` | Conditional blocks |
-| `#for items() as item (item.id)` … `#end` | Keyed list reconciliation |
+Bindings are **compile-time**. The compiler picks the thinnest runtime helper for each pattern — `bindText` for signals, `bindModel` for two-way inputs, `branch` for `#if`, etc.
+
+| Syntax | What it does | Why use it |
+|--------|--------------|------------|
+| `${expr}` | Reactive text | Display live values without manual `textContent` updates |
+| `on-click=${fn}` | DOM event | Declarative handlers with automatic cleanup on unmount |
+| `bind-href=${url}` | Reactive attribute | Keep `href`, `src`, `disabled` in sync with state |
+| `bind-value=${field}` | Two-way input | Signal ↔ input stay synced — no `on-input` boilerplate |
+| `bind-checked=${on}` | Two-way checkbox | Same for checkboxes |
+| `class-active=${on}` | Toggle class | Conditional styling without string concatenation |
+| `#if` / `#elif` / `#else` / `#end` | Show/hide branches | Compiler emits `branch()` — only active DOM exists |
+| `#for … as item (key)` / `#end` | Keyed lists | Move/add/remove rows by key — no full list re-render |
 
 ### Reactivity
 
-| API | Role |
-|-----|------|
-| `signal(initial)` | Mutable reactive value — read with `count()`, write with `count.set()` / `count.update()` |
-| `computed(() => …)` | Derived read-only value |
-| `effect(fn)` | Side effect when tracked signals change |
+Signals are **functions you call** — `count()` reads, `count.set(5)` writes. The compiler wires reads to DOM nodes; you never call `render()` yourself.
 
-Aliases: `pulse`, `derive`, `watch`.
+| API | Role | When to use |
+|-----|------|-------------|
+| `signal(initial)` | Mutable reactive cell | User input, toggles, fetched data |
+| `computed(() => …)` | Cached derived value | Totals, filters, formatted labels |
+| `effect(fn)` | Side effect on change | `document.title`, logging, integrations |
+
+Aliases `pulse`, `derive`, `watch` exist for brevity. Prefer `signal`, `computed`, `effect` in new code.
 
 ### Components and props
 
-Import a `.jcr` file and use it as a **PascalCase** tag. Props use `:name=${expr}`.
+Split UI into reusable `.jcr` files. Import them as **PascalCase tags** — the compiler calls their `mount()` function and passes props.
 
-**Child component** (`Badge.jcr`) — `text` is inferred as a mount prop:
+**Why components?** Encapsulate markup, scoped styles, and slot content. Parent state flows in via props; children stay independent — updating a signal in the parent only re-runs bound nodes in the affected component.
+
+**Child** (`Badge.jcr`) — identifiers in the template that are not declared in the script become **mount props**:
 
 ```javascript
 export <view>
@@ -166,7 +275,7 @@ export <style>
 </style>
 ```
 
-**Parent page** — pass a signal or a string:
+**Parent** — pass a live signal or a static string:
 
 ```javascript
 import Badge from './components/Badge.jcr'
@@ -180,43 +289,36 @@ export <view>
 </view>
 ```
 
-| Prop style | Example | Compiled as |
-|------------|---------|-------------|
-| Reactive expression | `:text=${mood}` | `text: mood` |
-| String literal | `:title=${'Hello'}` | `title: 'Hello'` |
-| Static attribute | `type="email"` | `type: "email"` |
+| Prop style | Example | Behavior |
+|------------|---------|----------|
+| Reactive expression | `:text=${mood}` | Child re-renders text when signal changes |
+| String literal | `:title=${'Hello'}` | Static prop, set once at mount |
+| HTML attribute | `type="email"` | Passed as string prop |
 
-**Component with slots** (`Card.jcr`):
+**Slots** — project parent content into a child without prop drilling:
 
 ```javascript
+// Card.jcr
 export <view>
   <div class="card">
-    <h3 class="card-title">${title}</h3>
-    #if subtitle
-      <p class="card-subtitle">${subtitle}</p>
-    #end
-    <div class="card-body">
-      <slot />
-    </div>
+    <h3>${title}</h3>
+    <div class="card-body"><slot /></div>
   </div>
 </view>
+
+// Page.jcr
+<Card :title=${'Hello'}>
+  <p>Projected into the default slot.</p>
+</Card>
 ```
 
-**Usage with children and props:**
-
-```javascript
-import Card from './components/Card.jcr'
-
-export <view>
-  <Card :title=${'Hello'} :subtitle=${'A reusable card'}>
-    <p>This content is projected into the default slot.</p>
-  </Card>
-</view>
-```
-
-Props used in the child template (`title`, `subtitle`) but not declared in the child script are automatically treated as mount props. Signal props stay reactive via `bindPropText`.
+`<slot />` in the child receives whatever markup the parent places between the opening and closing tags.
 
 ### Nav
+
+Multi-page apps without React Router or Vue Router. `createNav` mounts a **layout shell** and swaps **screens** inside `<main jacare-frame>`.
+
+**Why built-in nav?** Screens are lazy-loaded `.jcr` modules. URL changes update only the frame content — the shell (header, footer) stays mounted. Guards, path params, and query strings are first-class.
 
 ```javascript
 import { createNav, lazy } from '@jacare/core'
@@ -239,9 +341,13 @@ nav.attach(document.getElementById('app'))
 <main jacare-frame></main>
 ```
 
-Path params, query strings, lazy screens, and guards — see [docs/api.md](docs/api.md#9-navigation).
+Details: [docs/api.md — Navigation](docs/api.md#9-navigation)
 
 ### Forms
+
+`createForm` builds validated fields on top of signals. Each field has `error()`, `touched()`, `blur()`, and works with `bind-value` out of the box.
+
+**Why not a separate form library?** Field state is already reactive. The compiler binds inputs directly to signals — validation errors show via `#if field.error()` with no extra bridge layer.
 
 ```javascript
 import { createForm } from '@jacare/core'
@@ -266,40 +372,34 @@ export <view>
 
 ### DevTools
 
+`connectJacareDevtools()` opens the **Pulse Graph** — a live view of which signals depend on which, and their current values. Zero cost when not connected.
+
 ```javascript
 import { connectJacareDevtools } from '@jacare/devtools'
 
 connectJacareDevtools()
 ```
 
-Opens the Pulse Graph and Scope panels in development.
-
-## Quick start
-
-```bash
-yarn install
-yarn build
-yarn jacare new demo
-cd demo && yarn install && yarn dev
-```
-
-Or run the todo example:
-
-```bash
-yarn example:dev
-```
+Useful when debugging why an effect re-ran or tracing data flow in a complex screen.
 
 ## Development
 
-Requires Node.js 20+.
+Requires Node.js 20+. Clone the monorepo to hack on Jacaré itself:
 
 ```bash
 yarn install
 yarn build
 yarn test
 yarn typecheck
-yarn example:dev
-yarn example:build
+yarn example:dev      # todo demo — http://localhost:3000
+yarn showcase:dev     # showcase — http://localhost:3001
+```
+
+Scaffold from the monorepo:
+
+```bash
+yarn jacare new demo
+cd demo && yarn install && yarn dev
 ```
 
 ## Architecture
@@ -328,24 +428,25 @@ yarn example:build
 
 ## Install
 
+See [Quick start](#quick-start) to scaffold a new app.
+
+Add Jacaré to an existing Vite project:
+
 ```bash
 npm install @jacare/core
 npm install -D @jacare/cli @jacare/vite-plugin vite
 ```
 
-Or scaffold a new project:
-
 ```bash
-npm create jacare@latest my-app
 jacare new my-app --template=todo
 ```
 
-Live demos:
+## Live demos
 
-| Demo | URL | Description |
-|------|-----|-------------|
-| **Todo app** | [jacarejs.github.io/core](https://jacarejs.github.io/core/) | Full task manager with forms, keyed lists, and tutorial routes |
-| **Showcase** | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | Polished walkthrough of reactivity, components, slots, and scoped CSS |
+| Demo | URL | What to explore |
+|------|-----|-----------------|
+| **Todo app** | [jacarejs.github.io/core](https://jacarejs.github.io/core/) | Tasks, forms, keyed lists, tutorial routes |
+| **Showcase** | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | Reactivity, components, slots, scoped CSS, cart |
 
 Run locally:
 
@@ -353,3 +454,7 @@ Run locally:
 yarn showcase:dev   # http://localhost:3001
 yarn example:dev    # jacare-todo dev server
 ```
+
+---
+
+<p align="center">🇧🇷 ilove brazil</p>

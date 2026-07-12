@@ -1,5 +1,9 @@
 # Jacaré Syntax
 
+<p align="center">
+  <img src="../packages/cli/assets/jacare-logo.png" width="120" alt="Jacaré logo" />
+</p>
+
 Jacaré files are plain JavaScript modules. Markup lives in an `export <view>` block (recommended) or a `view` tagged template.
 
 **Full API walkthrough:** [api.md](api.md)

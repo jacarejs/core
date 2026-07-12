@@ -1,5 +1,9 @@
 # Jacaré API Reference
 
+<p align="center">
+  <img src="../packages/cli/assets/jacare-logo.png" width="120" alt="Jacaré logo" />
+</p>
+
 Complete API guide for building applications with Jacaré. Each section explains **what** the API does, **when** to use it, and includes a **minimal working example**.
 
 For syntax details see [syntax.md](syntax.md). For architecture rationale see [phases/](phases/).
