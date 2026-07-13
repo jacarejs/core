@@ -1,6 +1,6 @@
 {
   "name": "@jacare/meta",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "File-based routing and app conventions for Jacaré",
   "license": "MIT",
   "repository": {
@@ -31,7 +31,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@jacare/core": "0.1.4"
+    "@jacare/core": "0.1.5"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0"
