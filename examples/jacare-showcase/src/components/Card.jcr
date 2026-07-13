@@ -16,7 +16,6 @@ export <style>
 .card {
   display: flex;
   flex-direction: column;
-  height: 100%;
   border: 1px solid #b8e0c4;
   border-radius: 12px;
   background: #ffffff;
@@ -53,10 +52,14 @@ export <style>
   min-height: 2.9em;
 }
 .card-body {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   padding: 1.15rem;
+}
+.card-body > span {
+  display: block;
+  width: 100%;
 }
 </style>

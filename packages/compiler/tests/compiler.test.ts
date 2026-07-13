@@ -262,6 +262,20 @@ export default view\`
     expect(result.code).toContain('items: () => topics')
   })
 
+  it('binds reactive boolean attributes from signal refs', () => {
+    const source = `import { computed, signal, view } from '@jacare/core'
+const count = signal(0)
+const isEmpty = computed(() => count() === 0)
+export default view\`
+  <button disabled=\${isEmpty}>Clear</button>
+\``
+    const result = compile(source)
+    expect(result.code).toContain('bindAttribute(')
+    expect(result.code).toContain('"disabled"')
+    expect(result.code).toContain('isEmpty')
+    expect(result.code).not.toMatch(/setAttribute\("disabled", String\(isEmpty\)\)/)
+  })
+
   it('binds value and checked with bindModel for two-way signals', () => {
     const source = `import { signal, view } from '@jacare/core'
 const text = signal('')

@@ -272,17 +272,34 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
   if (attr.kind === 'expr') {
     if (attr.name === 'class') {
       ctx.line(`${el}.className = String(${attr.value})`)
-    } else if (/=>/.test(attr.value)) {
-      ctx.useRuntime('effect')
-      ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
-      ctx.indent()
-      ctx.line(`const _v = (${attr.value})()`)
-      ctx.line(`if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(attr.name)})`)
-      ctx.line(`else ${el}.setAttribute(${JSON.stringify(attr.name)}, String(_v))`)
-      ctx.dedent()
-      ctx.line('}).dispose)')
     } else {
-      ctx.line(`${el}.setAttribute(${JSON.stringify(attr.name)}, String(${attr.value}))`)
+      const src = ctx.resolveSignal(attr.value)
+      if (src) {
+        ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${src})`)
+      } else if (/=>/.test(attr.value)) {
+        ctx.useRuntime('effect')
+        ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
+        ctx.indent()
+        ctx.line(`const _v = (${attr.value})()`)
+        ctx.line(`if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(attr.name)})`)
+        ctx.line(`else if (_v === true) ${el}.setAttribute(${JSON.stringify(attr.name)}, '')`)
+        ctx.line(`else ${el}.setAttribute(${JSON.stringify(attr.name)}, String(_v))`)
+        ctx.dedent()
+        ctx.line('}).dispose)')
+      } else if (ctx.isComponentProp(attr.value.trim())) {
+        ctx.line(`${el}.setAttribute(${JSON.stringify(attr.name)}, String(${attr.value}))`)
+      } else {
+        ctx.useRuntime('effect')
+        const rewritten = ctx.rewriteExprForEffect(attr.value)
+        ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
+        ctx.indent()
+        ctx.line(`const _v = ${rewritten}`)
+        ctx.line(`if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(attr.name)})`)
+        ctx.line(`else if (_v === true) ${el}.setAttribute(${JSON.stringify(attr.name)}, '')`)
+        ctx.line(`else ${el}.setAttribute(${JSON.stringify(attr.name)}, String(_v))`)
+        ctx.dedent()
+        ctx.line('}).dispose)')
+      }
     }
     return
   }

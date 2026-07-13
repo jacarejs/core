@@ -122,31 +122,33 @@ export <view>
       </Card>
 
       <Card :title=${'Your cart'} :subtitle=${'Live totals update as you shop'}>
-        <div class="demo-panel">
-          <p class="demo-label">${itemCount} items in cart</p>
-          #if isEmpty()
-            <p class="demo-label">Cart is empty — add something from the catalog.</p>
-          #else
-            <ul class="list">
-              #for lines() as line (line.productId)
-                <li class="list-item cart-line">
-                  <div class="cart-line-info">
-                    <strong>${line.product.name}</strong>
-                    <span class="demo-label">${line.unitLabel} each</span>
-                  </div>
-                  <div class="demo-row">
-                    <button class="btn btn-outline" on-click=${() => changeQty(line.productId, -1)}>−</button>
-                    <span class="demo-value cart-qty">${line.qty}</span>
-                    <button class="btn btn-outline" on-click=${() => changeQty(line.productId, 1)}>+</button>
-                    <span class="cart-line-total">${line.totalLabel}</span>
-                    <button class="btn btn-outline" on-click=${() => removeFromCart(line.productId)}>Remove</button>
-                  </div>
-                </li>
-              #end
-            </ul>
-          #end
+        <div class="cart-panel">
+          <div class="cart-head">
+            <p class="demo-label">${itemCount} items in cart</p>
+            #if isEmpty()
+              <p class="demo-label cart-empty">Cart is empty — add something from the catalog.</p>
+            #end
+          </div>
 
-          <label class="demo-label">
+          <ul class="list cart-lines">
+            #for lines() as line (line.productId)
+              <li class="list-item cart-line">
+                <div class="cart-line-info">
+                  <strong>${line.product.name}</strong>
+                  <span class="demo-label">${line.unitLabel} each</span>
+                </div>
+                <div class="demo-row">
+                  <button class="btn btn-outline" on-click=${() => changeQty(line.productId, -1)}>−</button>
+                  <span class="demo-value cart-qty">${line.qty}</span>
+                  <button class="btn btn-outline" on-click=${() => changeQty(line.productId, 1)}>+</button>
+                  <span class="cart-line-total">${line.totalLabel}</span>
+                  <button class="btn btn-outline" on-click=${() => removeFromCart(line.productId)}>Remove</button>
+                </div>
+              </li>
+            #end
+          </ul>
+
+          <label class="demo-label cart-coupon">
             Coupon
             <input class="input" placeholder="Try JACARE10 or SHIPFREE" bind-value=${coupon} />
           </label>
@@ -175,7 +177,7 @@ export <view>
           </dl>
 
           <div class="demo-row">
-            <button class="btn btn-primary" on-click=${clearCart} disabled=${isEmpty}>Clear cart</button>
+            <button class="btn btn-primary" on-click=${clearCart} :disabled=${isEmpty}>Clear cart</button>
             <span class="pill">10% off orders over $100</span>
             <span class="pill">Free shipping over $75</span>
           </div>
@@ -194,6 +196,30 @@ export <style>
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  align-items: start;
+}
+.cart-layout .card {
+  height: auto;
+}
+.cart-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #b8e0c4;
+  border-radius: 12px;
+  background: #f8fcf9;
+  box-shadow: 0 4px 20px rgba(0, 48, 48, 0.06);
+}
+.cart-head {
+  display: grid;
+  gap: 0.35rem;
+}
+.cart-empty {
+  margin: 0;
+}
+.cart-lines {
+  margin: 0;
 }
 .product-grid {
   list-style: none;
