@@ -5,8 +5,10 @@ File-based routing and app conventions for [Jacaré](https://github.com/jacarejs
 ## Install
 
 ```bash
-yarn add @jacare/meta
+npm install @jacare/meta
 ```
+
+npm: [https://www.npmjs.com/package/@jacare/meta](https://www.npmjs.com/package/@jacare/meta)
 
 ## Usage
 
@@ -48,3 +50,9 @@ export const nav = createJacareAppFromRoutes({
 - `createJacareAppFromRoutes()` — wraps `createNav` with discovered loaders
 - `discoverRoutes()` — scan pages directory at build time
 - `defineJacareConfig()` — typed config helper
+
+## Links
+
+- [npm — @jacare/meta](https://www.npmjs.com/package/@jacare/meta)
+- [Repository](https://github.com/jacarejs/core)
+- Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)

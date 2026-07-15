@@ -15,6 +15,7 @@ npm create jacare@latest my-app -- --template vite-todo
 ### jacare new
 
 ```bash
+npm install -g @jacare/cli
 jacare new my-app --template=vite-minimal
 jacare new my-app --template=vite-nav
 jacare new my-app --template=vite-todo

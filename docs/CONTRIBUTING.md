@@ -21,6 +21,14 @@ yarn example:dev
 ### From npm
 
 ```bash
+npm install -g @jacare/cli
+jacare new my-app
+cd my-app && npm install && jacare dev
+```
+
+Add packages to an existing Vite project:
+
+```bash
 npm install @jacare/core
 npm install -D @jacare/cli @jacare/vite-plugin vite
 ```
@@ -30,6 +38,8 @@ Or scaffold with:
 ```bash
 npm create jacare@latest my-app
 ```
+
+npm packages: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta)
 
 ### Local development (yarn link)
 

@@ -15,7 +15,15 @@ npm create jacare@latest my-app
 cd my-app && npm install && npm run dev
 ```
 
-Open `http://localhost:5173` — a reactive counter is already running.
+Or install the CLI globally and scaffold with `jacare new`:
+
+```bash
+npm install -g @jacare/cli
+jacare new my-app
+cd my-app && npm install && jacare dev
+```
+
+Open `http://localhost:5173` (create-jacare) or `http://localhost:3000` (`jacare new`) — a reactive counter is already running.
 
 **How small is it?**
 
@@ -123,18 +131,27 @@ Live demos: [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](http
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@jacare/core` | Pulse graph, DOM bindings, SSR |
-| `@jacare/compiler` | Compiles `export <view>` / `export <style>` and `view\`...\`` templates |
-| `@jacare/vite-plugin` | Vite integration |
-| `@jacare/cli` | `jacare` command — create, dev, build |
-| `create-jacare` | `npm create jacare` — Vite-based scaffolds |
-| `@jacare/devtools` | Pulse Graph inspector panel |
+Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) scope on npm:
+
+| Package | npm | Description |
+|---------|-----|-------------|
+| `@jacare/core` | [npmjs.com/package/@jacare/core](https://www.npmjs.com/package/@jacare/core) | Pulse graph, DOM bindings, SSR |
+| `@jacare/compiler` | [npmjs.com/package/@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) | Compiles `export <view>` / `export <style>` and `view\`...\`` templates |
+| `@jacare/vite-plugin` | [npmjs.com/package/@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) | Vite integration |
+| `@jacare/cli` | [npmjs.com/package/@jacare/cli](https://www.npmjs.com/package/@jacare/cli) | `jacare` command — create, dev, build |
+| `@jacare/devtools` | [npmjs.com/package/@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) | Pulse Graph inspector panel |
+| `@jacare/meta` | [npmjs.com/package/@jacare/meta](https://www.npmjs.com/package/@jacare/meta) | File-based routing conventions |
+| `create-jacare` | [npmjs.com/package/create-jacare](https://www.npmjs.com/package/create-jacare) | `npm create jacare` — Vite-based scaffolds |
 
 Nav (`createNav`) ships inside `@jacare/core`.
 
 ## Commands
+
+Install the CLI once (recommended):
+
+```bash
+npm install -g @jacare/cli
+```
 
 ```bash
 jacare new my-app     # scaffold a project
@@ -479,18 +496,29 @@ cd demo && yarn install && yarn dev
 
 ## Install
 
-See [Quick start](#quick-start) to scaffold a new app.
+### CLI (global)
 
-Add Jacaré to an existing Vite project:
+```bash
+npm install -g @jacare/cli
+jacare new my-app --template=todo
+cd my-app && npm install && jacare dev
+```
+
+### Scaffold without a global CLI
+
+```bash
+npm create jacare@latest my-app
+cd my-app && npm install && npm run dev
+```
+
+### Add Jacaré to an existing Vite project
 
 ```bash
 npm install @jacare/core
 npm install -D @jacare/cli @jacare/vite-plugin vite
 ```
 
-```bash
-jacare new my-app --template=todo
-```
+See also: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta)
 
 ## Live demos
 

@@ -30,11 +30,15 @@ Jacaré compiles `.jcr` modules into direct DOM updates. When a value changes, o
 npm install @jacare/core
 ```
 
-For a full app with dev server and compiler, also install:
+For a full app with CLI, compiler, and Vite plugin:
 
 ```bash
-npm install @jacare/cli @jacare/vite-plugin
+npm install -g @jacare/cli
+npm install @jacare/core
+npm install -D @jacare/vite-plugin
 ```
+
+npm: [https://www.npmjs.com/package/@jacare/core](https://www.npmjs.com/package/@jacare/core)
 
 ---
 
@@ -465,11 +469,13 @@ SSR output includes `data-jacare-bind` markers for precise hydration targets.
 
 ## Links
 
+- [npm — @jacare/core](https://www.npmjs.com/package/@jacare/core)
 - [Repository](https://github.com/jacarejs/core)
 - [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Live demo](https://jacarejs.github.io/core/todo/)
 - [Example app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
+- Related: [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta)
 
 ## License
 

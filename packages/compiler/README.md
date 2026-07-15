@@ -30,6 +30,8 @@ npm install @jacare/compiler
 
 Usually installed as a dependency of `@jacare/vite-plugin` or `@jacare/cli`. Use directly when building custom tooling.
 
+npm: [https://www.npmjs.com/package/@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler)
+
 ---
 
 ## What it compiles
@@ -283,10 +285,11 @@ The runtime uses `Symbol.for('jacare.lazy')` on loaders returned by `lazy()`. Th
 
 ## Links
 
+- [npm — @jacare/compiler](https://www.npmjs.com/package/@jacare/compiler)
 - [Repository](https://github.com/jacarejs/core)
 - [Compiler docs](https://github.com/jacarejs/core/blob/main/docs/phases/02-compiler.md)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
-- [@jacare/core](https://www.npmjs.com/package/@jacare/core)
+- Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)
 
 ## License
 

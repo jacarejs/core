@@ -10,6 +10,13 @@ npm create jacare@latest my-app -- --template vite-nav
 npm create jacare@latest my-app -- --template vite-todo
 ```
 
+Or with the global CLI:
+
+```bash
+npm install -g @jacare/cli
+jacare new my-app --template=vite-minimal
+```
+
 With yarn:
 
 ```bash
@@ -53,9 +60,12 @@ npm run preview
 
 ## Links
 
+- [npm — create-jacare](https://www.npmjs.com/package/create-jacare)
+- [npm — @jacare/cli](https://www.npmjs.com/package/@jacare/cli)
 - [Repository](https://github.com/jacarejs/core)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Templates](https://github.com/jacarejs/core/tree/main/templates)
+- Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin)
 
 ## License
 

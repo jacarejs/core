@@ -37,6 +37,14 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 ### Step 1 — Scaffold a project
 
 ```bash
+npm install -g @jacare/cli
+jacare new my-app
+cd my-app && npm install && jacare dev
+```
+
+Or with `create-jacare`:
+
+```bash
 npm create jacare@latest my-app
 cd my-app && npm install && npm run dev
 ```
@@ -828,7 +836,11 @@ See [Phase 2 — Compiler](phases/02-compiler.md#pulse-analysis).
 
 ## 15. CLI
 
-Package: `@jacare/cli`
+Package: [`@jacare/cli`](https://www.npmjs.com/package/@jacare/cli)
+
+```bash
+npm install -g @jacare/cli
+```
 
 | Command | Description |
 |---------|-------------|
@@ -852,7 +864,7 @@ export default {
 
 ## 16. Vite plugin
 
-Package: `@jacare/vite-plugin`
+Package: [`@jacare/vite-plugin`](https://www.npmjs.com/package/@jacare/vite-plugin)
 
 ```javascript
 // vite.config.js

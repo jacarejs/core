@@ -29,7 +29,15 @@ npm install @jacare/vite-plugin @jacare/compiler @jacare/core
 npm install -D vite
 ```
 
+For the Jacaré CLI (scaffold / `jacare dev` / `jacare build`):
+
+```bash
+npm install -g @jacare/cli
+```
+
 Peer dependency: **Vite** `^5` or `^6`.
+
+npm: [https://www.npmjs.com/package/@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin)
 
 ---
 
@@ -290,10 +298,10 @@ export default { base: '/my-repo/' }
 
 ## Links
 
+- [npm — @jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin)
 - [Repository](https://github.com/jacarejs/core)
 - [Example app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
-- [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler)
-- [@jacare/core](https://www.npmjs.com/package/@jacare/core)
+- Related: [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)
 
 ## License
 

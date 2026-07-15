@@ -29,6 +29,8 @@ npm install @jacare/devtools
 
 Requires `@jacare/core` as a peer dependency.
 
+npm: [https://www.npmjs.com/package/@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools)
+
 ---
 
 ## Quick start
@@ -253,10 +255,12 @@ Tree-shaking removes `@jacare/devtools` from production bundles when the import 
 
 ## Links
 
+- [npm — @jacare/devtools](https://www.npmjs.com/package/@jacare/devtools)
 - [Repository](https://github.com/jacarejs/core)
 - [DevTools docs](https://github.com/jacarejs/core/blob/main/docs/phases/06-devtools.md)
 - [@jacare/core](https://www.npmjs.com/package/@jacare/core)
 - [Live demo](https://jacarejs.github.io/core/todo/)
+- Related: [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin)
 
 ## License
 
