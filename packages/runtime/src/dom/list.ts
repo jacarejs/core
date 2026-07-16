@@ -58,6 +58,9 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
   const entries = new Map<string | number, ListEntry<T>>()
 
   const run = effect(() => {
+    const parent = options.anchor?.parentNode ?? options.parent
+    if (!parent) return
+
     const items = options.items()
     const next = new Map<string | number, ListEntry<T>>()
     const seen = new Set<string | number>()
@@ -105,7 +108,7 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
       const item = items[i]!
       const key = options.getKey(item, i)
       const entry = next.get(key)!
-      const inserted = insertNodes(options.parent, entry.nodes, before)
+      const inserted = insertNodes(parent, entry.nodes, before)
       if (inserted) {
         before = inserted
       }

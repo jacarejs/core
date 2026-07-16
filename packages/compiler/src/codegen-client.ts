@@ -210,10 +210,11 @@ function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarge
     ? `(${node.itemName}, ${index}) => ${node.keyExpr}`
     : `(${node.itemName}, ${index}) => ${index}`
 
+  const parentExpr = target.kind === 'parent' ? target.name : `${anchor}.parentNode`
   ctx.useRuntime('reconcileKeyedList')
   ctx.line(`${ctx.cleanupVar}.push(reconcileKeyedList({`)
   ctx.indent()
-  ctx.line(`parent: ${target.kind === 'parent' ? target.name : 'target'},`)
+  ctx.line(`parent: ${parentExpr},`)
   ctx.line(`anchor: ${anchor},`)
   ctx.line(`items: () => ${node.source},`)
   ctx.line(`getKey: ${keyExpr},`)

@@ -704,6 +704,8 @@ When the key stays the same but the item **identity** changes, Jacaré remounts 
 
 Compiles to `reconcileKeyedList({ parent, anchor, items, getKey, render })`.
 
+When `#for` is nested under `#if` (mount target), the compiler passes `anchor.parentNode` instead of the root `mount` parameter. On each reconcile, the runtime also prefers the live `anchor.parentNode` so the list stays attached after the initial fragment is moved into the host.
+
 Multi-node rows (compiler may mount a `DocumentFragment` per item) keep **source order** inside each row and across the list. The runtime detects fragments with `nodeType === 11` (reliable across DOM implementations), expands them into child nodes, and inserts each row as an ordered group.
 
 ### Multi-child row (fragment)
@@ -739,6 +741,8 @@ DOM order per row matches the template top-to-bottom; reordering items by key mo
   <p>Cart is empty</p>
 #end
 ```
+
+`#for` may also be a **direct child** of `#if` / `#else` (no wrapper element). The compiler resolves the list parent from the list comment anchor (`anchor.parentNode`) instead of assuming the root `mount` target — so nested control flow does not throw at runtime.
 
 Prefer a stable `<ul>` outside `#if` when only the emptiness message toggles — fewer remounts:
 

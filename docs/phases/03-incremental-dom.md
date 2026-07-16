@@ -115,6 +115,8 @@ for each effect run:
 
 Fragments are detected with `nodeType === 11` (not `instanceof`), so collection expands children correctly across DOM implementations (including happy-dom).
 
+When an `anchor` is present, each reconcile resolves `parent` from `anchor.parentNode` (falling back to the options `parent`). That keeps `#for` correct inside `#if` and after the mount fragment is appended to the host.
+
 Immutable updates (e.g. `{ ...item, done: true }` with the same `id`) are supported — the runtime detects identity changes and refreshes row bindings.
 
 ## Trade-offs
@@ -150,6 +152,7 @@ yarn build && yarn test
 - Document fragment mounts advance the cursor in child order
 - `reconcileKeyedList` create, remove, reorder without recreate
 - Multi-child fragment rows preserve in-row and list order (`nodeType === 11`)
+- `#for` nested as a direct child of `#if` resolves `parent` from `anchor.parentNode`
 - Re-render when item identity changes at the same key
 - Parse and codegen for `#if`, `#for`, components
 - Prop auto-detection

@@ -165,6 +165,23 @@ export default view\`
     expect(result.code).not.toMatch(/reconcileKeyedList\(\{\)/)
   })
 
+  it('resolves #for parent from anchor when nested in #if', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const show = signal(true)
+const items = signal([{ id: '1', label: 'a' }])
+export default view\`
+#if show()
+  #for items() as item (item.id)
+    <li>\${item.label}</li>
+  #end
+#end
+\``
+    const result = compile(source)
+    expect(result.code).toContain('reconcileKeyedList')
+    expect(result.code).toMatch(/parent:\s*\w+\.parentNode/)
+    expect(result.code).not.toMatch(/parent:\s*target\s*,/)
+  })
+
   it('cleans up event listeners on dispose', () => {
     const result = compile(COUNTER)
     expect(result.code).toContain('removeEventListener')

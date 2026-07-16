@@ -99,6 +99,79 @@ describe('todo app', () => {
   })
 })
 
+const FOR_IN_IF = `import { pulse, view } from '@jacare/core'
+
+const show = pulse(true)
+const items = pulse([
+  { id: 'a', label: 'Alpha' },
+  { id: 'b', label: 'Beta' },
+])
+
+export default view\`
+  #if show()
+    #for items() as item (item.id)
+      <li>\${item.label}</li>
+    #end
+  #end
+\``
+
+function loadForInIf(source: string) {
+  const { code } = compile(source)
+  const body = code
+    .replace(/^import[^\n]*\n/, '')
+    .replace(/^export default mount\s*/m, '')
+    .replace(/^export /gm, '')
+  return new Function(
+    'runtime',
+    `const { signal, computed, pulse, derive, effect, bindText, bindAttribute, bindModel, bindClass, showIf, branch, reconcileKeyedList, resumeBindings } = runtime
+${body}
+return { mount, show, items }`,
+  )(runtime) as {
+    mount: (target: HTMLElement) => () => void
+    show: { set: (value: boolean) => void }
+    items: {
+      set: (list: { id: string; label: string }[]) => void
+      update: (fn: (list: { id: string; label: string }[]) => { id: string; label: string }[]) => void
+    }
+  }
+}
+
+describe('#for nested in #if', () => {
+  it('mounts, updates, and toggles without ReferenceError', async () => {
+    const { mount, show, items } = loadForInIf(FOR_IN_IF)
+    const root = document.createElement('div')
+    const dispose = mount(root)
+
+    expect([...root.querySelectorAll('li')].map((el) => el.textContent)).toEqual(['Alpha', 'Beta'])
+
+    items.set([
+      { id: 'b', label: 'Beta' },
+      { id: 'a', label: 'Alpha' },
+      { id: 'c', label: 'Gamma' },
+    ])
+    await Promise.resolve()
+    expect([...root.querySelectorAll('li')].map((el) => el.textContent)).toEqual([
+      'Beta',
+      'Alpha',
+      'Gamma',
+    ])
+
+    show.set(false)
+    await Promise.resolve()
+    expect(root.querySelectorAll('li')).toHaveLength(0)
+
+    show.set(true)
+    await Promise.resolve()
+    expect([...root.querySelectorAll('li')].map((el) => el.textContent)).toEqual([
+      'Beta',
+      'Alpha',
+      'Gamma',
+    ])
+
+    dispose()
+  })
+})
+
 const REACTIVITY_DEMO = `import { pulse, derive, view } from '@jacare/core'
 
 const demoCount = pulse(0)
