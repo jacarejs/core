@@ -1,9 +1,10 @@
+import { derive } from '@jacare/core'
 import { appHref } from '../app-base.js'
 import { route } from '../nav.js'
 import Tip from '../components/Tip.jcr'
 import Badge from '../components/Badge.jcr'
 
-const pathLabel = route.path
+const pathLabel = derive(() => route.path())
 
 export <view>
   <section class="page">
