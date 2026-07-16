@@ -1,5 +1,12 @@
 # @jacare/core
 
+[![npm](https://img.shields.io/npm/v/@jacare/core.svg?color=189030)](https://www.npmjs.com/package/@jacare/core)
+[![downloads](https://img.shields.io/npm/dm/@jacare/core.svg)](https://www.npmjs.com/package/@jacare/core)
+[![license](https://img.shields.io/npm/l/@jacare/core.svg)](https://github.com/jacarejs/core/blob/main/LICENSE)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![node](https://img.shields.io/badge/node-%3E%3D20-189030.svg)](https://nodejs.org)
+[![demo](https://img.shields.io/badge/demo-Lab-78c018.svg)](https://jacarejs.github.io/core/lab/)
+
 The runtime for [Jacaré](https://github.com/jacarejs/core) — a fine-grained reactive UI framework with **no Virtual DOM**.
 
 Jacaré compiles `.jcr` modules into direct DOM updates. When a value changes, only the nodes that depend on it update. This package provides the reactivity engine, DOM bindings, navigation, forms, SSR helpers, and lifecycle hooks.
@@ -476,6 +483,7 @@ SSR output includes `data-jacare-bind` markers for precise hydration targets.
 - [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Live demo](https://jacarejs.github.io/core/todo/)
+- [Jacaré Lab](https://jacarejs.github.io/core/lab/) — full API tutorial
 - [Example app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
 - Related: [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta)
 

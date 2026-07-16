@@ -1,8 +1,14 @@
 # @jacare/devtools
 
+[![npm](https://img.shields.io/npm/v/@jacare/devtools.svg?color=189030)](https://www.npmjs.com/package/@jacare/devtools)
+[![downloads](https://img.shields.io/npm/dm/@jacare/devtools.svg)](https://www.npmjs.com/package/@jacare/devtools)
+[![license](https://img.shields.io/npm/l/@jacare/devtools.svg)](https://github.com/jacarejs/core/blob/main/LICENSE)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![demo](https://img.shields.io/badge/demo-Todo-78c018.svg)](https://jacarejs.github.io/core/todo/)
+
 Development tools for Jacaré — a **Pulse Graph** inspector and a live **Scope** panel.
 
-Use this package during development to visualize reactive dependencies, inspect live pulse values, and watch registered scope variables update in real time.
+Use this package during development to visualize reactive dependencies, inspect live pulse values (with flash-on-change), minimize/hide the panel, and watch registered scope variables update in real time.
 
 ---
 
@@ -273,6 +279,7 @@ Tree-shaking removes `@jacare/devtools` from production bundles when the import 
 - [DevTools docs](https://github.com/jacarejs/core/blob/main/docs/phases/06-devtools.md)
 - [@jacare/core](https://www.npmjs.com/package/@jacare/core)
 - [Live demo](https://jacarejs.github.io/core/todo/)
+- [Jacaré Lab](https://jacarejs.github.io/core/lab/)
 - Related: [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin)
 
 ## License

@@ -4,7 +4,16 @@
   <img src="../packages/cli/assets/jacare-logo.png" width="120" alt="Jacaré logo" />
 </p>
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@jacare/core"><img src="https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030" alt="npm" /></a>
+  <a href="https://github.com/jacarejs/core/actions/workflows/ci.yml"><img src="https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://jacarejs.github.io/core/lab/"><img src="https://img.shields.io/badge/demo-Lab-78c018.svg" alt="Lab" /></a>
+  <a href="https://github.com/jacarejs/core/blob/main/LICENSE"><img src="https://img.shields.io/github/license/jacarejs/core.svg?color=189030" alt="MIT" /></a>
+</p>
+
 Complete API guide for building applications with Jacaré. Each section explains **what** the API does, **when** to use it, and includes a **minimal working example**.
+
+Interactive walkthrough: **[Jacaré Lab](https://jacarejs.github.io/core/lab/)** (`yarn lab:dev`).
 
 For syntax details see [syntax.md](syntax.md). For architecture rationale see [phases/](phases/).
 

@@ -1,5 +1,12 @@
 # Jacaré for VS Code
 
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/heberalmeida.jacare.svg?label=VS%20Code&color=189030)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
+[![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
+[![CI](https://github.com/jacarejs/core/actions/workflows/publish-vscode.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/publish-vscode.yml)
+[![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
+[![demo Lab](https://img.shields.io/badge/demo-Lab-78c018.svg)](https://jacarejs.github.io/core/lab/)
+
 Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr` files — syntax highlighting, file icons, and editor ergonomics for the Jacaré reactive UI framework.
 
 **Publisher:** [heberalmeida](https://marketplace.visualstudio.com/publishers/heberalmeida)  
@@ -250,7 +257,7 @@ Optional `settings.json` for Jacaré projects:
 - [Jacaré repository](https://github.com/jacarejs/core)
 - [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md) — including [template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
-- [Live demos](https://jacarejs.github.io/core/) — [Todo](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/)
+- [Live demos](https://jacarejs.github.io/core/) — [Todo](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [Lab](https://jacarejs.github.io/core/lab/)
 - [Compiler docs](https://github.com/jacarejs/core/blob/main/docs/phases/02-compiler.md)
 
 ---

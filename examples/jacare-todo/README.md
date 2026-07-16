@@ -1,8 +1,17 @@
 # Jacaré Todo — Example App
 
+[![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/todo/)
+[![Pages](https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/pages.yml)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![core](https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030)](https://www.npmjs.com/package/@jacare/core)
+[![devtools](https://img.shields.io/npm/v/@jacare/devtools.svg?label=%40jacare%2Fdevtools&color=189030)](https://www.npmjs.com/package/@jacare/devtools)
+[![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
+
 Full-featured demo for the Jacaré framework: tasks, tutorial, playground, forms, and DevTools.
 
 Live demo: [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/)
+
+Also see: [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [Lab (API tutorial)](https://jacarejs.github.io/core/lab/)
 
 ## Run locally
 
@@ -38,34 +47,12 @@ src/
   nav.js             route map + createRoute()
   boot.js            entry + DevTools
   app-base.js        appHref() / appRoute() for GH Pages base
-index.html           global styles
-public/              jacare-logo.png
-jacare.config.js
 ```
 
-## Navigation pattern
+## What it shows
 
-Use **route-relative** paths for `jacare-go` and **base-aware** URLs for `href`:
-
-```javascript
-<a jacare-go="/tutorial" href=${appHref('/tutorial')}>Tutorial</a>
-```
-
-- `jacare-go` — internal route (no deploy base prefix)
-- `href` — browser fallback with Vite `base` (`/core/todo/` on GitHub Pages)
-
-## Features demonstrated
-
-| Route | Features |
-|-------|----------|
-| `/` | Keyed lists, search, two-way bindings, stats |
-| `/tutorial/*` | Lesson pages, lazy loading, code samples |
-| `/playground` | Live Scope panel |
-| `/about` | Tabs via query string, `createForm`, lifecycle |
-| 404 | `missing` screen |
-
-## Check
-
-```bash
-node ../../packages/cli/dist/index.js check
-```
+- Keyed `#for` task lists with immutable updates
+- `createForm` + Field validation
+- Tutorial routes under `/tutorial/*`
+- `connectJacareDevtools()` in DEV (Pulse Graph with live values)
+- GitHub Pages `base` via `JACARE_BASE` / `appHref`

@@ -1,6 +1,14 @@
 # Jacaré Lab
 
-Interactive tutorial covering the Jacaré API from [`docs/api.md`](../../docs/api.md) — live demos, reusable components, and a **View code** modal on every example.
+[![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/lab/)
+[![Pages](https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/pages.yml)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![core](https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030)](https://www.npmjs.com/package/@jacare/core)
+[![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
+
+Interactive tutorial covering the Jacaré API from [`docs/api.md`](../../docs/api.md) — live demos, reusable components, template contracts, and a **View code** modal on every example.
+
+Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/)
 
 ## Run
 
@@ -15,8 +23,8 @@ yarn workspace jacare-lab preview
 ```
 
 ```bash
-node packages/cli/dist/index.js check
 # from examples/jacare-lab
+yarn jacare-check
 ```
 
 ## What’s inside
@@ -47,3 +55,4 @@ Each `Demo` card explains the idea, runs a live example, and opens the source in
 - `@jacare/core` + `@jacare/vite-plugin` + `@jacare/devtools` (DEV)
 - Logo + green palette aligned with Scale BMI
 - Fonts: Fraunces + Manrope + IBM Plex Mono
+- GitHub Pages base: `/core/lab/`

@@ -1,8 +1,17 @@
 # Scale — BMI by Jacaré
 
+[![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/bmi/)
+[![Pages](https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/pages.yml)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![core](https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030)](https://www.npmjs.com/package/@jacare/core)
+[![devtools](https://img.shields.io/npm/v/@jacare/devtools.svg?label=%40jacare%2Fdevtools&color=189030)](https://www.npmjs.com/package/@jacare/devtools)
+[![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
+
 Live body-mass index calculator demo. Move height and weight; the gauge, number, and category update through fine-grained reactivity — no VDOM.
 
 Live demo: [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/)
+
+Also see: [Todo](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Lab (API tutorial)](https://jacarejs.github.io/core/lab/)
 
 ![Jacaré](public/jacare-logo.png)
 

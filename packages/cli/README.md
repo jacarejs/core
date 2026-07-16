@@ -1,8 +1,14 @@
 # @jacare/cli
 
+[![npm](https://img.shields.io/npm/v/@jacare/cli.svg?color=189030)](https://www.npmjs.com/package/@jacare/cli)
+[![downloads](https://img.shields.io/npm/dm/@jacare/cli.svg)](https://www.npmjs.com/package/@jacare/cli)
+[![license](https://img.shields.io/npm/l/@jacare/cli.svg)](https://github.com/jacarejs/core/blob/main/LICENSE)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![node](https://img.shields.io/badge/node-%3E%3D20-189030.svg)](https://nodejs.org)
+
 Command-line tool to **create**, **develop**, **build**, and **check** Jacaré applications.
 
-Jacaré is a fine-grained reactive UI framework with no Virtual DOM. This CLI wraps Vite and the Jacaré compiler so you can start a project in seconds.
+Jacaré is a fine-grained reactive UI framework with no Virtual DOM. This CLI wraps Vite and the Jacaré compiler so you can start a project in seconds. `jacare check` also validates **template contracts** across parent/child `.jcr` files (required props, `model` + `bind-*`, pulses, emits).
 
 ---
 
@@ -234,7 +240,14 @@ ok src/pages/home.jcr
 3 file(s) ok
 ```
 
-Exits with code `1` if any file fails to compile. Ideal for CI:
+`jacare check` compiles each module **and** cross-checks parents against child **template contracts**:
+
+- unknown props / emits
+- missing `required` props and pulse props
+- `model: true` props must use `bind-name` (not `:name`)
+- soft static type checks (`boolean` / `number` / `object`)
+
+Exit code `1` if any compile or contract issue is found — ready for CI:
 
 ```yaml
 - run: npm install
@@ -393,6 +406,7 @@ Run `npm install` in the project directory after `jacare new`.
 - [npm — @jacare/cli](https://www.npmjs.com/package/@jacare/cli)
 - [Repository](https://github.com/jacarejs/core)
 - [Live demo](https://jacarejs.github.io/core/todo/)
+- [Jacaré Lab](https://jacarejs.github.io/core/lab/)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Example todo app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
 - Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta)

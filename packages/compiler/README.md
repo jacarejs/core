@@ -1,8 +1,14 @@
 # @jacare/compiler
 
+[![npm](https://img.shields.io/npm/v/@jacare/compiler.svg?color=189030)](https://www.npmjs.com/package/@jacare/compiler)
+[![downloads](https://img.shields.io/npm/dm/@jacare/compiler.svg)](https://www.npmjs.com/package/@jacare/compiler)
+[![license](https://img.shields.io/npm/l/@jacare/compiler.svg)](https://github.com/jacarejs/core/blob/main/LICENSE)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![node](https://img.shields.io/badge/node-%3E%3D20-189030.svg)](https://nodejs.org)
+
 The Jacaré compiler transforms `.jcr` modules into optimized JavaScript for the client, server, or both.
 
-A `.jcr` file is plain JavaScript with `export <view>` / `export <style>` blocks (recommended), or `view\`...\`` / `style\`...\`` tagged templates. The compiler parses the template, detects reactive bindings, and emits fine-grained DOM code that uses `@jacare/core`.
+A `.jcr` file is plain JavaScript with `export <view>` / `export <style>` / `export <contract>` blocks (recommended), or `view\`...\`` / `style\`...\`` tagged templates. The compiler parses the template, detects reactive bindings, and emits fine-grained DOM code that uses `@jacare/core`.
 
 ---
 
@@ -212,6 +218,28 @@ export function mount(target, props = {}) {
 }
 ```
 
+### Template contracts
+
+Declare the component surface with `export <contract>` — props (with `type`, `required`, `default`, `model`), pulses, slots, and emits. The compiler emits `emit()` + defaults; `jacare check` / the Vite plugin validate parents:
+
+```javascript
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+    value: { type: 'string', model: true }
+  }
+  emits: ['change']
+</contract>
+
+export <view>
+  <label>${label}</label>
+  <input bind-value=${value} />
+  <button on-click=${() => emit('change')}>OK</button>
+</view>
+```
+
+Parent must use `bind-value` for model props (not `:value`). See [API — Template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract).
+
 Module imports (`import { topics } from './topics.js'`) are **not** treated as props.
 
 ---
@@ -287,8 +315,10 @@ The runtime uses `Symbol.for('jacare.lazy')` on loaders returned by `lazy()`. Th
 
 - [npm — @jacare/compiler](https://www.npmjs.com/package/@jacare/compiler)
 - [Repository](https://github.com/jacarejs/core)
+- [API — Template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract)
 - [Compiler docs](https://github.com/jacarejs/core/blob/main/docs/phases/02-compiler.md)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
+- [Jacaré Lab](https://jacarejs.github.io/core/lab/)
 - Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)
 
 ## License

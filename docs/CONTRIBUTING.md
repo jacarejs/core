@@ -1,5 +1,10 @@
 # Contributing to Jacaré
 
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![Pages](https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/pages.yml)
+[![npm](https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030)](https://www.npmjs.com/package/@jacare/core)
+[![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
+
 ## Monorepo setup
 
 ```bash
@@ -121,7 +126,7 @@ See [benchmarks/README.md](../benchmarks/README.md) for the local performance su
 
 - **CI** — `.github/workflows/ci.yml` runs on every push/PR to `main`
 - **npm** — `.github/workflows/publish.yml` (`workflow_dispatch`) bumps versions, publishes packages, tags the release
-- **GitHub Pages** — `.github/workflows/pages.yml` deploys todo / showcase / BMI demos
+- GitHub Pages — `.github/workflows/pages.yml` deploys todo / showcase / BMI / **Lab** demos
 
 ### Why Pages used to break after npm publish
 

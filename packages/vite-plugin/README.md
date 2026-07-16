@@ -1,8 +1,14 @@
 # @jacare/vite-plugin
 
+[![npm](https://img.shields.io/npm/v/@jacare/vite-plugin.svg?color=189030)](https://www.npmjs.com/package/@jacare/vite-plugin)
+[![downloads](https://img.shields.io/npm/dm/@jacare/vite-plugin.svg)](https://www.npmjs.com/package/@jacare/vite-plugin)
+[![license](https://img.shields.io/npm/l/@jacare/vite-plugin.svg)](https://github.com/jacarejs/core/blob/main/LICENSE)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![peer](https://img.shields.io/badge/vite-%5E5%20%7C%20%5E6-189030.svg)](https://vitejs.dev)
+
 Vite plugin that compiles `.jcr` files during development and production builds.
 
-When you import a `.jcr` module, this plugin runs `@jacare/compiler` and returns optimized JavaScript with source maps. No extra build step is required — Vite handles everything.
+When you import a `.jcr` module, this plugin runs `@jacare/compiler` and returns optimized JavaScript with source maps. It also validates **template contracts** against imported children so misuse fails at transform time. No extra build step is required — Vite handles everything.
 
 ---
 
@@ -301,6 +307,8 @@ export default { base: '/my-repo/' }
 - [npm — @jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin)
 - [Repository](https://github.com/jacarejs/core)
 - [Example app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
+- [Jacaré Lab](https://jacarejs.github.io/core/lab/)
+- Related: [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)
 - Related: [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)
 
 ## License

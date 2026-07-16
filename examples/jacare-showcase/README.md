@@ -1,8 +1,16 @@
 # Jacaré Showcase
 
+[![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/showcase/)
+[![Pages](https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/pages.yml)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+[![core](https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030)](https://www.npmjs.com/package/@jacare/core)
+[![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
+
 A polished demo app showcasing the full potential of [Jacaré](https://github.com/jacarejs/core) — fine-grained reactivity, scoped CSS, slots, CPW, reactive CSS variables, forms, file-based routing, and incremental DOM updates.
 
 Live demo: [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/)
+
+Also see: [Todo](https://jacarejs.github.io/core/todo/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [Lab (API tutorial)](https://jacarejs.github.io/core/lab/)
 
 **Designed as a standalone repository:** [github.com/jacarejs/showcase](https://github.com/jacarejs/showcase)
 
@@ -126,12 +134,12 @@ jacare-showcase/
     "check": "jacare check"
   },
   "dependencies": {
-    "@jacare/core": "^0.1.0"
+    "@jacare/core": "^0.1.6"
   },
   "devDependencies": {
-    "@jacare/cli": "^0.1.0",
-    "@jacare/vite-plugin": "^0.1.0",
-    "@jacare/devtools": "^0.1.0"
+    "@jacare/cli": "^0.1.6",
+    "@jacare/vite-plugin": "^0.1.6",
+    "@jacare/devtools": "^0.1.6"
   }
 }
 ```

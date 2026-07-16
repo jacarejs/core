@@ -1,5 +1,10 @@
 # @jacare/meta
 
+[![npm](https://img.shields.io/npm/v/@jacare/meta.svg?color=189030)](https://www.npmjs.com/package/@jacare/meta)
+[![downloads](https://img.shields.io/npm/dm/@jacare/meta.svg)](https://www.npmjs.com/package/@jacare/meta)
+[![license](https://img.shields.io/npm/l/@jacare/meta.svg)](https://github.com/jacarejs/core/blob/main/LICENSE)
+[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
+
 File-based routing and app conventions for [Jacaré](https://github.com/jacarejs/core).
 
 ## Install
@@ -56,3 +61,4 @@ export const nav = createJacareAppFromRoutes({
 - [npm — @jacare/meta](https://www.npmjs.com/package/@jacare/meta)
 - [Repository](https://github.com/jacarejs/core)
 - Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)
+- [Jacaré Lab](https://jacarejs.github.io/core/lab/)

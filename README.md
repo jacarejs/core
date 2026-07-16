@@ -4,6 +4,31 @@
   <img src="packages/cli/assets/jacare-logo.png" width="140" alt="Jacaré logo" />
 </p>
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@jacare/core"><img src="https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030" alt="npm @jacare/core" /></a>
+  <a href="https://www.npmjs.com/package/@jacare/compiler"><img src="https://img.shields.io/npm/v/@jacare/compiler.svg?label=%40jacare%2Fcompiler&color=189030" alt="npm @jacare/compiler" /></a>
+  <a href="https://www.npmjs.com/package/@jacare/cli"><img src="https://img.shields.io/npm/v/@jacare/cli.svg?label=%40jacare%2Fcli&color=189030" alt="npm @jacare/cli" /></a>
+  <a href="https://www.npmjs.com/package/@jacare/vite-plugin"><img src="https://img.shields.io/npm/v/@jacare/vite-plugin.svg?label=%40jacare%2Fvite-plugin&color=189030" alt="npm @jacare/vite-plugin" /></a>
+  <a href="https://www.npmjs.com/package/@jacare/devtools"><img src="https://img.shields.io/npm/v/@jacare/devtools.svg?label=%40jacare%2Fdevtools&color=189030" alt="npm @jacare/devtools" /></a>
+  <a href="https://www.npmjs.com/package/@jacare/meta"><img src="https://img.shields.io/npm/v/@jacare/meta.svg?label=%40jacare%2Fmeta&color=189030" alt="npm @jacare/meta" /></a>
+  <a href="https://www.npmjs.com/package/create-jacare"><img src="https://img.shields.io/npm/v/create-jacare.svg?label=create-jacare&color=189030" alt="npm create-jacare" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/jacarejs/core/actions/workflows/ci.yml"><img src="https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/jacarejs/core/actions/workflows/pages.yml"><img src="https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg" alt="Pages" /></a>
+  <a href="https://github.com/jacarejs/core/blob/main/LICENSE"><img src="https://img.shields.io/github/license/jacarejs/core.svg?color=189030" alt="MIT License" /></a>
+  <img src="https://img.shields.io/badge/node-%3E%3D20-189030.svg" alt="Node >= 20" />
+  <a href="https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare"><img src="https://img.shields.io/visual-studio-marketplace/v/heberalmeida.jacare.svg?label=VS%20Code&color=189030" alt="VS Code Jacaré" /></a>
+</p>
+
+<p align="center">
+  <a href="https://jacarejs.github.io/core/todo/"><img src="https://img.shields.io/badge/demo-Todo-78c018.svg" alt="Todo demo" /></a>
+  <a href="https://jacarejs.github.io/core/showcase/"><img src="https://img.shields.io/badge/demo-Showcase-78c018.svg" alt="Showcase demo" /></a>
+  <a href="https://jacarejs.github.io/core/bmi/"><img src="https://img.shields.io/badge/demo-Scale%20BMI-78c018.svg" alt="BMI demo" /></a>
+  <a href="https://jacarejs.github.io/core/lab/"><img src="https://img.shields.io/badge/demo-Lab%20API%20tutorial-78c018.svg" alt="Lab demo" /></a>
+</p>
+
 **Jacaré** is a front-end framework for building fast, reactive web apps with plain JavaScript — no Virtual DOM, no component re-renders, no proprietary file format.
 
 Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
@@ -13,6 +38,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | Topic | Link |
 |-------|------|
 | **API reference (full)** | [docs/api.md](docs/api.md) |
+| Template contracts | [docs/api.md §9](docs/api.md#template-contracts-export-contract) |
 | Events `on-*` / `@*` | [docs/api.md §6](docs/api.md#6-events-on---) |
 | Conditionals `#if` | [docs/api.md §7](docs/api.md#7-control-flow--if) |
 | Lists `#for` | [docs/api.md §8](docs/api.md#8-control-flow--for) |
@@ -148,20 +174,24 @@ Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`]
 | 6 — DevTools | ✓ |
 | 7 — Forms | ✓ |
 | 8 — CPW + CSS vars | ✓ |
+| Template contracts (`export <contract>`) | ✓ — props / pulses / slots / emits + `jacare check` |
+| Typed model props (`model` + `bind-*`) | ✓ — defaults, required, Vite + CLI validation |
+| Jacaré Lab (API tutorial) | ✓ — `examples/jacare-lab` · [live](https://jacarejs.github.io/core/lab/) |
 
 ## Packages
 
-Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) scope on npm:
+Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) scope on npm (**v0.1.6**):
 
-| Package | npm | Description |
-|---------|-----|-------------|
-| `@jacare/core` | [npmjs.com/package/@jacare/core](https://www.npmjs.com/package/@jacare/core) | Pulse graph, DOM bindings, SSR |
-| `@jacare/compiler` | [npmjs.com/package/@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) | Compiles `export <view>` / `export <style>` and `view\`...\`` templates |
-| `@jacare/vite-plugin` | [npmjs.com/package/@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) | Vite integration |
-| `@jacare/cli` | [npmjs.com/package/@jacare/cli](https://www.npmjs.com/package/@jacare/cli) | `jacare` command — create, dev, build |
-| `@jacare/devtools` | [npmjs.com/package/@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) | Pulse Graph inspector panel |
-| `@jacare/meta` | [npmjs.com/package/@jacare/meta](https://www.npmjs.com/package/@jacare/meta) | File-based routing conventions |
-| `create-jacare` | [npmjs.com/package/create-jacare](https://www.npmjs.com/package/create-jacare) | `npm create jacare` — Vite-based scaffolds |
+| Package | Badges | Description |
+|---------|--------|-------------|
+| `@jacare/core` | [![npm](https://img.shields.io/npm/v/@jacare/core.svg?color=189030)](https://www.npmjs.com/package/@jacare/core) [![dm](https://img.shields.io/npm/dm/@jacare/core.svg)](https://www.npmjs.com/package/@jacare/core) | Pulse graph, DOM bindings, SSR |
+| `@jacare/compiler` | [![npm](https://img.shields.io/npm/v/@jacare/compiler.svg?color=189030)](https://www.npmjs.com/package/@jacare/compiler) [![dm](https://img.shields.io/npm/dm/@jacare/compiler.svg)](https://www.npmjs.com/package/@jacare/compiler) | Compiles `export <view>` / `<style>` / `<contract>` |
+| `@jacare/vite-plugin` | [![npm](https://img.shields.io/npm/v/@jacare/vite-plugin.svg?color=189030)](https://www.npmjs.com/package/@jacare/vite-plugin) [![dm](https://img.shields.io/npm/dm/@jacare/vite-plugin.svg)](https://www.npmjs.com/package/@jacare/vite-plugin) | Vite integration + contract checks |
+| `@jacare/cli` | [![npm](https://img.shields.io/npm/v/@jacare/cli.svg?color=189030)](https://www.npmjs.com/package/@jacare/cli) [![dm](https://img.shields.io/npm/dm/@jacare/cli.svg)](https://www.npmjs.com/package/@jacare/cli) | `jacare` — create, dev, build, check |
+| `@jacare/devtools` | [![npm](https://img.shields.io/npm/v/@jacare/devtools.svg?color=189030)](https://www.npmjs.com/package/@jacare/devtools) [![dm](https://img.shields.io/npm/dm/@jacare/devtools.svg)](https://www.npmjs.com/package/@jacare/devtools) | Pulse Graph inspector panel |
+| `@jacare/meta` | [![npm](https://img.shields.io/npm/v/@jacare/meta.svg?color=189030)](https://www.npmjs.com/package/@jacare/meta) [![dm](https://img.shields.io/npm/dm/@jacare/meta.svg)](https://www.npmjs.com/package/@jacare/meta) | File-based routing conventions |
+| `create-jacare` | [![npm](https://img.shields.io/npm/v/create-jacare.svg?color=189030)](https://www.npmjs.com/package/create-jacare) [![dm](https://img.shields.io/npm/dm/create-jacare.svg)](https://www.npmjs.com/package/create-jacare) | `npm create jacare` — Vite scaffolds |
+| VS Code | [![marketplace](https://img.shields.io/visual-studio-marketplace/v/heberalmeida.jacare.svg?label=VS%20Code&color=189030)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) | `.jcr` syntax highlighting |
 
 Nav (`createNav`) ships inside `@jacare/core`.
 
@@ -543,12 +573,12 @@ See also: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare
 
 ## Live demos
 
-| Demo | URL | What to explore |
-|------|-----|-----------------|
-| **Todo app** | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
-| **Showcase** | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | CPW, `style---`, components, slots, cart |
-| **Scale BMI** | [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/) | Live BMI gauge, metric/imperial, reactive CSS |
-| **Lab** | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) | Full API tutorial with live demos + View code modals |
+| Demo | Badges | URL | What to explore |
+|------|--------|-----|-----------------|
+| **Todo app** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/todo/) | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
+| **Showcase** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/showcase/) | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | CPW, `style---`, components, slots, cart |
+| **Scale BMI** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/bmi/) | [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/) | Live BMI gauge, metric/imperial, reactive CSS |
+| **Lab** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/lab/) | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) | Full API tutorial — live demos + View code modals |
 
 Run locally:
 
