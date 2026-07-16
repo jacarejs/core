@@ -8,19 +8,11 @@
 [![demo Lab](https://img.shields.io/badge/demo-Lab-78c018.svg)](https://jacarejs.github.io/core/lab/)
 
 <p align="center">
-  <img
-    src="https://raw.githubusercontent.com/jacarejs/core/main/packages/vscode-jacare/media/jacare-logo.png"
-    width="140"
-    alt="Jacaré logo"
-  />
-</p>
-
-<p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare">
     <img
-      src="https://raw.githubusercontent.com/jacarejs/core/main/packages/vscode-jacare/media/marketplace-banner.png"
-      width="520"
-      alt="Jacaré available in the VS Code Marketplace"
+      src="https://raw.githubusercontent.com/jacarejs/core/main/examples/jacare-bmi/public/jacare-logo.png"
+      width="180"
+      alt="Jacaré logo"
     />
   </a>
 </p>
