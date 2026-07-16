@@ -184,6 +184,90 @@ const results = derive(() => {
   </div>`,
 )
 
+const theme = pulse('day')
+const themes = ['day', 'dusk', 'night']
+
+function setTheme(next) {
+  theme.set(next)
+}
+
+const themeBgCode = viewSnippet(
+  `const theme = pulse('day')
+const themes = ['day', 'dusk', 'night']
+
+function setTheme(next) {
+  theme.set(next)
+}`,
+  `  <div class="stack">
+    <div class="row">
+      #for themes as t (t)
+        <button
+          type="button"
+          class="btn btn-outline"
+          class-active=\${() => theme() === t}
+          on-click=\${() => setTheme(t)}
+        >
+          \${t}
+        </button>
+      #end
+    </div>
+
+    #if theme() === 'day'
+      <div class="theme-panel theme-day">
+        <strong>Day</strong>
+        <p>Soft mist background — only this branch is in the DOM.</p>
+      </div>
+    #elif theme() === 'dusk'
+      <div class="theme-panel theme-dusk">
+        <strong>Dusk</strong>
+        <p>Warm amber wash — day and night panels are unmounted.</p>
+      </div>
+    #else
+      <div class="theme-panel theme-night">
+        <strong>Night</strong>
+        <p>Deep canopy background — swapped in by the if branch.</p>
+      </div>
+    #end
+  </div>`,
+  `.theme-panel {
+  padding: 1rem 1.1rem;
+  border-radius: 0.9rem;
+  border: 1px solid transparent;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.theme-panel strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.theme-panel p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.theme-day {
+  background: linear-gradient(135deg, #e7f6ec, #f8fffb);
+  border-color: color-mix(in srgb, var(--leaf) 25%, white);
+  color: var(--ink);
+}
+
+.theme-dusk {
+  background: linear-gradient(135deg, #ffe8c7, #ffd4a3);
+  border-color: #f0b35a;
+  color: #7a3e05;
+}
+
+.theme-night {
+  background: linear-gradient(135deg, #0b3d2e, #061a14);
+  border-color: #1f8f4e;
+  color: #e8f8dc;
+}`,
+)
+
 export <view>
   <section class="page">
     <header class="page-hero">
@@ -282,6 +366,80 @@ export <view>
           #end
         </div>
       </Demo>
+
+      <Demo :title=${'Swap backgrounds with if'} :lead=${'Each theme mounts a different panel — inactive backgrounds are not in the DOM at all.'} :code=${themeBgCode}>
+        <div class="stack">
+          <div class="row">
+            #for themes as t (t)
+              <button
+                type="button"
+                class="btn btn-outline"
+                class-active=${() => theme() === t}
+                on-click=${() => setTheme(t)}
+              >
+                ${t}
+              </button>
+            #end
+          </div>
+
+          #if theme() === 'day'
+            <div class="theme-panel theme-day">
+              <strong>Day</strong>
+              <p>Soft mist background — only this branch is in the DOM.</p>
+            </div>
+          #elif theme() === 'dusk'
+            <div class="theme-panel theme-dusk">
+              <strong>Dusk</strong>
+              <p>Warm amber wash — day and night panels are unmounted.</p>
+            </div>
+          #else
+            <div class="theme-panel theme-night">
+              <strong>Night</strong>
+              <p>Deep canopy background — swapped in by the if branch.</p>
+            </div>
+          #end
+        </div>
+      </Demo>
     </div>
   </section>
 </view>
+
+export <style>
+.theme-panel {
+  padding: 1rem 1.1rem;
+  border-radius: 0.9rem;
+  border: 1px solid transparent;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.theme-panel strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.theme-panel p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.theme-day {
+  background: linear-gradient(135deg, #e7f6ec, #f8fffb);
+  border-color: color-mix(in srgb, var(--leaf) 25%, white);
+  color: var(--ink);
+}
+
+.theme-dusk {
+  background: linear-gradient(135deg, #ffe8c7, #ffd4a3);
+  border-color: #f0b35a;
+  color: #7a3e05;
+}
+
+.theme-night {
+  background: linear-gradient(135deg, #0b3d2e, #061a14);
+  border-color: #1f8f4e;
+  color: #e8f8dc;
+}
+</style>
