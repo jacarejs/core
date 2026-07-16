@@ -1287,12 +1287,14 @@ import { connectJacareDevtools } from '@jacare/devtools'
 connectJacareDevtools()
 ```
 
-Panels:
+Panels (dev only — only when you call `connectJacareDevtools()`):
 
-- **Pulse Graph** — signal dependency graph, live values
+- **Pulse Graph** — signal dependency graph, **live values** in the list (flash on change)
 - **Scope** — registered scope entries
 
-Zero runtime cost when DevTools are not connected.
+Controls: `−` minimize · `×` hide to a chip · click chip to restore (remembered in `sessionStorage`). Call the returned dispose function to remove panels entirely.
+
+Zero runtime cost when DevTools are not connected (production should keep the import behind `import.meta.env.DEV`).
 
 ### Pulse Graph nodes
 
@@ -1443,13 +1445,15 @@ declare module '*.jcr' {
 |---------|------|------------|
 | **Todo** | `examples/jacare-todo` | Nav, forms, tutorial, lifecycle, playground |
 | **Showcase** | `examples/jacare-showcase` | CPW, `style---`, components, slots, cart |
+| **Scale BMI** | `examples/jacare-bmi` | Live gauge, metric/imperial, `derive` + range inputs |
 
 ```bash
 yarn example:dev    # todo app
 yarn showcase:dev   # showcase
+yarn bmi:dev        # Scale BMI
 ```
 
-Live demos: [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) · [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/)
+Live demos: [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) · [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) · [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/)
 
 ---
 

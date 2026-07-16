@@ -1,0 +1,9 @@
+import { appHref } from '../app-base.js'
+
+export <view>
+  <section class="missing">
+    <h1>Page not found</h1>
+    <p>That route is outside this Scale demo.</p>
+    <a class="text-link" jacare-go="/" href=${appHref('/')}>Back to Scale</a>
+  </section>
+</view>

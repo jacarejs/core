@@ -11,6 +11,7 @@
         var href = path + search + hash
         var isShowcase = path.indexOf('/core/showcase') === 0
         var isTodo = path.indexOf('/core/todo') === 0
+        var isBmi = path.indexOf('/core/bmi') === 0
         var base
         var target
 
@@ -20,6 +21,9 @@
         } else if (isTodo) {
           base = '/core/todo/'
           target = '/core/todo/'
+        } else if (isBmi) {
+          base = '/core/bmi/'
+          target = '/core/bmi/'
         } else if (path.indexOf('/core/') === 0 && path !== '/core/' && path !== '/core/index.html') {
           base = '/core/todo/'
           target = '/core/todo/'

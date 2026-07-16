@@ -1,0 +1,194 @@
+import { pulse, derive } from '@jacare/core'
+import { assetUrl } from '../app-base.js'
+
+const unit = pulse('metric')
+const heightCmOrIn = pulse(170)
+const weightKgOrLb = pulse(70)
+
+const isMetric = derive(() => unit() === 'metric')
+const isImperial = derive(() => unit() === 'imperial')
+
+const heightDisplay = derive(() => {
+  const n = Number(heightCmOrIn())
+  if (!Number.isFinite(n)) return '—'
+  return isMetric() ? `${Math.round(n)} cm` : `${Math.round(n)} in`
+})
+
+const weightDisplay = derive(() => {
+  const n = Number(weightKgOrLb())
+  if (!Number.isFinite(n)) return '—'
+  return isMetric() ? `${n.toFixed(1)} kg` : `${Math.round(n)} lb`
+})
+
+const bmi = derive(() => {
+  let h = Number(heightCmOrIn())
+  let w = Number(weightKgOrLb())
+  if (!Number.isFinite(h) || !Number.isFinite(w) || h <= 0 || w <= 0) return 0
+  if (isImperial()) {
+    h = (h * 2.54) / 100
+    w = w * 0.45359237
+  } else {
+    h = h / 100
+  }
+  return w / (h * h)
+})
+
+const bmiText = derive(() => {
+  const n = bmi()
+  if (n <= 0) return '—'
+  return n.toFixed(1)
+})
+
+const category = derive(() => {
+  const n = bmi()
+  if (n <= 0) return 'Waiting'
+  if (n < 18.5) return 'Underweight'
+  if (n < 25) return 'Healthy'
+  if (n < 30) return 'Overweight'
+  return 'Obese'
+})
+
+const categoryHint = derive(() => {
+  const n = bmi()
+  if (n <= 0) return 'Move the sliders to read your index.'
+  if (n < 18.5) return 'Below the usual adult range — useful context, not a diagnosis.'
+  if (n < 25) return 'Inside the commonly cited healthy adult band.'
+  if (n < 30) return 'Above the healthy band — muscle and frame still matter.'
+  return 'In the higher adult band — talk with a clinician for context.'
+})
+
+const isUnder = derive(() => {
+  const n = bmi()
+  return n > 0 && n < 18.5
+})
+const isHealthy = derive(() => {
+  const n = bmi()
+  return n >= 18.5 && n < 25
+})
+const isOver = derive(() => {
+  const n = bmi()
+  return n >= 25 && n < 30
+})
+const isObese = derive(() => {
+  const n = bmi()
+  return n >= 30
+})
+
+const needleAngle = derive(() => {
+  const n = bmi()
+  const t = Math.min(1, Math.max(0, (n - 12) / 28))
+  return `${-90 + t * 180}deg`
+})
+
+function toMetric() {
+  if (unit() === 'metric') return
+  const h = Number(heightCmOrIn())
+  const w = Number(weightKgOrLb())
+  heightCmOrIn.set(Math.round(h * 2.54))
+  weightKgOrLb.set(Number((w * 0.45359237).toFixed(1)))
+  unit.set('metric')
+}
+
+function toImperial() {
+  if (unit() === 'imperial') return
+  const h = Number(heightCmOrIn())
+  const w = Number(weightKgOrLb())
+  heightCmOrIn.set(Math.round(h / 2.54))
+  weightKgOrLb.set(Math.round(w / 0.45359237))
+  unit.set('imperial')
+}
+
+function resetAdult() {
+  unit.set('metric')
+  heightCmOrIn.set(170)
+  weightKgOrLb.set(70)
+}
+
+export <view>
+  <div class="scale">
+    <header class="hero">
+      <img class="hero-logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
+      <p class="hero-brand">Scale</p>
+      <h1 class="hero-title">Feel the math of your body.</h1>
+      <p class="hero-lead">
+        A live BMI gauge — height and weight wire straight into the number, with no page reload.
+      </p>
+    </header>
+
+    <section class="console" aria-label="BMI calculator">
+      <div class="gauge">
+        <div class="gauge-arc" aria-hidden="true"></div>
+        <div class="gauge-needle" style---angle=${needleAngle} aria-hidden="true"></div>
+        <div class="gauge-hub" aria-hidden="true"></div>
+        <div
+          class="gauge-readout"
+          class-zone-under=${isUnder}
+          class-zone-healthy=${isHealthy}
+          class-zone-over=${isOver}
+          class-zone-obese=${isObese}
+        >
+          <p class="bmi-value">${bmiText}</p>
+          <p class="bmi-unit">BMI</p>
+          <p class="bmi-category">${category}</p>
+        </div>
+      </div>
+
+      <p class="hint">${categoryHint}</p>
+
+      <div class="unit-row" role="group" aria-label="Unit system">
+        <button type="button" class="unit-btn" class-unit-on=${isMetric} on-click=${toMetric}>
+          Metric
+        </button>
+        <button type="button" class="unit-btn" class-unit-on=${isImperial} on-click=${toImperial}>
+          Imperial
+        </button>
+        <button type="button" class="unit-reset" on-click=${resetAdult}>Reset</button>
+      </div>
+
+      <div class="sliders">
+        <label class="slider">
+          <span class="slider-top">
+            <span>Height</span>
+            <strong>${heightDisplay}</strong>
+          </span>
+          #if isMetric()
+            <input class="range" type="range" min="120" max="220" step="1" bind-value=${heightCmOrIn} />
+          #else
+            <input class="range" type="range" min="48" max="84" step="1" bind-value=${heightCmOrIn} />
+          #end
+        </label>
+
+        <label class="slider">
+          <span class="slider-top">
+            <span>Weight</span>
+            <strong>${weightDisplay}</strong>
+          </span>
+          #if isMetric()
+            <input class="range" type="range" min="35" max="160" step="0.5" bind-value=${weightKgOrLb} />
+          #else
+            <input class="range" type="range" min="80" max="350" step="1" bind-value=${weightKgOrLb} />
+          #end
+        </label>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h2 class="explain-title">How the index is read</h2>
+      <p class="explain-lead">
+        BMI is weight divided by height squared. Scale keeps metric under the hood when you switch units,
+        so the needle stays honest.
+      </p>
+      <p class="formula">BMI = weight (kg) ÷ height (m)²</p>
+      <ul class="bands">
+        <li><span class="swatch under"></span> Underweight — below 18.5</li>
+        <li><span class="swatch healthy"></span> Healthy — 18.5 to 24.9</li>
+        <li><span class="swatch over"></span> Overweight — 25 to 29.9</li>
+        <li><span class="swatch obese"></span> Obese — 30 and above</li>
+      </ul>
+    </section>
+
+    <footer class="foot">
+      Built with Jacaré · educational demo, not medical advice
+    </footer>
+  </div>
+</view>

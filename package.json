@@ -23,6 +23,8 @@
     "example:build": "yarn workspace jacare-todo build",
     "showcase:dev": "yarn workspace jacare-showcase dev",
     "showcase:build": "yarn workspace jacare-showcase build",
+    "bmi:dev": "yarn workspace jacare-bmi dev",
+    "bmi:build": "yarn workspace jacare-bmi build",
     "bench": "yarn build && node benchmarks/run.mjs",
     "jacare": "node packages/cli/dist/index.js"
   },
