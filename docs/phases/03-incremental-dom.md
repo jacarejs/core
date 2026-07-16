@@ -67,6 +67,8 @@ showIf(anchor, condition, render) → dispose
 
 `branch` handles multi-branch `#if` / `#elif` / `#else`. `showIf` remains available for simple two-state toggles.
 
+Both use an **insertion cursor** (`createOrderedMount`): each `mount(node)` inserts after the previous sibling so multiple children keep **source order** (not reverse). Document fragments expand in child order and advance the cursor to the last child.
+
 ### Template syntax
 
 ```javascript
@@ -142,6 +144,8 @@ yarn build && yarn test
 ```
 
 - `showIf` and `branch` mount, toggle, dispose
+- Multi-child `branch` / `showIf` preserve source order (insertion cursor)
+- Document fragment mounts advance the cursor in child order
 - `reconcileKeyedList` create, remove, reorder without recreate
 - Re-render when item identity changes at the same key
 - Parse and codegen for `#if`, `#for`, components

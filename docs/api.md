@@ -557,6 +557,8 @@ Bare signal refs may work when the compiler rewrites them inside effects; **pref
 
 All children of the active branch mount in **source order**.
 
+The runtime keeps an insertion cursor after the comment anchor: each `mount()` call inserts the next node after the previous one (`createOrderedMount` in `@jacare/core`). Fragments are expanded in child order.
+
 ### Runtime
 
 Compiles to `branch(anchor, (mount) => { if (…) mount(node); … })` from `@jacare/core`. Switching branch disposes the previous nodes and mounts the new ones.

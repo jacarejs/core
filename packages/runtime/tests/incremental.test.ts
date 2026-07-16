@@ -47,6 +47,30 @@ describe('showIf', () => {
     expect(parent.querySelector('p')?.textContent).toBe('yes')
     dispose()
   })
+
+  it('mounts multiple siblings in source order', () => {
+    const parent = document.createElement('div')
+    const anchor = document.createComment('if')
+    parent.appendChild(anchor)
+
+    const visible = signal(true)
+    showIf(
+      anchor,
+      () => visible(),
+      (mount) => {
+        const title = document.createElement('h2')
+        title.textContent = 'title'
+        const body = document.createElement('p')
+        body.textContent = 'body'
+        mount(title)
+        mount(body)
+        return () => {}
+      },
+    )
+
+    expect([...parent.children].map((el) => el.tagName.toLowerCase())).toEqual(['h2', 'p'])
+    expect(parent.textContent).toBe('titlebody')
+  })
 })
 
 describe('reconcileKeyedList', () => {

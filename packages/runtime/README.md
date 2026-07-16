@@ -248,6 +248,8 @@ view`
 
 Alias: `@if` / `@elseif` / `@else` / `@end`
 
+Multiple siblings inside a branch mount in **source order** (`branch` / `showIf` use an insertion cursor after the comment anchor).
+
 ### Lists
 
 ```javascript

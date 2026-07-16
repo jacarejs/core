@@ -227,6 +227,8 @@ export <view>
 </view>
 ```
 
+Siblings inside the active branch keep source order at runtime (`branch` insertion cursor).
+
 ### Lists
 
 ```javascript
