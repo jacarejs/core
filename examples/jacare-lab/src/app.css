@@ -585,6 +585,7 @@ body {
   display: grid;
   place-items: center;
   padding: 1rem;
+  overflow: hidden;
   background: rgba(6, 26, 20, 0.48);
   backdrop-filter: blur(3px);
   animation: fade 0.2s ease both;
@@ -592,6 +593,7 @@ body {
 
 .code-panel {
   width: min(48rem, 100%);
+  min-width: 0;
   max-height: min(78vh, 40rem);
   display: grid;
   grid-template-rows: auto 1fr;
@@ -612,13 +614,6 @@ body {
   border-bottom: 1px solid rgba(143, 209, 42, 0.2);
 }
 
-.code-panel-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
 .code-panel-title {
   margin: 0;
   font-family: var(--font-display);
@@ -626,12 +621,15 @@ body {
 }
 
 .code-scroll {
-  overflow: auto;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: grid;
   gap: 0;
 }
 
 .code-file {
+  min-width: 0;
   border-bottom: 1px solid rgba(143, 209, 42, 0.14);
 }
 
@@ -649,12 +647,16 @@ body {
 }
 
 .code-file-name {
+  min-width: 0;
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.02em;
   color: #8fd12a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .btn-copy {
@@ -691,13 +693,37 @@ body {
 }
 
 .code-body {
+  max-width: 100%;
   margin: 0;
   padding: 0.85rem 1rem 1.1rem;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
   font-family: var(--font-mono);
   font-size: 0.78rem;
   line-height: 1.55;
   white-space: pre;
+}
+
+@media (max-width: 640px) {
+  .code-modal {
+    padding: 0.5rem;
+  }
+
+  .code-panel {
+    width: 100%;
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .code-panel-head {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .code-panel-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .tip {
