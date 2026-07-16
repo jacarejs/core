@@ -71,15 +71,48 @@ function toggleHighlight() {
   </div>`,
 )
 
+const installCreate = `npm create jacare@latest my-app
+cd my-app && npm install && npm run dev`
+
+const installCli = `npm install -g @jacare/cli
+jacare new my-app
+cd my-app && npm install && jacare dev`
+
+const startDev = `npm run dev
+jacare dev`
+
 export <view>
   <section class="page">
     <header class="page-hero">
       <img class="lab-logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
       <h1 class="page-title lab-brand">Jacaré Lab</h1>
-      <p class="page-lead">A complete, live tour of the API — every lesson pairs a short explanation with a running demo. Open <strong>View code</strong> to see the source.</p>
+      <p class="page-lead">A complete, live tour of the API — every lesson pairs a short explanation with a running demo. Open <strong>View code</strong>${' '}to see the source.</p>
     </header>
 
     <Tip :text=${'Every Demo card below has a "View code" button in its header — it opens the exact source for that example in a modal.'} />
+
+    <div class="intro-stack">
+      <article class="intro-card">
+        <h2 class="intro-title">What is Jacaré?</h2>
+        <p class="intro-copy">Jacaré is a compile-time front-end framework for building fast, reactive web apps with plain JavaScript. You write <code>.jcr</code>${' '}modules — normal JS plus an HTML-like view — and the compiler turns them into direct DOM updates. No virtual DOM, no whole-tree re-renders: when state changes, only the nodes that depend on it update.</p>
+        <p class="intro-copy">This lab is a guided tour of that API. Each lesson ships a live demo and a <strong>View code</strong>${' '}button so you can read the exact source that is running.</p>
+      </article>
+
+      <article class="intro-card">
+        <h2 class="intro-title">Install</h2>
+        <p class="intro-copy">Scaffold a new app with the official create package (npm, pnpm, or yarn all work):</p>
+        <pre class="log">${installCreate}</pre>
+        <p class="intro-copy">Or install the CLI globally and scaffold with <code>jacare new</code>:</p>
+        <pre class="log">${installCli}</pre>
+      </article>
+
+      <article class="intro-card">
+        <h2 class="intro-title">Start a project</h2>
+        <p class="intro-copy">From the project folder, start the dev server with <code>npm run dev</code>${' '}(create-jacare) or <code>jacare dev</code>${' '}(CLI scaffold). Create-jacare apps usually open on <code>http://localhost:5173</code>; <code>jacare new</code>${' '}apps default to <code>http://localhost:3000</code>.</p>
+        <pre class="log">${startDev}</pre>
+        <p class="intro-copy">Edit <code>src/app.jcr</code>${' '}(or the screens under <code>src/pages/</code>${' '}if you picked a nav template) and the page hot-reloads. When you are ready to explore the full API, walk the lessons in the sidebar — or jump into the Playground and type.</p>
+      </article>
+    </div>
 
     <div class="lesson-grid">
       <Demo :title=${'Quick start'} :lead=${'A pulse, a button, one line of reactive text — the smallest possible Jacaré app.'} :code=${quickStartCode}>
@@ -142,5 +175,35 @@ export <style>
 @keyframes lab-breathe {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
+}
+.intro-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+.intro-card {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border-radius: calc(var(--radius) + 0.15rem);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+.intro-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.intro-copy {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 68ch;
+}
+.intro-copy code {
+  font-size: 0.86em;
 }
 </style>

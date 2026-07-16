@@ -821,21 +821,95 @@ body {
   font-size: 1.05rem;
 }
 
-.playground-editor {
-  width: 100%;
-  height: 100%;
+.playground-editor-wrap {
+  position: relative;
   min-height: 20rem;
+  height: 100%;
+  overflow: hidden;
+  background: #0b1f18;
+}
+
+.playground-highlight,
+.playground-editor {
+  box-sizing: border-box;
   margin: 0;
   padding: 0.9rem 1rem;
   border: 0;
-  resize: none;
-  outline: none;
-  background: #0b1f18;
-  color: #e8f8dc;
   font-family: var(--font-mono);
   font-size: 0.8rem;
   line-height: 1.55;
   tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+}
+
+.playground-highlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: #d7eccb;
+}
+
+.playground-highlight code {
+  display: block;
+  min-height: 100%;
+  font: inherit;
+}
+
+.playground-editor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  outline: none;
+  background: transparent;
+  color: transparent;
+  caret-color: #e8f8dc;
+  -webkit-text-fill-color: transparent;
+  z-index: 1;
+}
+
+.playground-editor::selection {
+  background: rgba(125, 211, 167, 0.28);
+  color: transparent;
+}
+
+.playground-highlight .pg-tok-keyword {
+  color: #8ecbff;
+}
+
+.playground-highlight .pg-tok-string {
+  color: #f0b35a;
+}
+
+.playground-highlight .pg-tok-comment {
+  color: #6b8f7a;
+  font-style: italic;
+}
+
+.playground-highlight .pg-tok-number {
+  color: #ffd4a3;
+}
+
+.playground-highlight .pg-tok-tag {
+  color: #7dd3a7;
+}
+
+.playground-highlight .pg-tok-attr {
+  color: #c4e87a;
+}
+
+.playground-highlight .pg-tok-directive {
+  color: #f5a9c5;
+}
+
+.playground-highlight .pg-tok-punct {
+  color: #9db5a8;
+}
+
+.playground-highlight .pg-tok-ident {
+  color: #e8f8dc;
 }
 
 .playground-host {

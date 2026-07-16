@@ -1,6 +1,7 @@
 import { createLifecycle, effect, pulse } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import { DEFAULT_PLAYGROUND_SOURCE, PLAYGROUND_EXAMPLES } from '../playground/examples.js'
+import { highlightJacare } from '../playground/highlight.js'
 import { runPlayground } from '../playground/run.js'
 
 const source = pulse(DEFAULT_PLAYGROUND_SOURCE)
@@ -8,6 +9,7 @@ const error = pulse('')
 const status = pulse('Ready')
 
 let host = null
+let highlightCode = null
 let disposePreview = null
 let timer = null
 
@@ -15,6 +17,18 @@ function loadExample(id) {
   const example = PLAYGROUND_EXAMPLES.find((item) => item.id === id)
   if (!example) return
   source.set(example.source)
+}
+
+function paintHighlight() {
+  if (!highlightCode) return
+  highlightCode.innerHTML = highlightJacare(source())
+}
+
+function syncEditorScroll(event) {
+  const layer = event.currentTarget.previousElementSibling
+  if (!layer) return
+  layer.scrollTop = event.currentTarget.scrollTop
+  layer.scrollLeft = event.currentTarget.scrollLeft
 }
 
 function runNow() {
@@ -48,6 +62,7 @@ export const lifecycle = createLifecycle({
     queueMicrotask(() => {
       if (cancelled) return
       host = document.getElementById('playground-host')
+      highlightCode = document.getElementById('playground-highlight-code')
       if (!host) {
         error.set('Preview host not found')
         status.set('Error')
@@ -55,6 +70,7 @@ export const lifecycle = createLifecycle({
       }
       tracker = effect(() => {
         source()
+        paintHighlight()
         scheduleRun()
       })
     })
@@ -66,6 +82,7 @@ export const lifecycle = createLifecycle({
       disposePreview?.()
       disposePreview = null
       host = null
+      highlightCode = null
     }
   },
   onActivate() {
@@ -100,14 +117,18 @@ export <view>
           <h2 class="playground-pane-title">Source</h2>
           <span class="muted">.jcr</span>
         </header>
-        <textarea
-          class="playground-editor"
-          spellcheck="false"
-          autocomplete="off"
-          autocapitalize="off"
-          bind-value=${source}
-          aria-label="Jacaré source editor"
-        ></textarea>
+        <div class="playground-editor-wrap">
+          <pre class="playground-highlight" aria-hidden="true"><code id="playground-highlight-code"></code></pre>
+          <textarea
+            class="playground-editor"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            bind-value=${source}
+            on-scroll=${syncEditorScroll}
+            aria-label="Jacaré source editor"
+          ></textarea>
+        </div>
       </section>
 
       <section class="playground-pane">
