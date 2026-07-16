@@ -56,3 +56,26 @@ Each `Demo` card explains the idea, runs a live example, and opens the source in
 - Logo + green palette aligned with Scale BMI
 - Fonts: Fraunces + Manrope + IBM Plex Mono
 - GitHub Pages base: `/core/lab/`
+
+## Snippets
+
+Demo “View code” sources live in `src/snippets/` (one module per lesson), built with `viewSnippet` / `moduleSnippet` from `src/utils/snippet.js`.
+
+| File | Lesson |
+|------|--------|
+| `start.js` | `/` |
+| `reactivity.js` | `/reactivity` |
+| `templates.js` | `/templates` |
+| `bindings.js` | `/bindings` |
+| `events.js` | `/events` |
+| `conditionals.js` | `/if` |
+| `lists.js` | `/for` |
+| `components.js` | `/components` |
+| `css.js` | `/css` |
+| `navigation.js` | `/nav` |
+| `forms.js` | `/forms` |
+| `lifecycle.js` | `/lifecycle` |
+| `cookbook.js` | `/cookbook` |
+| `ssr.js` | `/ssr` |
+| `tooling.js` | `/tooling` |
+| `index.js` | barrel + `SNIPPET_CATALOG` |

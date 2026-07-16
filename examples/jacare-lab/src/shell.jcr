@@ -52,6 +52,11 @@ export <view>
           <p class="topbar-hint">Live demos · View code opens the source for each example</p>
         </header>
         <main class="main" jacare-frame></main>
+        <footer class="site-footer">
+          <p class="site-footer-line">
+            Made in Brazil <span class="site-footer-flag" aria-hidden="true">🇧🇷</span>
+          </p>
+        </footer>
       </div>
     </div>
 

@@ -131,7 +131,7 @@ body {
 .shell-main {
   min-width: 0;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
 }
 
 .topbar {
@@ -155,7 +155,26 @@ body {
 }
 
 .main {
-  padding: 1.25rem clamp(1rem, 3vw, 2rem) 3rem;
+  padding: 1.25rem clamp(1rem, 3vw, 2rem) 2rem;
+}
+
+.site-footer {
+  padding: 1rem clamp(1rem, 3vw, 2rem) 1.5rem;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.site-footer-line {
+  margin: 0;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.site-footer-flag {
+  margin-left: 0.2rem;
 }
 
 .backdrop {
