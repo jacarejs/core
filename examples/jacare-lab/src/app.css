@@ -472,7 +472,15 @@ body {
   margin: 0 auto;
   border-radius: 999px 999px 0 0;
   background:
-    conic-gradient(from 270deg, #4ade80 0deg, #f59e0b var(--angle), #ef4444 180deg, #d7ebe0 180deg);
+    conic-gradient(
+      from 270deg at 50% 100%,
+      #4ade80 0deg,
+      #f59e0b,
+      #ef4444 var(--angle),
+      #d7ebe0 var(--angle) 180deg,
+      transparent 180deg
+    );
+  -webkit-mask: radial-gradient(circle at 50% 100%, transparent 48%, #000 49%);
   mask: radial-gradient(circle at 50% 100%, transparent 48%, #000 49%);
 }
 
