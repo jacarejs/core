@@ -13,37 +13,51 @@
 
 Complete API guide for building applications with Jacaré. Each section explains **what** the API does, **when** to use it, and includes a **minimal working example**.
 
-Interactive walkthrough: **[Jacaré Lab](https://jacarejs.github.io/core/lab/)** (`yarn lab:dev`).
-
 For syntax details see [syntax.md](syntax.md). For architecture rationale see [phases/](phases/).
+
+---
+
+## Tutorial — Jacaré Lab
+
+> **Featured interactive tutorial.** Prefer learning by running demos? Open **[Jacaré Lab](https://jacarejs.github.io/core/lab/)** — one lesson per API topic, each with a live example and a **View code** modal.
+
+| | |
+|---|---|
+| **Live** | [https://jacarejs.github.io/core/lab/](https://jacarejs.github.io/core/lab/) |
+| **Local** | `yarn lab:dev` → http://localhost:3003 |
+| **Source** | [`examples/jacare-lab`](../examples/jacare-lab) |
+| **Matches this doc** | Reactivity → tooling (§3–§19), including contracts, forms, nav, and cookbook |
+
+[![Open Jacaré Lab](https://img.shields.io/badge/Open%20Jacaré%20Lab-interactive%20tutorial-78c018?style=for-the-badge)](https://jacarejs.github.io/core/lab/)
 
 ---
 
 ## Table of contents
 
-1. [Quick start](#1-quick-start)
-2. [Module format (.jcr)](#2-module-format-jcr)
-3. [Reactivity](#3-reactivity)
-4. [Templates](#4-templates)
-5. [DOM bindings](#5-dom-bindings)
-6. [Events (`on-*` / `@*`)](#6-events-on---)
-7. [Control flow — `#if`](#7-control-flow--if)
-8. [Control flow — `#for`](#8-control-flow--for)
-9. [Components, props, and slots](#9-components-and-slots)
-10. [Scoped CSS](#10-scoped-css)
-11. [Navigation](#11-navigation)
-12. [Forms](#12-forms)
-13. [Lifecycle and scope](#13-lifecycle-and-scope)
-13b. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
-14. [SSR and hydration](#14-ssr-and-hydration)
-15. [DevTools](#15-devtools)
-16. [Compiler API](#16-compiler-api)
-17. [CLI](#17-cli)
-18. [Vite plugin](#18-vite-plugin)
-19. [Testing](#19-testing)
-20. [Runtime helpers index](#20-runtime-helpers-index)
+1. [Tutorial — Jacaré Lab](#tutorial--jacaré-lab)
+2. [Quick start](#1-quick-start)
+3. [Module format (.jcr)](#2-module-format-jcr)
+4. [Reactivity](#3-reactivity)
+5. [Templates](#4-templates)
+6. [DOM bindings](#5-dom-bindings)
+7. [Events (`on-*` / `@*`)](#6-events-on---)
+8. [Control flow — `#if`](#7-control-flow--if)
+9. [Control flow — `#for`](#8-control-flow--for)
+10. [Components, props, and slots](#9-components-and-slots)
+11. [Scoped CSS](#10-scoped-css)
+12. [Navigation](#11-navigation)
+13. [Forms](#12-forms)
+14. [Lifecycle and scope](#13-lifecycle-and-scope)
+15. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
+16. [SSR and hydration](#14-ssr-and-hydration)
+17. [DevTools](#15-devtools)
+18. [Compiler API](#16-compiler-api)
+19. [CLI](#17-cli)
+20. [Vite plugin](#18-vite-plugin)
+21. [Testing](#19-testing)
+22. [Runtime helpers index](#20-runtime-helpers-index)
 
-Jump to: [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
+Jump to: [Tutorial](#tutorial--jacaré-lab) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
 
 ---
 
@@ -1512,20 +1526,30 @@ declare module '*.jcr' {
 
 ## Examples in this repository
 
+### Featured tutorial
+
+| | |
+|---|---|
+| **[Jacaré Lab](https://jacarejs.github.io/core/lab/)** | Full interactive API tutorial — live demos + View code for every section |
+| Path | `examples/jacare-lab` |
+| Run | `yarn lab:dev` |
+
+### Other demos
+
 | Example | Path | Highlights |
 |---------|------|------------|
 | **Todo** | `examples/jacare-todo` | Nav, forms, tutorial, lifecycle, playground |
 | **Showcase** | `examples/jacare-showcase` | CPW, `style---`, components, slots, cart |
 | **Scale BMI** | `examples/jacare-bmi` | Live gauge, metric/imperial, `derive` + range inputs |
-| **Lab** | `examples/jacare-lab` | Full API tutorial — live demos + View code modals for every section |
 
 ```bash
+yarn lab:dev        # Jacaré Lab (tutorial) — http://localhost:3003
 yarn example:dev    # todo app
 yarn showcase:dev   # showcase
 yarn bmi:dev        # Scale BMI
 ```
 
-Live demos: [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) · [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) · [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/)
+Live demos: [Lab](https://jacarejs.github.io/core/lab/) · [Todo](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [BMI](https://jacarejs.github.io/core/bmi/)
 
 ---
 

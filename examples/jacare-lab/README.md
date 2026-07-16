@@ -1,12 +1,12 @@
 # Jacaré Lab
 
-[![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/lab/)
+[![demo](https://img.shields.io/badge/tutorial-featured-78c018.svg)](https://jacarejs.github.io/core/lab/)
 [![Pages](https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/pages.yml)
 [![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
 [![core](https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030)](https://www.npmjs.com/package/@jacare/core)
 [![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
 
-Interactive tutorial covering the Jacaré API from [`docs/api.md`](../../docs/api.md) — live demos, reusable components, template contracts, and a **View code** modal on every example.
+**Featured interactive tutorial** for the Jacaré API ([`docs/api.md`](../../docs/api.md)) — live demos, reusable components, template contracts, and a **View code** modal on every example.
 
 Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/)
 
@@ -79,3 +79,7 @@ Demo “View code” sources live in `src/snippets/` (one module per lesson), bu
 | `ssr.js` | `/ssr` |
 | `tooling.js` | `/tooling` |
 | `index.js` | barrel + `SNIPPET_CATALOG` |
+
+---
+
+<p align="center">Made in Brazil 🇧🇷</p>

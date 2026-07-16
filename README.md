@@ -33,10 +33,25 @@
 
 Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 
+## Tutorial — Jacaré Lab
+
+> **Start here if you want to learn the full API by doing.**  
+> [Jacaré Lab](https://jacarejs.github.io/core/lab/) is the interactive tutorial: every API topic from [`docs/api.md`](docs/api.md) has a live demo and a **View code** modal.
+
+| | |
+|---|---|
+| **Live** | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) |
+| **Local** | `yarn lab:dev` → [http://localhost:3003](http://localhost:3003) |
+| **Source** | [`examples/jacare-lab`](examples/jacare-lab) |
+| **Covers** | Reactivity, templates, bindings, events, `#if` / `#for`, components & contracts, CSS, nav, forms, lifecycle, cookbook, SSR, tooling |
+
+[![Lab tutorial](https://img.shields.io/badge/Jacaré%20Lab-interactive%20API%20tutorial-78c018?style=for-the-badge)](https://jacarejs.github.io/core/lab/)
+
 ## Documentation
 
 | Topic | Link |
 |-------|------|
+| **Tutorial (Jacaré Lab)** | [Live](https://jacarejs.github.io/core/lab/) · [`examples/jacare-lab`](examples/jacare-lab) · `yarn lab:dev` |
 | **API reference (full)** | [docs/api.md](docs/api.md) |
 | Template contracts | [docs/api.md §9](docs/api.md#template-contracts-export-contract) |
 | Events `on-*` / `@*` | [docs/api.md §6](docs/api.md#6-events-on---) |
@@ -158,7 +173,7 @@ Jacaré asks a different question: **why re-render anything when only one text n
 | DevTools | `@jacare/devtools` | Pulse Graph — visualize signal dependencies live |
 | Scaffolding | `create-jacare` | `npm create jacare@latest` |
 
-Live demos: [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [Lab](https://jacarejs.github.io/core/lab/)
+Live demos: [**Lab (tutorial)**](https://jacarejs.github.io/core/lab/) · [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/)
 
 Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Cookbook](docs/api.md#13b-cookbook--if--for--events--props--lifecycle)
 
@@ -575,20 +590,20 @@ See also: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare
 
 | Demo | Badges | URL | What to explore |
 |------|--------|-----|-----------------|
+| **Lab (tutorial)** | [![demo](https://img.shields.io/badge/tutorial-featured-78c018.svg)](https://jacarejs.github.io/core/lab/) | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) | **Featured** — full API walkthrough with View code modals |
 | **Todo app** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/todo/) | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
 | **Showcase** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/showcase/) | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | CPW, `style---`, components, slots, cart |
 | **Scale BMI** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/bmi/) | [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/) | Live BMI gauge, metric/imperial, reactive CSS |
-| **Lab** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/lab/) | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) | Full API tutorial — live demos + View code modals |
 
 Run locally:
 
 ```bash
+yarn lab:dev        # Jacaré Lab (tutorial) — http://localhost:3003
 yarn showcase:dev   # http://localhost:3001
 yarn example:dev    # jacare-todo — http://localhost:3000
 yarn bmi:dev        # Scale BMI — http://localhost:3002
-yarn lab:dev        # Jacaré Lab — http://localhost:3003
 ```
 
 ---
 
-<p align="center">🇧🇷 ilove brazil</p>
+<p align="center">Made in Brazil 🇧🇷</p>
