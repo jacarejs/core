@@ -134,7 +134,7 @@ Jacaré asks a different question: **why re-render anything when only one text n
 
 Live demos: [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/)
 
-Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for)
+Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Cookbook](docs/api.md#13b-cookbook--if--for--events--props--lifecycle)
 
 ## Status
 

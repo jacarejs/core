@@ -1,5 +1,9 @@
 import { effect } from '../effect.js'
 
+function isDocumentFragment(node: Node): node is DocumentFragment {
+  return node.nodeType === 11
+}
+
 function createOrderedMount(anchor: Comment, nodes: Node[]): (node: Node) => void {
   let cursor: Node = anchor
 
@@ -7,7 +11,7 @@ function createOrderedMount(anchor: Comment, nodes: Node[]): (node: Node) => voi
     const parent = anchor.parentNode
     if (!parent) return
 
-    if (node instanceof DocumentFragment) {
+    if (isDocumentFragment(node)) {
       const children = Array.from(node.childNodes)
       if (children.length === 0) return
       parent.insertBefore(node, cursor.nextSibling)

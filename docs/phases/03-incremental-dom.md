@@ -109,9 +109,11 @@ for each effect run:
   2. Drop keys no longer present (dispose + remove nodes)
   3. Create entries for new keys
   4. Reuse entries when key exists and item reference is unchanged
-  5. Walk list in reverse, insertBefore to establish order
-6. When key exists but `entry.item !== item`, dispose and re-render the row
+  5. Walk list in reverse; insert each row’s nodes as an ordered group (`insertNodes` + `DocumentFragment`)
+  6. When key exists but `entry.item !== item`, dispose and re-render the row
 ```
+
+Fragments are detected with `nodeType === 11` (not `instanceof`), so collection expands children correctly across DOM implementations (including happy-dom).
 
 Immutable updates (e.g. `{ ...item, done: true }` with the same `id`) are supported — the runtime detects identity changes and refreshes row bindings.
 
@@ -147,6 +149,7 @@ yarn build && yarn test
 - Multi-child `branch` / `showIf` preserve source order (insertion cursor)
 - Document fragment mounts advance the cursor in child order
 - `reconcileKeyedList` create, remove, reorder without recreate
+- Multi-child fragment rows preserve in-row and list order (`nodeType === 11`)
 - Re-render when item identity changes at the same key
 - Parse and codegen for `#if`, `#for`, components
 - Prop auto-detection

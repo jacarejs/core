@@ -176,6 +176,51 @@ describe('reconcileKeyedList', () => {
     expect(parent.querySelectorAll('span')).toHaveLength(5)
   })
 
+  it('preserves multi-child fragment order per row', () => {
+    const parent = document.createElement('div')
+    const anchor = document.createComment('each')
+    parent.appendChild(anchor)
+
+    const items = signal([
+      { id: 'a', name: 'Alpha' },
+      { id: 'b', name: 'Beta' },
+    ])
+
+    reconcileKeyedList({
+      parent,
+      anchor,
+      items: () => items(),
+      getKey: (item) => item.id,
+      render: (item, _index, mount) => {
+        const frag = document.createDocumentFragment()
+        const name = document.createElement('strong')
+        name.textContent = item.name
+        name.dataset.role = 'name'
+        const btn = document.createElement('button')
+        btn.textContent = 'x'
+        btn.dataset.role = 'remove'
+        frag.append(name, btn)
+        mount(frag)
+        return () => {}
+      },
+    })
+
+    const roles = [...parent.children].map((el) => `${el.tagName}:${el.dataset.role}:${el.textContent}`)
+    expect(roles).toEqual([
+      'STRONG:name:Alpha',
+      'BUTTON:remove:x',
+      'STRONG:name:Beta',
+      'BUTTON:remove:x',
+    ])
+
+    items.set([
+      { id: 'b', name: 'Beta' },
+      { id: 'a', name: 'Alpha' },
+    ])
+
+    expect([...parent.children].map((el) => el.textContent)).toEqual(['Beta', 'x', 'Alpha', 'x'])
+  })
+
   it('supports document fragment roots across effect runs', () => {
     const parent = document.createElement('div')
     const anchor = document.createComment('each')

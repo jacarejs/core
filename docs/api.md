@@ -20,11 +20,12 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 6. [Events (`on-*` / `@*`)](#6-events-on---)
 7. [Control flow — `#if`](#7-control-flow--if)
 8. [Control flow — `#for`](#8-control-flow--for)
-9. [Components and slots](#9-components-and-slots)
+9. [Components, props, and slots](#9-components-and-slots)
 10. [Scoped CSS](#10-scoped-css)
 11. [Navigation](#11-navigation)
 12. [Forms](#12-forms)
 13. [Lifecycle and scope](#13-lifecycle-and-scope)
+13b. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
 14. [SSR and hydration](#14-ssr-and-hydration)
 15. [DevTools](#15-devtools)
 16. [Compiler API](#16-compiler-api)
@@ -465,12 +466,46 @@ export <view>
 </view>
 ```
 
+### Pointer / mouse
+
+```javascript
+export <view>
+  <div
+    class="pad"
+    on-pointerdown=${onDown}
+    on-pointerup=${onUp}
+    on-pointermove=${onMove}
+  />
+  <img :src=${url} on-load=${onImageReady} on-error=${onImageError} alt="" />
+</view>
+```
+
+### Prevent default / stop propagation
+
+```javascript
+function onCardClick(event) {
+  event.stopPropagation()
+  openDetails()
+}
+
+function onLinkClick(event) {
+  event.preventDefault()
+  nav.go('/settings')
+}
+
+export <view>
+  <article on-click=${onCardClick}>…</article>
+  <a href="/settings" on-click=${onLinkClick}>Settings</a>
+</view>
+```
+
 ### Rules
 
 - Handler expression must evaluate to a **function**.
 - Do not put side effects in the attribute expression itself — only in the function body.
 - Listeners are removed when `mount()` dispose runs (HMR / nav unmount).
 - For two-way inputs prefer `bind-value` / `bind-checked` instead of manual `on-input`.
+- Component-to-parent notifications today: pass a **callback prop** (`:onPress=${fn}`). DOM events use `on-*` / `@*`.
 
 ### What the compiler emits (concept)
 
@@ -669,6 +704,28 @@ When the key stays the same but the item **identity** changes, Jacaré remounts 
 
 Compiles to `reconcileKeyedList({ parent, anchor, items, getKey, render })`.
 
+Multi-node rows (compiler may mount a `DocumentFragment` per item) keep **source order** inside each row and across the list. The runtime detects fragments with `nodeType === 11` (reliable across DOM implementations), expands them into child nodes, and inserts each row as an ordered group.
+
+### Multi-child row (fragment)
+
+```javascript
+#for lines() as line (line.productId)
+  <li class="cart-line">
+    <div class="cart-line-info">
+      <strong>${line.product.name}</strong>
+      <span>${line.unitLabel} each</span>
+    </div>
+    <div class="demo-row">
+      <button on-click=${() => changeQty(line.productId, -1)}>−</button>
+      <span>${line.qty}</span>
+      <button on-click=${() => changeQty(line.productId, 1)}>+</button>
+    </div>
+  </li>
+#end
+```
+
+DOM order per row matches the template top-to-bottom; reordering items by key moves the whole row together.
+
 ### `#for` + `#if`
 
 ```javascript
@@ -761,10 +818,96 @@ Children compile to a slot render function passed as `children` prop.
 
 ### Prop rules
 
-- `:propName=${expr}` — reactive prop
+- `:propName=${expr}` — pass expression / signal as prop
 - `title="Hello"` — static string prop
-- Identifiers in template not declared in script → mount props
-- Imports and `signal`/`computed` declarations are never props
+- Identifiers in the template not declared in script → mount props
+- Imports and `signal` / `computed` declarations are never props
+
+### Props — all common cases
+
+#### Static string
+
+```javascript
+<Card title="Profile" subtitle="Edit your account" />
+```
+
+#### Signal / computed (one-way)
+
+```javascript
+const title = signal('Hello')
+const upper = computed(() => title().toUpperCase())
+
+<Badge :text=${title} />
+<Badge :text=${upper} />
+```
+
+#### Callback props (parent → child “events”)
+
+Jacaré components receive functions as props. The child calls them — this is the supported pattern today for component events (typed `emits` / `on-change` sugar is planned).
+
+```javascript
+// IconButton.jcr
+export <view>
+  <button class="icon-btn" on-click=${onPress} type="button">
+    ${label}
+  </button>
+</view>
+```
+
+```javascript
+// parent
+import IconButton from './IconButton.jcr'
+
+function removeLine() {
+  removeFromCart(line.productId)
+}
+
+export <view>
+  <IconButton :label=${'Remove'} :onPress=${removeLine} />
+  <IconButton
+    :label=${'Add'}
+    :onPress=${() => addToCart(product.id)}
+  />
+</view>
+```
+
+#### Boolean / disabled
+
+```javascript
+const isEmpty = computed(() => itemCount() === 0)
+
+<button class="btn" on-click=${clearCart} :disabled=${isEmpty}>
+  Clear cart
+</button>
+```
+
+`:disabled=${isEmpty}` binds reactively (removes the attribute when falsy).
+
+#### Nested components (parent → child → grandchild)
+
+```javascript
+// Page.jcr
+<ProductCard
+  :product=${product}
+  :onAdd=${() => cart.add(product.id)}
+>
+  <Badge slot="tag" :text=${product.tag} />
+</ProductCard>
+
+// ProductCard.jcr — props + default/named slot + callback prop
+export <view>
+  <article class="card">
+    <header>
+      <slot name="tag" />
+      <h3>${product.name}</h3>
+    </header>
+    <p>${product.priceLabel}</p>
+    <button on-click=${onAdd}>Add</button>
+  </article>
+</view>
+```
+
+> Named slots: declare `<slot name="tag" />` in the child. Passing `slot="tag"` from the parent is the intended API; default `<slot />` is fully wired today.
 
 ---
 
@@ -951,20 +1094,61 @@ export <view>
 
 ### Screen lifecycle
 
+Export `lifecycle` from a **screen** module (a page used with `createNav`). Nav invokes hooks when the screen mounts, activates, deactivates, or unmounts.
+
 ```javascript
-import { createLifecycle } from '@jacare/core'
+import { createLifecycle, signal } from '@jacare/core'
+
+const ticks = signal(0)
+let timer
 
 export const lifecycle = createLifecycle({
-  onMount(ctx) {
-    return () => { /* cleanup */ }
+  onMount() {
+    timer = setInterval(() => ticks.update((n) => n + 1), 1000)
+    return () => clearInterval(timer)
   },
-  onActivate(ctx) { },
-  onDeactivate() { },
-  onUnmount() { },
+  onActivate(ctx) {
+    // screen became visible — ctx has nav info
+    document.title = 'Tasks'
+  },
+  onDeactivate() {
+    // screen hidden but kept alive (depending on nav strategy)
+  },
+  onUnmount() {
+    // last chance; prefer cleanup returned from onMount
+  },
 })
+
+export <view>
+  <p>Open for ${ticks}s</p>
+</view>
 ```
 
-Export `lifecycle` from a screen module; nav calls hooks on route changes.
+| Hook | When | Cleanup |
+|------|------|---------|
+| `onMount` | Screen first mounted | Return a function |
+| `onActivate` | Screen becomes active | Return a function (optional) |
+| `onDeactivate` | Screen no longer active | — |
+| `onUnmount` | Screen torn down | — |
+
+### Mount dispose (component / page root)
+
+Every `mount(target)` returns a dispose function. Always call it on HMR or when replacing a tree:
+
+```javascript
+import mount from './app.jcr'
+
+const root = document.getElementById('app')
+let dispose = mount(root)
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => dispose?.())
+  import.meta.hot.accept(() => {
+    dispose?.()
+    dispose = mount(root)
+  })
+}
+```
 
 ### Scope debugging
 
@@ -972,9 +1156,87 @@ Export `lifecycle` from a screen module; nav calls hooks on route changes.
 import { registerScope } from '@jacare/core'
 
 registerScope('cart.total', 'Cart total', () => total())
+registerScope('cart.count', 'Items', () => itemCount())
 ```
 
-Visible in DevTools Scope panel when `connectJacareDevtools()` is active.
+Visible in the DevTools Scope panel when `connectJacareDevtools()` is active.
+
+---
+
+## 13b. Cookbook — `#if` + `#for` + events + props + lifecycle
+
+Full screen-style example combining the main template features:
+
+```javascript
+import { computed, createLifecycle, signal } from '@jacare/core'
+import Badge from './Badge.jcr'
+import IconButton from './IconButton.jcr'
+
+const loading = signal(false)
+const items = signal([
+  { id: 'a', label: 'Alpha', done: false },
+  { id: 'b', label: 'Beta', done: true },
+])
+
+const remaining = computed(() => items().filter((i) => !i.done).length)
+const isEmpty = computed(() => items().length === 0)
+
+function toggle(id) {
+  items.update((list) =>
+    list.map((i) => (i.id === id ? { ...i, done: !i.done } : i)),
+  )
+}
+
+function remove(id) {
+  items.update((list) => list.filter((i) => i.id !== id))
+}
+
+function addItem() {
+  const id = crypto.randomUUID()
+  items.update((list) => [...list, { id, label: 'New', done: false }])
+}
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    document.title = `Tasks (${remaining()})`
+  },
+})
+
+export <view>
+  <header class="row">
+    <h1>Tasks</h1>
+    <Badge :text=${() => `${remaining()} left`} />
+    <button class="btn" on-click=${addItem}>Add</button>
+  </header>
+
+  #if loading()
+    <p class="muted">Loading…</p>
+  #elif isEmpty()
+    <p class="muted">No tasks yet.</p>
+  #else
+    <ul class="list">
+      #for items() as item (item.id)
+        <li class="list-item" class-done=${item.done}>
+          <button on-click=${() => toggle(item.id)}>${item.label}</button>
+          <IconButton :label=${'Remove'} :onPress=${() => remove(item.id)} />
+        </li>
+      #end
+    </ul>
+  #end
+</view>
+```
+
+**What each piece does:**
+
+| Feature | In the example |
+|---------|----------------|
+| `#if` / `#elif` / `#else` | loading / empty / list |
+| `#for` + key | `items() as item (item.id)` |
+| Events | `on-click` on Add / row / toggles |
+| Props | `:text`, `:label`, `:onPress` into Badge / IconButton |
+| `class-*` | `class-done=${item.done}` |
+| Lifecycle | `onActivate` updates `document.title` |
+| Immutable update | `items.update(list => list.map/filter/…)` |
 
 ---
 

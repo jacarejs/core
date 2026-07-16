@@ -14,8 +14,12 @@ interface ListEntry<T> {
   dispose: () => void
 }
 
+function isDocumentFragment(node: Node): node is DocumentFragment {
+  return node.nodeType === 11
+}
+
 function collectMountNode(nodes: Node[], node: Node): void {
-  if (node instanceof DocumentFragment) {
+  if (isDocumentFragment(node)) {
     nodes.push(...Array.from(node.childNodes))
     return
   }
@@ -23,14 +27,11 @@ function collectMountNode(nodes: Node[], node: Node): void {
 }
 
 function insertNode(parent: Node, node: Node, before: Node | null): Node | null {
-  if (node instanceof DocumentFragment) {
-    let last: Node | null = before
-    while (node.firstChild) {
-      const child = node.firstChild
-      parent.insertBefore(child, last)
-      last = child
-    }
-    return last
+  if (isDocumentFragment(node)) {
+    const first = node.firstChild
+    if (!first) return before
+    parent.insertBefore(node, before)
+    return first
   }
   if (before !== null && before.parentNode !== parent) {
     before = null
@@ -39,6 +40,18 @@ function insertNode(parent: Node, node: Node, before: Node | null): Node | null 
     parent.insertBefore(node, before)
   }
   return node
+}
+
+function insertNodes(parent: Node, nodes: Node[], before: Node | null): Node | null {
+  if (nodes.length === 0) return before
+  if (nodes.length === 1) {
+    return insertNode(parent, nodes[0]!, before)
+  }
+  const frag = document.createDocumentFragment()
+  for (const node of nodes) {
+    frag.appendChild(node)
+  }
+  return insertNode(parent, frag, before)
 }
 
 export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void {
@@ -92,11 +105,9 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
       const item = items[i]!
       const key = options.getKey(item, i)
       const entry = next.get(key)!
-      for (let j = entry.nodes.length - 1; j >= 0; j--) {
-        const inserted = insertNode(options.parent, entry.nodes[j]!, before)
-        if (inserted) {
-          before = inserted
-        }
+      const inserted = insertNodes(options.parent, entry.nodes, before)
+      if (inserted) {
+        before = inserted
       }
     }
 
