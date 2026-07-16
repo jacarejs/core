@@ -125,6 +125,8 @@ Component props use `bindPropText` at runtime — signals and plain strings both
 
 ### Events
 
+Full API: [Events (`on-*` / `@*`)](api.md#6-events-on---)
+
 ```javascript
 export <view>
   <button on-click=${save}>Save</button>
@@ -208,6 +210,8 @@ The compiler maps `style---pct` → `--pct` and emits `bindStyleVar` (dev) or in
 Use `computed` when the value needs a unit (`50%`, `12rem`). Plain numbers stringify as-is.
 
 ## Control flow
+
+Full API: [`#if`](api.md#7-control-flow--if) · [`#for`](api.md#8-control-flow--for) · [Events](api.md#6-events-on---)
 
 ### Conditionals
 

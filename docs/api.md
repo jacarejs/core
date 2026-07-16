@@ -17,18 +17,23 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 3. [Reactivity](#3-reactivity)
 4. [Templates](#4-templates)
 5. [DOM bindings](#5-dom-bindings)
-6. [Control flow](#6-control-flow)
-7. [Components and slots](#7-components-and-slots)
-8. [Scoped CSS](#8-scoped-css)
-9. [Navigation](#9-navigation)
-10. [Forms](#10-forms)
-11. [Lifecycle and scope](#11-lifecycle-and-scope)
-12. [SSR and hydration](#12-ssr-and-hydration)
-13. [DevTools](#13-devtools)
-14. [Compiler API](#14-compiler-api)
-15. [CLI](#15-cli)
-16. [Vite plugin](#16-vite-plugin)
-17. [Testing](#17-testing)
+6. [Events (`on-*` / `@*`)](#6-events-on---)
+7. [Control flow — `#if`](#7-control-flow--if)
+8. [Control flow — `#for`](#8-control-flow--for)
+9. [Components and slots](#9-components-and-slots)
+10. [Scoped CSS](#10-scoped-css)
+11. [Navigation](#11-navigation)
+12. [Forms](#12-forms)
+13. [Lifecycle and scope](#13-lifecycle-and-scope)
+14. [SSR and hydration](#14-ssr-and-hydration)
+15. [DevTools](#15-devtools)
+16. [Compiler API](#16-compiler-api)
+17. [CLI](#17-cli)
+18. [Vite plugin](#18-vite-plugin)
+19. [Testing](#19-testing)
+20. [Runtime helpers index](#20-runtime-helpers-index)
+
+Jump to: [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
 
 ---
 
@@ -291,14 +296,7 @@ export <style>
 
 ### Events
 
-```javascript
-export <view>
-  <button on-click=${save}>Save</button>
-  <button @click=${cancel}>Cancel</button>
-</view>
-```
-
-`on-click` and `@click` are equivalent. Handlers are registered with cleanup on unmount.
+See full guide: [§6 Events](#6-events-on---).
 
 ### Static vs reactive attributes
 
@@ -395,27 +393,213 @@ export <view>
 
 ---
 
-## 6. Control flow
+## 6. Events (`on-*` / `@*`)
 
-### Conditionals
+Event handlers wire DOM listeners at mount and remove them on dispose. Prefer named functions for readability.
+
+### Syntax
+
+| Canonical | Alias | DOM |
+|-----------|-------|-----|
+| `on-click=${fn}` | `@click=${fn}` | `click` |
+| `on-input=${fn}` | `@input=${fn}` | `input` |
+| `on-submit=${fn}` | `@submit=${fn}` | `submit` |
+| `on-change=${fn}` | `@change=${fn}` | `change` |
+| `on-blur=${fn}` | `@blur=${fn}` | `blur` |
+| `on-keydown=${fn}` | `@keydown=${fn}` | `keydown` |
+
+Any DOM event name works: `on-<event>` or `@<event>`. The compiler emits `addEventListener` + cleanup.
+
+### Basic click
 
 ```javascript
+function save() {
+  /* … */
+}
+
+export <view>
+  <button on-click=${save}>Save</button>
+  <button @click=${cancel}>Cancel</button>
+</view>
+```
+
+### Inline arrow (captures locals)
+
+```javascript
+export <view>
+  <button on-click=${() => addToCart(product.id)}>Add</button>
+  <button on-click=${() => changeQty(line.productId, 1)}>+</button>
+</view>
+```
+
+### Form submit
+
+```javascript
+function onSubmit(event) {
+  event.preventDefault()
+  form.handleSubmit(save)(event)
+}
+
+export <view>
+  <form on-submit=${onSubmit}>
+    <input bind-value=${form.fields.email} />
+    <button type="submit">Send</button>
+  </form>
+</view>
+```
+
+Or with `createForm`:
+
+```javascript
+<form on-submit=${form.handleSubmit(save)}>
+```
+
+### Keyboard
+
+```javascript
+export <view>
+  <input
+    bind-value=${query}
+    on-keydown=${(e) => { if (e.key === 'Enter') search() }}
+  />
+</view>
+```
+
+### Rules
+
+- Handler expression must evaluate to a **function**.
+- Do not put side effects in the attribute expression itself — only in the function body.
+- Listeners are removed when `mount()` dispose runs (HMR / nav unmount).
+- For two-way inputs prefer `bind-value` / `bind-checked` instead of manual `on-input`.
+
+### What the compiler emits (concept)
+
+```javascript
+const handler = save
+el.addEventListener('click', handler)
+_cleanups.push(() => el.removeEventListener('click', handler))
+```
+
+---
+
+## 7. Control flow — `#if`
+
+Conditionals mount **one** branch at a time. Inactive branches are not in the DOM.
+
+### Syntax
+
+```
+#if <condition>
+  …
+#elif <condition>
+  …
+#else
+  …
+#end
+```
+
+Aliases: `@if`, `@elseif`, `@else`, `@end`.
+
+| Part | Required | Notes |
+|------|----------|-------|
+| `#if expr` | yes | Truthy → mount this block |
+| `#elif expr` | no | Zero or more |
+| `#else` | no | Fallback |
+| `#end` | yes | Closes the block |
+
+### Signal / computed conditions
+
+Call signals in the condition when you need a boolean read:
+
+```javascript
+const loading = signal(true)
+const error = signal(null)
+const isEmpty = computed(() => items().length === 0)
+
 export <view>
 #if loading()
   <p>Loading…</p>
 #elif error()
   <p>${error()}</p>
+#elif isEmpty()
+  <p>No items</p>
 #else
   <Content />
 #end
 </view>
 ```
 
-Aliases: `@if`, `@elseif`, `@else`, `@end`.
+Bare signal refs may work when the compiler rewrites them inside effects; **prefer `name()`** in `#if` for clarity.
 
-### Keyed lists
+### Nested `#if`
 
 ```javascript
+#if user()
+  #if user().admin
+    <AdminPanel />
+  #else
+    <UserPanel />
+  #end
+#else
+  <Login />
+#end
+```
+
+### With siblings (order preserved)
+
+```javascript
+#if itemCount() > 0
+  <p class="demo-label">${itemCount} items in cart</p>
+  <ul class="list">…</ul>
+  <button on-click=${clearCart}>Clear</button>
+#end
+```
+
+All children of the active branch mount in **source order**.
+
+### Runtime
+
+Compiles to `branch(anchor, (mount) => { if (…) mount(node); … })` from `@jacare/core`. Switching branch disposes the previous nodes and mounts the new ones.
+
+### When to use
+
+- Loading / error / empty / ready screens
+- Auth gates
+- Optional UI blocks
+
+Avoid giant nested trees — split into components when a branch grows.
+
+---
+
+## 8. Control flow — `#for`
+
+Keyed lists reconcile by **key**, not index. Rows are created, moved, or removed incrementally.
+
+### Syntax
+
+```
+#for <source> as <item> (<key>)
+  …
+#end
+```
+
+Aliases: `@each` … `@end`.
+
+| Part | Example | Notes |
+|------|---------|-------|
+| source | `items()` / `catalog` | Array or signal-returning array |
+| item | `item` / `line` | Binding per row |
+| key | `(item.id)` | **Required for stable identity** |
+| index | `as item, i (item.id)` | Optional second binding |
+
+### Basic list
+
+```javascript
+const items = signal([
+  { id: 'a', label: 'Alpha' },
+  { id: 'b', label: 'Beta' },
+])
+
 export <view>
 <ul>
   #for items() as item (item.id)
@@ -425,17 +609,95 @@ export <view>
 </view>
 ```
 
-The key expression `(item.id)` drives incremental reconciliation — rows are created, moved, or removed by key, not by index.
-
-Optional index:
+### With index
 
 ```javascript
 #for items() as item, index (item.id)
+  <li>${index + 1}. ${item.label}</li>
+#end
+```
+
+### Static array (module constant)
+
+```javascript
+const catalog = [/* … */]
+
+#for catalog as product (product.id)
+  <li>${product.name}</li>
+#end
+```
+
+### Row actions (events inside `#for`)
+
+```javascript
+#for lines() as line (line.productId)
+  <li class="cart-line">
+    <strong>${line.product.name}</strong>
+    <button on-click=${() => changeQty(line.productId, -1)}>−</button>
+    <span>${line.qty}</span>
+    <button on-click=${() => changeQty(line.productId, 1)}>+</button>
+    <button on-click=${() => removeFromCart(line.productId)}>Remove</button>
+  </li>
+#end
+```
+
+### Immutable updates (required for refresh)
+
+```javascript
+// good — new array / new row objects
+cart.update((items) => items.map((x) =>
+  x.productId === id ? { …x, qty: x.qty + 1 } : x,
+))
+
+// bad — mutate in place; row may not refresh
+items()[0].qty++
+```
+
+When the key stays the same but the item **identity** changes, Jacaré remounts that row’s bindings.
+
+### Keys
+
+| Key choice | Result |
+|------------|--------|
+| Stable id `(item.id)` | Move/update without remount siblings |
+| Index `(index)` only | Reorder recreates rows — avoid for dynamic lists |
+| Missing key | Falls back to index — warn in reviews |
+
+### Runtime
+
+Compiles to `reconcileKeyedList({ parent, anchor, items, getKey, render })`.
+
+### `#for` + `#if`
+
+```javascript
+#if lines().length
+  <ul>
+    #for lines() as line (line.productId)
+      <li>${line.product.name}</li>
+    #end
+  </ul>
+#else
+  <p>Cart is empty</p>
+#end
+```
+
+Prefer a stable `<ul>` outside `#if` when only the emptiness message toggles — fewer remounts:
+
+```javascript
+<p>${itemCount} items</p>
+#if isEmpty()
+  <p>Cart is empty</p>
+#end
+<ul>
+  #for lines() as line (line.productId)
+    <li>…</li>
+  #end
+</ul>
 ```
 
 ---
 
-## 7. Components and slots
+## 9. Components and slots
 
 Components are `.jcr` modules used as PascalCase tags.
 
@@ -504,7 +766,7 @@ Children compile to a slot render function passed as `children` prop.
 
 ---
 
-## 8. Scoped CSS
+## 10. Scoped CSS
 
 Styles in `export <style>` are scoped with `data-jacare-s` on the mount root.
 
@@ -545,7 +807,7 @@ $color: #003030;
 
 ---
 
-## 9. Navigation
+## 11. Navigation
 
 `createNav` provides layout + screen routing without a virtual DOM router.
 
@@ -615,7 +877,7 @@ const href = routeHref('/about', { tab: 'feedback' })
 
 ---
 
-## 10. Forms
+## 12. Forms
 
 `createForm` builds validated fields with `bind-value` integration.
 
@@ -683,7 +945,7 @@ export <view>
 
 ---
 
-## 11. Lifecycle and scope
+## 13. Lifecycle and scope
 
 ### Screen lifecycle
 
@@ -714,7 +976,7 @@ Visible in DevTools Scope panel when `connectJacareDevtools()` is active.
 
 ---
 
-## 12. SSR and hydration
+## 14. SSR and hydration
 
 ### Server render
 
@@ -749,7 +1011,7 @@ for await (const chunk of renderToStream(render)) {
 
 ---
 
-## 13. DevTools
+## 15. DevTools
 
 ```javascript
 import { connectJacareDevtools } from '@jacare/devtools'
@@ -787,7 +1049,7 @@ See [Phase 6 — DevTools](phases/06-devtools.md#compiler-node-names).
 
 ---
 
-## 14. Compiler API
+## 16. Compiler API
 
 Package: `@jacare/compiler`
 
@@ -834,7 +1096,7 @@ See [Phase 2 — Compiler](phases/02-compiler.md#pulse-analysis).
 
 ---
 
-## 15. CLI
+## 17. CLI
 
 Package: [`@jacare/cli`](https://www.npmjs.com/package/@jacare/cli)
 
@@ -862,7 +1124,7 @@ export default {
 
 ---
 
-## 16. Vite plugin
+## 18. Vite plugin
 
 Package: [`@jacare/vite-plugin`](https://www.npmjs.com/package/@jacare/vite-plugin)
 
@@ -923,7 +1185,7 @@ Live demos: [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/
 
 ---
 
-## 17. Testing
+## 19. Testing
 
 Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
 
@@ -943,3 +1205,49 @@ Full guide: [testing.md](testing.md)
 ### `@jacare/testing` (planned)
 
 A dedicated package will provide `render()`, query helpers, and `cleanup()` around the compile-and-mount flow. Until it ships, use the patterns in [testing.md](testing.md).
+
+---
+
+## 20. Runtime helpers index
+
+All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless noted.
+
+| Helper | Doc | Role |
+|--------|-----|------|
+| `signal` / `pulse` | [§3](#3-reactivity) | Writable reactive cell |
+| `computed` / `derive` | [§3](#3-reactivity) | Derived value |
+| `effect` / `watch` | [§3](#3-reactivity) | Side effect |
+| `batch` | [§3](#3-reactivity) | Coalesce updates |
+| `bindText` / `bindPropText` | [§5](#5-dom-bindings) | Text node |
+| `bindAttribute` / `bindProperty` | [§5](#5-dom-bindings) | Attributes / props |
+| `bindModel` | [§5](#5-dom-bindings) | Two-way input |
+| `bindClass` / `bindStyleVar` | [§5](#5-dom-bindings) | Class / CSS var |
+| `branch` / `showIf` | [§7 `#if`](#7-control-flow--if) | Conditionals |
+| `reconcileKeyedList` | [§8 `#for`](#8-control-flow--for) | Keyed lists |
+| `mountSlot` | [§9](#9-components-and-slots) | Slot projection |
+| Event `on-*` / `@*` | [§6](#6-events-on---) | DOM listeners |
+| `createNav` / `lazy` | [§11](#11-navigation) | Routing |
+| `createForm` | [§12](#12-forms) | Forms |
+| `createLifecycle` / `registerScope` | [§13](#13-lifecycle-and-scope) | Lifecycle / debug |
+| `renderToString` / `resumeBindings` | [§14](#14-ssr-and-hydration) | SSR |
+| `connectJacareDevtools` | [§15](#15-devtools) | [`@jacare/devtools`](https://www.npmjs.com/package/@jacare/devtools) |
+
+---
+
+## Packages on npm
+
+| Package | Link |
+|---------|------|
+| `@jacare/core` | https://www.npmjs.com/package/@jacare/core |
+| `@jacare/compiler` | https://www.npmjs.com/package/@jacare/compiler |
+| `@jacare/vite-plugin` | https://www.npmjs.com/package/@jacare/vite-plugin |
+| `@jacare/cli` | https://www.npmjs.com/package/@jacare/cli |
+| `@jacare/devtools` | https://www.npmjs.com/package/@jacare/devtools |
+| `@jacare/meta` | https://www.npmjs.com/package/@jacare/meta |
+| `create-jacare` | https://www.npmjs.com/package/create-jacare |
+
+```bash
+npm install -g @jacare/cli
+npm install @jacare/core
+npm install -D @jacare/vite-plugin vite
+```

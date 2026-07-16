@@ -8,6 +8,24 @@
 
 Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 
+## Documentation
+
+| Topic | Link |
+|-------|------|
+| **API reference (full)** | [docs/api.md](docs/api.md) |
+| Events `on-*` / `@*` | [docs/api.md §6](docs/api.md#6-events-on---) |
+| Conditionals `#if` | [docs/api.md §7](docs/api.md#7-control-flow--if) |
+| Lists `#for` | [docs/api.md §8](docs/api.md#8-control-flow--for) |
+| Reactivity | [docs/api.md §3](docs/api.md#3-reactivity) |
+| DOM bindings | [docs/api.md §5](docs/api.md#5-dom-bindings) |
+| Components & slots | [docs/api.md §9](docs/api.md#9-components-and-slots) |
+| Navigation | [docs/api.md §11](docs/api.md#11-navigation) |
+| Forms | [docs/api.md §12](docs/api.md#12-forms) |
+| CLI | [docs/api.md §17](docs/api.md#17-cli) |
+| Syntax cheatsheet | [docs/syntax.md](docs/syntax.md) |
+| Testing | [docs/testing.md](docs/testing.md) |
+| Contributing | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) |
+
 ## Quick start
 
 ```bash
@@ -116,6 +134,8 @@ Jacaré asks a different question: **why re-render anything when only one text n
 
 Live demos: [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/)
 
+Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for)
+
 ## Status
 
 | Phase | Status |
@@ -214,7 +234,7 @@ Jacaré files (`.jcr`) are **plain JavaScript modules**. You keep all business l
 
 **Why this shape?** One file = one feature. The compiler reads the template at build time, infers props and signals, and emits optimized DOM code. You never parse HTML strings at runtime.
 
-Full reference: [docs/syntax.md](docs/syntax.md) · [docs/api.md](docs/api.md)
+Full reference: [**API**](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Syntax](docs/syntax.md)
 
 ### Simple module
 
@@ -403,7 +423,7 @@ nav.attach(document.getElementById('app'))
 <main jacare-frame></main>
 ```
 
-Details: [docs/api.md — Navigation](docs/api.md#9-navigation)
+Details: [docs/api.md — Navigation](docs/api.md#11-navigation)
 
 ### Forms
 
@@ -467,7 +487,7 @@ cd demo && yarn install && yarn dev
 
 ## Architecture
 
-- [**API reference**](docs/api.md) — step-by-step guide with examples
+- [**API reference**](docs/api.md) — full guide ([Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for))
 - [Syntax reference](docs/syntax.md)
 - [Phase 1 — Reactivity](docs/phases/01-reactivity.md)
 - [Phase 2 — Compiler](docs/phases/02-compiler.md)
