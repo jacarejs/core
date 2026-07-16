@@ -10,9 +10,9 @@ restoreSpaPath()
 let dispose = nav.attach(root)
 
 if (import.meta.hot) {
-  import.meta.hot.accept(() => {
+  import.meta.hot.accept()
+  import.meta.hot.dispose(() => {
     dispose?.()
-    dispose = nav.attach(root)
+    dispose = null
   })
-  import.meta.hot.dispose(() => dispose?.())
 }

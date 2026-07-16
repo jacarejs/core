@@ -276,6 +276,15 @@ export function createNav(options: NavOptions): Nav {
     where,
 
     attach(target: HTMLElement): () => void {
+      if (onPopState) {
+        window.removeEventListener('popstate', onPopState)
+        onPopState = null
+      }
+      document.removeEventListener('click', onDocumentClick)
+      renderDispose?.()
+      renderDispose = null
+      target.replaceChildren()
+
       where.set(parseWindowPlace(window.location, screens, base))
 
       onPopState = () => {
@@ -287,7 +296,10 @@ export function createNav(options: NavOptions): Nav {
       syncGoLinks(where.peek, base)
 
       return () => {
-        window.removeEventListener('popstate', onPopState!)
+        if (onPopState) {
+          window.removeEventListener('popstate', onPopState)
+          onPopState = null
+        }
         document.removeEventListener('click', onDocumentClick)
         renderDispose?.()
         renderDispose = null

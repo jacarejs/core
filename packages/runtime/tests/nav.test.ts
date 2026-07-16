@@ -374,6 +374,39 @@ describe('createNav', () => {
     expect(NotFound).toHaveBeenCalledTimes(1)
     expect(target.querySelector('[jacare-frame]')?.textContent).toBe('missing:/nope')
   })
+
+  it('reattach replaces a previous layout instead of duplicating it', async () => {
+    window.history.pushState({}, '', '/')
+
+    const Home = vi.fn((target: HTMLElement) => {
+      target.textContent = 'home'
+      return () => {}
+    })
+    const layout = vi.fn((target: HTMLElement) => {
+      const shell = document.createElement('div')
+      shell.className = 'shell'
+      shell.innerHTML = '<main jacare-frame></main>'
+      target.appendChild(shell)
+      return () => shell.remove()
+    })
+
+    const nav = createNav({
+      layout,
+      screens: {
+        '/': Home,
+      },
+    })
+
+    const target = document.createElement('div')
+    nav.attach(target)
+    await flush()
+    nav.attach(target)
+    await flush()
+
+    expect(layout).toHaveBeenCalledTimes(2)
+    expect(target.querySelectorAll('.shell')).toHaveLength(1)
+    expect(target.querySelector('[jacare-frame]')?.textContent).toBe('home')
+  })
 })
 
 async function flush(): Promise<void> {
