@@ -50,6 +50,18 @@ export <view>
           />
         </a>
         <a
+          class="lab-badge-link"
+          href="https://jacarejs.github.io/core/lab/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            class="lab-badge"
+            src="https://img.shields.io/badge/demo-Lab-78c018.svg"
+            alt="Jacaré Lab live demo"
+          />
+        </a>
+        <a
           class="lab-repo-link"
           href="https://github.com/jacarejs/core"
           target="_blank"

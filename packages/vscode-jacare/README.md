@@ -1,15 +1,27 @@
 # Jacaré for VS Code
 
-[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/heberalmeida.jacare.svg?label=VS%20Code&color=189030)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
-[![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
-[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
+[![Visual Studio Marketplace Version](https://vsmarketplacebadges.dev/version-short/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
+[![Visual Studio Marketplace Downloads](https://vsmarketplacebadges.dev/downloads-short/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
+[![Visual Studio Marketplace Installs](https://vsmarketplacebadges.dev/installs-short/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
 [![CI](https://github.com/jacarejs/core/actions/workflows/publish-vscode.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/publish-vscode.yml)
 [![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
 [![demo Lab](https://img.shields.io/badge/demo-Lab-78c018.svg)](https://jacarejs.github.io/core/lab/)
 
 <p align="center">
+  <img
+    src="https://raw.githubusercontent.com/jacarejs/core/main/packages/vscode-jacare/media/jacare-logo.png"
+    width="140"
+    alt="Jacaré logo"
+  />
+</p>
+
+<p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare">
-    <img src="media/marketplace-banner.png" width="520" alt="Jacaré available in the VS Code Marketplace" />
+    <img
+      src="https://raw.githubusercontent.com/jacarejs/core/main/packages/vscode-jacare/media/marketplace-banner.png"
+      width="520"
+      alt="Jacaré available in the VS Code Marketplace"
+    />
   </a>
 </p>
 
@@ -18,7 +30,8 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 **Publisher:** [heberalmeida](https://marketplace.visualstudio.com/publishers/heberalmeida)  
 **Extension ID:** [`heberalmeida.jacare`](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)  
 **Author:** Heber Almeida  
-**Marketplace:** [https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
+**Marketplace:** [https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)  
+**Live Lab:** [https://jacarejs.github.io/core/lab/](https://jacarejs.github.io/core/lab/)
 
 ---
 

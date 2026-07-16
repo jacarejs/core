@@ -19,7 +19,7 @@
   <a href="https://github.com/jacarejs/core/actions/workflows/pages.yml"><img src="https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg" alt="Pages" /></a>
   <a href="https://github.com/jacarejs/core/blob/main/LICENSE"><img src="https://img.shields.io/github/license/jacarejs/core.svg?color=189030" alt="MIT License" /></a>
   <img src="https://img.shields.io/badge/node-%3E%3D20-189030.svg" alt="Node >= 20" />
-  <a href="https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare"><img src="https://img.shields.io/visual-studio-marketplace/v/heberalmeida.jacare.svg?label=VS%20Code&color=189030" alt="VS Code Jacaré" /></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare"><img src="https://vsmarketplacebadges.dev/version-short/heberalmeida.jacare.svg" alt="VS Code Jacaré" /></a>
 </p>
 
 <p align="center">
@@ -206,7 +206,7 @@ Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) sco
 | `@jacare/devtools` | [![npm](https://img.shields.io/npm/v/@jacare/devtools.svg?color=189030)](https://www.npmjs.com/package/@jacare/devtools) [![dm](https://img.shields.io/npm/dm/@jacare/devtools.svg)](https://www.npmjs.com/package/@jacare/devtools) | Pulse Graph inspector panel |
 | `@jacare/meta` | [![npm](https://img.shields.io/npm/v/@jacare/meta.svg?color=189030)](https://www.npmjs.com/package/@jacare/meta) [![dm](https://img.shields.io/npm/dm/@jacare/meta.svg)](https://www.npmjs.com/package/@jacare/meta) | File-based routing conventions |
 | `create-jacare` | [![npm](https://img.shields.io/npm/v/create-jacare.svg?color=189030)](https://www.npmjs.com/package/create-jacare) [![dm](https://img.shields.io/npm/dm/create-jacare.svg)](https://www.npmjs.com/package/create-jacare) | `npm create jacare` — Vite scaffolds |
-| VS Code | [![marketplace](https://img.shields.io/visual-studio-marketplace/v/heberalmeida.jacare.svg?label=VS%20Code&color=189030)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) | `.jcr` syntax highlighting |
+| VS Code | [![marketplace](https://vsmarketplacebadges.dev/version-short/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) | `.jcr` syntax highlighting |
 
 Nav (`createNav`) ships inside `@jacare/core`.
 

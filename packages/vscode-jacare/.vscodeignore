@@ -3,4 +3,3 @@ tsconfig.json
 **/*.map
 **/*.ts
 !dist/**
-icons/jacare-logo.png
