@@ -2,6 +2,10 @@ import type { TemplateAST, TemplateNode } from './types.js'
 import { emitClient } from './codegen-client.js'
 import { emitResume, emitSSR } from './codegen-ssr.js'
 import { CodegenContext, type CodegenMapping } from './codegen-shared.js'
+import {
+  contractPropNames,
+  type TemplateContract,
+} from './parse-contract.js'
 
 const RUNTIME_IMPORT_ORDER = [
   'effect',
@@ -30,6 +34,44 @@ export function orderRuntimeImports(imports: Iterable<string>): string[] {
   return RUNTIME_IMPORT_ORDER.filter((name) => used.has(name))
 }
 
+export function resolveMountProps(
+  moduleCode: string,
+  ast: TemplateAST,
+  contract?: TemplateContract,
+): string[] {
+  const inferred = detectProps(moduleCode, ast)
+  if (!contract) return inferred
+
+  const names = new Set(contractPropNames(contract))
+  if (templateHasSlot(ast) && !names.has('children')) {
+    names.add('children')
+  }
+  for (const name of inferred) {
+    if (name !== 'emit') names.add(name)
+  }
+  return [...names].sort()
+}
+
+function templateHasSlot(ast: TemplateAST): boolean {
+  const walk = (nodes: TemplateNode[]): boolean => {
+    for (const node of nodes) {
+      if (node.type === 'slot') return true
+      if (node.type === 'element' || node.type === 'component') {
+        if (walk(node.children)) return true
+      } else if (node.type === 'if') {
+        for (const branch of node.branches) {
+          if (walk(branch.children)) return true
+        }
+        if (walk(node.elseChildren)) return true
+      } else if (node.type === 'each') {
+        if (walk(node.children)) return true
+      }
+    }
+    return false
+  }
+  return walk(ast.children)
+}
+
 export function generate(
   ast: TemplateAST,
   moduleCode: string,
@@ -40,11 +82,12 @@ export function generate(
     scopeId?: string
     scopedStyle?: string
     cpw?: boolean
+    contract?: TemplateContract
   } = {},
 ): { code: string; mappings: CodegenMapping[] } {
   const mode = options.mode ?? 'full'
   const runtime = options.runtimeImport ?? '@jacare/core'
-  const props = detectProps(moduleCode, ast)
+  const props = resolveMountProps(moduleCode, ast, options.contract)
   const signals = detectSignals(moduleCode)
   const runtimeImports = new Set<string>()
   const { userRuntimeSymbols, body } = extractUserRuntimeImport(
@@ -75,7 +118,7 @@ export function generate(
       signals,
       options.cpw ?? false,
     )
-    emitClient(ast, props, clientCtx, options.scopeId, options.scopedStyle)
+    emitClient(ast, props, clientCtx, options.scopeId, options.scopedStyle, options.contract)
     lines.push(...clientCtx.join())
     mappings = clientCtx.getMappings()
     lines.push('')
@@ -153,6 +196,7 @@ const BUILTIN_GLOBALS = new Set([
   'Object',
   'String',
   'console',
+  'emit',
 ])
 
 const RESERVED_WORDS = new Set([

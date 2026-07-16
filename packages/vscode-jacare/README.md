@@ -14,9 +14,10 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 |---------|-------------|
 | **Syntax highlighting** | JavaScript module body, `view` templates, `style` blocks, directives, HTML, and bindings |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#for` (and `@if` / `@each` aliases) |
+| **Template contracts** | `export <contract>` surfaces (`props`, `pulses`, `slots`, `emits`) alongside the view |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
-| **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `class-active`, and `${expr}` interpolations |
-| **Scoped CSS** | `style` tagged templates highlighted as CSS |
+| **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `on-inc` (contract emits), `class-active`, `${expr}` |
+| **Scoped CSS** | `style` tagged templates and `export <style>` highlighted as CSS |
 | **File icons** | Jacaré logo for `.jcr` files in the Explorer |
 | **Editor helpers** | Auto-closing brackets, quotes, and template literals |
 
@@ -43,7 +44,7 @@ cd packages/vscode-jacare
 yarn install
 yarn build
 yarn package
-code --install-extension jacare-0.0.4.vsix --force
+code --install-extension jacare-0.0.7.vsix --force
 ```
 
 ### Development mode
@@ -98,13 +99,49 @@ function increment() {
   count.update((n) => n + 1)
 }
 
-export default <view>
+export <view>
   <div class="counter">
     <p>${count}</p>
     <button on-click=${increment}>+1</button>
   </div>
 </view>
 ```
+
+**Template contracts**
+
+Declare the component surface with `export <contract>`. The compiler checks parents with `jacare check` — no runtime PropTypes.
+
+```javascript
+export <contract>
+  props: { label: 'string' }
+  pulses: { count: 'number' }
+  slots: ['default', 'actions']
+  emits: ['inc']
+</contract>
+
+export <view>
+  <p>${label}: ${count}</p>
+  <slot name="actions" />
+  <button on-click=${() => emit('inc')}>+</button>
+</view>
+```
+
+Parent usage (validated at check time):
+
+```javascript
+<Counter :label=${'Score'} :count=${score} on-inc=${() => score.update((n) => n + 1)}>
+  <button slot="actions">Reset</button>
+</Counter>
+```
+
+| Contract field | Meaning |
+|----------------|---------|
+| `props` | Accepted props (`'string'` or `{ type, required, default, model }`) |
+| `pulses` | Props expected to be pulses/signals |
+| `slots` | Slot names (`default` → `children`) |
+| `emits` | Events via `emit('name')` — parent listens with `on-name` |
+
+See the [API — Template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract) section for the full reference.
 
 **Template directives**
 
@@ -135,10 +172,10 @@ view`
 **Scoped styles**
 
 ```javascript
-style`
+export <style>
 .card { padding: 1rem; }
 .title { font-weight: bold; }
-`
+</style>
 ```
 
 ### Scope names (for theme authors)
@@ -147,9 +184,9 @@ style`
 |-------|----------|
 | `source.jacare` | Root language scope |
 | `keyword.control.jacare` | `#if`, `#for`, `#end`, `@each`, etc. |
-| `keyword.tag.jacare` | `view`, `style` tagged templates and `<view>` blocks |
+| `keyword.tag.jacare` | `view`, `style` tagged templates and `<view>` / `<style>` blocks |
 | `entity.name.type.tag.jacare` | PascalCase components |
-| `entity.name.tag` | HTML elements (`div`, `slot`, `button`, …) |
+| `entity.name.tag` | HTML elements (`div`, `slot`, `button`, `view`, `style`, …) |
 | `entity.other.attribute-name` | `bind-*`, `on-*`, `class-*`, `:prop` |
 | `meta.embedded.expression.jacare` | `${expression}` inside templates |
 | `source.css` | Content inside `style` blocks |
@@ -204,47 +241,17 @@ Optional `settings.json` for Jacaré projects:
 | IntelliSense / autocomplete | Use TypeScript with `jacare.d.ts` in your project |
 | Go to definition in templates | Planned for a future release |
 | Formatting | Format the JavaScript parts with your Prettier/ESLint setup |
-| Linting | Use `jacare check` from `@jacare/cli` |
+| Contract / template diagnostics | Use `jacare check` from `@jacare/cli` (validates `export <contract>` against parents) |
 
 ---
 
 ## Related documentation
 
 - [Jacaré repository](https://github.com/jacarejs/core)
+- [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md) — including [template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
-- [Live demo](https://jacarejs.github.io/core/todo/)
+- [Live demos](https://jacarejs.github.io/core/) — [Todo](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/)
 - [Compiler docs](https://github.com/jacarejs/core/blob/main/docs/phases/02-compiler.md)
-
----
-
-## Publishing (maintainers)
-
-### Prerequisites
-
-1. [Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) with **Marketplace → Manage**
-2. Publisher **heberalmeida** registered at [marketplace.visualstudio.com/manage](https://marketplace.visualstudio.com/manage)
-3. GitHub repository secret `VSCE_PAT`
-
-### Automated release (recommended)
-
-1. Go to **Actions → Publish VS Code Extension**
-2. Choose version bump: `patch`, `minor`, or `major`
-3. Run workflow
-
-The workflow will:
-
-- Bump `packages/vscode-jacare/package.json` version
-- Build and publish to the Visual Studio Marketplace
-- Commit the version bump and create tag `vscode-vX.Y.Z`
-
-### Manual release
-
-```bash
-node scripts/sync-versions.mjs vscode bump patch
-cd packages/vscode-jacare
-yarn build
-yarn publish
-```
 
 ---
 

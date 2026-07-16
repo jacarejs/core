@@ -820,12 +820,50 @@ export <view>
 
 Children compile to a slot render function passed as `children` prop.
 
+### Template contracts (`export <contract>`)
+
+Declare the component surface once; the compiler emits `emit()` and `jacare check` validates parents against children — **no runtime PropTypes**.
+
+```javascript
+// Counter.jcr
+export <contract>
+  props: { label: 'string' }
+  pulses: { count: 'number' }
+  slots: ['default', 'actions']
+  emits: ['inc']
+</contract>
+
+export <view>
+  <p>${label}: ${count}</p>
+  <slot name="actions" />
+  <button on-click=${() => emit('inc')}>+</button>
+</view>
+```
+
+```javascript
+// parent
+<Counter :label=${'Score'} :count=${score} on-inc=${() => score.update((n) => n + 1)}>
+  <button slot="actions">Reset</button>
+</Counter>
+```
+
+| Field | Meaning |
+|-------|---------|
+| `props` | Accepted props (`'string'` or `{ type, required, default, model }`) |
+| `pulses` | Props expected to be pulses/signals |
+| `slots` | Slot names (`default` → `children`) |
+| `emits` | Events the child may `emit('name')` — parent listens with `on-name` |
+| `forwards` | Parsed for future emit bridging (not validated yet) |
+
+`compile()` returns `contract` + `props`. Rich defaults become `props["open"] ?? false` in `mount`.
+
 ### Prop rules
 
 - `:propName=${expr}` — pass expression / signal as prop
 - `title="Hello"` — static string prop
-- Identifiers in the template not declared in script → mount props
+- Identifiers in the template not declared in script → mount props (merged with contract)
 - Imports and `signal` / `computed` declarations are never props
+- With a contract, unknown props / missing required / missing pulses fail `jacare check`
 
 ### Props — all common cases
 
@@ -847,7 +885,7 @@ const upper = computed(() => title().toUpperCase())
 
 #### Callback props (parent → child “events”)
 
-Jacaré components receive functions as props. The child calls them — this is the supported pattern today for component events (typed `emits` / `on-change` sugar is planned).
+Jacaré components receive functions as props. Prefer a **template contract** `emits` + `emit('name')` + parent `on-name` when you want compile-time checking; bare callback props (`:onPress=${fn}`) still work.
 
 ```javascript
 // IconButton.jcr

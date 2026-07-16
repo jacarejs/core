@@ -13,6 +13,7 @@ import {
   emitCpwText,
 } from './codegen-cpw.js'
 import { append, CodegenContext, resolveSignalExpr, type EmitTarget } from './codegen-shared.js'
+import type { TemplateContract } from './parse-contract.js'
 
 const SIGNAL_REF_RE = /^([A-Za-z_$][\w$]*)$/
 
@@ -22,12 +23,31 @@ export function emitClient(
   ctx: CodegenContext,
   scopeId?: string,
   scopedStyle?: string,
+  contract?: TemplateContract,
 ): void {
-  if (props.length > 0) {
+  const needsPropsObject =
+    props.length > 0 || (contract != null && Object.keys(contract.emits).length > 0)
+
+  if (needsPropsObject) {
     ctx.line('export function mount(target, props = {}) {')
     ctx.indent()
     for (const prop of props) {
-      ctx.line(`const ${prop} = props[${JSON.stringify(prop)}]`)
+      const def = contract?.props[prop]
+      if (def && 'default' in def) {
+        ctx.line(
+          `const ${prop} = props[${JSON.stringify(prop)}] ?? ${literalJs(def.default)}`,
+        )
+      } else {
+        ctx.line(`const ${prop} = props[${JSON.stringify(prop)}]`)
+      }
+    }
+    if (contract && Object.keys(contract.emits).length > 0) {
+      ctx.line('function emit(name, ...payload) {')
+      ctx.indent()
+      ctx.line('const handler = props[name]')
+      ctx.line('if (typeof handler === "function") handler(...payload)')
+      ctx.dedent()
+      ctx.line('}')
     }
     ctx.blank()
   } else {
@@ -455,4 +475,9 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
     .join('')
 
   ctx.pushCleanup(`effect(() => { ${textNode}.data = \`${template}\` }).dispose`)
+}
+
+function literalJs(value: unknown): string {
+  if (value === undefined) return 'undefined'
+  return JSON.stringify(value)
 }

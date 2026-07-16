@@ -4,7 +4,13 @@ export { parseModule, findViewTemplates, hasViewSource } from './parse-module.js
 export { flattenViewLiteral } from './flatten-literal.js'
 export { flattenViewBlock, findViewBlocks } from './flatten-view-block.js'
 export { parseTemplate } from './parse-template.js'
-export { generate } from './codegen.js'
+export { generate, detectProps, resolveMountProps } from './codegen.js'
+export {
+  parseContractBody,
+  emptyContract,
+  contractPropNames,
+  hasContractSurface,
+} from './parse-contract.js'
 export { scopeCss, scopeIdFromFilename } from './scope-css.js'
 export type {
   CompileOptions,
@@ -20,3 +26,8 @@ export type {
   TemplateTextNode,
   TextPart,
 } from './types.js'
+export type {
+  TemplateContract,
+  ContractPropDef,
+  ContractTypeName,
+} from './parse-contract.js'

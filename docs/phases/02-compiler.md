@@ -307,7 +307,7 @@ packages/vite-plugin/src/
 | ~~Compile-time dependency graph~~ | **CPW v1** — inline wiring in production for static bindings |
 | CPW for `bindModel` | Two-way inputs still use runtime helper |
 | TypeScript in `.jcr` | SWC transform for type annotations |
-| Component prop types | Inferred from template usage |
+| Component prop types | **Template contracts** (`export <contract>`) + `jacare check` |
 | HTML validation | Actionable errors for unclosed tags |
 | Pluggable directives | Custom attribute transforms via plugin API |
 | Branch tree-shaking | `#if import.meta.env.DEV` eliminated at build time |

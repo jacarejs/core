@@ -1,10 +1,11 @@
 import type { RawSourceMap } from 'source-map-js'
 import { SourceMapGenerator } from 'source-map-js'
 import { basename } from 'node:path'
-import { generate } from './codegen.js'
+import { generate, resolveMountProps } from './codegen.js'
 import type { CodegenMapping } from './codegen-shared.js'
 import { parseModule } from './parse-module.js'
 import { parseTemplate } from './parse-template.js'
+import { hasContractSurface } from './parse-contract.js'
 import { scopeCss, scopeIdFromFilename } from './scope-css.js'
 import type { CompileOptions, CompileResult } from './types.js'
 
@@ -18,6 +19,8 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   const scopeId = options.scopeId ?? (filename ? scopeIdFromFilename(filename) : undefined)
   const scopedStyle =
     parsed.styleCss && scopeId ? scopeCss(parsed.styleCss, scopeId) : undefined
+  const contract =
+    parsed.contract && hasContractSurface(parsed.contract) ? parsed.contract : undefined
   const generated = generate(ast, parsed.code, {
     ...(options.runtimeImport ? { runtimeImport: options.runtimeImport } : {}),
     viewStartLine: parsed.viewStartLine,
@@ -25,16 +28,21 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     ...(scopeId ? { scopeId } : {}),
     ...(scopedStyle ? { scopedStyle } : {}),
     ...(options.cpw ? { cpw: options.cpw } : {}),
+    ...(contract ? { contract } : {}),
   })
 
   const map = filename
     ? buildSourceMap(filename, source, generated.code, parsed.moduleLineMap, generated.mappings)
     : undefined
 
+  const props = resolveMountProps(parsed.code, ast, contract)
+
   return {
     code: generated.code,
     script: parsed.code,
     template: parsed.viewHtml!,
+    props,
+    ...(contract ? { contract } : {}),
     ...(scopeId ? { scopeId } : {}),
     ...(scopedStyle ? { scopedStyle } : {}),
     ...(parsed.styleLang ? { styleLang: parsed.styleLang } : {}),

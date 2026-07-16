@@ -11,6 +11,8 @@ export interface CompileResult {
   code: string
   script: string
   template: string
+  props: string[]
+  contract?: import('./parse-contract.js').TemplateContract
   scopeId?: string
   scopedStyle?: string
   styleLang?: string | null

@@ -2,12 +2,17 @@ import { flattenViewLiteral } from './flatten-literal.js'
 import { flattenViewBlock } from './flatten-view-block.js'
 import { flattenStyleBlock } from './flatten-style-block.js'
 import { JacareCompileError } from './errors.js'
+import {
+  parseContractBody,
+  type TemplateContract,
+} from './parse-contract.js'
 
 export interface ParsedModule {
   code: string
   viewHtml: string | null
   styleCss: string | null
   styleLang: string | null
+  contract: TemplateContract | null
   viewStartLine: number
   viewEndLine: number
   moduleLineMap: number[]
@@ -19,7 +24,9 @@ const VIEW_RE = /\bview\s*`/
 const EXPORT_VIEW_BLOCK_RE = /export(?:\s+default)?\s+<view\b/i
 const RETURN_VIEW_BLOCK_RE = /\breturn\s+<view\b/i
 const EXPORT_STYLE_BLOCK_RE = /export\s+<style\b/i
+const EXPORT_CONTRACT_BLOCK_RE = /export\s+<contract\b/i
 const STYLE_RE = /\bstyle\s*`/
+const CONTRACT_CLOSE_RE = /^<\/contract\s*>/i
 
 interface LocatedView {
   html: string
@@ -73,11 +80,15 @@ export function parseModule(source: string, filename?: string): ParsedModule {
   }
 
   const styleLocated = locateStyle(source, filename)
+  const contractLocated = locateContract(source, filename)
   const removeRanges: Array<{ start: number; end: number }> = [
     { start: located.removeStart, end: located.removeEnd },
   ]
   if (styleLocated) {
     removeRanges.push({ start: styleLocated.removeStart, end: styleLocated.removeEnd })
+  }
+  if (contractLocated) {
+    removeRanges.push({ start: contractLocated.removeStart, end: contractLocated.removeEnd })
   }
 
   removeRanges.sort((a, b) => b.start - a.start)
@@ -93,6 +104,7 @@ export function parseModule(source: string, filename?: string): ParsedModule {
     viewHtml: located.html,
     styleCss: styleLocated?.css ?? null,
     styleLang: styleLocated?.lang ?? null,
+    contract: contractLocated?.contract ?? null,
     viewStartLine: located.viewStartLine,
     viewEndLine: located.viewEndLine,
     moduleLineMap,
@@ -131,6 +143,61 @@ function locateStyle(source: string, filename?: string): LocatedStyle | null {
   }
 
   return null
+}
+
+interface LocatedContract {
+  contract: TemplateContract
+  removeStart: number
+  removeEnd: number
+  contractStartLine: number
+}
+
+function locateContract(source: string, filename?: string): LocatedContract | null {
+  const exportBlock = EXPORT_CONTRACT_BLOCK_RE.exec(source)
+  if (!exportBlock) return null
+
+  const openIndex = source.indexOf('<contract', exportBlock.index)
+  if (openIndex < 0) return null
+
+  let pos = openIndex + '<contract'.length
+  while (pos < source.length && source[pos] !== '>') pos++
+  if (source[pos] !== '>') {
+    throw new JacareCompileError('Jacaré: unclosed <contract> opening tag', {
+      ...(filename ? { filename } : {}),
+      line: lineAt(source, openIndex),
+      column: 1,
+      source,
+    })
+  }
+  pos++
+
+  const bodyStart = pos
+  while (pos < source.length) {
+    const close = CONTRACT_CLOSE_RE.exec(source.slice(pos))
+    if (close?.index === 0) {
+      const body = source.slice(bodyStart, pos)
+      const contractStartLine = lineAt(source, exportBlock.index)
+      const contract = parseContractBody(body, {
+        ...(filename ? { filename } : {}),
+        line: contractStartLine,
+        source,
+      })
+      return {
+        contract,
+        removeStart: exportBlock.index,
+        removeEnd: pos + close[0].length,
+        contractStartLine,
+      }
+    }
+    pos++
+  }
+
+  throw new JacareCompileError('Jacaré: unclosed <contract> block', {
+    ...(filename ? { filename } : {}),
+    line: lineAt(source, openIndex),
+    column: 1,
+    source,
+  })
 }
 
 function locateView(source: string, filename?: string): LocatedView | null {
