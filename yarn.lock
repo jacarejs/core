@@ -376,42 +376,6 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.25.12.tgz#9bdad8176be7811ad148d1f8772359041f46c6c5"
   integrity sha512-alJC0uCZpTFrSL0CCDjcgleBXPnCrEAhTBILpeAp7M/OFgoqtAetfBzX0xM00MUsVVPpVjlPuMbREqnZCXaTnA==
 
-"@jacare/cli@0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@jacare/cli/-/cli-0.1.5.tgz#a755b187c76e1cc56f2ed45a89e37c6eb0c4036b"
-  integrity sha512-4UhdNtAmjHafvCAqcBPQg/BVfPf7wOzqQWy0bn5RYnlxl0kgLrfk17xTRbskR9i1YtFtpiumo514azL5EFG84Q==
-  dependencies:
-    "@jacare/compiler" "0.1.5"
-    "@jacare/vite-plugin" "0.1.5"
-    create-jacare "0.1.5"
-    vite "^6.0.3"
-
-"@jacare/compiler@0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@jacare/compiler/-/compiler-0.1.5.tgz#3993749b03cc4f22acdb0b8cce90172ca2c4e3a2"
-  integrity sha512-uU1EYUeeKcOFMBhSLOTrbii6Gsi7xu0zJDTJtJqd1C4pLKJlJJczld1geap++vmUtBzKLp7JR4f8AS76V46gUQ==
-  dependencies:
-    source-map-js "^1.2.1"
-
-"@jacare/core@0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@jacare/core/-/core-0.1.5.tgz#27a83ed0e8e77ba23524e964715f90ef10c4f28e"
-  integrity sha512-trJHsT9xO/AcfST3rS61QkpXvetI9PNCFl/zvJ+tDX+p5X3mGRQcZWUXNHsnWok4khOwJiXSKLVbVZfVc+C2/g==
-
-"@jacare/devtools@0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@jacare/devtools/-/devtools-0.1.5.tgz#ae1ee5273a7770ede72523aba169df425a3143be"
-  integrity sha512-ya6v2uDDkE7d3HoH8twqr1cfFcRMd53HbjFs0t8gorHZHq2/1HAYPS7DJaA/tFGzIkjrCIWcHYSU7altmvAu/Q==
-  dependencies:
-    "@jacare/core" "0.1.5"
-
-"@jacare/vite-plugin@0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@jacare/vite-plugin/-/vite-plugin-0.1.5.tgz#8ae97a08fb5f5fa140bf05e036efe3994d3e2572"
-  integrity sha512-j4kap9f6ybzbEIJ9nYg/yvydq1ZN5F9yMBRCQUfRcvNswzhBHkzY+EUaWjVpubkMeGT9yDSUwc2rmP7LUX09Ag==
-  dependencies:
-    "@jacare/compiler" "0.1.5"
-
 "@jridgewell/sourcemap-codec@^1.5.5":
   version "1.5.5"
   resolved "https://registry.yarnpkg.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz#6912b00d2c631c0d15ce1a7ab57cd657f2a8f8ba"
@@ -1158,11 +1122,6 @@ commander@^12.1.0:
   version "12.1.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-12.1.0.tgz#01423b36f501259fdaac4d0e4d60c96c991585d3"
   integrity sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==
-
-create-jacare@0.1.5:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/create-jacare/-/create-jacare-0.1.5.tgz#791815fee20bee7ea9be9f29a3adee07153309fe"
-  integrity sha512-5B8jaP69nCd4p47xSNgX6a/pL+FKfpm0jbBaJdk6P6nKBfKkOuFc2OVn+yLeJ2TyKsQtp94L1SrEqaGlqvEYAA==
 
 css-select@^5.1.0:
   version "5.2.2"
