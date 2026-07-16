@@ -11,6 +11,13 @@ export {
   contractPropNames,
   hasContractSurface,
 } from './parse-contract.js'
+export {
+  collectComponents,
+  collectProvidedProps,
+  formatContractIssue,
+  validateContractUsage,
+} from './validate-contract.js'
+export type { ContractUsageIssue, ProvidedProp } from './validate-contract.js'
 export { scopeCss, scopeIdFromFilename } from './scope-css.js'
 export type {
   CompileOptions,

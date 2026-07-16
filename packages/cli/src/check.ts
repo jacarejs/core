@@ -2,12 +2,12 @@ import { dirname, isAbsolute, join, resolve } from 'node:path'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import {
   compile,
+  collectComponents,
+  formatContractIssue,
   JacareCompileError,
   parseModule,
   parseTemplate,
-  type TemplateAST,
-  type TemplateComponentNode,
-  type TemplateNode,
+  validateContractUsage,
 } from '@jacare/compiler'
 
 export function runCheck(cwd: string): number {
@@ -45,7 +45,7 @@ export function runCheck(cwd: string): number {
     if (!result) continue
     const source = readFileSync(file, 'utf-8')
     try {
-      const contractErrors = checkContracts(file, source, result.code, compiled, root)
+      const contractErrors = checkContracts(file, source, compiled, root)
       for (const message of contractErrors) {
         errors++
         console.error(message)
@@ -72,7 +72,6 @@ export function runCheck(cwd: string): number {
 function checkContracts(
   file: string,
   source: string,
-  _generated: string,
   compiled: Map<string, ReturnType<typeof compile>>,
   root: string,
 ): string[] {
@@ -89,9 +88,7 @@ function checkContracts(
     if (!importPath) continue
 
     const childFile = resolveImport(file, importPath, root)
-    if (!childFile) {
-      continue
-    }
+    if (!childFile) continue
 
     let child = compiled.get(childFile)
     if (!child) {
@@ -108,50 +105,8 @@ function checkContracts(
     const contract = child.contract
     if (!contract) continue
 
-    const provided = new Set<string>()
-    for (const attr of node.attrs) {
-      if (attr.kind === 'prop' || attr.kind === 'static' || attr.kind === 'event') {
-        provided.add(attr.name)
-      }
-    }
-    if (node.children.length > 0) {
-      provided.add('children')
-    }
-
-    const allowed = new Set<string>([
-      ...Object.keys(contract.props),
-      ...Object.keys(contract.pulses),
-      ...Object.keys(contract.emits),
-    ])
-    if (contract.slots.includes('default') || child.props.includes('children')) {
-      allowed.add('children')
-    }
-    for (const slotName of contract.slots) {
-      if (slotName !== 'default') allowed.add(slotName)
-    }
-
-    for (const key of provided) {
-      if (!allowed.has(key)) {
-        messages.push(
-          `${file}: <${node.name}> unknown prop/emit "${key}" (not in contract of ${childFile})`,
-        )
-      }
-    }
-
-    for (const [name, def] of Object.entries(contract.props)) {
-      if (def.required && !provided.has(name)) {
-        messages.push(`${file}: <${node.name}> missing required prop "${name}"`)
-      }
-    }
-
-    for (const name of Object.keys(contract.pulses)) {
-      if (!provided.has(name)) {
-        messages.push(`${file}: <${node.name}> missing pulse prop "${name}"`)
-      }
-    }
-
-    if (contract.slots.includes('default') && node.children.length === 0 && !provided.has('children')) {
-      // default slot optional unless we mark required — skip
+    for (const issue of validateContractUsage(node, contract, child.props)) {
+      messages.push(formatContractIssue(file, issue.component, issue.message))
     }
   }
 
@@ -183,27 +138,6 @@ function resolveImport(fromFile: string, spec: string, root: string): string | n
     if (existsSync(joined)) return joined
   }
   return null
-}
-
-function collectComponents(ast: TemplateAST): TemplateComponentNode[] {
-  const out: TemplateComponentNode[] = []
-  const walk = (nodes: TemplateNode[]): void => {
-    for (const node of nodes) {
-      if (node.type === 'component') {
-        out.push(node)
-        walk(node.children)
-      } else if (node.type === 'element') {
-        walk(node.children)
-      } else if (node.type === 'if') {
-        for (const branch of node.branches) walk(branch.children)
-        walk(node.elseChildren)
-      } else if (node.type === 'each') {
-        walk(node.children)
-      }
-    }
-  }
-  walk(ast.children)
-  return out
 }
 
 function findJacareFiles(dir: string, results: string[] = []): string[] {

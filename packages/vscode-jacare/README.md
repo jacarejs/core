@@ -109,7 +109,7 @@ export <view>
 
 **Template contracts**
 
-Declare the component surface with `export <contract>`. The compiler checks parents with `jacare check` — no runtime PropTypes.
+Declare the component surface with `export <contract>`. The compiler checks parents with `jacare check` (and Vite transform) — no runtime PropTypes. Use `bind-value` for `model: true` props; `:value` is rejected.
 
 ```javascript
 export <contract>

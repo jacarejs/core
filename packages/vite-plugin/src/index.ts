@@ -1,7 +1,17 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { compile, formatCompileError, JacareCompileError, hasViewSource } from '@jacare/compiler'
+import {
+  collectComponents,
+  compile,
+  formatCompileError,
+  formatContractIssue,
+  hasViewSource,
+  JacareCompileError,
+  parseModule,
+  parseTemplate,
+  validateContractUsage,
+} from '@jacare/compiler'
 import type { Plugin, UserConfig } from 'vite'
 import type { SourceMapInput } from 'rollup'
 
@@ -115,6 +125,11 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
           ...(options.runtimeImport ? { runtimeImport: options.runtimeImport } : {}),
         })
 
+        const contractErrors = validateContractsInModule(code, id, projectRoot)
+        if (contractErrors.length > 0) {
+          this.error(contractErrors.join('\n'))
+        }
+
         if (options.inspect) {
           writeInspectOutput(projectRoot, id, result.code)
         }
@@ -154,6 +169,63 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+}
+
+function validateContractsInModule(source: string, filename: string, root: string): string[] {
+  const imports = collectJacareImports(source, filename)
+  if (imports.size === 0) return []
+
+  const mod = parseModule(source, filename)
+  if (!mod.viewHtml) return []
+
+  const ast = parseTemplate(mod.viewHtml, { filename, baseLine: mod.viewStartLine })
+  const messages: string[] = []
+
+  for (const node of collectComponents(ast)) {
+    const importPath = imports.get(node.name)
+    if (!importPath) continue
+
+    const childFile = resolveImport(filename, importPath, root)
+    if (!childFile || !existsSync(childFile)) continue
+
+    let child
+    try {
+      child = compile(readFileSync(childFile, 'utf-8'), { filename: childFile })
+    } catch {
+      continue
+    }
+    if (!child.contract) continue
+
+    for (const issue of validateContractUsage(node, child.contract, child.props)) {
+      messages.push(formatContractIssue(filename, issue.component, issue.message))
+    }
+  }
+
+  return messages
+}
+
+function collectJacareImports(source: string, file: string): Map<string, string> {
+  const map = new Map<string, string>()
+  const script = parseModule(source, file).code
+  const withoutTemplates = script.replace(/`(?:\\.|[^`\\])*`/g, '``')
+  const re = /\bimport\s+(\w+)\s+from\s+['"]([^'"]+\.jcr)['"]/g
+  for (const match of withoutTemplates.matchAll(re)) {
+    map.set(match[1]!, match[2]!)
+  }
+  return map
+}
+
+function resolveImport(fromFile: string, spec: string, root: string): string | null {
+  const base = dirname(fromFile)
+  const candidates = [resolve(base, spec), resolve(root, spec.replace(/^\//, ''))]
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate
+  }
+  if (!isAbsolute(spec) && !spec.startsWith('.')) {
+    const joined = join(root, spec)
+    if (existsSync(joined)) return joined
+  }
+  return null
 }
 
 export default jacare

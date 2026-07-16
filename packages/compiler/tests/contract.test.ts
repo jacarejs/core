@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { compile, parseContractBody, parseModule } from '../src/index.js'
+import {
+  compile,
+  parseContractBody,
+  parseModule,
+  parseTemplate,
+  validateContractUsage,
+} from '../src/index.js'
 
 describe('template contracts', () => {
   it('parses export <contract> fields', () => {
@@ -68,5 +74,102 @@ export <view>
     expect(result.code).toContain('function emit(name, ...payload)')
     expect(result.code).toContain('props["open"] ?? false')
     expect(result.code).toContain('emit(')
+  })
+
+  it('keeps bind- as model binding on component call sites', () => {
+    const source = `import Field from './Field.jcr'
+import { pulse } from '@jacare/core'
+const email = pulse('')
+export <view>
+  <Field :label=\${'Email'} bind-value=\${email} />
+</view>`
+    const mod = parseModule(source)
+    const ast = parseTemplate(mod.viewHtml!)
+    const field = ast.children[0]
+    expect(field?.type).toBe('component')
+    if (field?.type !== 'component') return
+    expect(field.attrs).toEqual(
+      expect.arrayContaining([
+        { name: 'label', kind: 'prop', value: "'Email'" },
+        { name: 'value', kind: 'bind', value: 'email' },
+      ]),
+    )
+  })
+
+  it('validates model props require bind- at the parent', () => {
+    const contract = parseContractBody(`
+props: {
+  label: { type: 'string', required: true }
+  value: { type: 'string', model: true }
+}
+`)
+    const bad = parseTemplate(`<Field :label={'Email'} :value={email} />`).children[0]
+    const good = parseTemplate(`<Field :label={'Email'} bind-value={email} />`).children[0]
+    expect(bad?.type).toBe('component')
+    expect(good?.type).toBe('component')
+    if (bad?.type !== 'component' || good?.type !== 'component') return
+
+    const badIssues = validateContractUsage(bad, contract)
+    expect(badIssues.map((i) => i.message)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('is model — use bind-value'),
+      ]),
+    )
+
+    expect(validateContractUsage(good, contract)).toEqual([])
+  })
+
+  it('rejects bind- on non-model props and bad static types', () => {
+    const contract = parseContractBody(`
+props: {
+  label: { type: 'string', required: true }
+  open: { type: 'boolean', default: false }
+  meta: { type: 'object' }
+}
+`)
+    const node = parseTemplate(`<Field bind-label={x} open="yes" meta="{}" />`).children[0]
+    expect(node?.type).toBe('component')
+    if (node?.type !== 'component') return
+
+    const messages = validateContractUsage(node, contract).map((i) => i.message)
+    expect(messages).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('is not model — use :label'),
+        expect.stringContaining('expects boolean static value'),
+        expect.stringContaining('expects an object'),
+      ]),
+    )
+    expect(messages.some((m) => m.includes('missing required'))).toBe(false)
+  })
+
+  it('passes model prop through parent mount props object', () => {
+    const source = `import Field from './Field.jcr'
+import { pulse } from '@jacare/core'
+const email = pulse('')
+export <view>
+  <Field :label=\${'Email'} bind-value=\${email} />
+</view>`
+    const result = compile(source, { filename: 'Parent.jcr' })
+    expect(result.code).toContain('value: email')
+    expect(result.code).toContain("label: 'Email'")
+  })
+
+  it('child model prop uses bindModel; one-way prop uses bindPropText', () => {
+    const source = `export <contract>
+  props: {
+    label: { type: 'string', required: true }
+    value: { type: 'string', model: true }
+  }
+</contract>
+
+export <view>
+  <label>\${label}</label>
+  <input bind-value=\${value} />
+</view>`
+    const result = compile(source, { filename: 'Field.jcr' })
+    expect(result.code).toContain('bindPropText(')
+    expect(result.code).toContain('bindModel(')
+    expect(result.code).toContain('props["label"]')
+    expect(result.code).toContain('props["value"]')
   })
 })

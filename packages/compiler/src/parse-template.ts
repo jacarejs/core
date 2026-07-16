@@ -502,7 +502,7 @@ function parseAttrs(source: string, isComponent: boolean): TemplateAttr[] {
     if (rawName.startsWith('bind-')) {
       attrs.push({
         name: rawName.slice(5),
-        kind: isComponent ? 'prop' : 'bind',
+        kind: 'bind',
         value,
       })
       continue

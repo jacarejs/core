@@ -857,13 +857,37 @@ export <view>
 
 `compile()` returns `contract` + `props`. Rich defaults become `props["open"] ?? false` in `mount`.
 
+**Model props (two-way):** declare `model: true`. Parents must use `bind-name={signal}` (not `:name`). Inside the child, `bind-value=${value}` compiles to `bindModel`; one-way props in text compile to `bindPropText`.
+
+```javascript
+// Field.jcr
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+    open: { type: 'boolean', default: false }
+    value: { type: 'string', model: true }
+  }
+</contract>
+
+export <view>
+  <label>${label}</label>
+  <input bind-value=${value} />
+</view>
+```
+
+```javascript
+// parent — build / jacare check fails if label is missing or value uses :value
+<Field :label=${'Email'} bind-value=${email} />
+```
+
 ### Prop rules
 
-- `:propName=${expr}` — pass expression / signal as prop
-- `title="Hello"` — static string prop
+- `:propName=${expr}` — one-way prop (expression / signal)
+- `bind-propName=${signal}` — two-way **model** prop (must match `model: true` in contract)
+- `title="Hello"` — static string prop (soft type-checked when a contract is present)
 - Identifiers in the template not declared in script → mount props (merged with contract)
 - Imports and `signal` / `computed` declarations are never props
-- With a contract, unknown props / missing required / missing pulses fail `jacare check`
+- With a contract, unknown props / missing required / missing pulses / wrong bind vs `:` fail `jacare check` and Vite transform
 
 ### Props — all common cases
 
