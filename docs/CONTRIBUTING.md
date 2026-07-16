@@ -118,7 +118,14 @@ See [benchmarks/README.md](../benchmarks/README.md) for the local performance su
 ## CI and publish
 
 - **CI** — `.github/workflows/ci.yml` runs on every push/PR to `main`
-- **npm** — `.github/workflows/publish.yml` publishes all packages on tag `v*`
+- **npm** — `.github/workflows/publish.yml` (`workflow_dispatch`) bumps versions, publishes packages, tags the release
+- **GitHub Pages** — `.github/workflows/pages.yml` deploys todo / showcase / BMI demos
+
+### Why Pages used to break after npm publish
+
+The release commit is pushed with `GITHUB_TOKEN`. GitHub **does not** start new workflows from that push (avoids recursion), so Pages stayed stale or mid-cancel until someone re-ran it by hand.
+
+`publish.yml` now ends with an explicit `gh workflow run pages.yml --ref main` so demos redeploy after every npm release.
 
 Published packages:
 
