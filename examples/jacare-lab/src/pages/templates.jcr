@@ -4,6 +4,8 @@ import Demo from '../components/Demo.jcr'
 import { textBindingCode, attrCode, progressCode, multiAttrCode, trendCode } from '../snippets/templates.js'
 
 const name = pulse('Jacaré')
+const bareSyntax = '${name}'
+const mixedSyntax = 'Hello, ${name()}!'
 
 const avatarKind = pulse('leaf')
 const avatarSrc = derive(() =>
@@ -60,11 +62,21 @@ export <view>
     <Tip :text=${'A bare ${signal} in text compiles to a text binding. As soon as you mix it with other text or call it, the compiler falls back to an effect — always write ${name()} in mixed text.'} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Bare vs mixed text'} :lead=${'The exact same signal, bound two different ways.'} :code=${textBindingCode}>
-        <div class="stack">
+      <Demo :title=${'Bare vs mixed text'} :lead=${'Bare ${name} compiles to a text binding. Mix static text with a signal and you must call it — Hello, ${name()}!'} :code=${textBindingCode}>
+        <div class="stack binding-compare">
           <input class="input" bind-value=${name} placeholder="Type a name" />
-          <p class="muted">Bare (text binding): <strong>${name}</strong></p>
-          <p class="muted">Mixed (needs "()"): Hello, ${name()}!</p>
+          <div class="binding-row">
+            <span class="binding-label">Bare</span>
+            <code class="binding-syntax">${bareSyntax}</code>
+            <span class="binding-arrow" aria-hidden="true">→</span>
+            <strong class="binding-value">${name}</strong>
+          </div>
+          <div class="binding-row">
+            <span class="binding-label">Mixed</span>
+            <code class="binding-syntax">${mixedSyntax}</code>
+            <span class="binding-arrow" aria-hidden="true">→</span>
+            <span class="binding-value">Hello, ${name()}!</span>
+          </div>
         </div>
       </Demo>
 

@@ -1,22 +1,62 @@
 import { viewSnippet } from '../utils/snippet.js'
 
+export const setupCode = `import { createNav, createRoute, lazy, screen } from '@jacare/core'
+import Shell from './shell.jcr'
+import Home from './pages/index.jcr'
+import NotFound from './pages/not-found.jcr'
+
+export const nav = createNav({
+  base: '/',                 // optional — strip this prefix from URLs (GitHub Pages uses /core/lab)
+  layout: Shell,             // persistent chrome; must contain jacare-frame
+  screens: {
+    '/': screen(Home),       // eager screen (wrapped with lifecycle support)
+    '/nav': lazy(() => import('./pages/navigation.jcr')),
+    '/topic/:slug': lazy(() => import('./pages/topic-param.jcr')), // :slug → params.slug
+  },
+  missing: NotFound,         // unmatched paths
+  beforeGo(to, from) {       // guard: return true | false | redirect path
+    return true
+  },
+})
+
+export const route = createRoute(nav.where)
+
+// boot.js
+nav.attach(document.getElementById('app'))`
+
 export const routeCode = viewSnippet(
-  `import { createRoute } from '@jacare/core'
+  `import { createRoute, routeHref } from '@jacare/core'
 import { nav } from './nav.js'
 
 const route = createRoute(nav.where)
 
 const pathLabel = derive(() => route.path())
-const guardSearch = route.search('guard')
 const visitedSearch = route.search('visited')
 const qSearch = route.search('q')
-const slugParam = route.param('slug')`,
-  `  <div class="nav-live">
-    <div class="nav-live-row"><span>path</span><code>\${pathLabel}</code></div>
-    <div class="nav-live-row"><span>?visited</span><code>\${visitedSearch() ?? '—'}</code></div>
-    <div class="nav-live-row"><span>?q</span><code>\${qSearch() ?? '—'}</code></div>
-    <div class="nav-live-row"><span>?guard</span><code>\${guardSearch() ?? '—'}</code></div>
-    <div class="nav-live-row"><span>params.slug</span><code>\${slugParam() ?? '—'}</code></div>
+const guardSearch = route.search('guard')
+const slugParam = route.param('slug')
+const hashLabel = derive(() => nav.where().hash || '—')
+const paramsJson = derive(() => JSON.stringify(nav.where().params))
+const searchJson = derive(() => JSON.stringify(nav.where().search))
+
+function simulate(path) {
+  nav.go(path)
+}`,
+  `  <div class="stack">
+    <div class="nav-live">
+      <div class="nav-live-row"><span>path</span><code>\${pathLabel}</code></div>
+      <div class="nav-live-row"><span>?visited</span><code>\${visitedSearch() ?? '—'}</code></div>
+      <div class="nav-live-row"><span>?q</span><code>\${qSearch() ?? '—'}</code></div>
+      <div class="nav-live-row"><span>?guard</span><code>\${guardSearch() ?? '—'}</code></div>
+      <div class="nav-live-row"><span>params.slug</span><code>\${slugParam() ?? '—'}</code></div>
+      <div class="nav-live-row"><span>hash</span><code>\${hashLabel}</code></div>
+    </div>
+    <div class="row">
+      <button on-click=\${() => simulate('/nav')}>path → /nav</button>
+      <button on-click=\${() => simulate('/nav?visited=1')}>?visited=1</button>
+      <button on-click=\${() => simulate('/nav?q=jacare')}>?q=jacare</button>
+      <button on-click=\${() => simulate('/topic/alpha')}>params.slug=alpha</button>
+    </div>
   </div>`,
 )
 

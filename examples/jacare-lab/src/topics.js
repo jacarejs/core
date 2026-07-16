@@ -2,7 +2,17 @@ export const LESSONS = [
   {
     path: '/',
     title: 'Start',
-    blurb: 'Quick start, module layout, and how this lab works',
+    blurb: 'Lab overview, install notes, and lesson index',
+  },
+  {
+    path: '/quick-start',
+    title: 'Quick start',
+    blurb: 'API §1 — scaffold, app.jcr, boot.js, HTML shell',
+  },
+  {
+    path: '/module',
+    title: 'Module format',
+    blurb: 'API §2 — .jcr layout, view/style syntax, compiled exports',
   },
   {
     path: '/reactivity',

@@ -1,11 +1,23 @@
 import { viewSnippet } from '../utils/snippet.js'
 
 export const textBindingCode = viewSnippet(
-  `const name = pulse('Jacaré')`,
-  `  <div class="stack">
+  `const name = pulse('Jacaré')
+const bareSyntax = '\${name}'
+const mixedSyntax = 'Hello, \${name()}!'`,
+  `  <div class="stack binding-compare">
     <input class="input" bind-value=\${name} placeholder="Type a name" />
-    <p class="muted">Bare (text binding): <strong>\${name}</strong></p>
-    <p class="muted">Mixed (needs "()"): Hello, \${name()}!</p>
+    <div class="binding-row">
+      <span class="binding-label">Bare</span>
+      <code class="binding-syntax">\${bareSyntax}</code>
+      <span class="binding-arrow" aria-hidden="true">→</span>
+      <strong class="binding-value">\${name}</strong>
+    </div>
+    <div class="binding-row">
+      <span class="binding-label">Mixed</span>
+      <code class="binding-syntax">\${mixedSyntax}</code>
+      <span class="binding-arrow" aria-hidden="true">→</span>
+      <span class="binding-value">Hello, \${name()}!</span>
+    </div>
   </div>`,
 )
 

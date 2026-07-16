@@ -1,5 +1,15 @@
 export { quickStartCode, bootCode, greetingCode, highlightCode } from './start.js'
 
+export { scaffoldCode, appJcrCode, bootJsCode, htmlShellCode } from './quick-start.js'
+
+export {
+  layoutCode,
+  viewSyntaxCode,
+  styleSyntaxCode,
+  compiledExportsCode,
+  liveModuleCode,
+} from './module.js'
+
 export {
   signalCode,
   computedCode,
@@ -53,6 +63,7 @@ export {
 export { scopedCode, globalCode, spotlightCode, hueChipCode } from './css.js'
 
 export {
+  setupCode,
   routeCode,
   navApiCode,
   linksCode,
@@ -79,6 +90,14 @@ export {
 export { cliCode, vitePluginCode, compileApiCode, devtoolsCode, testingCode, scriptsCode } from './tooling.js'
 
 import { quickStartCode, bootCode, greetingCode, highlightCode } from './start.js'
+import { scaffoldCode, appJcrCode, bootJsCode, htmlShellCode } from './quick-start.js'
+import {
+  layoutCode,
+  viewSyntaxCode,
+  styleSyntaxCode,
+  compiledExportsCode,
+  liveModuleCode,
+} from './module.js'
 import {
   signalCode,
   computedCode,
@@ -124,6 +143,7 @@ import {
 } from './components.js'
 import { scopedCode, globalCode, spotlightCode, hueChipCode } from './css.js'
 import {
+  setupCode,
   routeCode,
   navApiCode,
   linksCode,
@@ -149,6 +169,17 @@ export const SNIPPET_CATALOG = [
   { id: 'start.boot', title: 'App boot pattern', lesson: '/', code: bootCode },
   { id: 'start.greeting', title: 'A signal and a derive, together', lesson: '/', code: greetingCode },
   { id: 'start.highlight', title: 'A class toggled from a signal', lesson: '/', code: highlightCode },
+
+  { id: 'quick-start.scaffold', title: 'Step 1 — Scaffold a project', lesson: '/quick-start', code: scaffoldCode },
+  { id: 'quick-start.app-jcr', title: 'Step 2 — Create src/app.jcr', lesson: '/quick-start', code: appJcrCode },
+  { id: 'quick-start.boot', title: 'Step 3 — Boot in src/boot.js', lesson: '/quick-start', code: bootJsCode },
+  { id: 'quick-start.html', title: 'Step 4 — HTML shell (index.html)', lesson: '/quick-start', code: htmlShellCode },
+
+  { id: 'module.layout', title: 'Recommended layout', lesson: '/module', code: layoutCode },
+  { id: 'module.live', title: 'Live mini-module', lesson: '/module', code: liveModuleCode },
+  { id: 'module.view-syntax', title: 'Supported view syntax', lesson: '/module', code: viewSyntaxCode },
+  { id: 'module.style-syntax', title: 'Supported style syntax', lesson: '/module', code: styleSyntaxCode },
+  { id: 'module.compiled', title: 'Compiled output', lesson: '/module', code: compiledExportsCode },
 
   { id: 'reactivity.signal', title: 'signal: set, update, peek', lesson: '/reactivity', code: signalCode },
   { id: 'reactivity.computed', title: 'computed: price × qty', lesson: '/reactivity', code: computedCode },
@@ -210,6 +241,7 @@ export const SNIPPET_CATALOG = [
   { id: 'css.spotlight', title: 'Toggle a locally scoped class', lesson: '/css', code: spotlightCode },
   { id: 'css.hue-chip', title: 'Scoped style, reactive CSS variable', lesson: '/css', code: hueChipCode },
 
+  { id: 'navigation.setup', title: 'createNav setup', lesson: '/nav', code: setupCode },
   { id: 'navigation.route', title: 'Live route reads', lesson: '/nav', code: routeCode },
   { id: 'navigation.nav-api', title: 'nav.go / swap / undo / warm', lesson: '/nav', code: navApiCode },
   { id: 'navigation.links', title: 'routeHref + param routes', lesson: '/nav', code: linksCode },

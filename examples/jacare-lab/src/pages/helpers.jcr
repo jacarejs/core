@@ -3,6 +3,8 @@ import { appHref } from '../app-base.js'
 import Tip from '../components/Tip.jcr'
 
 const helpers = [
+  { name: 'mount / default', description: 'Client render entry from a compiled .jcr module — returns a dispose function', path: '/module' },
+  { name: 'export view / style', description: 'Required view block and optional scoped styles in a .jcr file', path: '/module' },
   { name: 'signal / pulse', description: 'Mutable reactive cell — read with name(), write with .set() / .update()', path: '/reactivity' },
   { name: 'computed / derive', description: 'Derived read-only value, recomputed only when a dependency changes', path: '/reactivity' },
   { name: 'effect / watch', description: 'Side effect that reruns whenever a tracked signal changes', path: '/reactivity' },

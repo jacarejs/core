@@ -96,38 +96,40 @@ export <view>
           <path class="lifecycle-orbit-path lifecycle-orbit-path--leave" d="M52 180 A128 128 0 0 1 180 52" marker-end="url(#cycle-arrow-leave)" />
         </svg>
 
-        <div class="lifecycle-orbit-center">
-          <span class="lifecycle-orbit-phase">${activePhase}</span>
-          <span class="lifecycle-orbit-timer">${ticks}s on screen</span>
-          <span class="muted">This page is running the hooks below.</span>
-        </div>
+        <div class="lifecycle-orbit-layout">
+          <div class="lifecycle-orbit-center">
+            <span class="lifecycle-orbit-phase">${activePhase}</span>
+            <span class="lifecycle-orbit-timer">${ticks}s on screen</span>
+            <span class="muted">This page is running the hooks below.</span>
+          </div>
 
-        <div class="lifecycle-orbit-node lifecycle-orbit-node--activate">
-          <span class="lifecycle-orbit-step">1 · enter</span>
-          <code>onActivate</code>
-          <p>Title, analytics, registerScope</p>
-          <strong class="lifecycle-orbit-count">${activations}</strong>
-        </div>
+          <div class="lifecycle-orbit-node lifecycle-orbit-node--activate">
+            <span class="lifecycle-orbit-step">1 · enter</span>
+            <code>onActivate</code>
+            <p>Title, analytics, registerScope</p>
+            <strong class="lifecycle-orbit-count">${activations}</strong>
+          </div>
 
-        <div class="lifecycle-orbit-node lifecycle-orbit-node--mount">
-          <span class="lifecycle-orbit-step">2 · enter</span>
-          <code>onMount</code>
-          <p>Timers, subscriptions — return cleanup</p>
-          <strong class="lifecycle-orbit-count">${ticks}</strong>
-        </div>
+          <div class="lifecycle-orbit-node lifecycle-orbit-node--mount">
+            <span class="lifecycle-orbit-step">2 · enter</span>
+            <code>onMount</code>
+            <p>Timers, subscriptions — return cleanup</p>
+            <strong class="lifecycle-orbit-count">${ticks}</strong>
+          </div>
 
-        <div class="lifecycle-orbit-node lifecycle-orbit-node--deactivate">
-          <span class="lifecycle-orbit-step">3 · leave</span>
-          <code>onDeactivate</code>
-          <p>Screen hidden, still may be cached</p>
-          <strong class="lifecycle-orbit-count">${deactivations}</strong>
-        </div>
+          <div class="lifecycle-orbit-node lifecycle-orbit-node--deactivate">
+            <span class="lifecycle-orbit-step">3 · leave</span>
+            <code>onDeactivate</code>
+            <p>Screen hidden, still may be cached</p>
+            <strong class="lifecycle-orbit-count">${deactivations}</strong>
+          </div>
 
-        <div class="lifecycle-orbit-node lifecycle-orbit-node--unmount">
-          <span class="lifecycle-orbit-step">4 · leave</span>
-          <code>onUnmount</code>
-          <p>Final teardown after dispose</p>
-          <strong class="lifecycle-orbit-count">${unmounts}</strong>
+          <div class="lifecycle-orbit-node lifecycle-orbit-node--unmount">
+            <span class="lifecycle-orbit-step">4 · leave</span>
+            <code>onUnmount</code>
+            <p>Final teardown after dispose</p>
+            <strong class="lifecycle-orbit-count">${unmounts}</strong>
+          </div>
         </div>
       </div>
 

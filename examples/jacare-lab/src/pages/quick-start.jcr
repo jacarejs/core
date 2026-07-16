@@ -1,0 +1,54 @@
+import { pulse } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import {
+  scaffoldCode,
+  appJcrCode,
+  bootJsCode,
+  htmlShellCode,
+} from '../snippets/quick-start.js'
+
+const count = pulse(0)
+
+function increment() {
+  count.update((n) => n + 1)
+}
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §1</p>
+      <h1 class="page-title">Quick start</h1>
+      <p class="page-lead">Scaffold a project, write a tiny .jcr counter, boot it from JavaScript, and drop it into an HTML shell.</p>
+    </header>
+
+    <Tip :text=${'The Vite plugin compiles .jcr files on import. No virtual DOM — only the nodes bound to signals re-run when data changes.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Step 1 — Scaffold a project'} :lead=${'Use the CLI, create-jacare, or the monorepo jacare new command — then install and start the dev server.'} :code=${scaffoldCode}>
+        <div class="stack">
+          <p class="muted">create-jacare apps usually open on <code>http://localhost:5173</code>. CLI scaffolds default to <code>http://localhost:3000</code>.</p>
+          <pre class="log">${scaffoldCode}</pre>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Step 2 — Create src/app.jcr'} :lead=${'A signal, an update handler, and an export view block — the smallest useful Jacaré app.'} :code=${appJcrCode}>
+        <div class="stack">
+          <div class="row">
+            <span class="metric">${count}</span>
+            <button type="button" class="btn" on-click=${increment}>+1</button>
+          </div>
+          <p class="muted">This counter is the live version of the View code sample.</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Step 3 — Boot in src/boot.js'} :lead=${'Import the compiled mount export, attach it to #app, and dispose on HMR.'} :code=${bootJsCode}>
+        <pre class="log">${bootJsCode}</pre>
+      </Demo>
+
+      <Demo :title=${'Step 4 — HTML shell (index.html)'} :lead=${'A plain HTML page loads boot.js as a module. The Vite plugin handles .jcr compilation from there.'} :code=${htmlShellCode}>
+        <pre class="log">${htmlShellCode}</pre>
+      </Demo>
+    </div>
+  </section>
+</view>

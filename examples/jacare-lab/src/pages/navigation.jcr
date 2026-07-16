@@ -1,10 +1,12 @@
 import { routeHref, pulse, derive } from '@jacare/core'
 import { appHref } from '../app-base.js'
 import { nav, route } from '../nav.js'
+import { showCode } from '../code-viewer.js'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import Badge from '../components/Badge.jcr'
 import {
+  setupCode,
   routeCode,
   navApiCode,
   linksCode,
@@ -24,12 +26,23 @@ const guardLabel = derive(() => guardSearch() ?? '—')
 const visitedLabel = derive(() => visitedSearch() ?? '—')
 const qLabel = derive(() => qSearch() ?? '—')
 const slugLabel = derive(() => slugParam() ?? '—')
+const hashLabel = derive(() => {
+  const hash = nav.where().hash
+  return hash ? hash : '—'
+})
+const paramsJson = derive(() => JSON.stringify(nav.where().params))
+const searchJson = derive(() => JSON.stringify(nav.where().search))
 
 const lastAction = pulse('Ready')
 const draftQuery = pulse(qSearch() ?? '')
 
 function mark(action) {
   lastAction.set(action)
+}
+
+function simulate(path, label) {
+  mark(label ?? `nav.go(${path})`)
+  nav.go(path)
 }
 
 function goHelpers() {
@@ -94,15 +107,94 @@ function warmOnHover(path) {
   if (!warmed().includes(path)) warmed.update((list) => [...list, path])
 }
 
+const createNavOptions = [
+  { name: 'layout', detail: 'Persistent shell; must contain an element with jacare-frame' },
+  { name: 'screens', detail: 'Map of path → screen() / lazy() / mount. Use :param for dynamic segments' },
+  { name: 'missing', detail: 'Fallback screen when no pattern matches' },
+  { name: 'base', detail: 'URL prefix stripped before matching (e.g. /core/lab on GitHub Pages)' },
+  { name: 'beforeGo', detail: 'Guard: return true, false (cancel), or a path string (redirect)' },
+]
+
+const navMethods = [
+  { name: 'attach(target)', detail: 'Mount layout and sync to the current URL' },
+  { name: 'go(path)', detail: 'Push a new history entry and mount the screen' },
+  { name: 'swap(path)', detail: 'Replace the current history entry' },
+  { name: 'undo()', detail: 'history.back()' },
+  { name: 'warm(path)', detail: 'Preload a lazy screen chunk' },
+  { name: 'where', detail: 'Signal<NavPlace> — path, params, search, hash' },
+]
+
+const templateAttrs = [
+  { name: 'jacare-frame', detail: 'Outlet inside the layout where screens mount' },
+  { name: 'jacare-go', detail: 'In-app link — intercepts click and calls nav.go' },
+  { name: 'jacare-here', detail: 'Applied automatically to the active jacare-go link' },
+]
+
 export <view>
-  <section class="page">
+  <section class="page page-nav">
     <header class="page-hero">
       <p class="page-kicker">API §11</p>
       <h1 class="page-title">Navigation</h1>
       <p class="page-lead">createNav keeps a persistent layout around jacare-frame. createRoute exposes a reactive read of path, params, and search for any screen.</p>
     </header>
 
-    <Tip :text=${'jacare-go marks in-app links, jacare-frame is the layout outlet screens mount into, and jacare-here is applied automatically to the active link.'} />
+    <Tip :text=${'Boot order: createNav({ layout, screens, … }) → export route = createRoute(nav.where) → nav.attach(#app). Links use jacare-go; the active one gets jacare-here.'} />
+
+    <article class="nav-setup">
+      <header class="nav-setup-head">
+        <div>
+          <Badge :text=${'how it boots'} />
+          <h2 class="nav-setup-title">Initial routing flow</h2>
+          <p class="nav-setup-lead">Shell stays mounted. Screens swap inside jacare-frame. URL changes update nav.where, and createRoute turns that into reactive path / param / search reads.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${() => showCode('createNav setup', setupCode)}>View code</button>
+      </header>
+
+      <ol class="nav-flow">
+        <li><strong>1. createNav</strong> — register layout, screen map, optional base / missing / beforeGo</li>
+        <li><strong>2. createRoute(nav.where)</strong> — reactive helpers for path, param(), search()</li>
+        <li><strong>3. nav.attach(#app)</strong> — mount shell, match the current URL, load the screen</li>
+        <li><strong>4. Navigate</strong> — jacare-go links or nav.go / swap / undo update history and remount the frame</li>
+      </ol>
+
+      <div class="nav-options-grid">
+        <section class="nav-options-card">
+          <h3 class="nav-options-title">createNav options</h3>
+          <div class="nav-live">
+            #for createNavOptions as option (option.name)
+              <div class="nav-live-row">
+                <span>${option.name}</span>
+                <code>${option.detail}</code>
+              </div>
+            #end
+          </div>
+        </section>
+
+        <section class="nav-options-card">
+          <h3 class="nav-options-title">Nav methods</h3>
+          <div class="nav-live">
+            #for navMethods as method (method.name)
+              <div class="nav-live-row">
+                <span>${method.name}</span>
+                <code>${method.detail}</code>
+              </div>
+            #end
+          </div>
+        </section>
+
+        <section class="nav-options-card">
+          <h3 class="nav-options-title">Template attributes</h3>
+          <div class="nav-live">
+            #for templateAttrs as attr (attr.name)
+              <div class="nav-live-row">
+                <span>${attr.name}</span>
+                <code>${attr.detail}</code>
+              </div>
+            #end
+          </div>
+        </section>
+      </div>
+    </article>
 
     <div class="nav-summary">
       <Badge :text=${'live route'} />
@@ -112,18 +204,98 @@ export <view>
         <div class="nav-live-row"><span>?q</span><code>${qLabel}</code></div>
         <div class="nav-live-row"><span>?guard</span><code>${guardLabel}</code></div>
         <div class="nav-live-row"><span>params.slug</span><code>${slugLabel}</code></div>
+        <div class="nav-live-row"><span>hash</span><code>${hashLabel}</code></div>
+        <div class="nav-live-row"><span>params</span><code>${paramsJson}</code></div>
+        <div class="nav-live-row"><span>search</span><code>${searchJson}</code></div>
       </div>
       <p class="muted">Last action: ${lastAction}</p>
     </div>
 
     <div class="lesson-grid">
-      <Demo :title=${'Live route reads'} :lead=${'route comes from createRoute(nav.where) and stays in sync with the URL as you navigate.'} :code=${routeCode}>
-        <div class="nav-live">
-          <div class="nav-live-row"><span>path</span><code>${pathLabel}</code></div>
-          <div class="nav-live-row"><span>?visited</span><code>${visitedLabel}</code></div>
-          <div class="nav-live-row"><span>?q</span><code>${qLabel}</code></div>
-          <div class="nav-live-row"><span>?guard</span><code>${guardLabel}</code></div>
-          <div class="nav-live-row"><span>params.slug</span><code>${slugLabel}</code></div>
+      <Demo :title=${'Live route reads'} :lead=${'route comes from createRoute(nav.where). Use the buttons below to drive every read — path, search keys, params.slug, and hash.'} :code=${routeCode}>
+        <div class="stack">
+          <div class="nav-live">
+            <div class="nav-live-row"><span>path</span><code>${pathLabel}</code></div>
+            <div class="nav-live-row"><span>?visited</span><code>${visitedLabel}</code></div>
+            <div class="nav-live-row"><span>?q</span><code>${qLabel}</code></div>
+            <div class="nav-live-row"><span>?guard</span><code>${guardLabel}</code></div>
+            <div class="nav-live-row"><span>params.slug</span><code>${slugLabel}</code></div>
+            <div class="nav-live-row"><span>hash</span><code>${hashLabel}</code></div>
+            <div class="nav-live-row"><span>params</span><code>${paramsJson}</code></div>
+            <div class="nav-live-row"><span>search</span><code>${searchJson}</code></div>
+          </div>
+
+          <div class="nav-sim">
+            <div class="nav-sim-group">
+              <span class="nav-sim-label">path</span>
+              <div class="row">
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav', 'path → /nav')}>/nav</button>
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/forms', 'path → /forms')}>/forms</button>
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/reactivity', 'path → /reactivity')}>/reactivity</button>
+              </div>
+            </div>
+
+            <div class="nav-sim-group">
+              <span class="nav-sim-label">?visited</span>
+              <div class="row">
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?visited=1', '?visited=1')}>visited=1</button>
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?visited=swap', '?visited=swap')}>visited=swap</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?visited')}>clear</button>
+              </div>
+            </div>
+
+            <div class="nav-sim-group">
+              <span class="nav-sim-label">?q</span>
+              <div class="row">
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?q=jacare', '?q=jacare')}>q=jacare</button>
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?q=lab', '?q=lab')}>q=lab</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?q')}>clear</button>
+              </div>
+            </div>
+
+            <div class="nav-sim-group">
+              <span class="nav-sim-label">?guard</span>
+              <div class="row">
+                <button type="button" class="btn btn-outline" on-click=${armGuard}>arm + go</button>
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?guard=blocked', '?guard=blocked')}>guard=blocked</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?guard')}>clear</button>
+              </div>
+            </div>
+
+            <div class="nav-sim-group">
+              <span class="nav-sim-label">params.slug</span>
+              <div class="row">
+                #for topics as topic (topic.slug)
+                  <button
+                    type="button"
+                    class="btn btn-outline"
+                    on-click=${() => simulate(topicHref(topic.slug), `params.slug=${topic.slug}`)}
+                  >
+                    ${topic.label}
+                  </button>
+                #end
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear params.slug')}>back to /nav</button>
+              </div>
+            </div>
+
+            <div class="nav-sim-group">
+              <span class="nav-sim-label">hash</span>
+              <div class="row">
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav#demo', 'hash → #demo')}>#demo</button>
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav#live', 'hash → #live')}>#live</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear hash')}>clear</button>
+              </div>
+            </div>
+
+            <div class="nav-sim-group">
+              <span class="nav-sim-label">combined</span>
+              <div class="row">
+                <button type="button" class="btn" on-click=${() => simulate('/nav?visited=1&q=jacare#demo', 'visited + q + hash')}>visited + q + hash</button>
+                <button type="button" class="btn btn-outline" on-click=${() => simulate('/topic/beta?q=lab#focus', 'slug + q + hash')}>slug + q + hash</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'reset all')}>reset all</button>
+              </div>
+            </div>
+          </div>
         </div>
       </Demo>
 

@@ -31,7 +31,9 @@ yarn jacare-check
 
 | Route | Covers |
 |-------|--------|
-| `/` | Quick start, boot pattern, lesson index |
+| `/` | Lab overview, install notes, lesson index |
+| `/quick-start` | API §1 — scaffold, `app.jcr`, `boot.js`, HTML shell |
+| `/module` | API §2 — `.jcr` layout, view/style syntax, compiled exports |
 | `/reactivity` | `signal` / `pulse`, `computed` / `derive`, `effect`, `batch`, `untrack` |
 | `/templates` | Text, attrs, `style---` |
 | `/bindings` | `bind-value`, `bind-checked`, `class-*`, CPW notes |
@@ -64,6 +66,8 @@ Demo “View code” sources live in `src/snippets/` (one module per lesson), bu
 | File | Lesson |
 |------|--------|
 | `start.js` | `/` |
+| `quick-start.js` | `/quick-start` |
+| `module.js` | `/module` |
 | `reactivity.js` | `/reactivity` |
 | `templates.js` | `/templates` |
 | `bindings.js` | `/bindings` |

@@ -1,0 +1,76 @@
+import { pulse, derive } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import Badge from '../components/Badge.jcr'
+import {
+  layoutCode,
+  viewSyntaxCode,
+  styleSyntaxCode,
+  compiledExportsCode,
+  liveModuleCode,
+} from '../snippets/module.js'
+
+const title = pulse('Hello')
+const subtitle = derive(() => 'Updated: ' + title())
+
+function onSave() {
+  title.set('Saved')
+}
+
+const exports = [
+  { name: 'mount(target, props?)', role: 'Client render; returns dispose' },
+  { name: 'render(props?)', role: 'Server HTML + binding state' },
+  { name: 'resume(target, state, props?)', role: 'Hydrate from SSR state' },
+  { name: 'default', role: 'Alias for mount' },
+]
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §2</p>
+      <h1 class="page-title">Module format (.jcr)</h1>
+      <p class="page-lead">A .jcr file is a JavaScript module with optional script logic and one or more exported blocks — view required, style optional.</p>
+    </header>
+
+    <Tip :text=${'Recommended order inside a .jcr file: imports → state/logic → export view → export style last.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Recommended layout'} :lead=${'Imports, state, view, then scoped styles. The view block is required; style is optional and should come last.'} :code=${layoutCode}>
+        <pre class="log">${layoutCode}</pre>
+      </Demo>
+
+      <Demo :title=${'Live mini-module'} :lead=${'Same layout as the sample above — pulse + derive + handlers + view (+ style in the source panel).'} :code=${liveModuleCode}>
+        <div class="stack">
+          <p class="metric">${title}</p>
+          <p class="muted">${subtitle}</p>
+          <div class="row">
+            <input class="input" bind-value=${title} />
+            <button type="button" class="btn" on-click=${onSave}>Save</button>
+          </div>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Supported view syntax'} :lead=${'Block form is recommended. Tagged templates and factory return blocks are also accepted.'} :code=${viewSyntaxCode}>
+        <div class="stack">
+          <Badge :text=${'export view block recommended'} />
+          <pre class="log">${viewSyntaxCode}</pre>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Supported style syntax'} :lead=${'export style is scoped by default. lang is parsed as styleLang; SCSS/Less pass through until a preprocessor is wired.'} :code=${styleSyntaxCode}>
+        <pre class="log">${styleSyntaxCode}</pre>
+      </Demo>
+
+      <Demo :title=${'Compiled output'} :lead=${'Every .jcr file compiles to mount, render, resume, and a default alias for mount.'} :code=${compiledExportsCode}>
+        <div class="nav-live">
+          #for exports as item (item.name)
+            <div class="nav-live-row">
+              <span>${item.name}</span>
+              <code>${item.role}</code>
+            </div>
+          #end
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>

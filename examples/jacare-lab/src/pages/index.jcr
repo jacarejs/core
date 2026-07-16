@@ -36,6 +36,28 @@ export <view>
       <img class="lab-logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
       <h1 class="page-title lab-brand">Jacaré Lab</h1>
       <p class="page-lead">A complete, live tour of the API — every lesson pairs a short explanation with a running demo. Open <strong>View code</strong>${' '}to see the source.</p>
+      <div class="lab-links">
+        <a
+          class="lab-badge-link"
+          href="https://www.npmjs.com/package/@jacare/core"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            class="lab-badge"
+            src="https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030"
+            alt="@jacare/core on npm"
+          />
+        </a>
+        <a
+          class="lab-repo-link"
+          href="https://github.com/jacarejs/core"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub repository
+        </a>
+      </div>
     </header>
 
     <Tip :text=${'Every Demo card below has a "View code" button in its header — it opens the exact source for that example in a modal.'} />
@@ -120,6 +142,36 @@ export <style>
 .lab-brand {
   font-size: clamp(2.4rem, 7vw, 3.4rem);
   letter-spacing: -0.04em;
+}
+.lab-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+  margin-top: 0.15rem;
+}
+.lab-badge {
+  display: block;
+  height: 1.25rem;
+}
+.lab-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--canopy) 22%, white);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--canopy);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.lab-repo-link:hover {
+  background: rgba(143, 209, 42, 0.18);
+  border-color: color-mix(in srgb, var(--lime) 45%, var(--line));
+  transform: translateY(-1px);
 }
 @keyframes lab-breathe {
   0%, 100% { transform: translateY(0); }

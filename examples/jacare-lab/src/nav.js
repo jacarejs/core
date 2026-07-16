@@ -10,6 +10,8 @@ export const nav = createNav({
   layout: Shell,
   screens: {
     '/': screen(Home),
+    '/quick-start': lazy(() => import('./pages/quick-start.jcr')),
+    '/module': lazy(() => import('./pages/module.jcr')),
     '/reactivity': lazy(() => import('./pages/reactivity.jcr')),
     '/templates': lazy(() => import('./pages/templates.jcr')),
     '/bindings': lazy(() => import('./pages/bindings.jcr')),
@@ -43,6 +45,8 @@ export const nav = createNav({
 export const route = createRoute(nav.where)
 
 for (const path of [
+  '/quick-start',
+  '/module',
   '/reactivity',
   '/templates',
   '/bindings',
