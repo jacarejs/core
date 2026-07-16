@@ -8,6 +8,17 @@ export <contract>
   emits: ['close']
 </contract>
 
+function allCode() {
+  const list = typeof files === 'function' ? files() : files
+  if (!Array.isArray(list)) return String(list ?? '')
+  return list
+    .map((section) => {
+      const name = section?.name ? `// —— ${section.name} ——\n` : ''
+      return name + String(section?.code ?? '')
+    })
+    .join('\n\n')
+}
+
 export <view>
   <div
     class="code-modal"
@@ -18,14 +29,17 @@ export <view>
     <div class="code-panel" role="dialog" aria-modal="true">
       <header class="code-panel-head">
         <h4 class="code-panel-title">${title}</h4>
-        <button type="button" class="btn btn-lime" on-click=${() => emit('close')}>Close</button>
+        <div class="code-panel-actions">
+          <CopyCode :code=${allCode} />
+          <button type="button" class="btn btn-lime" on-click=${() => emit('close')}>Close</button>
+        </div>
       </header>
       <div class="code-scroll">
         #for files() as section (section.name)
           <section class="code-file">
             <div class="code-file-head">
               <h5 class="code-file-name">${section.name}</h5>
-              <CopyCode :code=${section.code} />
+              <CopyCode :code=${() => section.code} />
             </div>
             <pre class="code-body"><code>${section.code}</code></pre>
           </section>

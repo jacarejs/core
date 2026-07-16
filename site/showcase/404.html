@@ -9,21 +9,30 @@
         var search = location.search
         var hash = location.hash
         var href = path + search + hash
+        var isLab = path.indexOf('/core/lab') === 0
         var isShowcase = path.indexOf('/core/showcase') === 0
         var isTodo = path.indexOf('/core/todo') === 0
+        var isBmi = path.indexOf('/core/bmi') === 0
         var base
         var target
 
-        if (isShowcase) {
+        if (isLab) {
+          base = '/core/lab/'
+          target = '/core/lab/'
+        } else if (isShowcase) {
           base = '/core/showcase/'
           target = '/core/showcase/'
         } else if (isTodo) {
           base = '/core/todo/'
           target = '/core/todo/'
+        } else if (isBmi) {
+          base = '/core/bmi/'
+          target = '/core/bmi/'
         } else if (path.indexOf('/core/') === 0 && path !== '/core/' && path !== '/core/index.html') {
-          base = '/core/todo/'
-          target = '/core/todo/'
-          href = '/core/todo' + path.slice('/core'.length) + search + hash
+          // Unknown /core/* deep links default to Lab (primary demo)
+          base = '/core/lab/'
+          target = '/core/lab/'
+          href = '/core/lab' + path.slice('/core'.length) + search + hash
         } else {
           location.replace('/core/')
           return

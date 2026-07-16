@@ -612,6 +612,13 @@ body {
   border-bottom: 1px solid rgba(143, 209, 42, 0.2);
 }
 
+.code-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
 .code-panel-title {
   margin: 0;
   font-family: var(--font-display);
