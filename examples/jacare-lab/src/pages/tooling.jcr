@@ -1,0 +1,107 @@
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+
+const cliCode = `jacare new my-app --template=nav
+jacare dev --port=4000
+jacare build
+jacare compile src/app.jcr dist/app.js --watch
+jacare check`
+
+const vitePluginCode = `import jacare from '@jacare/vite-plugin'
+
+export default {
+  plugins: [
+    jacare({
+      emit: 'auto',       // 'auto' | 'client' | 'server' | 'full'
+      cpw: 'auto',        // 'auto' | true | false
+      inspect: true,      // write .jacare/compiled/*.js
+      runtimeImport: '@jacare/core',
+    }),
+  ],
+}`
+
+const compileApiCode = `import { compile } from '@jacare/compiler'
+
+const result = compile(source, {
+  filename: 'Card.jcr',
+  mode: 'client', // 'client' | 'server' | 'full'
+  cpw: true,
+})
+
+result.code // generated JavaScript
+result.map  // source map`
+
+const devtoolsCode = `// boot.js -- already wired in this lab
+if (import.meta.env.DEV) {
+  const { connectJacareDevtools } = await import('@jacare/devtools')
+  connectJacareDevtools()
+}`
+
+const testingCode = `import { compile } from '@jacare/compiler'
+import { it, expect } from 'vitest'
+
+it('mounts and reacts to clicks', () => {
+  const { code } = compile(source, { filename: 'Counter.jcr' })
+  const mod = evalModule(code) // your own eval/import helper
+  const dispose = mod.mount(document.body)
+  document.querySelector('button').click()
+  expect(document.querySelector('.metric').textContent).toBe('1')
+  dispose()
+})`
+
+const scriptsCode = `{
+  "scripts": {
+    "dev": "jacare dev",
+    "build": "jacare build",
+    "check": "jacare check",
+    "test": "vitest run"
+  }
+}`
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §16 - §19</p>
+      <h1 class="page-title">Tooling</h1>
+      <p class="page-lead">The CLI, Vite plugin, compiler, and DevTools that turn .jcr files into a running app — and back into test assertions.</p>
+    </header>
+
+    <Tip :text=${'connectJacareDevtools() is already wired into this lab, behind import.meta.env.DEV in boot.js -- open the Pulse Graph or Scope panel in the corner while you click around any lesson.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'CLI commands'} :lead=${'jacare new / dev / build / compile / check wrap Vite and the compiler.'} :code=${cliCode}>
+        <pre class="log">${cliCode}</pre>
+      </Demo>
+
+      <div class="ref-card">
+        <h3>Vite plugin options</h3>
+        <p class="muted">emit and cpw default to "auto" — production client builds get CPW automatically.</p>
+        <pre><code>${vitePluginCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>Compiler API</h3>
+        <p class="muted">Use @jacare/compiler directly to inspect generated code outside of Vite.</p>
+        <pre><code>${compileApiCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>DevTools</h3>
+        <p class="muted">Pulse Graph shows every signal / computed / effect; Scope shows registerScope() entries.</p>
+        <pre><code>${devtoolsCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>Testing</h3>
+        <p class="muted">Compile + mount in Vitest with happy-dom for full integration coverage.</p>
+        <pre><code>${testingCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>package.json scripts</h3>
+        <p class="muted">A typical project wires dev / build / check / test straight to the CLI.</p>
+        <pre><code>${scriptsCode}</code></pre>
+      </div>
+    </div>
+  </section>
+</view>

@@ -1,0 +1,114 @@
+import { createLifecycle, effect, pulse, registerScope } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import { viewSnippet } from '../utils/snippet.js'
+
+const ticks = pulse(0)
+const activations = pulse(0)
+let timer
+
+export const lifecycle = createLifecycle({
+  onMount() {
+    timer = setInterval(() => ticks.update((n) => n + 1), 1000)
+    return () => clearInterval(timer)
+  },
+  onActivate() {
+    document.title = 'Jacaré Lab · Lifecycle'
+    activations.update((n) => n + 1)
+    return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
+  },
+})
+
+const hooksCode = `export const lifecycle = createLifecycle({
+  onMount() {
+    const timer = setInterval(() => ticks.update((n) => n + 1), 1000)
+    return () => clearInterval(timer) // cleanup on unmount
+  },
+  onActivate(ctx) {
+    document.title = 'Jacaré Lab · Lifecycle'
+    return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
+  },
+})`
+
+const scopeCode = `registerScope(id, label, readFn)
+// readFn is called on a short interval and whenever any scope entry changes,
+// so the DevTools Scope panel always shows a live value`
+
+const activationCode = `onActivate() {
+  document.title = 'Jacaré Lab · Lifecycle'
+  activations.update((n) => n + 1) // runs again every time you come back
+  return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
+}`
+
+const showBlock = pulse(true)
+const mounts = pulse(0)
+const disposals = pulse(0)
+
+effect(() => {
+  if (!showBlock()) return
+  mounts.update((n) => n + 1)
+  return () => disposals.update((n) => n + 1)
+})
+
+function toggleBlock() {
+  showBlock.update((on) => !on)
+}
+
+const disposeCode = viewSnippet(
+  `const showBlock = pulse(true)
+const mounts = pulse(0)
+const disposals = pulse(0)
+
+effect(() => {
+  if (!showBlock()) return
+  mounts.update((n) => n + 1)
+  return () => disposals.update((n) => n + 1) // cleanup runs before the next rerun and on dispose
+})
+
+function toggleBlock() {
+  showBlock.update((on) => !on)
+}`,
+  `  <div class="stack">
+    <button type="button" class="btn" on-click=\${toggleBlock}>\${showBlock() ? 'Unmount' : 'Mount'} block</button>
+    <p class="muted">mounts: \${mounts} · disposals: \${disposals}</p>
+    #if showBlock()
+      <p class="muted">This block is currently mounted.</p>
+    #end
+  </div>`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §13</p>
+      <h1 class="page-title">Lifecycle and Scope</h1>
+      <p class="page-lead">A screen exports a lifecycle object; nav calls onMount + onActivate when it mounts, onDeactivate + onUnmount when it goes away.</p>
+    </header>
+
+    <Tip :text=${'onActivate is the place for document.title, analytics, and registerScope() calls. onMount is the place for timers and subscriptions -- always return a cleanup function from it.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'onMount timer + cleanup'} :lead=${'The interval below starts once, in onMount, and is cleared by the returned cleanup function on unmount.'} :code=${hooksCode}>
+        <p class="metric">${ticks}s</p>
+      </Demo>
+
+      <Demo :title=${'registerScope for the DevTools panel'} :lead=${'Registered values show up live in the Scope panel while @jacare/devtools is connected.'} :code=${scopeCode}>
+        <p class="muted">Open the Scope panel (bottom-right, dev only) and look for "Lifecycle ticks" — it mirrors the counter above.</p>
+      </Demo>
+
+      <Demo :title=${'onActivate runs on every visit'} :lead=${'Navigate away to another lesson and back — this count goes up again, unlike the onMount timer above.'} :code=${activationCode}>
+        <p class="metric">${activations}</p>
+      </Demo>
+
+      <Demo :title=${'Dispose counter'} :lead=${"A plain effect's cleanup runs before every rerun and on final dispose — that is the same mechanism behind onUnmount."} :code=${disposeCode}>
+        <div class="stack">
+          <button type="button" class="btn" on-click=${toggleBlock}>${showBlock() ? 'Unmount' : 'Mount'} block</button>
+          <p class="muted">mounts: ${mounts} · disposals: ${disposals}</p>
+          #if showBlock()
+            <p class="muted">This block is currently mounted.</p>
+          #end
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>

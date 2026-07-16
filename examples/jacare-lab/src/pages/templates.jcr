@@ -1,0 +1,223 @@
+import { pulse, derive } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import { viewSnippet } from '../utils/snippet.js'
+
+const name = pulse('Jacaré')
+
+const textBindingCode = viewSnippet(
+  `const name = pulse('Jacaré')`,
+  `  <div class="stack">
+    <input class="input" bind-value=\${name} placeholder="Type a name" />
+    <p class="muted">Bare (text binding): <strong>\${name}</strong></p>
+    <p class="muted">Mixed (needs "()"): Hello, \${name()}!</p>
+  </div>`,
+)
+
+const avatarKind = pulse('leaf')
+const avatarSrc = derive(() =>
+  avatarKind() === 'leaf'
+    ? 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48"%3E%3Ccircle cx="24" cy="24" r="22" fill="%238fd12a"/%3E%3C/svg%3E'
+    : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48"%3E%3Ccircle cx="24" cy="24" r="22" fill="%23f59e0b"/%3E%3C/svg%3E',
+)
+
+function swapAvatar() {
+  avatarKind.update((kind) => (kind === 'leaf' ? 'amber' : 'leaf'))
+}
+
+const linkKind = pulse('reactivity')
+const linkLabel = derive(() => '/' + linkKind())
+
+function swapLink() {
+  linkKind.update((kind) => (kind === 'reactivity' ? 'templates' : 'reactivity'))
+}
+
+const attrCode = viewSnippet(
+  `const avatarKind = pulse('leaf')
+const avatarSrc = derive(() => (avatarKind() === 'leaf' ? '/leaf.svg' : '/amber.svg'))
+
+function swapAvatar() {
+  avatarKind.update((kind) => (kind === 'leaf' ? 'amber' : 'leaf'))
+}
+
+const linkKind = pulse('reactivity')
+const linkLabel = derive(() => '/' + linkKind())
+
+function swapLink() {
+  linkKind.update((kind) => (kind === 'reactivity' ? 'templates' : 'reactivity'))
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <span class="badge" title="This title never changes">Static attribute</span>
+      <img :src=\${avatarSrc} width="32" height="32" alt="Avatar" />
+      <button type="button" class="btn btn-outline" on-click=\${swapAvatar}>Swap :src</button>
+    </div>
+    <div class="row">
+      <a class="text-link" bind-href=\${linkLabel}>Reactive link → \${linkLabel}</a>
+      <button type="button" class="btn btn-outline" on-click=\${swapLink}>Swap bind-href</button>
+    </div>
+  </div>`,
+)
+
+const progress = pulse(40)
+const pct = derive(() => progress() + '%')
+
+function bump(delta) {
+  progress.update((n) => Math.max(0, Math.min(100, n + delta)))
+}
+
+const progressCode = viewSnippet(
+  `const progress = pulse(40)
+const pct = derive(() => progress() + '%')
+
+function bump(delta) {
+  progress.update((n) => Math.max(0, Math.min(100, n + delta)))
+}`,
+  `  <div class="stack">
+    <div class="progress">
+      <div class="progress-fill" style---pct=\${pct}></div>
+    </div>
+    <div class="row">
+      <button type="button" class="btn btn-outline" on-click=\${() => bump(-10)}>−10</button>
+      <button type="button" class="btn" on-click=\${() => bump(10)}>+10</button>
+      <span class="muted">\${progress}%</span>
+    </div>
+  </div>`,
+)
+
+const seats = pulse(3)
+const maxSeats = pulse(5)
+const seatsLabel = derive(() => seats() + ' / ' + maxSeats() + ' seats booked')
+const atCapacity = derive(() => seats() >= maxSeats())
+
+function bookSeat() {
+  if (!atCapacity()) seats.update((n) => n + 1)
+}
+
+const multiAttrCode = viewSnippet(
+  `const seats = pulse(3)
+const maxSeats = pulse(5)
+const seatsLabel = derive(() => seats() + ' / ' + maxSeats() + ' seats booked')
+const atCapacity = derive(() => seats() >= maxSeats())
+
+function bookSeat() {
+  if (!atCapacity()) seats.update((n) => n + 1)
+}`,
+  `  <div class="stack">
+    <p class="muted">\${seatsLabel}</p>
+    <button
+      type="button"
+      class="btn"
+      :disabled=\${atCapacity}
+      :title=\${seatsLabel}
+      on-click=\${bookSeat}
+    >
+      Book a seat
+    </button>
+  </div>`,
+)
+
+const price = pulse(128.4)
+const previous = pulse(128.4)
+
+function nudge(delta) {
+  previous.set(price())
+  price.update((n) => Math.round((n + delta) * 100) / 100)
+}
+
+const trendLabel = derive(() => (price() > previous() ? '▲ Up' : price() < previous() ? '▼ Down' : '– Flat'))
+
+const trendCode = viewSnippet(
+  `const price = pulse(128.4)
+const previous = pulse(128.4)
+
+function nudge(delta) {
+  previous.set(price())
+  price.update((n) => Math.round((n + delta) * 100) / 100)
+}
+
+const trendLabel = derive(() => (price() > previous() ? '▲ Up' : price() < previous() ? '▼ Down' : '– Flat'))`,
+  `  <div class="stack">
+    <p class="metric">\${price}</p>
+    <div class="row">
+      <span class="badge" class-badge-danger=\${() => price() > previous()} class-badge-warn=\${() => price() < previous()}>\${trendLabel}</span>
+      <button type="button" class="btn btn-outline" on-click=\${() => nudge(-1.5)}>−1.5</button>
+      <button type="button" class="btn" on-click=\${() => nudge(1.5)}>+1.5</button>
+    </div>
+  </div>`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §4</p>
+      <h1 class="page-title">Templates</h1>
+      <p class="page-lead">Templates compile at build time — the compiler emits direct DOM calls and binding hooks, never a virtual tree.</p>
+    </header>
+
+    <Tip :text=${'A bare ${signal} in text compiles to a text binding. As soon as you mix it with other text or call it, the compiler falls back to an effect — always write ${name()} in mixed text.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Bare vs mixed text'} :lead=${'The exact same signal, bound two different ways.'} :code=${textBindingCode}>
+        <div class="stack">
+          <input class="input" bind-value=${name} placeholder="Type a name" />
+          <p class="muted">Bare (text binding): <strong>${name}</strong></p>
+          <p class="muted">Mixed (needs "()"): Hello, ${name()}!</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Static attribute vs :src / bind-href'} :lead=${'A plain string attribute never changes; :src and bind-href track a signal.'} :code=${attrCode}>
+        <div class="stack">
+          <div class="row">
+            <span class="badge" title="This title never changes">Static attribute</span>
+            <img :src=${avatarSrc} width="32" height="32" alt="Avatar" />
+            <button type="button" class="btn btn-outline" on-click=${swapAvatar}>Swap :src</button>
+          </div>
+          <div class="row">
+            <a class="text-link" bind-href=${linkLabel}>Reactive link → ${linkLabel}</a>
+            <button type="button" class="btn btn-outline" on-click=${swapLink}>Swap bind-href</button>
+          </div>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Reactive CSS variable: style---pct'} :lead=${'style---name binds a signal straight to a CSS custom property.'} :code=${progressCode}>
+        <div class="stack">
+          <div class="progress">
+            <div class="progress-fill" style---pct=${pct}></div>
+          </div>
+          <div class="row">
+            <button type="button" class="btn btn-outline" on-click=${() => bump(-10)}>−10</button>
+            <button type="button" class="btn" on-click=${() => bump(10)}>+10</button>
+            <span class="muted">${progress}%</span>
+          </div>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Multiple reactive attributes on one element'} :lead=${':disabled and :title both track derived signals on the exact same button.'} :code=${multiAttrCode}>
+        <div class="stack">
+          <p class="muted">${seatsLabel}</p>
+          <button
+            type="button"
+            class="btn"
+            :disabled=${atCapacity}
+            :title=${seatsLabel}
+            on-click=${bookSeat}
+          >
+            Book a seat
+          </button>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Conditional text + class from expressions'} :lead=${'trendLabel is a ternary inside derive(); the badge classes come from inline expressions, not bare signals.'} :code=${trendCode}>
+        <div class="stack">
+          <p class="metric">${price}</p>
+          <div class="row">
+            <span class="badge" class-badge-danger=${() => price() > previous()} class-badge-warn=${() => price() < previous()}>${trendLabel}</span>
+            <button type="button" class="btn btn-outline" on-click=${() => nudge(-1.5)}>−1.5</button>
+            <button type="button" class="btn" on-click=${() => nudge(1.5)}>+1.5</button>
+          </div>
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>

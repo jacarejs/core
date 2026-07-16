@@ -1,0 +1,33 @@
+import { appHref } from '../app-base.js'
+import { route } from '../nav.js'
+import Tip from '../components/Tip.jcr'
+import Badge from '../components/Badge.jcr'
+
+const pathLabel = route.path
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">Param route</p>
+      <h1 class="page-title">Topic: ${slug}</h1>
+      <p class="page-lead">Mounted from /topic/:slug — the slug segment is passed as a mount prop. No manual URL parsing.</p>
+    </header>
+
+    <Tip :text=${'createNav merges ctx.params and ctx.search into the props object passed to mount() — every :name segment becomes a same-named prop on the screen.'} />
+
+    <div class="nav-summary">
+      <Badge :text=${slug} />
+      <div class="nav-live">
+        <div class="nav-live-row"><span>prop slug</span><code>${slug}</code></div>
+        <div class="nav-live-row"><span>route.path()</span><code>${pathLabel}</code></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <a class="btn" jacare-go="/nav" href=${appHref('/nav')}>← Back to Navigation</a>
+      <a class="btn btn-outline" jacare-go="/topic/alpha" href=${appHref('/topic/alpha')}>alpha</a>
+      <a class="btn btn-outline" jacare-go="/topic/beta" href=${appHref('/topic/beta')}>beta</a>
+      <a class="btn btn-outline" jacare-go="/topic/gamma" href=${appHref('/topic/gamma')}>gamma</a>
+    </div>
+  </section>
+</view>

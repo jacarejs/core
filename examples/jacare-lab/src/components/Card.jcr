@@ -1,0 +1,22 @@
+export <contract>
+  props: {
+    title: { type: 'string', required: true }
+    subtitle: { type: 'string', default: '' }
+  }
+  slots: ['default', 'actions']
+</contract>
+
+export <view>
+  <section class="card">
+    <h4 class="card-title">${title}</h4>
+    #if subtitle
+      <p class="card-sub">${subtitle}</p>
+    #end
+    <div>
+      <slot />
+    </div>
+    <div class="row">
+      <slot name="actions" />
+    </div>
+  </section>
+</view>

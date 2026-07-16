@@ -132,7 +132,7 @@ Jacaré asks a different question: **why re-render anything when only one text n
 | DevTools | `@jacare/devtools` | Pulse Graph — visualize signal dependencies live |
 | Scaffolding | `create-jacare` | `npm create jacare@latest` |
 
-Live demos: [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/)
+Live demos: [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [Lab](https://jacarejs.github.io/core/lab/)
 
 Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Cookbook](docs/api.md#13b-cookbook--if--for--events--props--lifecycle)
 
@@ -548,6 +548,7 @@ See also: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare
 | **Todo app** | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
 | **Showcase** | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | CPW, `style---`, components, slots, cart |
 | **Scale BMI** | [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/) | Live BMI gauge, metric/imperial, reactive CSS |
+| **Lab** | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) | Full API tutorial with live demos + View code modals |
 
 Run locally:
 
@@ -555,6 +556,7 @@ Run locally:
 yarn showcase:dev   # http://localhost:3001
 yarn example:dev    # jacare-todo — http://localhost:3000
 yarn bmi:dev        # Scale BMI — http://localhost:3002
+yarn lab:dev        # Jacaré Lab — http://localhost:3003
 ```
 
 ---

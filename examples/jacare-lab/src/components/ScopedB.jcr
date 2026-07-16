@@ -1,0 +1,9 @@
+export <view>
+  <div class="scope-b-box box">Scoped B · same class, different color</div>
+</view>
+
+export <style>
+.box {
+  font-style: italic;
+}
+</style>

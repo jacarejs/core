@@ -101,6 +101,8 @@ yarn bench          # CPW vs runtime microbenchmarks
 yarn typecheck      # TypeScript check
 yarn example:build  # build jacare-todo example
 yarn showcase:build # build jacare-showcase example
+yarn lab:dev        # interactive API tutorial (jacare-lab)
+yarn lab:build      # build jacare-lab
 jacare check        # compile all .jcr files (from app root)
 ```
 

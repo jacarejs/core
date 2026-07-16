@@ -95,6 +95,10 @@ function syncNpmVersion(version) {
   const bmiPkg = readJson(join(ROOT, 'examples/jacare-bmi/package.json'))
   setDependencyVersions(bmiPkg, version)
   writeJson(join(ROOT, 'examples/jacare-bmi/package.json'), bmiPkg)
+
+  const labPkg = readJson(join(ROOT, 'examples/jacare-lab/package.json'))
+  setDependencyVersions(labPkg, version)
+  writeJson(join(ROOT, 'examples/jacare-lab/package.json'), labPkg)
 }
 
 function syncVscodeVersion(version) {

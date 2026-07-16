@@ -1,0 +1,13 @@
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+    value: { type: 'string', model: true }
+  }
+</contract>
+
+export <view>
+  <label class="field">
+    <span class="field-label">${label}</span>
+    <input class="input" bind-value=${value} />
+  </label>
+</view>

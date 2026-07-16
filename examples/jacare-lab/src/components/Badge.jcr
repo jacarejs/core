@@ -1,0 +1,12 @@
+export <contract>
+  props: {
+    text: { type: 'string', required: true }
+    tone: { type: 'string', default: 'default' }
+  }
+</contract>
+
+export <view>
+  <span class="badge" class-badge-warn=${() => tone === 'warn'} class-badge-danger=${() => tone === 'danger'}>
+    ${text}
+  </span>
+</view>

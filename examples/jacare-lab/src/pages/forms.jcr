@@ -1,0 +1,194 @@
+import { createForm, pulse } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import Field from '../components/Field.jcr'
+import { viewSnippet } from '../utils/snippet.js'
+
+const form = createForm({
+  name: {
+    value: '',
+    validate: (value) => (value.trim().length < 2 ? 'Name is too short' : undefined),
+  },
+  email: {
+    value: '',
+    validate: (value) => (value.includes('@') ? undefined : 'Enter a valid email'),
+  },
+})
+
+const newsletter = pulse(false)
+const submittedValues = pulse(null)
+
+const onSubmit = form.handleSubmit((values) => {
+  submittedValues.set({ name: values.name, email: values.email, newsletter: newsletter() })
+})
+
+function resetForm() {
+  form.reset()
+  newsletter.set(false)
+  submittedValues.set(null)
+}
+
+const formCode = viewSnippet(
+  `const form = createForm({
+  name: {
+    value: '',
+    validate: (value) => (value.trim().length < 2 ? 'Name is too short' : undefined),
+  },
+  email: {
+    value: '',
+    validate: (value) => (value.includes('@') ? undefined : 'Enter a valid email'),
+  },
+})
+
+// checkboxes need bind-checked on a real pulse, so newsletter lives beside the form
+const newsletter = pulse(false)
+const submittedValues = pulse(null)
+
+const onSubmit = form.handleSubmit((values) => {
+  submittedValues.set({ name: values.name, email: values.email, newsletter: newsletter() })
+})
+
+function resetForm() {
+  form.reset()
+  newsletter.set(false)
+  submittedValues.set(null)
+}`,
+  `  <form class="stack" on-submit=\${onSubmit}>
+    <Field :label=\${'Name'} :field=\${form.fields.name} :type=\${'text'} :placeholder=\${'Ada Lovelace'} />
+    <Field :label=\${'Email'} :field=\${form.fields.email} :type=\${'email'} :placeholder=\${'you@jacare.dev'} />
+    <label class="row"><input type="checkbox" bind-checked=\${newsletter} /> Subscribe to the newsletter</label>
+    <div class="row">
+      <button type="submit" class="btn">Submit</button>
+      <button type="button" class="btn btn-outline" on-click=\${resetForm}>Reset</button>
+    </div>
+  </form>
+
+  <p class="muted">valid: \${form.valid() ? 'yes' : 'no'} · dirty: \${form.dirty() ? 'yes' : 'no'}</p>
+  #if submittedValues()
+    <p class="muted">Submitted: \${JSON.stringify(submittedValues())}</p>
+  #else
+    <p class="muted">Nothing submitted yet.</p>
+  #end`,
+)
+
+const touchedDirtyCode = viewSnippet(
+  `// reuses the exact same form declared for the schema demo above
+form.fields.name.touched() // true only after the field has been blurred
+form.fields.name.dirty()   // true once the value differs from its initial value`,
+  `  <div class="row">
+    <span class="badge" class-badge-warn=\${form.fields.name.touched()}>name touched: \${form.fields.name.touched() ? 'yes' : 'no'}</span>
+    <span class="badge" class-badge-warn=\${form.fields.name.dirty()}>name dirty: \${form.fields.name.dirty() ? 'yes' : 'no'}</span>
+    <span class="badge" class-badge-warn=\${form.fields.email.touched()}>email touched: \${form.fields.email.touched() ? 'yes' : 'no'}</span>
+  </div>
+  <p class="muted">Focus and blur the fields in the schema demo above — these flip in real time.</p>`,
+)
+
+const password = pulse('')
+const confirmForm = createForm({
+  confirm: {
+    value: '',
+    validate: (value) => (value.length > 0 && value !== password() ? 'Passwords do not match' : undefined),
+  },
+})
+
+const confirmCode = viewSnippet(
+  `const password = pulse('')
+const confirmForm = createForm({
+  confirm: {
+    value: '',
+    validate: (value) => (value.length > 0 && value !== password() ? 'Passwords do not match' : undefined),
+  },
+})`,
+  `  <div class="stack">
+    <label class="field">
+      <span class="field-label">Password</span>
+      <input class="input" type="password" bind-value=\${password} />
+    </label>
+    <Field :label=\${'Confirm password'} :field=\${confirmForm.fields.confirm} :type=\${'password'} :placeholder=\${'Repeat password'} />
+  </div>`,
+)
+
+const signupForm = createForm({
+  username: {
+    value: '',
+    validate: [
+      (value) => (value.trim().length < 3 ? 'At least 3 characters' : undefined),
+      (value) => (/\s/.test(value) ? 'No spaces allowed' : undefined),
+    ],
+  },
+})
+
+const multiValidatorCode = viewSnippet(
+  `const signupForm = createForm({
+  username: {
+    value: '',
+    validate: [
+      (value) => (value.trim().length < 3 ? 'At least 3 characters' : undefined),
+      (value) => (/\\s/.test(value) ? 'No spaces allowed' : undefined),
+    ],
+  },
+})`,
+  `  <Field :label=\${'Username'} :field=\${signupForm.fields.username} :type=\${'text'} :placeholder=\${'jacare_dev'} />`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §12</p>
+      <h1 class="page-title">Forms</h1>
+      <p class="page-lead">createForm builds signal-backed fields with validation, dirty tracking, and a ready-to-wire submit handler.</p>
+    </header>
+
+    <Tip :text=${"Field.jcr binds bind-value internally through a bare component prop, so it works great with form.fields.*. Native checkboxes need bind-checked on a real top-level pulse -- that is why newsletter lives beside the form instead of inside its schema."} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Schema + validation'} :lead=${'Each field tracks its own value, error, touched, and dirty state.'} :code=${formCode}>
+        <form class="stack" on-submit=${onSubmit}>
+          <Field :label=${'Name'} :field=${form.fields.name} :type=${'text'} :placeholder=${'Ada Lovelace'} />
+          <Field :label=${'Email'} :field=${form.fields.email} :type=${'email'} :placeholder=${'you@jacare.dev'} />
+          <label class="row"><input type="checkbox" bind-checked=${newsletter} /> Subscribe to the newsletter</label>
+          <div class="row">
+            <button type="submit" class="btn">Submit</button>
+            <button type="button" class="btn btn-outline" on-click=${resetForm}>Reset</button>
+          </div>
+        </form>
+      </Demo>
+
+      <Demo :title=${'Submit handler + form state'} :lead=${'handleSubmit blurs every field, validates, and only calls your callback when the form is valid.'} :code=${formCode}>
+        <div class="stack">
+          <p class="muted">valid: ${form.valid() ? 'yes' : 'no'} · dirty: ${form.dirty() ? 'yes' : 'no'}</p>
+          #if submittedValues()
+            <p class="muted">Submitted: ${JSON.stringify(submittedValues())}</p>
+          #else
+            <p class="muted">Nothing submitted yet.</p>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Field state: touched + dirty'} :lead=${'Every field exposes its own touched and dirty signals, independent of form.valid and form.dirty.'} :code=${touchedDirtyCode}>
+        <div class="stack">
+          <div class="row">
+            <span class="badge" class-badge-warn=${form.fields.name.touched()}>name touched: ${form.fields.name.touched() ? 'yes' : 'no'}</span>
+            <span class="badge" class-badge-warn=${form.fields.name.dirty()}>name dirty: ${form.fields.name.dirty() ? 'yes' : 'no'}</span>
+            <span class="badge" class-badge-warn=${form.fields.email.touched()}>email touched: ${form.fields.email.touched() ? 'yes' : 'no'}</span>
+          </div>
+          <p class="muted">Focus and blur the fields in the schema demo above — these flip in real time.</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Custom validator reading another field'} :lead=${'The validate function closes over the password pulse and reruns whenever either value changes.'} :code=${confirmCode}>
+        <div class="stack">
+          <label class="field">
+            <span class="field-label">Password</span>
+            <input class="input" type="password" bind-value=${password} />
+          </label>
+          <Field :label=${'Confirm password'} :field=${confirmForm.fields.confirm} :type=${'password'} :placeholder=${'Repeat password'} />
+        </div>
+      </Demo>
+
+      <Demo :title=${'Multiple validators on one field'} :lead=${'validate accepts an array — the first validator to return a message wins.'} :code=${multiValidatorCode}>
+        <Field :label=${'Username'} :field=${signupForm.fields.username} :type=${'text'} :placeholder=${'jacare_dev'} />
+      </Demo>
+    </div>
+  </section>
+</view>

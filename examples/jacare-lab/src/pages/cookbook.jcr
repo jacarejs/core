@@ -1,0 +1,212 @@
+import { pulse, derive } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import Badge from '../components/Badge.jcr'
+import IconButton from '../components/IconButton.jcr'
+import { viewSnippet } from '../utils/snippet.js'
+
+const draft = pulse('')
+const nextId = pulse(3)
+const tasks = pulse([
+  { id: '1', label: 'Read the API docs', done: true },
+  { id: '2', label: 'Build a lesson page', done: false },
+])
+
+const remaining = derive(() => tasks().filter((task) => !task.done).length)
+const remainingLabel = derive(() => remaining() + ' left')
+const isEmpty = derive(() => tasks().length === 0)
+
+function addTask() {
+  const label = draft().trim()
+  if (!label) return
+  const id = String(nextId())
+  nextId.update((n) => n + 1)
+  tasks.update((list) => [...list, { id, label, done: false }])
+  draft.set('')
+}
+
+function toggleTask(id) {
+  tasks.update((list) => list.map((task) => (task.id === id ? { ...task, done: !task.done } : task)))
+}
+
+function removeTask(id) {
+  tasks.update((list) => list.filter((task) => task.id !== id))
+}
+
+function onDraftKeydown(event) {
+  if (event.key === 'Enter') addTask()
+}
+
+const cookbookCode = viewSnippet(
+  `const draft = pulse('')
+const nextId = pulse(3)
+const tasks = pulse([
+  { id: '1', label: 'Read the API docs', done: true },
+  { id: '2', label: 'Build a lesson page', done: false },
+])
+
+const remaining = derive(() => tasks().filter((task) => !task.done).length)
+const remainingLabel = derive(() => remaining() + ' left')
+const isEmpty = derive(() => tasks().length === 0)
+
+function addTask() {
+  const label = draft().trim()
+  if (!label) return
+  const id = String(nextId())
+  nextId.update((n) => n + 1)
+  tasks.update((list) => [...list, { id, label, done: false }])
+  draft.set('')
+}
+
+function toggleTask(id) {
+  tasks.update((list) => list.map((task) => (task.id === id ? { ...task, done: !task.done } : task)))
+}
+
+function removeTask(id) {
+  tasks.update((list) => list.filter((task) => task.id !== id))
+}
+
+function onDraftKeydown(event) {
+  if (event.key === 'Enter') addTask()
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <Badge :text=\${remainingLabel} />
+      <span class="muted">\${tasks().length} total</span>
+    </div>
+
+    <div class="row">
+      <input bind-value=\${draft} placeholder="What needs to be done?" on-keydown=\${onDraftKeydown} />
+      <button class="btn" on-click=\${addTask}>Add</button>
+    </div>
+
+    #if isEmpty()
+      <p class="muted">No tasks yet — add one above.</p>
+    #else
+      <ul class="list">
+        #for tasks() as task (task.id)
+          <li class="list-item" class-done=\${task.done}>
+            <span class="item-label" on-click=\${() => toggleTask(task.id)}>\${task.label}</span>
+            <IconButton :label=\${'Delete'} on-press=\${() => removeTask(task.id)} />
+          </li>
+        #end
+      </ul>
+    #end
+  </div>`,
+)
+
+const contactQuery = pulse('')
+const contactBook = [
+  { id: 'a', name: 'Ada Lovelace', role: 'Engineer' },
+  { id: 'b', name: 'Grace Hopper', role: 'Engineer' },
+  { id: 'c', name: 'Alan Turing', role: 'Mathematician' },
+  { id: 'd', name: 'Katherine Johnson', role: 'Mathematician' },
+]
+
+const matches = derive(() => {
+  const q = contactQuery().trim().toLowerCase()
+  if (!q) return contactBook
+  return contactBook.filter(
+    (person) => person.name.toLowerCase().includes(q) || person.role.toLowerCase().includes(q),
+  )
+})
+const matchLabel = derive(() => matches().length + ' match' + (matches().length === 1 ? '' : 'es'))
+
+const searchCode = viewSnippet(
+  `const contactQuery = pulse('')
+const contactBook = [
+  { id: 'a', name: 'Ada Lovelace', role: 'Engineer' },
+  { id: 'b', name: 'Grace Hopper', role: 'Engineer' },
+  { id: 'c', name: 'Alan Turing', role: 'Mathematician' },
+  { id: 'd', name: 'Katherine Johnson', role: 'Mathematician' },
+]
+
+const matches = derive(() => {
+  const q = contactQuery().trim().toLowerCase()
+  if (!q) return contactBook
+  return contactBook.filter(
+    (person) => person.name.toLowerCase().includes(q) || person.role.toLowerCase().includes(q),
+  )
+})
+const matchLabel = derive(() => matches().length + ' match' + (matches().length === 1 ? '' : 'es'))`,
+  `  <div class="stack">
+    <div class="row">
+      <input class="input" bind-value=\${contactQuery} placeholder="Search name or role" />
+      <Badge :text=\${matchLabel} />
+    </div>
+    #if matches().length === 0
+      <p class="muted">Nobody matches that search.</p>
+    #else
+      <ul class="list">
+        #for matches() as person (person.id)
+          <li class="list-item">
+            <span class="item-label">\${person.name}</span>
+            <span class="muted">\${person.role}</span>
+          </li>
+        #end
+      </ul>
+    #end
+  </div>`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §13b</p>
+      <h1 class="page-title">Cookbook</h1>
+      <p class="page-lead">One screen combining conditionals, loops, events, immutable updates, and two shared components.</p>
+    </header>
+
+    <Tip :text=${'This is the same shape as any real screen: pulses for state, plain functions for actions, and a template that reads them back.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Task list'} :lead=${'Add, toggle, and remove tasks with immutable updates so the list can reconcile efficiently.'} :code=${cookbookCode}>
+        <div class="stack">
+          <div class="row">
+            <Badge :text=${remainingLabel} />
+            <span class="muted">${tasks().length} total</span>
+          </div>
+
+          <div class="row">
+            <input class="input" bind-value=${draft} placeholder="What needs to be done?" on-keydown=${onDraftKeydown} />
+            <button type="button" class="btn" on-click=${addTask}>Add</button>
+          </div>
+
+          #if isEmpty()
+            <p class="muted">No tasks yet — add one above.</p>
+          #else
+            <ul class="list">
+              #for tasks() as task (task.id)
+                <li class="list-item" class-done=${task.done}>
+                  <span class="item-label" on-click=${() => toggleTask(task.id)}>${task.label}</span>
+                  <IconButton :label=${'Delete'} on-press=${() => removeTask(task.id)} />
+                </li>
+              #end
+            </ul>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Search + filter'} :lead=${'A single derive() drives the badge count, the empty state, and the filtered list together.'} :code=${searchCode}>
+        <div class="stack">
+          <div class="row">
+            <input class="input" bind-value=${contactQuery} placeholder="Search name or role" />
+            <Badge :text=${matchLabel} />
+          </div>
+          #if matches().length === 0
+            <p class="muted">Nobody matches that search.</p>
+          #else
+            <ul class="list">
+              #for matches() as person (person.id)
+                <li class="list-item">
+                  <span class="item-label">${person.name}</span>
+                  <span class="muted">${person.role}</span>
+                </li>
+              #end
+            </ul>
+          #end
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>

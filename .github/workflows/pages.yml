@@ -53,18 +53,26 @@ jobs:
           JACARE_BASE: /core/bmi/
         run: yarn build
 
+      - name: Build Lab demo
+        working-directory: examples/jacare-lab
+        env:
+          JACARE_BASE: /core/lab/
+        run: yarn build
+
       - name: Prepare Pages site
         run: |
-          mkdir -p site/todo site/showcase site/bmi
+          mkdir -p site/todo site/showcase site/bmi site/lab
           cp scripts/gh-pages-index.html site/index.html
           cp -r examples/jacare-todo/dist/. site/todo/
           cp -r examples/jacare-showcase/dist/. site/showcase/
           cp -r examples/jacare-bmi/dist/. site/bmi/
+          cp -r examples/jacare-lab/dist/. site/lab/
           cp scripts/gh-pages-404.html site/404.html
           cp scripts/gh-pages-404.html site/todo/404.html
           cp scripts/gh-pages-404.html site/showcase/404.html
           cp scripts/gh-pages-404.html site/bmi/404.html
-          touch site/.nojekyll site/todo/.nojekyll site/showcase/.nojekyll site/bmi/.nojekyll
+          cp scripts/gh-pages-404.html site/lab/404.html
+          touch site/.nojekyll site/todo/.nojekyll site/showcase/.nojekyll site/bmi/.nojekyll site/lab/.nojekyll
 
       - name: Verify Pages artifact
         run: |
@@ -73,6 +81,7 @@ jobs:
           test -f site/showcase/index.html
           test -f site/todo/index.html
           test -f site/bmi/index.html
+          test -f site/lab/index.html
           echo "Pages artifact:"
           find site -maxdepth 2 -type f | sort
 

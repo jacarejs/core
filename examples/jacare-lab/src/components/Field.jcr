@@ -1,0 +1,25 @@
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+    field: { type: 'any', required: true }
+    type: { type: 'string', default: 'text' }
+    placeholder: { type: 'string', default: '' }
+  }
+</contract>
+
+export <view>
+  <label class="field">
+    <span class="field-label">${label}</span>
+    <input
+      class="input field-input"
+      class-invalid=${() => !!field.error()}
+      type=${type}
+      placeholder=${placeholder}
+      bind-value=${field}
+      on-blur=${() => field.blur()}
+    />
+    #if field.error()
+      <span class="field-error">${field.error()}</span>
+    #end
+  </label>
+</view>

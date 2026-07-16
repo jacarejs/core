@@ -1,0 +1,169 @@
+import { pulse, derive } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import { viewSnippet } from '../utils/snippet.js'
+
+const mirrorCount = pulse(0)
+
+function bumpMirror() {
+  mirrorCount.update((n) => n + 1)
+}
+
+const hydrated = pulse(false)
+const postHydrateClicks = pulse(0)
+const hydrationStatus = derive(() =>
+  hydrated() ? 'Hydrated — listeners attached' : 'Server HTML only — no listeners yet',
+)
+
+function simulateResume() {
+  hydrated.set(true)
+}
+
+function onHydratedClick() {
+  if (!hydrated()) return
+  postHydrateClicks.update((n) => n + 1)
+}
+
+const renderCode = viewSnippet(
+  `import { pulse } from '@jacare/core'
+
+const count = pulse(0)
+
+function bump() {
+  count.update((n) => n + 1)
+}
+
+// server
+// import { render } from './Counter.jcr'
+// const { html, state } = render({ count: 0 })
+// html  -> escaped markup
+// state -> bindings needed to resume on the client`,
+  `  <div class="stack">
+    <span class="metric">\${count}</span>
+    <button type="button" class="btn" on-click=\${bump}>Bump</button>
+  </div>`,
+)
+
+const resumeMentalModelCode = viewSnippet(
+  `const hydrated = pulse(false)
+const postHydrateClicks = pulse(0)
+const hydrationStatus = derive(() =>
+  hydrated() ? 'Hydrated — listeners attached' : 'Server HTML only — no listeners yet',
+)
+
+function simulateResume() {
+  hydrated.set(true)
+}
+
+function onHydratedClick() {
+  if (!hydrated()) return
+  postHydrateClicks.update((n) => n + 1)
+}`,
+  `  <div class="stack">
+    <p class="muted">\${hydrationStatus}</p>
+    <div class="row">
+      <button type="button" class="btn" disabled=\${() => !hydrated()} on-click=\${onHydratedClick}>
+        Click me (needs resume())
+      </button>
+      <button type="button" class="btn btn-outline" on-click=\${simulateResume}>Simulate resume()</button>
+    </div>
+    <p class="muted">Clicks after hydration: \${postHydrateClicks}</p>
+  </div>`,
+)
+
+const resumeCode = viewSnippet(
+  `import { pulse } from '@jacare/core'
+
+const count = pulse(0)
+
+// client — after the SSR HTML is already in the DOM
+// import { resume } from './Counter.jcr'
+// resume(document.getElementById('app'), state, props)
+// resume() re-attaches signal subscriptions without recreating DOM nodes`,
+  `  <div class="stack">
+    <span class="metric">\${count}</span>
+    <button type="button" class="btn" on-click=\${() => count.update((n) => n + 1)}>+1</button>
+  </div>`,
+)
+
+const renderToStringCode = viewSnippet(
+  `import { pulse } from '@jacare/core'
+
+const title = pulse('Jacaré')
+
+// server handler
+// import { renderToString } from '@jacare/core'
+// import { render } from './Page.jcr'
+// const html = renderToString(render, { title: 'Jacaré' })
+// res.send('<div id="app">' + html + '</div>')`,
+  `  <section class="page">
+    <h1>\${title}</h1>
+    <p class="muted">Same source for server HTML and client mount.</p>
+  </section>`,
+)
+
+const renderToStreamCode = viewSnippet(
+  `import { pulse } from '@jacare/core'
+
+const items = pulse(['Compile', 'Render', 'Resume'])
+
+// server handler
+// import { renderToStream } from '@jacare/core'
+// import { render } from './Page.jcr'
+// for await (const chunk of renderToStream(render, props)) {
+//   res.write(chunk)
+// }
+// res.end()`,
+  `  <ul class="list">
+    #for items() as item (item)
+      <li class="list-item"><span class="item-label">\${item}</span></li>
+    #end
+  </ul>`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §14</p>
+      <h1 class="page-title">SSR and hydration</h1>
+      <p class="page-lead">Every .jcr file compiles to three exports — mount, render, and resume — so the same source runs on the server and the client.</p>
+    </header>
+
+    <Tip :text=${'This lab is served client-only, so the SSR cards below are reference demos with a live mental model — the View code always shows the full module including the view block.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'render(props): server HTML + state'} :lead=${'render() never touches the DOM — it returns escaped HTML plus a small state object describing each dynamic binding.'} :code=${renderCode}>
+        <div class="stack">
+          <span class="metric">${mirrorCount}</span>
+          <button type="button" class="btn" on-click=${bumpMirror}>Bump (client-only mirror)</button>
+          <p class="muted">On the server this button does not exist yet — render() only produces the initial HTML for this counter's starting value.</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'The resume() mental model'} :lead=${'Before resume(), the button looks real but has no listener. Simulate resume() to attach it — no DOM is recreated.'} :code=${resumeMentalModelCode}>
+        <div class="stack">
+          <p class="muted">${hydrationStatus}</p>
+          <div class="row">
+            <button type="button" class="btn" disabled=${() => !hydrated()} on-click=${onHydratedClick}>
+              Click me (needs resume())
+            </button>
+            <button type="button" class="btn btn-outline" on-click=${simulateResume}>Simulate resume()</button>
+          </div>
+          <p class="muted">Clicks after hydration: ${postHydrateClicks}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'resume(target, state, props)'} :lead=${'resume() walks state.bindings and re-attaches signal subscriptions to the existing server-rendered nodes.'} :code=${resumeCode}>
+        <p class="muted">Hydration keeps the server HTML in place — only listeners and bindings are wired up on the client.</p>
+      </Demo>
+
+      <Demo :title=${'renderToString: one HTML string'} :lead=${'A thin wrapper around render() for handlers that just need a string to send.'} :code=${renderToStringCode}>
+        <p class="muted">Useful for classic request/response servers that buffer the full page before writing.</p>
+      </Demo>
+
+      <Demo :title=${'renderToStream: chunked HTML'} :lead=${'Splits the rendered markup into top-level chunks so a server can start flushing early.'} :code=${renderToStreamCode}>
+        <p class="muted">Same .jcr source — only the delivery strategy changes on the server.</p>
+      </Demo>
+    </div>
+  </section>
+</view>

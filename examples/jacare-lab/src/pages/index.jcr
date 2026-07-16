@@ -1,0 +1,146 @@
+import { pulse, derive } from '@jacare/core'
+import { appHref, assetUrl } from '../app-base.js'
+import { LESSONS } from '../topics.js'
+import Demo from '../components/Demo.jcr'
+import Tip from '../components/Tip.jcr'
+import { viewSnippet } from '../utils/snippet.js'
+
+const quickCount = pulse(0)
+
+function increment() {
+  quickCount.update((n) => n + 1)
+}
+
+const quickStartCode = viewSnippet(
+  `import { pulse } from '@jacare/core'
+
+const count = pulse(0)
+
+function increment() {
+  count.update((n) => n + 1)
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <span class="metric">\${count}</span>
+      <button type="button" class="btn" on-click=\${increment}>+1</button>
+    </div>
+    <p class="muted">This is the whole counter shown in the code panel — no extra wiring.</p>
+  </div>`,
+)
+
+const bootCode = `import './app.css'
+import { nav } from './nav.js'
+
+const root = document.getElementById('app')
+let dispose = nav.attach(root)
+
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    dispose?.()
+    dispose = nav.attach(root)
+  })
+}`
+
+const learnerName = pulse('friend')
+const greeting = derive(() => 'Hello, ' + learnerName() + '!')
+
+const greetingCode = viewSnippet(
+  `const learnerName = pulse('friend')
+const greeting = derive(() => 'Hello, ' + learnerName() + '!')`,
+  `  <div class="stack">
+    <input class="input" bind-value=\${learnerName} placeholder="Your name" />
+    <p class="metric">\${greeting}</p>
+  </div>`,
+)
+
+const highlighted = pulse(false)
+
+function toggleHighlight() {
+  highlighted.update((on) => !on)
+}
+
+const highlightCode = viewSnippet(
+  `const highlighted = pulse(false)
+
+function toggleHighlight() {
+  highlighted.update((on) => !on)
+}`,
+  `  <div class="row">
+    <span class="badge" class-badge-warn=\${highlighted}>Lesson preview</span>
+    <button type="button" class="btn btn-outline" on-click=\${toggleHighlight}>Toggle class</button>
+  </div>`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <img class="lab-logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
+      <h1 class="page-title lab-brand">Jacaré Lab</h1>
+      <p class="page-lead">A complete, live tour of the API — every lesson pairs a short explanation with a running demo. Open <strong>View code</strong> to see the source.</p>
+    </header>
+
+    <Tip :text=${'Every Demo card below has a "View code" button in its header — it opens the exact source for that example in a modal.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Quick start'} :lead=${'A pulse, a button, one line of reactive text — the smallest possible Jacaré app.'} :code=${quickStartCode}>
+        <div class="stack">
+          <div class="row">
+            <span class="metric">${quickCount}</span>
+            <button type="button" class="btn" on-click=${increment}>+1</button>
+          </div>
+          <p class="muted">This is the whole counter shown in the code panel — no extra wiring.</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'App boot pattern'} :lead=${'How boot.js wires app.css, the nav, and hot reload together in this lab.'} :code=${bootCode}>
+        <div class="stack">
+          <p class="muted">Jacaré Lab boots through <code>nav.attach(root)</code> — the same pattern every navigation lesson builds on.</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'A signal and a derive, together'} :lead=${'Every lesson in this lab is a variation on these two calls.'} :code=${greetingCode}>
+        <div class="stack">
+          <input class="input" bind-value=${learnerName} placeholder="Your name" />
+          <p class="metric">${greeting}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'A class toggled from a signal'} :lead=${'The bindings and CSS lessons build entirely on this one idea.'} :code=${highlightCode}>
+        <div class="row">
+          <span class="badge" class-badge-warn=${highlighted}>Lesson preview</span>
+          <button type="button" class="btn btn-outline" on-click=${toggleHighlight}>Toggle class</button>
+        </div>
+      </Demo>
+    </div>
+
+    <div class="home-grid">
+      #for LESSONS as lesson (lesson.path)
+        <a class="home-card" jacare-go=${lesson.path} href=${appHref(lesson.path)}>
+          <strong>${lesson.title}</strong>
+          <span>${lesson.blurb}</span>
+        </a>
+      #end
+    </div>
+  </section>
+</view>
+
+export <style>
+.page-hero {
+  justify-items: start;
+  text-align: left;
+}
+.lab-logo {
+  width: min(8.5rem, 36vw);
+  height: auto;
+  filter: drop-shadow(0 16px 28px rgba(6, 26, 20, 0.18));
+  animation: lab-breathe 4.5s ease-in-out infinite;
+}
+.lab-brand {
+  font-size: clamp(2.4rem, 7vw, 3.4rem);
+  letter-spacing: -0.04em;
+}
+@keyframes lab-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+</style>

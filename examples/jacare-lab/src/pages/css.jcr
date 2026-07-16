@@ -1,0 +1,163 @@
+import { pulse } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import ScopedA from '../components/ScopedA.jcr'
+import ScopedB from '../components/ScopedB.jcr'
+import { moduleSnippet, viewSnippet } from '../utils/snippet.js'
+
+const scopedCode = moduleSnippet(
+  `// ScopedA.jcr`,
+  viewSnippet(
+    '',
+    `  <div class="scope-a-box box">Scoped A · shared class name "box"</div>`,
+    `.box {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}`,
+  ),
+  `// ScopedB.jcr`,
+  viewSnippet(
+    '',
+    `  <div class="scope-b-box box">Scoped B · same class, different color</div>`,
+    `.box {
+  font-style: italic;
+}`,
+  ),
+)
+
+const outlineOn = pulse(true)
+
+function toggleOutline() {
+  outlineOn.update((on) => !on)
+}
+
+const globalCode = viewSnippet(
+  `const outlineOn = pulse(true)
+
+function toggleOutline() {
+  outlineOn.update((on) => !on)
+}`,
+  `  <div class="stack">
+    <div class="row" class-shared-outline=\${outlineOn}>
+      <ScopedA />
+      <ScopedB />
+    </div>
+    <button type="button" class="btn btn-outline" on-click=\${toggleOutline}>Toggle outline</button>
+  </div>`,
+  `:global(.shared-outline) {
+  outline: 2px dashed color-mix(in srgb, var(--leaf) 45%, transparent);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+}`,
+)
+
+const spotlightOn = pulse(false)
+
+function toggleSpotlight() {
+  spotlightOn.update((on) => !on)
+}
+
+const spotlightCode = viewSnippet(
+  `const spotlightOn = pulse(false)
+
+function toggleSpotlight() {
+  spotlightOn.update((on) => !on)
+}`,
+  `  <div class="stack">
+    <div class="card" class-spotlight=\${spotlightOn}>
+      <p class="muted">The spotlight class only exists in this file's own scoped style block.</p>
+    </div>
+    <button type="button" class="btn btn-outline" on-click=\${toggleSpotlight}>Toggle spotlight</button>
+  </div>`,
+  `.spotlight {
+  background: linear-gradient(135deg, rgba(143, 209, 42, 0.32), rgba(31, 143, 78, 0.16));
+  box-shadow: 0 0 0 2px var(--leaf) inset;
+}`,
+)
+
+const accentHue = pulse(140)
+
+const hueChipCode = viewSnippet(
+  `const accentHue = pulse(140)`,
+  `  <div class="stack">
+    <div class="hue-chip" style---hue=\${accentHue}></div>
+    <input class="input" type="range" min="0" max="360" bind-value=\${accentHue} />
+  </div>`,
+  `.hue-chip {
+  --hue: 140;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--line);
+  background: hsl(var(--hue) 70% 55%);
+}`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §10</p>
+      <h1 class="page-title">Scoped CSS</h1>
+      <p class="page-lead">Every style block is scoped to its own file with a data-jacare-s attribute — the same class name in two files never collides.</p>
+    </header>
+
+    <Tip :text=${'Use :global(.selector) inside a style block to opt a rule out of scoping — handy for shared utility classes like the outline demo below.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Same class name, two components'} :lead=${'ScopedA and ScopedB both use class="box" — their styles never leak into each other.'} :code=${scopedCode}>
+        <div class="row">
+          <ScopedA />
+          <ScopedB />
+        </div>
+      </Demo>
+
+      <Demo :title=${'Global opt-out'} :lead=${'This page declares a global .shared-outline rule and toggles it on the row above.'} :code=${globalCode}>
+        <div class="stack">
+          <div class="row" class-shared-outline=${outlineOn}>
+            <ScopedA />
+            <ScopedB />
+          </div>
+          <button type="button" class="btn btn-outline" on-click=${toggleOutline}>Toggle outline</button>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Toggle a locally scoped class'} :lead=${'.spotlight is a normal (non-global) rule in this file — toggling it works exactly like any other class-* binding.'} :code=${spotlightCode}>
+        <div class="stack">
+          <div class="card" class-spotlight=${spotlightOn}>
+            <p class="muted">The spotlight class only exists in this file's own scoped style block.</p>
+          </div>
+          <button type="button" class="btn btn-outline" on-click=${toggleSpotlight}>Toggle spotlight</button>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Scoped style, reactive CSS variable'} :lead=${'hue-chip is scoped to this file; style---hue still binds a signal straight to its --hue custom property.'} :code=${hueChipCode}>
+        <div class="stack">
+          <div class="hue-chip" style---hue=${accentHue}></div>
+          <input class="input" type="range" min="0" max="360" bind-value=${accentHue} />
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>
+
+export <style>
+:global(.shared-outline) {
+  outline: 2px dashed color-mix(in srgb, var(--leaf) 45%, transparent);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+}
+
+.spotlight {
+  background: linear-gradient(135deg, rgba(143, 209, 42, 0.32), rgba(31, 143, 78, 0.16));
+  box-shadow: 0 0 0 2px var(--leaf) inset;
+}
+
+.hue-chip {
+  --hue: 140;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--line);
+  background: hsl(var(--hue) 70% 55%);
+}
+</style>

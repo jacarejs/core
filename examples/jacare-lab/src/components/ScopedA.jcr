@@ -1,0 +1,10 @@
+export <view>
+  <div class="scope-a-box box">Scoped A · shared class name "box"</div>
+</view>
+
+export <style>
+.box {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+</style>

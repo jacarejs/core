@@ -25,6 +25,8 @@
     "showcase:build": "yarn workspace jacare-showcase build",
     "bmi:dev": "yarn workspace jacare-bmi dev",
     "bmi:build": "yarn workspace jacare-bmi build",
+    "lab:dev": "yarn workspace jacare-lab dev",
+    "lab:build": "yarn workspace jacare-lab build",
     "bench": "yarn build && node benchmarks/run.mjs",
     "jacare": "node packages/cli/dist/index.js"
   },

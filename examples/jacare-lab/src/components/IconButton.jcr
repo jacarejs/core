@@ -1,0 +1,13 @@
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+    disabled: { type: 'boolean', default: false }
+  }
+  emits: ['press']
+</contract>
+
+export <view>
+  <button type="button" class="btn btn-outline" disabled=${disabled} on-click=${() => emit('press')}>
+    ${label}
+  </button>
+</view>

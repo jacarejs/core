@@ -1,0 +1,14 @@
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+    count: { type: 'number', required: true }
+  }
+  emits: ['inc']
+</contract>
+
+export <view>
+  <div class="row">
+    <span class="metric">${label}: ${count}</span>
+    <button type="button" class="btn" on-click=${() => emit('inc')}>+1</button>
+  </div>
+</view>

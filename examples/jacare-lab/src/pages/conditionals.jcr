@@ -1,0 +1,287 @@
+import { pulse, derive } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import { viewSnippet } from '../utils/snippet.js'
+
+const state = pulse('loading')
+const states = ['loading', 'error', 'empty', 'ready']
+
+function setState(next) {
+  state.set(next)
+}
+
+const stateCode = viewSnippet(
+  `const state = pulse('loading')
+const states = ['loading', 'error', 'empty', 'ready']
+
+function setState(next) {
+  state.set(next)
+}`,
+  `  <div class="stack">
+    <div class="row">
+      #for states as s (s)
+        <button class="btn btn-outline" class-active=\${() => state() === s} on-click=\${() => setState(s)}>\${s}</button>
+      #end
+    </div>
+    #if state() === 'loading'
+      <p class="muted">Loading…</p>
+    #elif state() === 'error'
+      <p class="muted">Something went wrong.</p>
+    #elif state() === 'empty'
+      <p class="muted">No items yet.</p>
+    #else
+      <p class="muted">Ready — here is your content.</p>
+    #end
+  </div>`,
+)
+
+const user = pulse(null)
+
+function login(role) {
+  user.set({ name: role === 'admin' ? 'Ana' : 'Beto', admin: role === 'admin' })
+}
+
+function logout() {
+  user.set(null)
+}
+
+const nestedCode = viewSnippet(
+  `const user = pulse(null)
+
+function login(role) {
+  user.set({ name: role === 'admin' ? 'Ana' : 'Beto', admin: role === 'admin' })
+}
+
+function logout() {
+  user.set(null)
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <button class="btn" on-click=\${() => login('admin')}>Log in as admin</button>
+      <button class="btn btn-outline" on-click=\${() => login('member')}>Log in as member</button>
+      <button class="btn btn-ghost" on-click=\${logout}>Log out</button>
+    </div>
+    #if user()
+      #if user().admin
+        <p class="muted">Welcome, \${user().name} — admin panel unlocked.</p>
+      #else
+        <p class="muted">Welcome, \${user().name} — member view only.</p>
+      #end
+    #else
+      <p class="muted">Please log in.</p>
+    #end
+  </div>`,
+)
+
+const cartCount = pulse(0)
+
+function addToCart() {
+  cartCount.update((n) => n + 1)
+}
+
+function clearCart() {
+  cartCount.set(0)
+}
+
+const siblingCode = viewSnippet(
+  `const cartCount = pulse(0)
+
+function addToCart() {
+  cartCount.update((n) => n + 1)
+}
+
+function clearCart() {
+  cartCount.set(0)
+}`,
+  `  <div class="stack">
+    #if cartCount() > 0
+      <p class="muted">\${cartCount} items in cart</p>
+      <div class="row">
+        <button class="btn" on-click=\${addToCart}>Add one more</button>
+        <button class="btn btn-outline" on-click=\${clearCart}>Clear</button>
+      </div>
+    #else
+      <p class="muted">Your cart is empty.</p>
+      <button class="btn" on-click=\${addToCart}>Add an item</button>
+    #end
+  </div>`,
+)
+
+const score = pulse(72)
+const grade = derive(() => {
+  const n = Number(score())
+  if (n >= 90) return 'A'
+  if (n >= 80) return 'B'
+  if (n >= 70) return 'C'
+  if (n >= 60) return 'D'
+  return 'F'
+})
+
+const gradeCode = viewSnippet(
+  `const score = pulse(72)
+const grade = derive(() => {
+  const n = Number(score())
+  if (n >= 90) return 'A'
+  if (n >= 80) return 'B'
+  if (n >= 70) return 'C'
+  if (n >= 60) return 'D'
+  return 'F'
+})`,
+  `  <div class="stack">
+    <input class="input" type="range" min="0" max="100" bind-value=\${score} />
+    <div class="row">
+      <span class="metric">\${score}</span>
+      #if score() >= 90
+        <span class="badge">Grade \${grade}</span>
+      #elif score() >= 80
+        <span class="badge">Grade \${grade}</span>
+      #elif score() >= 70
+        <span class="badge badge-warn">Grade \${grade}</span>
+      #elif score() >= 60
+        <span class="badge badge-warn">Grade \${grade}</span>
+      #else
+        <span class="badge badge-danger">Grade \${grade}</span>
+      #end
+    </div>
+  </div>`,
+)
+
+const contacts = pulse([
+  { id: 'a', name: 'Ada Lovelace' },
+  { id: 'b', name: 'Grace Hopper' },
+  { id: 'c', name: 'Alan Turing' },
+])
+const query = pulse('')
+const results = derive(() => {
+  const q = query().trim().toLowerCase()
+  if (!q) return contacts()
+  return contacts().filter((person) => person.name.toLowerCase().includes(q))
+})
+
+const emptyResultsCode = viewSnippet(
+  `const contacts = pulse([
+  { id: 'a', name: 'Ada Lovelace' },
+  { id: 'b', name: 'Grace Hopper' },
+  { id: 'c', name: 'Alan Turing' },
+])
+const query = pulse('')
+const results = derive(() => {
+  const q = query().trim().toLowerCase()
+  if (!q) return contacts()
+  return contacts().filter((person) => person.name.toLowerCase().includes(q))
+})`,
+  `  <div class="stack">
+    <input class="input" bind-value=\${query} placeholder="Search contacts" />
+    #if results().length === 0
+      <p class="muted">No contacts match "\${query}".</p>
+    #else
+      <ul class="list">
+        #for results() as person (person.id)
+          <li class="list-item"><span class="item-label">\${person.name}</span></li>
+        #end
+      </ul>
+    #end
+  </div>`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §7</p>
+      <h1 class="page-title">The if directive</h1>
+      <p class="page-lead">Conditionals mount exactly one branch at a time — inactive branches are not in the DOM at all.</p>
+    </header>
+
+    <Tip :text=${'Call signals as functions inside a condition for clarity, for example checking loading() rather than the bare loading reference.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Loading / error / empty / ready'} :lead=${'A classic four-state machine driven by one pulse.'} :code=${stateCode}>
+        <div class="stack">
+          <div class="row">
+            #for states as s (s)
+              <button type="button" class="btn btn-outline" class-active=${() => state() === s} on-click=${() => setState(s)}>${s}</button>
+            #end
+          </div>
+          #if state() === 'loading'
+            <p class="muted">Loading…</p>
+          #elif state() === 'error'
+            <p class="muted">Something went wrong.</p>
+          #elif state() === 'empty'
+            <p class="muted">No items yet.</p>
+          #else
+            <p class="muted">Ready — here is your content.</p>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Nested conditionals: auth gate'} :lead=${'One outer branch for logged-in vs not, a nested branch for admin vs member.'} :code=${nestedCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn" on-click=${() => login('admin')}>Log in as admin</button>
+            <button type="button" class="btn btn-outline" on-click=${() => login('member')}>Log in as member</button>
+            <button type="button" class="btn btn-ghost" on-click=${logout}>Log out</button>
+          </div>
+          #if user()
+            #if user().admin
+              <p class="muted">Welcome, ${user().name} — admin panel unlocked.</p>
+            #else
+              <p class="muted">Welcome, ${user().name} — member view only.</p>
+            #end
+          #else
+            <p class="muted">Please log in.</p>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Multi-sibling branches'} :lead=${'Every element inside the active branch mounts together, in source order.'} :code=${siblingCode}>
+        <div class="stack">
+          #if cartCount() > 0
+            <p class="muted">${cartCount} items in cart</p>
+            <div class="row">
+              <button type="button" class="btn" on-click=${addToCart}>Add one more</button>
+              <button type="button" class="btn btn-outline" on-click=${clearCart}>Clear</button>
+            </div>
+          #else
+            <p class="muted">Your cart is empty.</p>
+            <button type="button" class="btn" on-click=${addToCart}>Add an item</button>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'#elif chain: grade tiers'} :lead=${'Five branches, five score ranges — only the matching one ever mounts.'} :code=${gradeCode}>
+        <div class="stack">
+          <input class="input" type="range" min="0" max="100" bind-value=${score} />
+          <div class="row">
+            <span class="metric">${score}</span>
+            #if score() >= 90
+              <span class="badge">Grade ${grade}</span>
+            #elif score() >= 80
+              <span class="badge">Grade ${grade}</span>
+            #elif score() >= 70
+              <span class="badge badge-warn">Grade ${grade}</span>
+            #elif score() >= 60
+              <span class="badge badge-warn">Grade ${grade}</span>
+            #else
+              <span class="badge badge-danger">Grade ${grade}</span>
+            #end
+          </div>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Empty-state pattern: search results'} :lead=${'A derived filter drives both the list and the "no matches" message.'} :code=${emptyResultsCode}>
+        <div class="stack">
+          <input class="input" bind-value=${query} placeholder="Search contacts" />
+          #if results().length === 0
+            <p class="muted">No contacts match "${query}".</p>
+          #else
+            <ul class="list">
+              #for results() as person (person.id)
+                <li class="list-item"><span class="item-label">${person.name}</span></li>
+              #end
+            </ul>
+          #end
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>

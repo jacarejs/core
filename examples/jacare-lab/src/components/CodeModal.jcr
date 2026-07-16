@@ -1,0 +1,24 @@
+export <contract>
+  props: {
+    title: { type: 'string', required: true }
+    code: { type: 'string', required: true }
+  }
+  emits: ['close']
+</contract>
+
+export <view>
+  <div
+    class="code-modal"
+    on-click=${(event) => {
+      if (event.target === event.currentTarget) emit('close')
+    }}
+  >
+    <div class="code-panel" role="dialog" aria-modal="true">
+      <header class="code-panel-head">
+        <h4 class="code-panel-title">${title}</h4>
+        <button type="button" class="btn btn-lime" on-click=${() => emit('close')}>Close</button>
+      </header>
+      <pre class="code-body"><code>${code}</code></pre>
+    </div>
+  </div>
+</view>

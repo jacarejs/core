@@ -1,0 +1,27 @@
+import { showCode } from '../code-viewer.js'
+
+export <contract>
+  props: {
+    title: { type: 'string', required: true }
+    lead: { type: 'string', default: '' }
+    code: { type: 'string', required: true }
+  }
+  slots: ['default']
+</contract>
+
+export <view>
+  <article class="demo">
+    <header class="demo-head">
+      <div>
+        <h3 class="demo-title">${title}</h3>
+        #if lead
+          <p class="demo-lead">${lead}</p>
+        #end
+      </div>
+      <button type="button" class="btn btn-ghost" on-click=${() => showCode(title, code)}>View code</button>
+    </header>
+    <div class="demo-live">
+      <slot />
+    </div>
+  </article>
+</view>

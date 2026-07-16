@@ -1,0 +1,26 @@
+{
+  "name": "jacare-lab",
+  "version": "0.1.6",
+  "private": true,
+  "description": "Jacaré Lab — complete interactive API tutorial",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "predev": "yarn --cwd ../.. build",
+    "prebuild": "yarn --cwd ../.. build",
+    "dev": "node ../../packages/cli/dist/index.js dev",
+    "build": "node ../../packages/cli/dist/index.js build",
+    "jacare-check": "node ../../packages/cli/dist/index.js check",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@jacare/compiler": "0.1.6",
+    "@jacare/core": "0.1.6"
+  },
+  "devDependencies": {
+    "@jacare/cli": "0.1.6",
+    "@jacare/devtools": "0.1.6",
+    "@jacare/vite-plugin": "0.1.6",
+    "vite": "^6.0.3"
+  }
+}

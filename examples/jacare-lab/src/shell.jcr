@@ -1,0 +1,64 @@
+import { computed, derive, pulse } from '@jacare/core'
+import { appHref, assetUrl } from './app-base.js'
+import { LESSONS } from './topics.js'
+import { activeCode, hideCode } from './code-viewer.js'
+import CodeModal from './components/CodeModal.jcr'
+
+const menuOpen = pulse(false)
+const menuLabel = computed(() => (menuOpen() ? 'Close' : 'Lessons'))
+const viewerTitle = derive(() => activeCode()?.title ?? '')
+const viewerCode = derive(() => activeCode()?.code ?? '')
+
+function toggleMenu() {
+  menuOpen.update((open) => !open)
+}
+
+function closeMenu() {
+  menuOpen.set(false)
+}
+
+export <view>
+  <div class="app">
+    <div class="layout">
+      <aside class="sidebar" class-open=${menuOpen}>
+        <a class="brand" jacare-go="/" href=${appHref('/')} on-click=${closeMenu}>
+          <img class="brand-logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
+          <span class="brand-copy">
+            <span class="brand-name">Jacaré Lab</span>
+            <span class="brand-tag">Complete API tutorial</span>
+          </span>
+        </a>
+
+        <nav class="side-nav">
+          #for LESSONS as lesson (lesson.path)
+            <a
+              class="side-link"
+              jacare-go=${lesson.path}
+              href=${appHref(lesson.path)}
+              on-click=${closeMenu}
+            >
+              <span class="side-title">${lesson.title}</span>
+              <span class="side-blurb">${lesson.blurb}</span>
+            </a>
+          #end
+        </nav>
+      </aside>
+
+      <div class="shell-main">
+        <header class="topbar">
+          <button type="button" class="btn btn-ghost menu-btn" on-click=${toggleMenu}>
+            ${menuLabel}
+          </button>
+          <p class="topbar-hint">Live demos · View code opens the source for each example</p>
+        </header>
+        <main class="main" jacare-frame></main>
+      </div>
+    </div>
+
+    <div class="backdrop" class-show=${menuOpen} on-click=${closeMenu}></div>
+
+    #if activeCode()
+      <CodeModal :title=${viewerTitle} :code=${viewerCode} on-close=${hideCode} />
+    #end
+  </div>
+</view>

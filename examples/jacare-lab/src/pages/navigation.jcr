@@ -1,0 +1,376 @@
+import { routeHref, pulse, derive } from '@jacare/core'
+import { appHref } from '../app-base.js'
+import { nav, route } from '../nav.js'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import Badge from '../components/Badge.jcr'
+import { viewSnippet } from '../utils/snippet.js'
+
+const guardSearch = route.search('guard')
+const visitedSearch = route.search('visited')
+const qSearch = route.search('q')
+const slugParam = route.param('slug')
+
+const pathLabel = derive(() => route.path())
+const guardLabel = derive(() => guardSearch() ?? '—')
+const visitedLabel = derive(() => visitedSearch() ?? '—')
+const qLabel = derive(() => qSearch() ?? '—')
+const slugLabel = derive(() => slugParam() ?? '—')
+
+const lastAction = pulse('Ready')
+const draftQuery = pulse(qSearch() ?? '')
+
+const routeCode = viewSnippet(
+  `import { createRoute } from '@jacare/core'
+import { nav } from './nav.js'
+
+const route = createRoute(nav.where)
+
+const pathLabel = derive(() => route.path())
+const guardSearch = route.search('guard')
+const visitedSearch = route.search('visited')
+const qSearch = route.search('q')
+const slugParam = route.param('slug')`,
+  `  <div class="nav-live">
+    <div class="nav-live-row"><span>path</span><code>\${pathLabel}</code></div>
+    <div class="nav-live-row"><span>?visited</span><code>\${visitedSearch() ?? '—'}</code></div>
+    <div class="nav-live-row"><span>?q</span><code>\${qSearch() ?? '—'}</code></div>
+    <div class="nav-live-row"><span>?guard</span><code>\${guardSearch() ?? '—'}</code></div>
+    <div class="nav-live-row"><span>params.slug</span><code>\${slugParam() ?? '—'}</code></div>
+  </div>`,
+)
+
+function mark(action) {
+  lastAction.set(action)
+}
+
+function goHelpers() {
+  mark('nav.go(/nav?visited=1)')
+  nav.go('/nav?visited=1')
+}
+
+function swapHelpers() {
+  mark('nav.swap(/nav?visited=swap)')
+  nav.swap('/nav?visited=swap')
+}
+
+function undoHelpers() {
+  mark('nav.undo()')
+  nav.undo()
+}
+
+function warmForms() {
+  mark("nav.warm('/forms')")
+  nav.warm('/forms')
+}
+
+const navApiCode = viewSnippet(
+  `function goHelpers() {
+  nav.go('/nav?visited=1')
+}
+
+function swapHelpers() {
+  nav.swap('/nav?visited=swap')
+}
+
+function undoHelpers() {
+  nav.undo()
+}
+
+function warmForms() {
+  nav.warm('/forms')
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <button type="button" class="btn" on-click=\${goHelpers}>nav.go</button>
+      <button type="button" class="btn btn-outline" on-click=\${swapHelpers}>nav.swap</button>
+      <button type="button" class="btn btn-outline" on-click=\${undoHelpers}>nav.undo</button>
+      <button type="button" class="btn btn-ghost" on-click=\${warmForms}>nav.warm('/forms')</button>
+    </div>
+    <p class="muted">Last action: \${lastAction}</p>
+    <p class="muted">Current ?visited=: \${visitedSearch() ?? '—'}</p>
+  </div>`,
+)
+
+const topics = [
+  { slug: 'alpha', label: 'alpha' },
+  { slug: 'beta', label: 'beta' },
+  { slug: 'gamma', label: 'gamma' },
+]
+
+function topicHref(slug) {
+  return routeHref('/topic/:slug', { slug })
+}
+
+const linksCode = viewSnippet(
+  `import { routeHref } from '@jacare/core'
+import { appHref } from './app-base.js'
+
+const topics = [
+  { slug: 'alpha', label: 'alpha' },
+  { slug: 'beta', label: 'beta' },
+  { slug: 'gamma', label: 'gamma' },
+]
+
+function topicHref(slug) {
+  return routeHref('/topic/:slug', { slug })
+}`,
+  `  <div class="stack">
+    <div class="row">
+      #for topics as topic (topic.slug)
+        <a
+          class="btn btn-outline"
+          jacare-go=\${topicHref(topic.slug)}
+          href=\${appHref(topicHref(topic.slug))}
+        >
+          Topic: \${topic.label}
+        </a>
+      #end
+    </div>
+    <p class="muted">routeHref('/topic/:slug', { slug: 'alpha' }) → /topic/alpha</p>
+  </div>`,
+)
+
+function applyQuery() {
+  const value = draftQuery().trim()
+  const next = value ? `/nav?q=${encodeURIComponent(value)}` : '/nav'
+  mark(`nav.go(${next})`)
+  nav.go(next)
+}
+
+function clearQuery() {
+  draftQuery.set('')
+  mark('nav.swap(/nav)')
+  nav.swap('/nav')
+}
+
+const queryCode = viewSnippet(
+  `const draftQuery = pulse('')
+const qSearch = route.search('q')
+
+function applyQuery() {
+  const value = draftQuery().trim()
+  const next = value ? '/nav?q=' + encodeURIComponent(value) : '/nav'
+  nav.go(next)
+}
+
+function clearQuery() {
+  draftQuery.set('')
+  nav.swap('/nav')
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <input class="input" bind-value=\${draftQuery} placeholder="Search query" />
+      <button type="button" class="btn" on-click=\${applyQuery}>Apply ?q=</button>
+      <button type="button" class="btn btn-outline" on-click=\${clearQuery}>Clear</button>
+    </div>
+    <p class="muted">Live search: \${qSearch() ?? '—'}</p>
+  </div>`,
+)
+
+function armGuard() {
+  sessionStorage.setItem('jacare-lab:guard', '1')
+  mark("guard armed → nav.go('/nav')")
+  nav.go('/nav')
+}
+
+const guardCode = viewSnippet(
+  `// nav.js
+beforeGo(to) {
+  if (to.path === '/nav' && sessionStorage.getItem('jacare-lab:guard') === '1') {
+    sessionStorage.removeItem('jacare-lab:guard')
+    return '/nav?guard=blocked'
+  }
+  return true
+}
+
+function armGuard() {
+  sessionStorage.setItem('jacare-lab:guard', '1')
+  nav.go('/nav')
+}`,
+  `  <div class="stack">
+    <button type="button" class="btn" on-click=\${armGuard}>Arm guard + nav.go('/nav')</button>
+    #if guardSearch() === 'blocked'
+      <p class="nav-alert">Guard fired — redirected to /nav?guard=blocked.</p>
+    #else
+      <p class="muted">Arm the flag, then navigate. beforeGo can return a new path to redirect.</p>
+    #end
+  </div>`,
+)
+
+const prefetchTargets = [
+  { path: '/css', label: 'Scoped CSS' },
+  { path: '/forms', label: 'Forms' },
+  { path: '/playground', label: 'Playground' },
+]
+const warmed = pulse([])
+const warmedLabel = derive(() => (warmed().length > 0 ? warmed().join(', ') : 'none yet'))
+
+function warmOnHover(path) {
+  nav.warm(path)
+  if (!warmed().includes(path)) warmed.update((list) => [...list, path])
+}
+
+const warmOnHoverCode = viewSnippet(
+  `const prefetchTargets = [
+  { path: '/css', label: 'Scoped CSS' },
+  { path: '/forms', label: 'Forms' },
+  { path: '/playground', label: 'Playground' },
+]
+const warmed = pulse([])
+const warmedLabel = derive(() => (warmed().length > 0 ? warmed().join(', ') : 'none yet'))
+
+function warmOnHover(path) {
+  nav.warm(path)
+  if (!warmed().includes(path)) warmed.update((list) => [...list, path])
+}`,
+  `  <div class="stack">
+    <div class="row">
+      #for prefetchTargets as item (item.path)
+        <a
+          class="btn btn-outline"
+          jacare-go=\${item.path}
+          href=\${appHref(item.path)}
+          on-pointerenter=\${() => warmOnHover(item.path)}
+        >
+          \${item.label}
+        </a>
+      #end
+    </div>
+    <p class="muted">Warmed so far: \${warmedLabel}</p>
+  </div>`,
+)
+
+const shellCode = viewSnippet(
+  `import { createNav, lazy, screen } from '@jacare/core'
+import Shell from './shell.jcr'
+import Home from './pages/index.jcr'
+
+export const nav = createNav({
+  layout: Shell,
+  screens: {
+    '/': screen(Home),
+    '/nav': lazy(() => import('./pages/navigation.jcr')),
+    '/topic/:slug': lazy(() => import('./pages/topic-param.jcr')),
+  },
+})`,
+  `  <!-- shell.jcr -->
+  <aside class="sidebar">…lesson links with jacare-go…</aside>
+  <main class="main" jacare-frame></main>`,
+)
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §11</p>
+      <h1 class="page-title">Navigation</h1>
+      <p class="page-lead">createNav keeps a persistent layout around jacare-frame. createRoute exposes a reactive read of path, params, and search for any screen.</p>
+    </header>
+
+    <Tip :text=${'jacare-go marks in-app links, jacare-frame is the layout outlet screens mount into, and jacare-here is applied automatically to the active link.'} />
+
+    <div class="nav-summary">
+      <Badge :text=${'live route'} />
+      <div class="nav-live">
+        <div class="nav-live-row"><span>path</span><code>${pathLabel}</code></div>
+        <div class="nav-live-row"><span>?visited</span><code>${visitedLabel}</code></div>
+        <div class="nav-live-row"><span>?q</span><code>${qLabel}</code></div>
+        <div class="nav-live-row"><span>?guard</span><code>${guardLabel}</code></div>
+        <div class="nav-live-row"><span>params.slug</span><code>${slugLabel}</code></div>
+      </div>
+      <p class="muted">Last action: ${lastAction}</p>
+    </div>
+
+    <div class="lesson-grid">
+      <Demo :title=${'Live route reads'} :lead=${'route comes from createRoute(nav.where) and stays in sync with the URL as you navigate.'} :code=${routeCode}>
+        <div class="nav-live">
+          <div class="nav-live-row"><span>path</span><code>${pathLabel}</code></div>
+          <div class="nav-live-row"><span>?visited</span><code>${visitedLabel}</code></div>
+          <div class="nav-live-row"><span>?q</span><code>${qLabel}</code></div>
+          <div class="nav-live-row"><span>?guard</span><code>${guardLabel}</code></div>
+          <div class="nav-live-row"><span>params.slug</span><code>${slugLabel}</code></div>
+        </div>
+      </Demo>
+
+      <Demo :title=${'nav.go / swap / undo / warm'} :lead=${'go() pushes history, swap() replaces it, undo() goes back, warm() preloads a lazy screen.'} :code=${navApiCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn" on-click=${goHelpers}>nav.go</button>
+            <button type="button" class="btn btn-outline" on-click=${swapHelpers}>nav.swap</button>
+            <button type="button" class="btn btn-outline" on-click=${undoHelpers}>nav.undo</button>
+            <button type="button" class="btn btn-ghost" on-click=${warmForms}>nav.warm('/forms')</button>
+          </div>
+          <p class="muted">Try go, then undo — history restores the previous query string.</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Search query with route.search'} :lead=${'Write a query, apply it with nav.go, and watch route.search("q") update live in the summary above.'} :code=${queryCode}>
+        <div class="stack">
+          <div class="row">
+            <input class="input" bind-value=${draftQuery} placeholder="e.g. jacare" />
+            <button type="button" class="btn" on-click=${applyQuery}>Apply ?q=</button>
+            <button type="button" class="btn btn-outline" on-click=${clearQuery}>Clear</button>
+          </div>
+          #if qSearch()
+            <p class="muted">Filtering mental model: showing results for “${qSearch()}”.</p>
+          #else
+            <p class="muted">No ?q= yet — apply one to see route.search react.</p>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'routeHref + param routes'} :lead=${'routeHref fills :slug and returns a path you can put in jacare-go / href.'} :code=${linksCode}>
+        <div class="stack">
+          <div class="row">
+            #for topics as topic (topic.slug)
+              <a
+                class="btn btn-outline"
+                jacare-go=${topicHref(topic.slug)}
+                href=${appHref(topicHref(topic.slug))}
+              >
+                Topic: ${topic.label}
+              </a>
+            #end
+          </div>
+          <p class="muted">Opens /topic/:slug — params arrive as mount props on that screen.</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'beforeGo guard'} :lead=${'Arm a sessionStorage flag, navigate to /nav, and the guard redirects to ?guard=blocked.'} :code=${guardCode}>
+        <div class="stack">
+          <button type="button" class="btn" on-click=${armGuard}>Arm guard + nav.go('/nav')</button>
+          #if guardSearch() === 'blocked'
+            <p class="nav-alert">Guard fired — redirected to /nav?guard=blocked.</p>
+          #else
+            <p class="muted">beforeGo can return true, false, or another path string.</p>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Prefetch on hover'} :lead=${'Hover warms the lazy chunk; click navigates with jacare-go.'} :code=${warmOnHoverCode}>
+        <div class="stack">
+          <div class="row">
+            #for prefetchTargets as item (item.path)
+              <a
+                class="btn btn-outline"
+                jacare-go=${item.path}
+                href=${appHref(item.path)}
+                on-pointerenter=${() => warmOnHover(item.path)}
+              >
+                ${item.label}
+              </a>
+            #end
+          </div>
+          <p class="muted">Warmed so far: ${warmedLabel}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Layout + lazy screens'} :lead=${'Shell owns the sidebar; screens mount into jacare-frame. Lazy imports keep lesson chunks small.'} :code=${shellCode}>
+        <div class="stack">
+          <p class="muted">This lab’s shell.jcr already uses jacare-frame. Every lesson link in the sidebar is a jacare-go navigation.</p>
+          <a class="btn btn-outline" jacare-go="/playground" href=${appHref('/playground')}>Open Playground</a>
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>

@@ -1,0 +1,125 @@
+import { createLifecycle, effect, pulse } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import { DEFAULT_PLAYGROUND_SOURCE, PLAYGROUND_EXAMPLES } from '../playground/examples.js'
+import { runPlayground } from '../playground/run.js'
+
+const source = pulse(DEFAULT_PLAYGROUND_SOURCE)
+const error = pulse('')
+const status = pulse('Ready')
+
+let host = null
+let disposePreview = null
+let timer = null
+
+function loadExample(id) {
+  const example = PLAYGROUND_EXAMPLES.find((item) => item.id === id)
+  if (!example) return
+  source.set(example.source)
+}
+
+function runNow() {
+  if (!host) return
+  try {
+    disposePreview?.()
+    disposePreview = null
+    disposePreview = runPlayground(host, source())
+    error.set('')
+    status.set('Live')
+  } catch (err) {
+    disposePreview?.()
+    disposePreview = null
+    host.replaceChildren()
+    error.set(err?.message || String(err))
+    status.set('Error')
+  }
+}
+
+function scheduleRun() {
+  clearTimeout(timer)
+  status.set('Compiling…')
+  timer = setTimeout(runNow, 220)
+}
+
+export const lifecycle = createLifecycle({
+  onMount() {
+    let cancelled = false
+    let tracker = null
+
+    queueMicrotask(() => {
+      if (cancelled) return
+      host = document.getElementById('playground-host')
+      if (!host) {
+        error.set('Preview host not found')
+        status.set('Error')
+        return
+      }
+      tracker = effect(() => {
+        source()
+        scheduleRun()
+      })
+    })
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+      tracker?.dispose()
+      disposePreview?.()
+      disposePreview = null
+      host = null
+    }
+  },
+  onActivate() {
+    document.title = 'Jacaré Lab · Playground'
+  },
+})
+
+export <view>
+  <section class="page playground-page">
+    <header class="page-hero">
+      <p class="page-kicker">Live lab</p>
+      <h1 class="page-title">Playground</h1>
+      <p class="page-lead">Type Jacaré source on the left — it compiles and mounts on the right as you type.</p>
+    </header>
+
+    <Tip :text=${'Use a full module: imports, pulses, functions, then an export view block. Presets below are complete starting points.'} />
+
+    <div class="playground-toolbar">
+      <div class="row">
+        #for PLAYGROUND_EXAMPLES as example (example.id)
+          <button type="button" class="btn btn-outline" on-click=${() => loadExample(example.id)}>
+            ${example.label}
+          </button>
+        #end
+      </div>
+      <span class="playground-status" class-error=${() => error().length > 0}>${status}</span>
+    </div>
+
+    <div class="playground-grid">
+      <section class="playground-pane">
+        <header class="playground-pane-head">
+          <h2 class="playground-pane-title">Source</h2>
+          <span class="muted">.jcr</span>
+        </header>
+        <textarea
+          class="playground-editor"
+          spellcheck="false"
+          autocomplete="off"
+          autocapitalize="off"
+          bind-value=${source}
+          aria-label="Jacaré source editor"
+        ></textarea>
+      </section>
+
+      <section class="playground-pane">
+        <header class="playground-pane-head">
+          <h2 class="playground-pane-title">Preview</h2>
+          <span class="muted">live mount</span>
+        </header>
+        #if error()
+          <pre class="playground-error">${error}</pre>
+        #end
+        <div id="playground-host" class="playground-host"></div>
+      </section>
+    </div>
+  </section>
+</view>

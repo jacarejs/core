@@ -1508,6 +1508,7 @@ declare module '*.jcr' {
 | **Todo** | `examples/jacare-todo` | Nav, forms, tutorial, lifecycle, playground |
 | **Showcase** | `examples/jacare-showcase` | CPW, `style---`, components, slots, cart |
 | **Scale BMI** | `examples/jacare-bmi` | Live gauge, metric/imperial, `derive` + range inputs |
+| **Lab** | `examples/jacare-lab` | Full API tutorial — live demos + View code modals for every section |
 
 ```bash
 yarn example:dev    # todo app
