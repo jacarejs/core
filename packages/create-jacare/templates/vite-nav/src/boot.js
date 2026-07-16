@@ -6,9 +6,9 @@ if (!root) throw new Error('Missing #app')
 let dispose = nav.attach(root)
 
 if (import.meta.hot) {
-  import.meta.hot.accept()
-  import.meta.hot.dispose(() => {
+  import.meta.hot.accept(() => {
     dispose?.()
-    dispose = null
+    dispose = nav.attach(root)
   })
+  import.meta.hot.dispose(() => dispose?.())
 }
