@@ -568,9 +568,34 @@ body {
   font-size: 1.05rem;
 }
 
+.code-scroll {
+  overflow: auto;
+  display: grid;
+  gap: 0;
+}
+
+.code-file {
+  border-bottom: 1px solid rgba(143, 209, 42, 0.14);
+}
+
+.code-file:last-child {
+  border-bottom: none;
+}
+
+.code-file-name {
+  margin: 0;
+  padding: 0.65rem 1rem 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #8fd12a;
+  background: rgba(143, 209, 42, 0.08);
+}
+
 .code-body {
   margin: 0;
-  padding: 1rem;
+  padding: 0.85rem 1rem 1.1rem;
   overflow: auto;
   font-family: var(--font-mono);
   font-size: 0.78rem;
@@ -594,6 +619,65 @@ body {
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--panel);
+}
+
+.vscode-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-radius: calc(var(--radius) + 0.1rem);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.vscode-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--lime) 55%, var(--line));
+}
+
+.vscode-card-img {
+  width: min(12.5rem, 42vw);
+  height: auto;
+  display: block;
+  border-radius: 0.65rem;
+}
+
+.vscode-card-copy {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.vscode-card-copy strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+.vscode-card-copy span {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.vscode-card-link {
+  font-family: var(--font-mono);
+  font-size: 0.72rem !important;
+  color: var(--leaf) !important;
+  word-break: break-all;
+}
+
+@media (max-width: 640px) {
+  .vscode-card {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
 }
 
 .ref-card h3 {

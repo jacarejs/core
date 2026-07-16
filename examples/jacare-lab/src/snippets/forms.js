@@ -1,7 +1,11 @@
-import { viewSnippet } from '../utils/snippet.js'
+import { viewSnippet, codeFiles } from '../utils/snippet.js'
+import { FIELD_SOURCE } from './component-sources.js'
 
-export const formCode = viewSnippet(
-  `const form = createForm({
+const fieldChild = [{ name: 'components/Field.jcr', code: FIELD_SOURCE }]
+
+export const formCode = codeFiles(
+  viewSnippet(
+    `const form = createForm({
   name: {
     value: '',
     validate: (value) => (value.trim().length < 2 ? 'Name is too short' : undefined),
@@ -12,7 +16,6 @@ export const formCode = viewSnippet(
   },
 })
 
-// checkboxes need bind-checked on a real pulse, so newsletter lives beside the form
 const newsletter = pulse(false)
 const submittedValues = pulse(null)
 
@@ -25,7 +28,7 @@ function resetForm() {
   newsletter.set(false)
   submittedValues.set(null)
 }`,
-  `  <form class="stack" on-submit=\${onSubmit}>
+    `  <form class="stack" on-submit=\${onSubmit}>
     <Field :label=\${'Name'} :field=\${form.fields.name} :type=\${'text'} :placeholder=\${'Ada Lovelace'} />
     <Field :label=\${'Email'} :field=\${form.fields.email} :type=\${'email'} :placeholder=\${'you@jacare.dev'} />
     <label class="row"><input type="checkbox" bind-checked=\${newsletter} /> Subscribe to the newsletter</label>
@@ -41,12 +44,13 @@ function resetForm() {
   #else
     <p class="muted">Nothing submitted yet.</p>
   #end`,
+  ),
+  fieldChild,
 )
 
 export const touchedDirtyCode = viewSnippet(
-  `// reuses the exact same form declared for the schema demo above
-form.fields.name.touched() // true only after the field has been blurred
-form.fields.name.dirty()   // true once the value differs from its initial value`,
+  `form.fields.name.touched()
+form.fields.name.dirty()`,
   `  <div class="row">
     <span class="badge" class-badge-warn=\${form.fields.name.touched()}>name touched: \${form.fields.name.touched() ? 'yes' : 'no'}</span>
     <span class="badge" class-badge-warn=\${form.fields.name.dirty()}>name dirty: \${form.fields.name.dirty() ? 'yes' : 'no'}</span>
@@ -55,25 +59,29 @@ form.fields.name.dirty()   // true once the value differs from its initial value
   <p class="muted">Focus and blur the fields in the schema demo above — these flip in real time.</p>`,
 )
 
-export const confirmCode = viewSnippet(
-  `const password = pulse('')
+export const confirmCode = codeFiles(
+  viewSnippet(
+    `const password = pulse('')
 const confirmForm = createForm({
   confirm: {
     value: '',
     validate: (value) => (value.length > 0 && value !== password() ? 'Passwords do not match' : undefined),
   },
 })`,
-  `  <div class="stack">
+    `  <div class="stack">
     <label class="field">
       <span class="field-label">Password</span>
       <input class="input" type="password" bind-value=\${password} />
     </label>
     <Field :label=\${'Confirm password'} :field=\${confirmForm.fields.confirm} :type=\${'password'} :placeholder=\${'Repeat password'} />
   </div>`,
+  ),
+  fieldChild,
 )
 
-export const multiValidatorCode = viewSnippet(
-  `const signupForm = createForm({
+export const multiValidatorCode = codeFiles(
+  viewSnippet(
+    `const signupForm = createForm({
   username: {
     value: '',
     validate: [
@@ -82,5 +90,7 @@ export const multiValidatorCode = viewSnippet(
     ],
   },
 })`,
-  `  <Field :label=\${'Username'} :field=\${signupForm.fields.username} :type=\${'text'} :placeholder=\${'jacare_dev'} />`,
+    `  <Field :label=\${'Username'} :field=\${signupForm.fields.username} :type=\${'text'} :placeholder=\${'jacare_dev'} />`,
+  ),
+  fieldChild,
 )

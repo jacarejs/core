@@ -7,11 +7,18 @@
 [![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
 [![demo Lab](https://img.shields.io/badge/demo-Lab-78c018.svg)](https://jacarejs.github.io/core/lab/)
 
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare">
+    <img src="media/marketplace-banner.png" width="520" alt="Jacaré available in the VS Code Marketplace" />
+  </a>
+</p>
+
 Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr` files — syntax highlighting, file icons, and editor ergonomics for the Jacaré reactive UI framework.
 
 **Publisher:** [heberalmeida](https://marketplace.visualstudio.com/publishers/heberalmeida)  
-**Extension ID:** `heberalmeida.jacare`  
-**Author:** Heber Almeida
+**Extension ID:** [`heberalmeida.jacare`](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)  
+**Author:** Heber Almeida  
+**Marketplace:** [https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)
 
 ---
 

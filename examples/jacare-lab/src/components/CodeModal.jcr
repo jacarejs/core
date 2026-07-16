@@ -1,7 +1,7 @@
 export <contract>
   props: {
     title: { type: 'string', required: true }
-    code: { type: 'string', required: true }
+    files: { type: 'any', required: true }
   }
   emits: ['close']
 </contract>
@@ -18,7 +18,14 @@ export <view>
         <h4 class="code-panel-title">${title}</h4>
         <button type="button" class="btn btn-lime" on-click=${() => emit('close')}>Close</button>
       </header>
-      <pre class="code-body"><code>${code}</code></pre>
+      <div class="code-scroll">
+        #for files() as section (section.name)
+          <section class="code-file">
+            <h5 class="code-file-name">${section.name}</h5>
+            <pre class="code-body"><code>${section.code}</code></pre>
+          </section>
+        #end
+      </div>
     </div>
   </div>
 </view>

@@ -19,3 +19,21 @@ export function moduleSnippet(...sections) {
 export function styleSnippet(css) {
   return block('style', css)
 }
+
+export function codeFiles(parentCode, children = []) {
+  return [
+    { name: 'usage (parent)', code: parentCode },
+    ...children.map((child) => ({
+      name: child.name,
+      code: String(child.code ?? '').trim(),
+    })),
+  ]
+}
+
+export function flattenCodeFiles(codeOrFiles) {
+  if (typeof codeOrFiles === 'string') return codeOrFiles
+  if (!Array.isArray(codeOrFiles)) return ''
+  return codeOrFiles
+    .map((file) => `// —— ${file.name} ——\n${file.code}`)
+    .join('\n\n')
+}

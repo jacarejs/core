@@ -4,10 +4,14 @@ export <contract>
   props: {
     title: { type: 'string', required: true }
     lead: { type: 'string', default: '' }
-    code: { type: 'string', required: true }
+    code: { type: 'any', required: true }
   }
   slots: ['default']
 </contract>
+
+function openCode() {
+  showCode(title, code)
+}
 
 export <view>
   <article class="demo">
@@ -18,7 +22,7 @@ export <view>
           <p class="demo-lead">${lead}</p>
         #end
       </div>
-      <button type="button" class="btn btn-ghost" on-click=${() => showCode(title, code)}>View code</button>
+      <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
     </header>
     <div class="demo-live">
       <slot />

@@ -8,6 +8,10 @@
     "name": "Heber Almeida"
   },
   "license": "MIT",
+  "galleryBanner": {
+    "color": "#0b3d2e",
+    "theme": "dark"
+  },
   "icon": "icons/jacare-256.png",
   "repository": {
     "type": "git",

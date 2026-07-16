@@ -7,7 +7,7 @@ import CodeModal from './components/CodeModal.jcr'
 const menuOpen = pulse(false)
 const menuLabel = computed(() => (menuOpen() ? 'Close' : 'Lessons'))
 const viewerTitle = derive(() => activeCode()?.title ?? '')
-const viewerCode = derive(() => activeCode()?.code ?? '')
+const viewerFiles = derive(() => activeCode()?.files ?? [])
 
 function toggleMenu() {
   menuOpen.update((open) => !open)
@@ -63,7 +63,7 @@ export <view>
     <div class="backdrop" class-show=${menuOpen} on-click=${closeMenu}></div>
 
     #if activeCode()
-      <CodeModal :title=${viewerTitle} :code=${viewerCode} on-close=${hideCode} />
+      <CodeModal :title=${viewerTitle} :files=${viewerFiles} on-close=${hideCode} />
     #end
   </div>
 </view>

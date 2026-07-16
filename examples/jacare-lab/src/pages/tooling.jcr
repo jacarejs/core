@@ -1,5 +1,6 @@
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { assetUrl } from '../app-base.js'
 import {
   cliCode,
   vitePluginCode,
@@ -9,17 +10,35 @@ import {
   scriptsCode,
 } from '../snippets/tooling.js'
 
+const marketplaceUrl = 'https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare'
+const marketplaceImg = assetUrl('vscode-marketplace.png')
+
 export <view>
   <section class="page">
     <header class="page-hero">
       <p class="page-kicker">API §16 - §19</p>
       <h1 class="page-title">Tooling</h1>
-      <p class="page-lead">The CLI, Vite plugin, compiler, and DevTools that turn .jcr files into a running app — and back into test assertions.</p>
+      <p class="page-lead">The CLI, Vite plugin, compiler, DevTools — and the VS Code extension for .jcr files.</p>
     </header>
 
     <Tip :text=${'connectJacareDevtools() is already wired into this lab, behind import.meta.env.DEV in boot.js -- open the Pulse Graph or Scope panel in the corner while you click around any lesson.'} />
 
     <div class="lesson-grid">
+      <a class="vscode-card" href=${marketplaceUrl} target="_blank" rel="noopener noreferrer">
+        <img
+          class="vscode-card-img"
+          src=${marketplaceImg}
+          width="360"
+          height="123"
+          alt="Jacaré available in the VS Code Marketplace"
+        />
+        <div class="vscode-card-copy">
+          <strong>Jacaré for VS Code</strong>
+          <span>Syntax highlighting, file icons, and contracts for .jcr — install from the Marketplace.</span>
+          <span class="vscode-card-link">marketplace.visualstudio.com/items?itemName=heberalmeida.jacare</span>
+        </div>
+      </a>
+
       <Demo :title=${'CLI commands'} :lead=${'jacare new / dev / build / compile / check wrap Vite and the compiler.'} :code=${cliCode}>
         <pre class="log">${cliCode}</pre>
       </Demo>
