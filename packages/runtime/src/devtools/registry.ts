@@ -20,6 +20,7 @@ const edges = new Set<string>()
 const listeners = new Set<() => void>()
 
 function emit(): void {
+  if (!enabled) return
   for (const listener of listeners) {
     listener()
   }
@@ -39,7 +40,6 @@ export function isDevtoolsEnabled(): boolean {
 }
 
 export function registerSignal(cell: DependencyCell, initial: unknown): void {
-  if (!enabled) return
   const id = nextId++
   nodes.set(id, {
     id,
@@ -54,7 +54,6 @@ export function registerSignal(cell: DependencyCell, initial: unknown): void {
 }
 
 export function registerComputed(cell: DependencyCell, owner: OwnerNode, initial?: unknown): void {
-  if (!enabled) return
   const id = nextId++
   nodes.set(id, {
     id,
@@ -71,7 +70,6 @@ export function registerComputed(cell: DependencyCell, owner: OwnerNode, initial
 }
 
 export function registerEffect(owner: OwnerNode): void {
-  if (!enabled) return
   const id = nextId++
   nodes.set(id, {
     id,
@@ -84,7 +82,6 @@ export function registerEffect(owner: OwnerNode): void {
 }
 
 export function linkDependency(cell: DependencyCell, owner: OwnerNode): void {
-  if (!enabled) return
   const from = cellToId.get(cell)
   const to = ownerToId.get(owner)
   if (from == null || to == null || from === to) return
@@ -94,7 +91,6 @@ export function linkDependency(cell: DependencyCell, owner: OwnerNode): void {
 }
 
 export function recordValue(cell: DependencyCell, value: unknown): void {
-  if (!enabled) return
   const id = cellToId.get(cell)
   if (id == null) return
   const node = nodes.get(id)
@@ -106,7 +102,6 @@ export function recordValue(cell: DependencyCell, value: unknown): void {
 }
 
 export function recordStale(cell: DependencyCell): void {
-  if (!enabled) return
   const id = cellToId.get(cell)
   if (id == null) return
   const node = nodes.get(id)
@@ -116,7 +111,6 @@ export function recordStale(cell: DependencyCell): void {
 }
 
 export function recordEffectRun(owner: OwnerNode): void {
-  if (!enabled) return
   const id = ownerToId.get(owner)
   if (id == null) return
   const node = nodes.get(id)
@@ -126,7 +120,6 @@ export function recordEffectRun(owner: OwnerNode): void {
 }
 
 export function disposeOwner(owner: OwnerNode): void {
-  if (!enabled) return
   const id = ownerToId.get(owner)
   if (id == null) return
   const node = nodes.get(id)
@@ -144,6 +137,14 @@ function syncSubscriberCount(cell: DependencyCell): void {
 }
 
 export function getPulseGraph(): PulseGraphSnapshot {
+  if (!enabled) {
+    return {
+      nodes: [],
+      edges: [],
+      updatedAt: Date.now(),
+    }
+  }
+
   const snapshotNodes: PulseNode[] = []
   for (const node of nodes.values()) {
     if (node.cell) {

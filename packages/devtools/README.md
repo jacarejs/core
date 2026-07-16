@@ -45,10 +45,21 @@ if (import.meta.env.DEV) {
 }
 ```
 
-Two floating panels appear in the bottom-right corner of the page:
+Two floating panels appear in the bottom-right corner of the page (dev only):
 
-1. **Pulse Graph** — reactive nodes, dependencies, and live values
+1. **Pulse Graph** — reactive nodes, dependencies, and **live values**
 2. **Scope** — registered variables from `registerScope()`
+
+### Show / hide Pulse Graph
+
+| Action | How |
+|--------|-----|
+| Minimize | `−` in the panel header (or click the collapsed header to expand) |
+| Hide | `×` — collapses to a dark **Pulse Graph** chip |
+| Show again | Click the chip |
+| Remember | Mode is stored in `sessionStorage` for the tab |
+| Remove entirely | Call the dispose function returned by `connectJacareDevtools()` |
+| Never load | Omit `connectJacareDevtools()` or guard with `import.meta.env.DEV` (production builds tree-shake it) |
 
 Call the returned dispose function to remove panels:
 
@@ -72,10 +83,12 @@ The Pulse Graph shows every reactive node in your app:
 
 For each node you can see:
 
-- **Name** — variable name when available
-- **Value** — current value (live-updated)
+- **Id / kind** — Pulse, Derive, or Watch
+- **Value preview** — shown in the list and detail pane; flashes green when it changes
 - **Dependencies** — which nodes this one reads from
 - **Dependents** — which nodes read from this one
+
+Pulses created **before** `connectJacareDevtools()` are still tracked (registration is always on; the panel only becomes visible after connect).
 
 ### How it works
 

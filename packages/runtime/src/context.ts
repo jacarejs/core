@@ -105,9 +105,7 @@ export function trackDependency(cell: DependencyCell): void {
   const run = currentOwner.run
   if (cell.has(run)) return
   currentOwner.addDependency(cell.subscribe(run))
-  if (devtools.isDevtoolsEnabled()) {
-    devtools.linkDependency(cell, currentOwner)
-  }
+  devtools.linkDependency(cell, currentOwner)
 }
 
 export function schedule(subscriber: Subscriber): void {
