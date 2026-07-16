@@ -821,6 +821,276 @@ body {
   }
 }
 
+.page-lifecycle {
+  width: min(58rem, 100%);
+}
+
+.lifecycle-cycle {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border-radius: calc(var(--radius) + 0.2rem);
+  border: 1px solid color-mix(in srgb, var(--canopy) 20%, white);
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgba(143, 209, 42, 0.2), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(231, 246, 236, 0.72));
+  box-shadow: var(--shadow);
+}
+
+.lifecycle-cycle-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.lifecycle-cycle-title {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.lifecycle-cycle-lead {
+  margin: 0.4rem 0 0;
+  max-width: 38rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.lifecycle-orbit {
+  position: relative;
+  width: min(100%, 26rem);
+  margin: 0.5rem auto 0;
+  aspect-ratio: 1;
+}
+
+.lifecycle-orbit-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.lifecycle-orbit-ring {
+  fill: none;
+  stroke: color-mix(in srgb, var(--leaf) 18%, white);
+  stroke-width: 2;
+  stroke-dasharray: 6 10;
+}
+
+.lifecycle-orbit-path {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.lifecycle-orbit-path--enter {
+  stroke: var(--leaf);
+}
+
+.lifecycle-orbit-path--leave {
+  stroke: var(--warn);
+}
+
+.lifecycle-orbit-center {
+  position: absolute;
+  inset: 26%;
+  display: grid;
+  place-content: center;
+  gap: 0.25rem;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid color-mix(in srgb, var(--lime) 45%, white);
+  box-shadow: 0 12px 28px rgba(6, 26, 20, 0.08);
+  animation: lifecycle-pulse 3.2s ease-in-out infinite;
+}
+
+.lifecycle-orbit-phase {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--canopy);
+}
+
+.lifecycle-orbit-timer {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.lifecycle-orbit-node {
+  position: absolute;
+  width: 44%;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem 0.8rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 22px rgba(6, 26, 20, 0.06);
+}
+
+.lifecycle-orbit-node code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--canopy);
+}
+
+.lifecycle-orbit-node p {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.lifecycle-orbit-step {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lifecycle-orbit-count {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.lifecycle-orbit-node--activate {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-color: color-mix(in srgb, var(--leaf) 35%, white);
+}
+
+.lifecycle-orbit-node--activate .lifecycle-orbit-step {
+  color: var(--leaf);
+}
+
+.lifecycle-orbit-node--mount {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  border-color: color-mix(in srgb, var(--leaf) 28%, white);
+}
+
+.lifecycle-orbit-node--mount .lifecycle-orbit-step {
+  color: var(--leaf);
+}
+
+.lifecycle-orbit-node--deactivate {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-color: color-mix(in srgb, var(--warn) 40%, white);
+}
+
+.lifecycle-orbit-node--deactivate .lifecycle-orbit-step {
+  color: color-mix(in srgb, var(--warn) 85%, var(--ink));
+}
+
+.lifecycle-orbit-node--unmount {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  border-color: color-mix(in srgb, var(--warn) 32%, white);
+}
+
+.lifecycle-orbit-node--unmount .lifecycle-orbit-step {
+  color: color-mix(in srgb, var(--warn) 85%, var(--ink));
+}
+
+.lifecycle-orbit-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.lifecycle-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--muted);
+}
+
+.lifecycle-legend::before {
+  content: "";
+  width: 2.25rem;
+  height: 0.2rem;
+  border-radius: 999px;
+}
+
+.lifecycle-legend--enter::before {
+  background: var(--leaf);
+}
+
+.lifecycle-legend--leave::before {
+  background: var(--warn);
+}
+
+.lifecycle-orbit-actions {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.25rem;
+  border-top: 1px dashed color-mix(in srgb, var(--leaf) 22%, transparent);
+}
+
+@keyframes lifecycle-pulse {
+  0%,
+  100% {
+    box-shadow: 0 12px 28px rgba(6, 26, 20, 0.08);
+  }
+
+  50% {
+    box-shadow: 0 14px 32px rgba(31, 143, 78, 0.16);
+  }
+}
+
+@media (max-width: 640px) {
+  .lifecycle-cycle-head {
+    flex-direction: column;
+  }
+
+  .lifecycle-orbit {
+    aspect-ratio: auto;
+    display: grid;
+    gap: 0.65rem;
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .lifecycle-orbit-svg {
+    display: none;
+  }
+
+  .lifecycle-orbit-center {
+    position: static;
+    inset: auto;
+    border-radius: var(--radius);
+    animation: none;
+  }
+
+  .lifecycle-orbit-node {
+    position: static;
+    width: 100%;
+    transform: none;
+  }
+}
+
 .nav-summary {
   display: grid;
   gap: 0.85rem;

@@ -1,5 +1,26 @@
 import { viewSnippet } from '../utils/snippet.js'
 
+export const cycleFlowCode = `// packages/runtime/src/nav/screen.ts (simplified)
+export function screen(mod) {
+  return (host, ctx) => {
+    const cleanups = []
+
+    const activateCleanup = runScreenLifecycle(lifecycle, 'activate', ctx)
+    if (typeof activateCleanup === 'function') cleanups.push(activateCleanup)
+
+    const mountCleanup = runScreenLifecycle(lifecycle, 'mount')
+    if (typeof mountCleanup === 'function') cleanups.push(mountCleanup)
+
+    cleanups.push(adapted(host, ctx)) // mount the .jcr view
+
+    return () => {
+      runScreenLifecycle(lifecycle, 'deactivate')
+      runScreenLifecycle(lifecycle, 'unmount')
+      for (const cleanup of cleanups) cleanup()
+    }
+  }
+}`
+
 export const hooksCode = `export const lifecycle = createLifecycle({
   onMount() {
     const timer = setInterval(() => ticks.update((n) => n + 1), 1000)
@@ -7,7 +28,14 @@ export const hooksCode = `export const lifecycle = createLifecycle({
   },
   onActivate(ctx) {
     document.title = 'Jacaré Lab · Lifecycle'
+    activations.update((n) => n + 1)
     return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
+  },
+  onDeactivate() {
+    deactivations.update((n) => n + 1)
+  },
+  onUnmount() {
+    unmounts.update((n) => n + 1)
   },
 })`
 
@@ -19,6 +47,10 @@ export const activationCode = `onActivate() {
   document.title = 'Jacaré Lab · Lifecycle'
   activations.update((n) => n + 1) // runs again every time you come back
   return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
+}
+
+onDeactivate() {
+  deactivations.update((n) => n + 1) // fires when nav hides this screen
 }`
 
 export const disposeCode = viewSnippet(

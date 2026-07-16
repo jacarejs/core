@@ -64,7 +64,7 @@ export {
 
 export { formCode, touchedDirtyCode, confirmCode, multiValidatorCode } from './forms.js'
 
-export { hooksCode, scopeCode, activationCode, disposeCode } from './lifecycle.js'
+export { cycleFlowCode, hooksCode, scopeCode, activationCode, disposeCode } from './lifecycle.js'
 
 export { cookbookCode, searchCode } from './cookbook.js'
 
@@ -133,7 +133,7 @@ import {
   shellCode,
 } from './navigation.js'
 import { formCode, touchedDirtyCode, confirmCode, multiValidatorCode } from './forms.js'
-import { hooksCode, scopeCode, activationCode, disposeCode } from './lifecycle.js'
+import { cycleFlowCode, hooksCode, scopeCode, activationCode, disposeCode } from './lifecycle.js'
 import { cookbookCode, searchCode } from './cookbook.js'
 import {
   renderCode,
@@ -223,7 +223,8 @@ export const SNIPPET_CATALOG = [
   { id: 'forms.confirm', title: 'Custom validator reading another field', lesson: '/forms', code: confirmCode },
   { id: 'forms.multi-validator', title: 'Multiple validators on one field', lesson: '/forms', code: multiValidatorCode },
 
-  { id: 'lifecycle.hooks', title: 'onMount timer + cleanup', lesson: '/lifecycle', code: hooksCode },
+  { id: 'lifecycle.cycle', title: 'screen() lifecycle order', lesson: '/lifecycle', code: cycleFlowCode },
+  { id: 'lifecycle.hooks', title: 'Full lifecycle export', lesson: '/lifecycle', code: hooksCode },
   { id: 'lifecycle.scope', title: 'registerScope for the DevTools panel', lesson: '/lifecycle', code: scopeCode },
   { id: 'lifecycle.activation', title: 'onActivate runs on every visit', lesson: '/lifecycle', code: activationCode },
   { id: 'lifecycle.dispose', title: 'Dispose counter', lesson: '/lifecycle', code: disposeCode },

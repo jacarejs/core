@@ -9,10 +9,6 @@ export <contract>
   slots: ['default']
 </contract>
 
-function openCode() {
-  showCode(title, code)
-}
-
 export <view>
   <article class="demo">
     <header class="demo-head">
@@ -22,7 +18,7 @@ export <view>
           <p class="demo-lead">${lead}</p>
         #end
       </div>
-      <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      <button type="button" class="btn btn-ghost" on-click=${() => showCode(title, code)}>View code</button>
     </header>
     <div class="demo-live">
       <slot />
