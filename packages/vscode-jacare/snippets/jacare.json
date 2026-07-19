@@ -1,0 +1,154 @@
+{
+  "Jacaré component": {
+    "prefix": ["jcr-component", "jacare-component"],
+    "body": [
+      "export <contract>",
+      "  props: {",
+      "    ${1:label}: { type: '${2:string}', required: true }",
+      "  }",
+      "  emits: ['${3:change}']",
+      "</contract>",
+      "",
+      "export <view>",
+      "  ${4:<div class=\"${5:component}\">",
+      "    $0",
+      "  </div>}",
+      "</view>",
+      "",
+      "export <style>",
+      ".${5:component} {",
+      "  ${6:}",
+      "}",
+      "</style>"
+    ],
+    "description": "Scaffold a .jcr component with contract, view, and style"
+  },
+  "Export contract": {
+    "prefix": ["jcr-contract", "export-contract"],
+    "body": [
+      "export <contract>",
+      "  props: {",
+      "    ${1:label}: { type: '${2:string}', required: true }",
+      "  }",
+      "  pulses: {",
+      "    ${3:count}: '${4:number}'",
+      "  }",
+      "  slots: ['default'${5:, 'actions'}]",
+      "  emits: ['${6:change}']",
+      "</contract>"
+    ],
+    "description": "Declare export <contract> with props, pulses, slots, and emits"
+  },
+  "Export contract (props only)": {
+    "prefix": ["jcr-props", "contract-props"],
+    "body": [
+      "export <contract>",
+      "  props: {",
+      "    ${1:label}: { type: '${2:string}', required: true }",
+      "    ${3:value}: { type: '${4:string}', model: true }",
+      "  }",
+      "</contract>"
+    ],
+    "description": "Minimal contract with required and model props"
+  },
+  "Export view": {
+    "prefix": ["jcr-view", "export-view"],
+    "body": [
+      "export <view>",
+      "  ${1:<div>",
+      "    $0",
+      "  </div>}",
+      "</view>"
+    ],
+    "description": "Declare an export <view> block"
+  },
+  "Export style": {
+    "prefix": ["jcr-style", "export-style"],
+    "body": [
+      "export <style>",
+      ".${1:class} {",
+      "  ${2:}",
+      "}",
+      "</style>"
+    ],
+    "description": "Declare an export <style> scoped CSS block"
+  },
+  "Signal": {
+    "prefix": ["jcr-signal", "signal"],
+    "body": [
+      "const ${1:count} = signal(${2:0})"
+    ],
+    "description": "Create a Jacaré signal (reactive state)"
+  },
+  "Computed": {
+    "prefix": ["jcr-computed", "computed"],
+    "body": [
+      "const ${1:value} = computed(() => ${2:})"
+    ],
+    "description": "Create a computed value derived from signals"
+  },
+  "If block": {
+    "prefix": ["jcr-if", "#if"],
+    "body": [
+      "#if ${1:condition}",
+      "  $0",
+      "#end"
+    ],
+    "description": "Template #if / #end conditional"
+  },
+  "If / else block": {
+    "prefix": ["jcr-ifelse", "#ifelse"],
+    "body": [
+      "#if ${1:condition}",
+      "  $2",
+      "#else",
+      "  $0",
+      "#end"
+    ],
+    "description": "Template #if / #else / #end conditional"
+  },
+  "For block": {
+    "prefix": ["jcr-for", "#for"],
+    "body": [
+      "#for ${1:items}() as ${2:item} (${2:item}.${3:id})",
+      "  $0",
+      "#end"
+    ],
+    "description": "Template #for / #end keyed list"
+  },
+  "Bind value": {
+    "prefix": ["jcr-bind", "bind-value"],
+    "body": [
+      "bind-value=\\${${1:signal}}"
+    ],
+    "description": "Two-way bind-value for model props / inputs"
+  },
+  "On click": {
+    "prefix": ["jcr-click", "on-click"],
+    "body": [
+      "on-click=\\${${1:handler}}"
+    ],
+    "description": "Event handler attribute on-click"
+  },
+  "Emit event": {
+    "prefix": ["jcr-emit", "emit"],
+    "body": [
+      "emit('${1:change}'${2:})"
+    ],
+    "description": "Emit a contract event from the child"
+  },
+  "Slot": {
+    "prefix": ["jcr-slot", "slot"],
+    "body": [
+      "<slot${1: name=\"${2:default}\"} />"
+    ],
+    "description": "Named or default slot placeholder"
+  },
+  "Component usage": {
+    "prefix": ["jcr-use", "component-tag"],
+    "body": [
+      "<${1:Component} :${2:prop}=\\${${3:value}}>$0</${1:Component}>"
+    ],
+    "description": "PascalCase component tag with a one-way prop"
+  }
+}

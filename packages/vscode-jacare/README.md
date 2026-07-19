@@ -17,7 +17,7 @@
   </a>
 </p>
 
-Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr` files — syntax highlighting, file icons, and editor ergonomics for the Jacaré reactive UI framework.
+Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr` files — syntax highlighting, snippets, file icons, and editor ergonomics for the Jacaré reactive UI framework.
 
 **Publisher:** [heberalmeida](https://marketplace.visualstudio.com/publishers/heberalmeida)  
 **Extension ID:** [`heberalmeida.jacare`](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)  
@@ -31,9 +31,10 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 
 | Feature | Description |
 |---------|-------------|
-| **Syntax highlighting** | JavaScript module body, `view` templates, `style` blocks, directives, HTML, and bindings |
+| **Syntax highlighting** | JavaScript module body, `view` / `style` / `contract` blocks, directives, HTML, and bindings |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#for` (and `@if` / `@each` aliases) |
-| **Template contracts** | `export <contract>` surfaces (`props`, `pulses`, `slots`, `emits`) alongside the view |
+| **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` fields |
+| **Snippets** | Prefixes for component scaffold, contract, view, style, signals, and template control flow |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
 | **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `on-inc` (contract emits), `class-active`, `${expr}` |
 | **Scoped CSS** | `style` tagged templates and `export <style>` highlighted as CSS |
@@ -63,7 +64,7 @@ cd packages/vscode-jacare
 yarn install
 yarn build
 yarn package
-code --install-extension jacare-0.0.7.vsix --force
+code --install-extension jacare-0.0.10.vsix --force
 ```
 
 ### Development mode
@@ -73,6 +74,84 @@ code --install-extension jacare-0.0.7.vsix --force
 3. A new Extension Development Host window opens with the extension loaded
 
 ---
+
+## Snippets
+
+In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Snippets use the `jacare` language id.
+
+| Prefix | Aliases | Inserts |
+|--------|---------|---------|
+| `jcr-component` | `jacare-component` | Full scaffold: `export <contract>` + `<view>` + `<style>` |
+| `jcr-contract` | `export-contract` | Contract with `props`, `pulses`, `slots`, and `emits` |
+| `jcr-props` | `contract-props` | Minimal contract (`required` + `model` props) |
+| `jcr-view` | `export-view` | `export <view>…</view>` |
+| `jcr-style` | `export-style` | `export <style>…</style>` |
+| `jcr-signal` | `signal` | `const name = signal(…)` |
+| `jcr-computed` | `computed` | `const name = computed(() => …)` |
+| `jcr-if` | `#if` | `#if` / `#end` |
+| `jcr-ifelse` | `#ifelse` | `#if` / `#else` / `#end` |
+| `jcr-for` | `#for` | `#for items() as item (item.id)` / `#end` |
+| `jcr-bind` | `bind-value` | `bind-value=${signal}` |
+| `jcr-click` | `on-click` | `on-click=${handler}` |
+| `jcr-emit` | `emit` | `emit('change')` |
+| `jcr-slot` | `slot` | `<slot name="…" />` |
+| `jcr-use` | `component-tag` | `<Component :prop=${value}>…</Component>` |
+
+### Snippet examples
+
+**Component scaffold** (`jcr-component`):
+
+```javascript
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+  }
+  emits: ['change']
+</contract>
+
+export <view>
+  <div class="component">
+    
+  </div>
+</view>
+
+export <style>
+.component {
+  
+}
+</style>
+```
+
+**Contract** (`jcr-contract`):
+
+```javascript
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+  }
+  pulses: {
+    count: 'number'
+  }
+  slots: ['default', 'actions']
+  emits: ['change']
+</contract>
+```
+
+**Control flow** (`jcr-if`, `jcr-for`):
+
+```javascript
+#if show()
+  <p>Visible</p>
+#else
+  <p>Hidden</p>
+#end
+
+#for items() as item (item.id)
+  <li>${item.label}</li>
+#end
+```
+
+Tab through placeholders to fill names, types, and handlers.
 
 ## Language support
 
@@ -203,11 +282,14 @@ export <style>
 |-------|----------|
 | `source.jacare` | Root language scope |
 | `keyword.control.jacare` | `#if`, `#for`, `#end`, `@each`, etc. |
-| `keyword.tag.jacare` | `view`, `style` tagged templates and `<view>` / `<style>` blocks |
+| `entity.name.tag.jacare` | `view`, `style`, and `contract` block tags |
+| `entity.name.tag.jacare.contract` | `<contract>` / `</contract>` specifically |
+| `keyword.other.contract.jacare` | Contract fields: `props`, `pulses`, `slots`, `emits`, `forwards` |
 | `entity.name.type.tag.jacare` | PascalCase components |
 | `entity.name.tag` | HTML elements (`div`, `slot`, `button`, `view`, `style`, …) |
 | `entity.other.attribute-name` | `bind-*`, `on-*`, `class-*`, `:prop` |
 | `meta.embedded.expression.jacare` | `${expression}` inside templates |
+| `meta.contract.jacare` | Entire `export <contract>…</contract>` block |
 | `source.css` | Content inside `style` blocks |
 
 ---
@@ -257,7 +339,7 @@ Optional `settings.json` for Jacaré projects:
 
 | Not included | Alternative |
 |--------------|-------------|
-| IntelliSense / autocomplete | Use TypeScript with `jacare.d.ts` in your project |
+| IntelliSense / autocomplete | Use snippets (`jcr-*`) plus TypeScript with `jacare.d.ts` in your project |
 | Go to definition in templates | Planned for a future release |
 | Formatting | Format the JavaScript parts with your Prettier/ESLint setup |
 | Contract / template diagnostics | Use `jacare check` from `@jacare/cli` (validates `export <contract>` against parents) |

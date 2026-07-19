@@ -1,8 +1,8 @@
 {
   "name": "jacare",
   "displayName": "Jacaré",
-  "description": "Syntax highlighting and icons for Jacaré .jcr files",
-  "version": "0.0.9",
+  "description": "Syntax highlighting, snippets, and icons for Jacaré .jcr files",
+  "version": "0.0.10",
   "publisher": "heberalmeida",
   "author": {
     "name": "Heber Almeida"
@@ -23,6 +23,7 @@
   },
   "categories": [
     "Programming Languages",
+    "Snippets",
     "Themes"
   ],
   "main": "./dist/extension.js",
@@ -70,15 +71,30 @@
         "path": "./icons/jacare-icon-theme.json"
       }
     ],
+    "snippets": [
+      {
+        "language": "jacare",
+        "path": "./snippets/jacare.json"
+      }
+    ],
     "configurationDefaults": {
       "workbench.iconTheme": "jacare-icons",
       "editor.tokenColorCustomizations": {
         "[Default Dark Modern]": {
           "textMateRules": [
             {
-              "scope": "entity.name.tag.jacare",
+              "scope": [
+                "entity.name.tag.jacare",
+                "entity.name.tag.jacare.contract"
+              ],
               "settings": {
                 "foreground": "#569CD6"
+              }
+            },
+            {
+              "scope": "keyword.other.contract.jacare",
+              "settings": {
+                "foreground": "#9CDCFE"
               }
             },
             {
@@ -114,9 +130,18 @@
         "[Default Dark+]": {
           "textMateRules": [
             {
-              "scope": "entity.name.tag.jacare",
+              "scope": [
+                "entity.name.tag.jacare",
+                "entity.name.tag.jacare.contract"
+              ],
               "settings": {
                 "foreground": "#569CD6"
+              }
+            },
+            {
+              "scope": "keyword.other.contract.jacare",
+              "settings": {
+                "foreground": "#9CDCFE"
               }
             },
             {
@@ -152,9 +177,18 @@
         "[Default Light Modern]": {
           "textMateRules": [
             {
-              "scope": "entity.name.tag.jacare",
+              "scope": [
+                "entity.name.tag.jacare",
+                "entity.name.tag.jacare.contract"
+              ],
               "settings": {
                 "foreground": "#800000"
+              }
+            },
+            {
+              "scope": "keyword.other.contract.jacare",
+              "settings": {
+                "foreground": "#001080"
               }
             },
             {
@@ -190,9 +224,18 @@
         "[Default Light+]": {
           "textMateRules": [
             {
-              "scope": "entity.name.tag.jacare",
+              "scope": [
+                "entity.name.tag.jacare",
+                "entity.name.tag.jacare.contract"
+              ],
               "settings": {
                 "foreground": "#800000"
+              }
+            },
+            {
+              "scope": "keyword.other.contract.jacare",
+              "settings": {
+                "foreground": "#001080"
               }
             },
             {
@@ -227,9 +270,18 @@
         },
         "textMateRules": [
           {
-            "scope": "entity.name.tag.jacare",
+            "scope": [
+              "entity.name.tag.jacare",
+              "entity.name.tag.jacare.contract"
+            ],
             "settings": {
               "foreground": "#569CD6"
+            }
+          },
+          {
+            "scope": "keyword.other.contract.jacare",
+            "settings": {
+              "foreground": "#9CDCFE"
             }
           },
           {

@@ -14,6 +14,9 @@
           "include": "#style-blocks"
         },
         {
+          "include": "#contract-block"
+        },
+        {
           "include": "#view-block"
         },
         {
@@ -26,6 +29,59 @@
           "include": "source.js"
         }
       ]
+    },
+    "contract-block": {
+      "begin": "(\\bexport)(\\s+)(<)(contract)\\b([^>]*)(>)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.export.js"
+        },
+        "2": {
+          "name": "source.jacare"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "4": {
+          "name": "entity.name.tag.jacare entity.name.tag.jacare.contract entity.name.tag"
+        },
+        "5": {
+          "patterns": [
+            {
+              "include": "#tag-attributes"
+            }
+          ]
+        },
+        "6": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "end": "(</)(contract)(>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "2": {
+          "name": "entity.name.tag.jacare entity.name.tag.jacare.contract entity.name.tag"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "name": "meta.contract.jacare",
+      "contentName": "meta.embedded.block.contract.jacare source.js",
+      "patterns": [
+        {
+          "include": "#contract-fields"
+        },
+        {
+          "include": "source.js"
+        }
+      ]
+    },
+    "contract-fields": {
+      "match": "\\b(props|pulses|slots|emits|forwards)\\b(?=\\s*:)",
+      "name": "keyword.other.contract.jacare support.type.property-name.json"
     },
     "style-blocks": {
       "patterns": [
@@ -380,7 +436,7 @@
           }
         },
         {
-          "match": "(</?)(slot|div|span|p|a|button|input|label|ul|ol|li|nav|main|header|footer|section|article|h[1-6]|form|select|option|textarea|pre|code|table|tr|td|th|thead|tbody|img|br|hr|dl|dt|dd|strong|em|small|figure|figcaption|template|view|style)(\\s|/?>)",
+          "match": "(</?)(slot|div|span|p|a|button|input|label|ul|ol|li|nav|main|header|footer|section|article|h[1-6]|form|select|option|textarea|pre|code|table|tr|td|th|thead|tbody|img|br|hr|dl|dt|dd|strong|em|small|figure|figcaption|template|view|style|contract)(\\s|/?>)",
           "captures": {
             "1": {
               "name": "punctuation.definition.tag.begin.html"
