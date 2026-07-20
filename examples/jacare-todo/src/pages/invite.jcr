@@ -1,7 +1,7 @@
 import { createForm, derive, pulse } from '@jacare/core'
 import Field from '../components/Field.jcr'
 import { showCode } from '../code-viewer.js'
-import { inviteCode } from '../snippets/pages.js'
+import inviteCode from './invite.jcr?raw'
 
 const step = pulse(0, { name: 'invite.step', file: 'invite.jcr', line: 6 })
 const vegetarian = pulse(false, { name: 'invite.vegetarian', file: 'invite.jcr', line: 7 })

@@ -1,6 +1,6 @@
 import { derive, pulse } from '@jacare/core'
 import { showCode } from '../code-viewer.js'
-import { splitCode } from '../snippets/pages.js'
+import splitCode from './split.jcr?raw'
 
 const TIP_PRESETS = [10, 15, 18, 20, 25]
 

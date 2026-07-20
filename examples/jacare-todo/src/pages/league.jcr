@@ -1,6 +1,6 @@
 import { batch, derive, pulse } from '@jacare/core'
 import { showCode } from '../code-viewer.js'
-import { leagueCode } from '../snippets/pages.js'
+import leagueCode from './league.jcr?raw'
 
 const TEAMS = [
   { id: 'harbor', name: 'North Harbor', abbr: 'NH', c1: '#0b3d5c', c2: '#e8b923' },

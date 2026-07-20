@@ -3,7 +3,7 @@
   --ink-soft: #2a4a38;
   --muted: #5c7a68;
   --paper: #f3f7f1;
-  --panel: rgba(255, 255, 255, 0.78);
+  --panel: rgba(255, 255, 255, 0.92);
   --panel-solid: #fbfef9;
   --line: rgba(16, 36, 26, 0.1);
   --line-strong: rgba(16, 36, 26, 0.18);
@@ -39,19 +39,9 @@ body {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 80% 55% at 12% -10%, rgba(120, 192, 24, 0.35), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 100% 0%, rgba(24, 144, 48, 0.22), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(16, 36, 26, 0.08), transparent 60%),
+    radial-gradient(ellipse 80% 55% at 12% -10%, rgba(120, 192, 24, 0.28), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 0%, rgba(24, 144, 48, 0.16), transparent 50%),
     linear-gradient(165deg, #e8f0e4 0%, #d5e4d4 48%, #c8d9c4 100%);
-}
-
-.atmosphere::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
-  pointer-events: none;
 }
 
 .app {
@@ -76,7 +66,6 @@ body {
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.75rem;
-  animation: rise 0.55s ease both;
   min-width: 0;
 }
 
@@ -121,9 +110,8 @@ body {
   gap: 0.25rem;
   padding: 0.28rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid var(--line);
-  backdrop-filter: blur(10px);
   max-width: 100%;
 }
 
@@ -152,7 +140,6 @@ body {
 .main {
   min-height: 22rem;
   min-width: 0;
-  animation: rise 0.7s ease 0.06s both;
 }
 
 .footer {
@@ -243,7 +230,6 @@ body {
   border-radius: var(--radius-sm);
   background: var(--panel);
   border: 1px solid var(--line);
-  backdrop-filter: blur(8px);
 }
 
 .metric-value {
@@ -267,7 +253,6 @@ body {
   background: var(--panel);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(12px);
 }
 
 .composer {
@@ -790,17 +775,6 @@ body {
   line-height: 1.45;
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes pop {
   from {
     opacity: 0;
@@ -1296,8 +1270,7 @@ button:disabled {
   place-items: center;
   padding: 1rem;
   overflow: hidden;
-  background: rgba(6, 26, 20, 0.48);
-  backdrop-filter: blur(3px);
+  background: rgba(6, 26, 20, 0.55);
   animation: fade 0.2s ease both;
 }
 

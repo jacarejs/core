@@ -1,6 +1,6 @@
 import { derive, effect, pulse } from '@jacare/core'
 import { showCode } from '../code-viewer.js'
-import { matchCode } from '../snippets/pages.js'
+import matchCode from './tictactoe.jcr?raw'
 
 const HUMAN = 'X'
 const CPU = 'O'

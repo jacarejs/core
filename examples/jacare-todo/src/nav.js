@@ -18,10 +18,3 @@ export const nav = createNav({
   },
   missing: NotFound,
 })
-
-nav.warm('/board')
-nav.warm('/match')
-nav.warm('/focus')
-nav.warm('/invite')
-nav.warm('/split')
-nav.warm('/league')

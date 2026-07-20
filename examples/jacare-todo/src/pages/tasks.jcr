@@ -15,7 +15,8 @@ import {
   doneCount,
 } from '../store.js'
 import { showCode } from '../code-viewer.js'
-import { tasksCode, storeCode } from '../snippets/pages.js'
+import tasksCode from './tasks.jcr?raw'
+import storeCode from '../store.js?raw'
 
 
 export const lifecycle = createLifecycle({

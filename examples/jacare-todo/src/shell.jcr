@@ -12,7 +12,7 @@ export <view>
     <div class="layout">
       <header class="header">
         <a class="brand" jacare-go="/" href=${appHref('/')}>
-          <img class="logo" src=${assetUrl('jacare-logo.png')} alt="" />
+          <img class="logo" src=${assetUrl('jacare-mark.webp')} width="52" height="55" alt="" />
           <div class="brand-copy">
             <strong class="brand-name">Jacaré</strong>
             <span class="brand-tag">Suite</span>

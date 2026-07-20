@@ -9,7 +9,8 @@ import {
   removeItem,
 } from '../store.js'
 import { showCode } from '../code-viewer.js'
-import { kanbanCode, storeCode } from '../snippets/pages.js'
+import kanbanCode from './kanban.jcr?raw'
+import storeCode from '../store.js?raw'
 
 
 const dropTarget = pulse(null)

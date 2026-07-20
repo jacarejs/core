@@ -8,7 +8,7 @@ import {
   setNavTitle,
 } from '@jacare/core'
 import { showCode } from '../code-viewer.js'
-import { focusCode } from '../snippets/pages.js'
+import focusCode from './focus.jcr?raw'
 
 const WORK_PRESETS = [
   { id: '15', label: '15 min', secs: 15 * 60 },
