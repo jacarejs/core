@@ -14,13 +14,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@jacare/compiler": "0.1.8",
-    "@jacare/core": "0.1.8"
+    "@jacare/compiler": "0.1.9",
+    "@jacare/core": "0.1.9"
   },
   "devDependencies": {
-    "@jacare/cli": "0.1.8",
-    "@jacare/devtools": "0.1.8",
-    "@jacare/vite-plugin": "0.1.8",
+    "@jacare/cli": "0.1.9",
+    "@jacare/devtools": "0.1.9",
+    "@jacare/vite-plugin": "0.1.9",
     "vite": "^6.0.3"
   }
 }
