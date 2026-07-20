@@ -1,6 +1,6 @@
 {
   "name": "@jacare/devtools",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Jacaré DevTools — Pulse Graph inspector",
   "license": "MIT",
   "repository": {
@@ -31,7 +31,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@jacare/core": "0.1.7"
+    "@jacare/core": "0.1.8"
   },
   "sideEffects": false
 }
