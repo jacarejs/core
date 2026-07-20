@@ -109,22 +109,29 @@ export function createNav(options: NavOptions): Nav {
     const target = await runGuard(toPlace(url), from)
     if (target === false) return
 
-    if (
+    const samePlace =
       target.path === from.path &&
       JSON.stringify(target.search) === JSON.stringify(from.search) &&
       target.hash === from.hash
-    ) {
-      return
-    }
+
+    // Always assign a fresh place object so the render effect remounts —
+    // including same-path navigations used to recover a stuck screen.
+    where.set({
+      path: target.path,
+      params: target.params,
+      search: target.search,
+      hash: target.hash,
+    })
 
     const href = `${base === '/' ? '' : base}${buildPath(target.path, target.search)}${target.hash}`
+    const locationHref = `${window.location.pathname}${window.location.search}${window.location.hash}`
+    if (samePlace && locationHref === href) return
+
     if (mode === 'go') {
       history.pushState({ jacare: true }, '', href)
     } else {
       history.replaceState({ jacare: true }, '', href)
     }
-
-    where.set(target)
   }
 
   async function drainNavigateQueue(): Promise<void> {
@@ -205,7 +212,11 @@ export function createNav(options: NavOptions): Nav {
       const match = matchScreen(screens, current.path)
       const runId = ++active
 
-      screenDispose?.()
+      try {
+        screenDispose?.()
+      } catch (error) {
+        console.error(error)
+      }
       screenDispose = null
 
       let host: HTMLElement
@@ -213,11 +224,11 @@ export function createNav(options: NavOptions): Nav {
       if (layout) {
         if (!layoutDispose) {
           layoutDispose = layout(target, buildContext(current.path, match?.params ?? {}))
-          layoutHost = requireFrame(target)
-        } else {
-          layoutHost!.replaceChildren()
         }
-        host = layoutHost!
+        // Re-query every navigation — a reactive layout may replace [jacare-frame].
+        layoutHost = requireFrame(target)
+        layoutHost.replaceChildren()
+        host = layoutHost
       } else {
         target.replaceChildren()
         host = target

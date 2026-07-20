@@ -246,6 +246,77 @@ describe('createNav', () => {
     expect(target.querySelector('[jacare-frame]')?.textContent).toBe('about')
   })
 
+  it('remounts into a replaced layout frame', async () => {
+    window.history.pushState({}, '', '/')
+    const Shell = vi.fn((target: HTMLElement) => {
+      target.innerHTML = '<header>shell</header><div jacare-frame></div>'
+      return () => {}
+    })
+    const Home = vi.fn((target: HTMLElement) => {
+      target.textContent = 'home'
+      return () => {}
+    })
+    const About = vi.fn((target: HTMLElement) => {
+      target.textContent = 'about'
+      return () => {}
+    })
+
+    const nav = createNav({
+      layout: Shell,
+      screens: {
+        '/': Home,
+        '/about': About,
+      },
+    })
+
+    const target = document.createElement('div')
+    nav.attach(target)
+    await flush()
+
+    const staleFrame = target.querySelector('[jacare-frame]')
+    expect(staleFrame?.textContent).toBe('home')
+
+    const liveFrame = document.createElement('div')
+    liveFrame.setAttribute('jacare-frame', '')
+    staleFrame?.replaceWith(liveFrame)
+
+    await nav.go('/about')
+    await flush()
+
+    expect(About).toHaveBeenCalledTimes(1)
+    expect(liveFrame.textContent).toBe('about')
+    expect(target.querySelector('[jacare-frame]')?.textContent).toBe('about')
+  })
+
+  it('remounts when navigating to the current path again', async () => {
+    window.history.pushState({}, '', '/page')
+    let mounts = 0
+    const Page = vi.fn((target: HTMLElement) => {
+      mounts += 1
+      target.textContent = `page-${mounts}`
+      return () => {}
+    })
+
+    const nav = createNav({
+      screens: {
+        '/page': Page,
+      },
+    })
+
+    const target = document.createElement('div')
+    nav.attach(target)
+    await flush()
+
+    expect(target.textContent).toBe('page-1')
+    expect(Page).toHaveBeenCalledTimes(1)
+
+    await nav.go('/page')
+    await flush()
+
+    expect(Page).toHaveBeenCalledTimes(2)
+    expect(target.textContent).toBe('page-2')
+  })
+
   it('queues rapid navigations', async () => {
     window.history.pushState({}, '', '/')
     const order: string[] = []
