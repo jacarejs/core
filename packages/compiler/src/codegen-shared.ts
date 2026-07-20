@@ -48,10 +48,19 @@ export function rewriteSignalsInExpr(
   if (names.size === 0) return expr
   let out = expr
   for (const name of [...names].sort((a, b) => b.length - a.length)) {
-    const re = new RegExp(`(?<![.\\w$])${name}(?![\\w$])(?!\\s*\\()`, 'g')
-    out = out.replace(re, `${name}()`)
+    // `{ clicks, fruits }` → `{ clicks: clicks(), fruits: fruits() }`
+    const shorthand = new RegExp(`(?<=[{,]\\s*)${escapeRegExp(name)}(?=\\s*[,}])`, 'g')
+    out = out.replace(shorthand, `${name}: ${name}()`)
+
+    // Bare reads → `name()`, but skip calls `name(`, keys `name:`, and property access `.name`
+    const bare = new RegExp(`(?<![.\\w$])${escapeRegExp(name)}(?![\\w$])(?!\\s*[:(])`, 'g')
+    out = out.replace(bare, `${name}()`)
   }
   return out
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 export function escapeHtml(value: string): string {
@@ -137,7 +146,9 @@ export class CodegenContext {
   }
 
   rewriteExprForEffect(expr: string): string {
-    return rewriteSignalsInExpr(expr, this.signals, this.importedNames)
+    // Only rewrite known local signals. Imported names may be plain values
+    // (snippet strings, helpers) — forcing `name()` would break those.
+    return rewriteSignalsInExpr(expr, this.signals)
   }
 
   useRuntime(name: string): void {

@@ -35,6 +35,11 @@ export const LESSONS = [
     blurb: 'on-*, @*, keyboard, pointer, stopPropagation',
   },
   {
+    path: '/debug',
+    title: 'Debug',
+    blurb: '<debug> syntax — JSON panels, label, copy, shorthand',
+  },
+  {
     path: '/if',
     title: '#if',
     blurb: 'Branches, nested conditions, empty states',

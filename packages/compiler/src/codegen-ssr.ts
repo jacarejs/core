@@ -220,17 +220,27 @@ function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
   if (parts.length === 1 && parts[0]!.type === 'expr') {
     const expr = parts[0]!.value
     const id = ctx.nextBinding()
-    const src = ctx.resolveBindingSignal(expr)
+    const local = ctx.resolveSignal(expr)
+    const src = local ?? ctx.resolveBindingSignal(expr)
     ctx.useRuntime('escapeHtml')
-    const readExpr = src
-      ? `${src}()`
-      : `(() => { const _v = (${ctx.rewriteExprForEffect(expr)}); return typeof _v === 'function' ? _v() : _v })()`
-    ctx.line(
-      `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${readExpr})) + '</span>'`,
-    )
-    if (src) {
-      ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${src} })`)
+    if (local) {
+      ctx.line(
+        `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${local}())) + '</span>'`,
+      )
+      ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${local} })`)
+    } else if (src) {
+      const readExpr = `typeof ${src} === 'function' ? ${src}() : ${src}`
+      ctx.line(
+        `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${readExpr})) + '</span>'`,
+      )
+      ctx.line(
+        `_bindings.push({ id: '${id}', kind: 'expr', read: () => ${readExpr} })`,
+      )
     } else {
+      const readExpr = `(() => { const _v = (${ctx.rewriteExprForEffect(expr)}); return typeof _v === 'function' ? _v() : _v })()`
+      ctx.line(
+        `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${readExpr})) + '</span>'`,
+      )
       ctx.line(
         `_bindings.push({ id: '${id}', kind: 'expr', read: () => { const _v = (${ctx.rewriteExprForEffect(expr)}); return typeof _v === 'function' ? _v() : _v } })`,
       )

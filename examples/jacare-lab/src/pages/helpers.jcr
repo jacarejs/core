@@ -14,6 +14,7 @@ const helpers = [
   { name: 'class-*', description: 'Toggle a class from a boolean signal or expression', path: '/bindings' },
   { name: 'style---*', description: 'Bind a signal to a reactive CSS custom property', path: '/bindings' },
   { name: 'on-* / @*', description: 'Attach a DOM event listener with automatic cleanup', path: '/events' },
+  { name: '<debug>', description: 'Dev-only JSON inspector — label, copy, object shorthand; stripped in production', path: '/debug' },
   { name: 'if / elif / else', description: 'Mount exactly one branch at a time', path: '/if' },
   { name: 'case / when / else', description: 'Match one value with Object.is arms', path: '/case' },
   { name: 'for … as … (key)', description: 'Reconcile a keyed list incrementally instead of re-rendering it', path: '/for' },

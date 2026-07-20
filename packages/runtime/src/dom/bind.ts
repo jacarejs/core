@@ -3,9 +3,16 @@ import type { ReadonlySignal } from '../types.js'
 
 export { bindModel } from './bind-model.js'
 
-export function bindText(node: Text, source: ReadonlySignal<string | number>): () => void {
+export function bindText(
+  node: Text,
+  source: ReadonlySignal<string | number> | string | number | null | undefined,
+): () => void {
+  const read = (): string | number => {
+    if (typeof source === 'function') return source()
+    return source ?? ''
+  }
   const update = (): void => {
-    node.data = String(source())
+    node.data = String(read())
   }
   runUntracked(update)
   return effect(update).dispose

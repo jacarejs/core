@@ -554,10 +554,15 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
     const expr = parts[0]!.value
     const src = ctx.resolveBindingSignal(expr)
     if (src) {
-      if (ctx.cpw) {
-        emitCpwText(ctx, textNode, src)
+      const localSignal = ctx.resolveSignal(expr)
+      if (localSignal && ctx.cpw) {
+        emitCpwText(ctx, textNode, localSignal)
+      } else if (localSignal) {
+        ctx.pushCleanup(`bindText(${textNode}, ${localSignal})`)
+        ctx.pushDevtoolsBind(localSignal, textNode, 'text')
       } else {
-        ctx.pushCleanup(`bindText(${textNode}, ${src})`)
+        // Imported binding — may be a pulse or a plain value (snippet strings, etc.)
+        ctx.pushCleanup(`bindPropText(${textNode}, ${src})`)
         ctx.pushDevtoolsBind(src, textNode, 'text')
       }
       return
@@ -576,7 +581,10 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
         return `\${typeof ${trimmed} === 'function' ? ${trimmed}() : ${trimmed} ?? ''}`
       }
       const src = ctx.resolveBindingSignal(p.value)
-      if (src) return `\${${src}()}`
+      if (src) {
+        if (ctx.resolveSignal(p.value)) return `\${${src}()}`
+        return `\${typeof ${src} === 'function' ? ${src}() : ${src} ?? ''}`
+      }
       return `\${(() => { const _v = (${ctx.rewriteExprForEffect(p.value)}); return typeof _v === 'function' ? _v() : _v })()}`
     })
     .join('')

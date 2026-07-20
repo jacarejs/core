@@ -21,7 +21,7 @@ function loadApp(source: string, options: { debug?: boolean } = {}) {
     .replace(/^export /gm, '')
   return new Function(
     'runtime',
-    `const { pulse, effect, bindDebug, runUntracked } = runtime
+    `const { pulse, effect, bindDebug, runUntracked, devtoolsBind = () => () => {} } = runtime
 ${body}
 return { mount, cart }`,
   )(runtime) as {
@@ -58,6 +58,36 @@ describe('bindDebug', () => {
     mount(root)
 
     expect(root.querySelector('.jacare-debug-copy')?.textContent).toBe('Copy JSON')
+  })
+
+  it('expands object shorthand signals without a syntax error', () => {
+    const source = `import { pulse, view } from '@jacare/core'
+const clicks = pulse(1)
+const fruits = pulse([{ id: 'a' }])
+export default view\`
+  <debug copy>\${{ clicks, fruits }}</debug>
+\``
+    const { code } = compile(source, { mode: 'client', debug: true })
+    expect(code).toContain('clicks: clicks()')
+    expect(code).toContain('fruits: fruits()')
+    expect(code).not.toContain('{ clicks(), fruits() }')
+
+    const body = code
+      .replace(/^import[^\n]*\n/, '')
+      .replace(/^export default mount\s*/m, '')
+      .replace(/^export /gm, '')
+    const app = new Function(
+      'runtime',
+      `const { pulse, effect, bindDebug, runUntracked, devtoolsBind = () => () => {} } = runtime
+${body}
+return { mount }`,
+    )(runtime) as { mount: (target: HTMLElement) => () => void }
+
+    const root = document.createElement('div')
+    app.mount(root)
+    const text = root.querySelector('.jacare-debug-body')?.textContent ?? ''
+    expect(text).toContain('"clicks": 1')
+    expect(text).toContain('"id": "a"')
   })
 })
 

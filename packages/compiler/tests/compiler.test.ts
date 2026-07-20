@@ -526,20 +526,39 @@ export <view>
   <input bind-value=\${draft} />
 </view>`
     const client = compile(source, { mode: 'client', debug: false })
-    expect(client.code).toContain('bindText(_text')
-    expect(client.code).toContain('bindText(_text2, active)')
-    expect(client.code).toMatch(/bindText\([^,]+, total\)/)
+    expect(client.code).toContain('bindPropText(_text')
+    expect(client.code).toContain('bindPropText(_text2, active)')
+    expect(client.code).toMatch(/bindPropText\([^,]+, total\)/)
     expect(client.code).toMatch(/bindModel\([^,]+, "value", draft\)/)
     expect(client.code).not.toContain('String(active)')
     expect(client.code).not.toContain('String(total)')
 
     const server = compile(source, { mode: 'server', debug: false })
-    expect(server.code).toContain('String(active())')
-    expect(server.code).toContain('String(total())')
-    expect(server.code).toContain("kind: 'signal', read: active")
-    expect(server.code).toContain("kind: 'signal', read: total")
+    expect(server.code).toContain("typeof active === 'function' ? active() : active")
+    expect(server.code).toContain("typeof total === 'function' ? total() : total")
+    expect(server.code).toContain("kind: 'expr'")
     expect(server.code).not.toContain('String(active)')
-    expect(server.code).not.toContain('read: () => active')
+  })
+
+  it('binds imported plain values with bindPropText (snippet strings)', () => {
+    const source = `import { scaffoldCode } from './snippets.js'
+export <view>
+  <pre>\${scaffoldCode}</pre>
+</view>`
+    const result = compile(source, { mode: 'client', debug: false })
+    expect(result.code).toContain('bindPropText(')
+    expect(result.code).toMatch(/bindPropText\([^,]+, scaffoldCode\)/)
+    expect(result.code).not.toMatch(/bindText\([^,]+, scaffoldCode\)/)
+  })
+
+  it('expands object-shorthand signals inside <debug>', () => {
+    const source = `import { pulse, view } from '@jacare/core'
+const clicks = pulse(0)
+const fruits = pulse([])
+export default view\`<debug>\${{ clicks, fruits }}</debug>\``
+    const result = compile(source, { mode: 'client', debug: true })
+    expect(result.code).toContain('() => ({ clicks: clicks(), fruits: fruits() })')
+    expect(result.code).not.toContain('() => ({ clicks(), fruits() })')
   })
 
   it('does not rewrite signal prefixes inside longer identifiers', () => {

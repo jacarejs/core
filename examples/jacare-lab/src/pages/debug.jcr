@@ -1,0 +1,131 @@
+import { pulse, derive } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import { appHref } from '../app-base.js'
+import {
+  singleCode,
+  labelCopyCode,
+  shorthandCode,
+  nestedCode,
+  syntaxCard,
+} from '../snippets/debug.js'
+
+const cart = pulse([
+  { id: 'a', qty: 1 },
+  { id: 'b', qty: 2 },
+])
+
+function addItem() {
+  cart.update((items) => [
+    ...items,
+    { id: String.fromCharCode(97 + items.length), qty: 1 },
+  ])
+}
+
+function bumpQty() {
+  cart.update((items) =>
+    items.map((item, i) => (i === 0 ? { ...item, qty: item.qty + 1 } : item)),
+  )
+}
+
+const score = pulse(0)
+const mood = pulse('curious')
+const removed = pulse(0)
+
+function bumpScore() {
+  score.update((n) => n + 1)
+}
+
+function cycleMood() {
+  const next = { curious: 'focused', focused: 'done', done: 'curious' }
+  mood.update((m) => next[m] ?? 'curious')
+}
+
+function bumpRemoved() {
+  removed.update((n) => n + 1)
+}
+
+const user = pulse({ name: 'Ada', role: 'admin' })
+const flags = pulse({ dark: true, beta: false })
+const summary = derive(() => ({
+  user: user(),
+  flags: flags(),
+}))
+
+function toggleDark() {
+  flags.update((f) => ({ ...f, dark: !f.dark }))
+}
+
+function renameUser() {
+  user.update((u) => ({
+    ...u,
+    name: u.name === 'Ada' ? 'Grace' : 'Ada',
+  }))
+}
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §7c</p>
+      <h1 class="page-title">Debug</h1>
+      <p class="page-lead">
+        Pretty-print reactive state as JSON in development. Prefer
+        <code>&lt;debug&gt;</code> over dumping objects into normal text nodes when you want readable quotes and live updates.
+      </p>
+    </header>
+
+    <Tip :text=${'<debug> is stripped from production builds (Vite passes debug: !isProduction). SSR render() skips it too. Bare pulse names inside { score, mood } become score() / mood() automatically.'} />
+
+    <div class="ref-card">
+      <h3>Syntax</h3>
+      <p class="muted">Body must be a single <code>${'${expr}'}</code>. Optional <code>label</code> and boolean <code>copy</code>.</p>
+      <pre><code>${syntaxCard}</code></pre>
+      <p class="muted">
+        Also used live in
+        <a jacare-go="/components" href=${appHref('/components')}>Components</a>
+        and
+        <a jacare-go="/events" href=${appHref('/events')}>Events</a>.
+      </p>
+    </div>
+
+    <div class="lesson-grid">
+      <Demo :title=${'Single pulse'} :lead=${'Pass one signal — the panel updates whenever the value changes.'} :code=${singleCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn" on-click=${addItem}>Add line</button>
+            <button type="button" class="btn btn-outline" on-click=${bumpQty}>Bump first qty</button>
+          </div>
+          <debug>${cart}</debug>
+        </div>
+      </Demo>
+
+      <Demo :title=${'label + copy'} :lead=${'label captions the header; copy adds a Copy JSON button.'} :code=${labelCopyCode}>
+        <div class="stack">
+          <p class="muted">Same cart pulse — try Copy JSON in the panel.</p>
+          <debug copy label="cart">${cart}</debug>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Object shorthand'} :lead=${'{ score, mood, removed } unwraps each pulse — no score() needed inside the literal.'} :code=${shorthandCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn" on-click=${bumpScore}>score++</button>
+            <button type="button" class="btn btn-outline" on-click=${cycleMood}>cycle mood</button>
+            <button type="button" class="btn btn-outline" on-click=${bumpRemoved}>removed++</button>
+          </div>
+          <debug copy label="props">${{ score, mood, removed }}</debug>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Derived object'} :lead=${'Any expression works — here a derive bundles nested pulses into one snapshot.'} :code=${nestedCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn" on-click=${renameUser}>Rename user</button>
+            <button type="button" class="btn btn-outline" on-click=${toggleDark}>Toggle dark</button>
+          </div>
+          <debug copy label="summary">${summary}</debug>
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>
