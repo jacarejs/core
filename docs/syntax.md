@@ -479,6 +479,19 @@ export const nav = createNav({
 
 Configure `title` on each route in `createNav` (string or `(ctx) => string`). Optional page-level `export const title` still works as a fallback; nav titles win.
 
+For **live** titles (countdown, totals), use `setNavTitle` inside an `effect` from `onActivate`:
+
+```javascript
+import { effect, setNavTitle } from '@jacare/core'
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    const titleFx = effect(() => setNavTitle(`Focus · ${clock()}`))
+    return () => titleFx.dispose()
+  },
+})
+```
+
 Layout shells expose a frame slot:
 
 ```html

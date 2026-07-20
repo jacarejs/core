@@ -214,8 +214,8 @@ export <view>
     </div>
 
     <div class="lesson-grid">
-      <Demo :title=${'Screen title in nav'} :lead=${'Set the browser tab title per route in createNav. Lazy screens use the same { use, title } shape.'} :code=${titleCode}>
-        <p class="muted">This route sets <code>title: 'Jacaré Lab · Navigation'</code> in <code>nav.js</code>. Topic routes use a function title with <code>params.slug</code>.</p>
+      <Demo :title=${'Screen title in nav + setNavTitle'} :lead=${'Static titles: { use, title } in createNav. Live titles: setNavTitle from the page (see Focus in the Todo suite).'} :code=${titleCode}>
+        <p class="muted">This route sets <code>title</code> in <code>nav.js</code>. Topic routes use a function title with <code>params.slug</code>.</p>
       </Demo>
 
       <Demo :title=${'Live route reads'} :lead=${'route comes from createRoute(nav.where). Use the buttons below to drive every read — path, search keys, params.slug, and hash.'} :code=${routeCode}>

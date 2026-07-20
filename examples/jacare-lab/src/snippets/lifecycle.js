@@ -14,7 +14,19 @@ export const titleCode = `export const nav = createNav({
   },
 })
 
-// Configured in nav — applied when the route activates.`
+// Static / param titles → createNav { use, title }
+// Live titles (countdown, totals) → setNavTitle inside an effect:
+
+import { effect, setNavTitle } from '@jacare/core'
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    const titleFx = effect(() => {
+      setNavTitle(\`Jacaré · Focus · \${clock()}\`)
+    })
+    return () => titleFx.dispose()
+  },
+})`
 
 export const cycleFlowCode = `// packages/runtime/src/nav/screen.ts (simplified)
 export function screen(mod) {

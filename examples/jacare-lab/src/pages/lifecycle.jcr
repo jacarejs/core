@@ -149,11 +149,11 @@ export <view>
       </div>
     </article>
 
-    <Tip :text=${'Configure document.title in createNav screens with { use, title }. Use onActivate for analytics and registerScope(). Use onMount for timers and subscriptions — always return a cleanup from it.'} />
+    <Tip :text=${'Static titles go in createNav as { use, title }. Live titles use setNavTitle inside an effect from onActivate. Use onMount for timers — always return a cleanup from it.'} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Screen title in nav'} :lead=${'Set document.title on each route in createNav — string or (ctx) => string. Check the browser tab for Jacaré Lab · Lifecycle.'} :code=${titleCode}>
-        <p class="muted">Configured in <code>nav.js</code> as <code>{ use, title }</code>. Nav titles win over a page-level export.</p>
+      <Demo :title=${'Screen title + setNavTitle'} :lead=${'Static titles live in createNav. For a live tab title (countdown, totals), call setNavTitle from an effect started in onActivate.'} :code=${titleCode}>
+        <p class="muted">See Todo suite <code>/focus</code> for a live <code>setNavTitle</code> + timer example.</p>
       </Demo>
 
       <Demo :title=${'Full lifecycle export'} :lead=${'This page exports lifecycle with all four hooks — the orbit counters above are wired to them.'} :code=${hooksCode}>

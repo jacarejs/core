@@ -5,47 +5,65 @@ import {
   effect,
   pulse,
   registerScope,
+  setNavTitle,
 } from '@jacare/core'
 import { showCode } from '../code-viewer.js'
 import { focusCode } from '../snippets/pages.js'
 
-const WORK = 25 * 60
-const BREAK = 5 * 60
+const WORK_PRESETS = [
+  { id: '15', label: '15 min', secs: 15 * 60 },
+  { id: '25', label: '25 min', secs: 25 * 60 },
+  { id: '45', label: '45 min', secs: 45 * 60 },
+  { id: '50', label: '50 min', secs: 50 * 60 },
+]
 
-const phase = pulse('idle', { name: 'focus.phase', file: 'focus.jcr', line: 16 })
-const running = pulse(false, { name: 'focus.running', file: 'focus.jcr', line: 17 })
-const remaining = pulse(WORK, { name: 'focus.remaining', file: 'focus.jcr', line: 18 })
-const completed = pulse(0, { name: 'focus.completed', file: 'focus.jcr', line: 19 })
+const BREAK_PRESETS = [
+  { id: '5', label: '5 min', secs: 5 * 60 },
+  { id: '10', label: '10 min', secs: 10 * 60 },
+  { id: '15', label: '15 min', secs: 15 * 60 },
+]
 
-const totalSecs = derive(() => (phase() === 'break' ? BREAK : WORK), {
+const workSecs = pulse(25 * 60, { name: 'focus.workSecs', file: 'focus.jcr', line: 28 })
+const breakSecs = pulse(5 * 60, { name: 'focus.breakSecs', file: 'focus.jcr', line: 29 })
+const phase = pulse('idle', { name: 'focus.phase', file: 'focus.jcr', line: 30 })
+const running = pulse(false, { name: 'focus.running', file: 'focus.jcr', line: 31 })
+const remaining = pulse(workSecs(), { name: 'focus.remaining', file: 'focus.jcr', line: 32 })
+const completed = pulse(0, { name: 'focus.completed', file: 'focus.jcr', line: 33 })
+
+const totalSecs = derive(() => (phase() === 'break' ? breakSecs() : workSecs()), {
   name: 'focus.totalSecs',
   file: 'focus.jcr',
-  line: 21,
+  line: 35,
 })
 
 const progress = derive(() => {
   const total = totalSecs()
+  if (total <= 0) return 0
   return Math.round(((total - remaining()) / total) * 100)
-}, { name: 'focus.progress', file: 'focus.jcr', line: 27 })
+}, { name: 'focus.progress', file: 'focus.jcr', line: 41 })
 
 const clock = derive(() => {
   const secs = Math.max(0, remaining())
   const m = String(Math.floor(secs / 60)).padStart(2, '0')
   const s = String(secs % 60).padStart(2, '0')
   return `${m}:${s}`
-}, { name: 'focus.clock', file: 'focus.jcr', line: 33 })
+}, { name: 'focus.clock', file: 'focus.jcr', line: 48 })
 
 const mode = derive(() => {
   if (phase() === 'idle') return 'idle'
   if (phase() === 'work') return running() ? 'work' : 'paused'
   return running() ? 'break' : 'break-paused'
-}, { name: 'focus.mode', file: 'focus.jcr', line: 40 })
+}, { name: 'focus.mode', file: 'focus.jcr', line: 55 })
 
 const startLabel = derive(() => {
   if (phase() === 'idle') return 'Start focus'
   if (phase() === 'break') return 'Start break'
   return 'Resume'
-}, { name: 'focus.startLabel', file: 'focus.jcr', line: 47 })
+}, { name: 'focus.startLabel', file: 'focus.jcr', line: 62 })
+
+const workLabel = derive(() => `${Math.round(workSecs() / 60)} min`)
+const breakLabel = derive(() => `${Math.round(breakSecs() / 60)} min`)
+const canEditPresets = derive(() => !running() && phase() === 'idle')
 
 effect(() => {
   if (!running()) return
@@ -56,10 +74,10 @@ effect(() => {
         if (phase() === 'work') {
           completed.update((n) => n + 1)
           phase.set('break')
-          remaining.set(BREAK)
+          remaining.set(breakSecs())
         } else {
           phase.set('idle')
-          remaining.set(WORK)
+          remaining.set(workSecs())
         }
       })
       return
@@ -69,16 +87,25 @@ effect(() => {
   return () => clearInterval(id)
 })
 
-
 export const lifecycle = createLifecycle({
   onActivate() {
+    const titleFx = effect(() => {
+      const label =
+        mode() === 'idle'
+          ? 'Jacaré · Focus'
+          : `Jacaré · Focus · ${clock()}`
+      setNavTitle(label)
+    })
     const stops = [
       registerScope('focus.mode', 'Mode', () => mode()),
       registerScope('focus.clock', 'Clock', () => clock()),
       registerScope('focus.progress', 'Progress %', () => progress()),
       registerScope('focus.completed', 'Sessions done', () => completed()),
+      registerScope('focus.workSecs', 'Focus length', () => workSecs()),
+      registerScope('focus.breakSecs', 'Break length', () => breakSecs()),
     ]
     return () => {
+      titleFx.dispose()
       for (const stop of stops) stop()
     }
   },
@@ -87,11 +114,24 @@ export const lifecycle = createLifecycle({
   },
 })
 
+function setWorkPreset(secs) {
+  if (!canEditPresets()) return
+  batch(() => {
+    workSecs.set(secs)
+    remaining.set(secs)
+  })
+}
+
+function setBreakPreset(secs) {
+  if (!canEditPresets()) return
+  breakSecs.set(secs)
+}
+
 function start() {
   batch(() => {
     if (phase() === 'idle') {
       phase.set('work')
-      remaining.set(WORK)
+      remaining.set(workSecs())
     }
     running.set(true)
   })
@@ -107,10 +147,10 @@ function skip() {
     if (phase() === 'work') {
       completed.update((n) => n + 1)
       phase.set('break')
-      remaining.set(BREAK)
+      remaining.set(breakSecs())
     } else {
       phase.set('idle')
-      remaining.set(WORK)
+      remaining.set(workSecs())
     }
   })
 }
@@ -119,7 +159,7 @@ function reset() {
   batch(() => {
     running.set(false)
     phase.set('idle')
-    remaining.set(WORK)
+    remaining.set(workSecs())
   })
 }
 
@@ -134,7 +174,7 @@ export <view>
         <div>
           <p class="eyebrow">Timer</p>
           <h1 class="page-title">Focus</h1>
-          <p class="page-lead">A Pomodoro clock driven by effect() — the interval cleans up when you pause or leave the page. Open DevTools Scope to watch the live countdown.</p>
+          <p class="page-lead">Pick a focus and break length, then run the clock. effect() owns the tick; setNavTitle() keeps the tab title in sync with the countdown.</p>
         </div>
         <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
       </div>
@@ -172,6 +212,36 @@ export <view>
       </section>
 
       <aside class="panel focus-side">
+        <div class="field">
+          <span class="field-label">Focus · ${workLabel}</span>
+          <div class="tip-presets">
+            #for WORK_PRESETS as preset (preset.id)
+              <button
+                type="button"
+                class="btn btn-tiny tip-chip"
+                class-active=${() => workSecs() === preset.secs}
+                disabled=${() => !canEditPresets()}
+                on-click=${() => setWorkPreset(preset.secs)}
+              >${preset.label}</button>
+            #end
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Break · ${breakLabel}</span>
+          <div class="tip-presets">
+            #for BREAK_PRESETS as preset (preset.id)
+              <button
+                type="button"
+                class="btn btn-tiny tip-chip"
+                class-active=${() => breakSecs() === preset.secs}
+                disabled=${() => !canEditPresets()}
+                on-click=${() => setBreakPreset(preset.secs)}
+              >${preset.label}</button>
+            #end
+          </div>
+        </div>
+
         <div class="metrics">
           <div class="metric">
             <span class="metric-value">${completed}</span>
@@ -183,10 +253,10 @@ export <view>
           </div>
         </div>
         <ul class="focus-hints">
-          <li>25 min focus · 5 min break</li>
+          <li>Choose lengths while idle, then start</li>
+          <li><code>setNavTitle</code> updates the browser tab live</li>
           <li><code>effect</code> owns the tick; cleanup clears the interval</li>
           <li><code>style---pct</code> drives the ring fill</li>
-          <li>Mode copy switches with a case block</li>
         </ul>
       </aside>
     </div>

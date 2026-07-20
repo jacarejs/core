@@ -1354,7 +1354,34 @@ export const nav = createNav({
 | `title: '…'` | Static document title on activate |
 | `title: (ctx) => …` | Title from `NavContext` (`params`, `search`, `path`) |
 
-Nav titles win over an optional page-level `export const title`. Use `onActivate` only when the title must track live signals after mount (for example `Tasks (${remaining()})`).
+Nav titles win over an optional page-level `export const title`.
+
+### Dynamic title — `setNavTitle`
+
+For titles that change while the screen is open (countdown, cart total, draft name), call **`setNavTitle`** from the page — typically inside an `effect` started in `onActivate` so it cleans up on leave:
+
+```javascript
+import { createLifecycle, effect, setNavTitle } from '@jacare/core'
+
+const clock = derive(() => /* "24:59" */)
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    const titleFx = effect(() => {
+      setNavTitle(`Jacaré · Focus · ${clock()}`)
+    })
+    return () => titleFx.dispose()
+  },
+})
+```
+
+| API | When |
+|-----|------|
+| `createNav` `{ use, title }` | Static (or param-based) title when the route activates |
+| `setNavTitle(string)` | Update `document.title` from the screen — live values, after mount |
+| `document.title = …` in `onActivate` | One-shot; prefer `setNavTitle` for the same job |
+
+See the live example on **Focus** in the Todo suite (`examples/jacare-todo` → `/focus`).
 
 ---
 
@@ -1551,7 +1578,7 @@ function addItem() {
 
 export const lifecycle = createLifecycle({
   onActivate() {
-    // optional: live title from signals (prefer createNav title for static names)
+    // live title — prefer setNavTitle + effect (see §11)
     document.title = `Tasks (${remaining()})`
   },
 })
@@ -1589,7 +1616,8 @@ export <view>
 | Events | `on-click` on Add / row / toggles |
 | Props | `:text`, `:label`, `:onPress` into Badge / IconButton |
 | `class-*` | `class-done=${item.done}` |
-| Lifecycle | `createNav` `{ use, title }` for static titles; `onActivate` for live titles like `Tasks (${remaining()})` |
+| Lifecycle | `createNav` `{ use, title }` for static titles; `setNavTitle` + `effect` for live titles |
+
 | Immutable update | `items.update(list => list.map/filter/…)` |
 
 ---
@@ -1925,6 +1953,7 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | Event `on-*` / `@*` | [§6](#6-events-on---) | DOM listeners |
 | `createNav` / `lazy` | [§11](#11-navigation) | Routing |
 | `screens: { use, title }` | [§11 Screen title](#screen-title) | Document title per route |
+| `setNavTitle` | [§11 Dynamic title](#dynamic-title--setnavtitle) | Live `document.title` from a screen |
 | `createForm` | [§12](#12-forms) | Forms |
 | `createLifecycle` / `registerScope` | [§13](#13-lifecycle-and-scope) | Lifecycle / debug |
 | `renderToString` / `resumeBindings` | [§14](#14-ssr-and-hydration) | SSR |

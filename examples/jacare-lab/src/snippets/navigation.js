@@ -15,7 +15,13 @@ export const titleCode = `export const nav = createNav({
       },
     },
   },
-})`
+})
+
+// Live title from the page (not nav):
+import { effect, setNavTitle } from '@jacare/core'
+
+effect(() => setNavTitle(\`Cart · \${total()} items\`))
+// Prefer starting that effect in onActivate and disposing on leave.`
 
 export const setupCode = `import { createNav, createRoute, lazy, screen } from '@jacare/core'
 import Shell from './shell.jcr'

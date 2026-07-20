@@ -15,6 +15,7 @@ export { createNav } from './create-nav.js'
 export { lazy } from './lazy.js'
 export { adaptScreen, applyScreenTitle, screen } from './screen.js'
 export type { ScreenModule, ScreenModuleMount, ScreenTitle } from './screen.js'
+export { setNavTitle } from './title.js'
 
 export {
   createRoute,
