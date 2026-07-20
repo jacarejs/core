@@ -494,12 +494,14 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
         ctx.pushDevtoolsBind(source, el, 'attr')
       }
     } else if (useProperty) {
-      ctx.pushCleanup(`effect(() => { ${el}[${JSON.stringify(attr.name)}] = (${attr.value}) }).dispose`)
+      ctx.pushCleanup(
+        `effect(() => { ${el}[${JSON.stringify(attr.name)}] = (${ctx.rewriteExprForEffect(attr.value)}) }).dispose`,
+      )
     } else {
       ctx.useRuntime('effect')
       ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
       ctx.indent()
-      ctx.line(`const _v = ${attr.value}`)
+      ctx.line(`const _v = ${ctx.rewriteExprForEffect(attr.value)}`)
       ctx.line(`if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(attr.name)})`)
       ctx.line(`else if (_v === true) ${el}.setAttribute(${JSON.stringify(attr.name)}, '')`)
       ctx.line(`else ${el}.setAttribute(${JSON.stringify(attr.name)}, String(_v))`)

@@ -1,4 +1,6 @@
 import { pulse, derive } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import { matchCode } from '../snippets/pages.js'
 
 const empty = () => Array(9).fill(null)
 
@@ -8,9 +10,9 @@ const winner = pulse(null)
 const scores = pulse({ X: 0, O: 0, draws: 0 })
 
 const status = derive(() => {
-  if (winner() === 'draw') return 'Draw — nice pace.'
-  if (winner()) return `${winner()} wins`
-  return `${turn()} to play`
+  if (winner() === 'draw') return 'Empate — bom ritmo.'
+  if (winner()) return `${winner()} venceu`
+  return `${turn()} joga`
 })
 
 const canPlay = derive(() => winner() == null)
@@ -68,14 +70,23 @@ function resetScores() {
   resetBoard()
 }
 
+function openCode() {
+  showCode('Jogo da velha', [{ name: 'pages/tictactoe.jcr', code: matchCode }])
+}
+
 const cells = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
 export <view>
   <section class="page page-match">
     <header class="page-hero">
-      <p class="eyebrow">Play</p>
-      <h1 class="page-title">Match</h1>
-      <p class="page-lead">A quick tic-tac-toe break — same fine-grained updates, zero VDOM.</p>
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Jogar</p>
+          <h1 class="page-title">Jogo da velha</h1>
+          <p class="page-lead">Uma pausa rápida — mesma reatividade fine-grained, zero VDOM.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>Ver código</button>
+      </div>
     </header>
 
     <div class="match-layout">
@@ -83,8 +94,8 @@ export <view>
         <div class="match-status">
           <p class="match-turn">${status}</p>
           <div class="match-actions">
-            <button type="button" class="btn btn-ghost" on-click=${resetBoard}>New round</button>
-            <button type="button" class="btn btn-ghost" on-click=${resetScores}>Reset scores</button>
+            <button type="button" class="btn btn-ghost" on-click=${resetBoard}>Nova rodada</button>
+            <button type="button" class="btn btn-ghost" on-click=${resetScores}>Zerar placar</button>
           </div>
         </div>
 
@@ -99,29 +110,29 @@ export <view>
               disabled=${() => !canPlay() || board()[i] != null}
               on-click=${() => play(i)}
             >
-              <span>${() => board()[i] ?? ''}</span>
+              <span>${board()[i] ?? ''}</span>
             </button>
           #end
         </div>
       </section>
 
       <aside class="panel match-score">
-        <h2 class="aside-title">Scoreboard</h2>
+        <h2 class="aside-title">Placar</h2>
         <ul class="score-list">
           <li>
             <span class="score-mark x">X</span>
-            <span class="score-value">${() => scores().X}</span>
+            <span class="score-value">${scores().X}</span>
           </li>
           <li>
             <span class="score-mark o">O</span>
-            <span class="score-value">${() => scores().O}</span>
+            <span class="score-value">${scores().O}</span>
           </li>
           <li>
             <span class="score-mark draw">=</span>
-            <span class="score-value">${() => scores().draws}</span>
+            <span class="score-value">${scores().draws}</span>
           </li>
         </ul>
-        <p class="aside-copy">Tap a square to place. New round keeps the score; Reset scores clears everything.</p>
+        <p class="aside-copy">Toque em uma casa. Nova rodada mantém o placar; Zerar limpa tudo.</p>
       </aside>
     </div>
   </section>

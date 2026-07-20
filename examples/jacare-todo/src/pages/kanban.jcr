@@ -8,6 +8,8 @@ import {
   moveItem,
   removeItem,
 } from '../store.js'
+import { showCode } from '../code-viewer.js'
+import { kanbanCode, storeCode } from '../snippets/pages.js'
 
 const dropTarget = pulse(null)
 
@@ -36,12 +38,24 @@ function onDrop(e, column) {
   dropTarget.set(null)
 }
 
+function openCode() {
+  showCode('Kanban', [
+    { name: 'pages/kanban.jcr', code: kanbanCode },
+    { name: 'store.js', code: storeCode },
+  ])
+}
+
 export <view>
   <section class="page page-board">
     <header class="page-hero">
-      <p class="eyebrow">Flow</p>
-      <h1 class="page-title">Board</h1>
-      <p class="page-lead">Same tasks as the Todo list — drag cards across columns to change status.</p>
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Fluxo</p>
+          <h1 class="page-title">Kanban</h1>
+          <p class="page-lead">As mesmas tarefas da lista — arraste os cards entre colunas para mudar o status.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>Ver código</button>
+      </div>
     </header>
 
     <section class="panel composer composer-compact">
@@ -49,12 +63,12 @@ export <view>
         <input
           type="text"
           class="input"
-          placeholder="Quick add to To do…"
+          placeholder="Adicionar em To do…"
           bind-value=${draft}
           on-keydown=${onDraftKeydown}
         />
         <button type="button" class="btn btn-primary" on-click=${() => addItem('todo')}>
-          Add
+          Adicionar
         </button>
       </div>
     </section>
@@ -73,7 +87,7 @@ export <view>
               <h2 class="column-title">${col.label}</h2>
               <p class="column-hint">${col.hint}</p>
             </div>
-            <span class="column-count">${() => itemsIn(col.id).length}</span>
+            <span class="column-count">${itemsIn(col.id).length}</span>
           </header>
 
           <div class="column-body">
@@ -99,7 +113,7 @@ export <view>
                       type="button"
                       class="btn btn-ghost btn-tiny danger"
                       on-click=${() => removeItem(item.id)}
-                    >Remove</button>
+                    >Remover</button>
                   </div>
                 </article>
               #end

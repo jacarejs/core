@@ -42,10 +42,12 @@ export function resolveSignalBinding(
 export function rewriteSignalsInExpr(
   expr: string,
   signals?: ReadonlySet<string>,
+  extraNames?: ReadonlySet<string>,
 ): string {
-  if (!signals || signals.size === 0) return expr
+  const names = new Set<string>([...(signals ?? []), ...(extraNames ?? [])])
+  if (names.size === 0) return expr
   let out = expr
-  for (const name of [...signals].sort((a, b) => b.length - a.length)) {
+  for (const name of [...names].sort((a, b) => b.length - a.length)) {
     const re = new RegExp(`(?<![.\\w$])${name}(?!\\s*\\()`, 'g')
     out = out.replace(re, `${name}()`)
   }
@@ -135,7 +137,7 @@ export class CodegenContext {
   }
 
   rewriteExprForEffect(expr: string): string {
-    return rewriteSignalsInExpr(expr, this.signals)
+    return rewriteSignalsInExpr(expr, this.signals, this.importedNames)
   }
 
   useRuntime(name: string): void {

@@ -13,6 +13,8 @@ import {
   total,
   doneCount,
 } from '../store.js'
+import { showCode } from '../code-viewer.js'
+import { tasksCode, storeCode } from '../snippets/pages.js'
 
 function onDraftKeydown(e) {
   if (e.key === 'Enter') addItem()
@@ -28,32 +30,44 @@ function onRemove(id, e) {
   removeItem(id)
 }
 
+function openCode() {
+  showCode('Tarefas', [
+    { name: 'pages/tasks.jcr', code: tasksCode },
+    { name: 'store.js', code: storeCode },
+  ])
+}
+
 export <view>
   <section class="page page-todo">
     <header class="page-hero">
-      <p class="eyebrow">List</p>
-      <h1 class="page-title">Todo</h1>
-      <p class="page-lead">Capture work, mark it done, and keep the same items flowing on the Board.</p>
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Lista</p>
+          <h1 class="page-title">Tarefas</h1>
+          <p class="page-lead">Anote o que precisa ser feito — as mesmas tasks fluem no Kanban.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>Ver código</button>
+      </div>
     </header>
 
     <div class="metrics">
       <div class="metric">
         <span class="metric-value">${active}</span>
-        <span class="metric-label">open</span>
+        <span class="metric-label">abertas</span>
       </div>
       <div class="metric">
         <span class="metric-value">${doneCount}</span>
-        <span class="metric-label">done</span>
+        <span class="metric-label">feitas</span>
       </div>
       <div class="metric">
         <span class="metric-value">${total}</span>
-        <span class="metric-label">all</span>
+        <span class="metric-label">todas</span>
       </div>
     </div>
 
     <section class="panel composer">
       <label class="field">
-        <span class="field-label">Search</span>
+        <span class="field-label">Buscar</span>
         <div class="search">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
@@ -62,7 +76,7 @@ export <view>
           <input
             type="search"
             class="input search-input"
-            placeholder="Filter by title…"
+            placeholder="Filtrar por título…"
             bind-value=${filter}
           />
         </div>
@@ -70,17 +84,17 @@ export <view>
 
       <div class="add-row">
         <label class="field grow">
-          <span class="field-label">New task</span>
+          <span class="field-label">Nova tarefa</span>
           <input
             type="text"
             class="input"
-            placeholder="What needs shipping?"
+            placeholder="O que precisa sair?"
             bind-value=${draft}
             on-keydown=${onDraftKeydown}
           />
         </label>
         <button type="button" class="btn btn-primary add-btn" on-click=${() => addItem()}>
-          Add
+          Adicionar
         </button>
       </div>
     </section>
@@ -88,13 +102,13 @@ export <view>
     <section class="panel list-panel">
       #if isEmpty()
         <div class="empty">
-          <p class="empty-title">Nothing here yet</p>
-          <p class="empty-copy">Add a task above — it also shows up on the Board.</p>
+          <p class="empty-title">Nada por aqui</p>
+          <p class="empty-copy">Adicione uma tarefa — ela também aparece no Kanban.</p>
         </div>
       #elif noMatches()
         <div class="empty">
-          <p class="empty-title">No matches</p>
-          <p class="empty-copy">Try a shorter search.</p>
+          <p class="empty-title">Sem resultados</p>
+          <p class="empty-copy">Tente um termo mais curto.</p>
         </div>
       #else
         <ul class="list">
@@ -107,7 +121,7 @@ export <view>
               <button
                 type="button"
                 class="check"
-                aria-label="Toggle done"
+                aria-label="Alternar concluída"
                 on-click=${(e) => onToggle(item.id, e)}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -121,7 +135,7 @@ export <view>
               <button
                 type="button"
                 class="remove"
-                aria-label="Remove"
+                aria-label="Remover"
                 on-click=${(e) => onRemove(item.id, e)}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">

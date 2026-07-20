@@ -1,4 +1,10 @@
+import { derive } from '@jacare/core'
 import { appHref, assetUrl } from './app-base.js'
+import { activeCode, hideCode } from './code-viewer.js'
+import CodeModal from './components/CodeModal.jcr'
+
+const viewerTitle = derive(() => activeCode()?.title ?? '')
+const viewerFiles = derive(() => activeCode()?.files ?? [])
 
 export <view>
   <div class="app">
@@ -9,21 +15,25 @@ export <view>
           <img class="logo" src=${assetUrl('jacare-logo.png')} alt="" />
           <div class="brand-copy">
             <strong class="brand-name">Jacaré</strong>
-            <span class="brand-tag">Todo suite</span>
+            <span class="brand-tag">Suite</span>
           </div>
         </a>
         <nav class="nav" aria-label="Primary">
-          <a class="nav-link" jacare-go="/" href=${appHref('/')}>Todo</a>
-          <a class="nav-link" jacare-go="/board" href=${appHref('/board')}>Board</a>
-          <a class="nav-link" jacare-go="/match" href=${appHref('/match')}>Match</a>
+          <a class="nav-link" jacare-go="/" href=${appHref('/')}>Tarefas</a>
+          <a class="nav-link" jacare-go="/board" href=${appHref('/board')}>Kanban</a>
+          <a class="nav-link" jacare-go="/match" href=${appHref('/match')}>Velha</a>
         </nav>
       </header>
 
       <main class="main" jacare-frame></main>
 
       <footer class="footer">
-        <span>Fine-grained reactivity · zero VDOM</span>
+        <span>Fine-grained reactivity · zero VDOM · Ver código abre o source</span>
       </footer>
     </div>
+
+    #if activeCode()
+      <CodeModal :title=${viewerTitle} :files=${viewerFiles} on-close=${hideCode} />
+    #end
   </div>
 </view>
