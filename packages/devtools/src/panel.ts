@@ -346,9 +346,26 @@ export function createPanel(host: HTMLElement): PanelHandle {
         animation: jacare-devtools-value 0.45s ease;
       }
 
+      .jacare-devtools__changed {
+        display: inline;
+        padding: 0.05em 0.15em;
+        margin: 0 -0.15em;
+        border-radius: 3px;
+        background: #bfdbfe;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+        animation: jacare-devtools-line 1.4s ease;
+      }
+
       @keyframes jacare-devtools-value {
         0% { background: #dcfce7; }
         100% { background: #f4f4f5; }
+      }
+
+      @keyframes jacare-devtools-line {
+        0% { background: #60a5fa; color: #fff; }
+        35% { background: #93c5fd; color: inherit; }
+        100% { background: #bfdbfe; }
       }
 
       .jacare-devtools__links {
@@ -634,6 +651,7 @@ export function createPanel(host: HTMLElement): PanelHandle {
   function renderDetail(
     snapshot: PulseGraphSnapshot,
     node: PulseNode | undefined,
+    previousText: string | undefined,
     flashed: boolean,
   ): void {
     if (!node) {
@@ -653,11 +671,15 @@ export function createPanel(host: HTMLElement): PanelHandle {
 
     const bindings = getBindingsForPulse(node.id)
     const src = sourceLabel(node)
+    const valueText = formatValue(node.value)
+    const valueHtml = flashed
+      ? highlightChangedLines(previousText, valueText)
+      : escapeHtml(valueText)
 
     detail.innerHTML = `
       <div class="jacare-devtools__section">
         <h4>Value</h4>
-        <pre class="jacare-devtools__value${flashed ? ' is-pulse' : ''}">${escapeHtml(formatValue(node.value))}</pre>
+        <pre class="jacare-devtools__value${flashed ? ' is-pulse' : ''}">${valueHtml}</pre>
       </div>
       <div class="jacare-devtools__section">
         <h4>Meta</h4>
@@ -738,9 +760,11 @@ export function createPanel(host: HTMLElement): PanelHandle {
     }
 
     const changed = new Set<number>()
+    const previousById = new Map<number, string>()
     for (const node of activeNodes) {
-      const encoded = previewValue(node.value)
+      const encoded = formatValue(node.value)
       const prev = previousValues.get(node.id)
+      previousById.set(node.id, prev ?? '')
       if (prev !== undefined && prev !== encoded) {
         changed.add(node.id)
       }
@@ -779,7 +803,13 @@ export function createPanel(host: HTMLElement): PanelHandle {
 
     const current = activeNodes.find((node) => node.id === selectedId)
     if (current) highlightBinding(current.id)
-    renderDetail(snapshot, current, current ? changed.has(current.id) : false)
+    const flashed = current ? changed.has(current.id) : false
+    renderDetail(
+      snapshot,
+      current,
+      current ? previousById.get(current.id) : undefined,
+      flashed,
+    )
   }
 
   return {
@@ -811,3 +841,25 @@ function escapeHtml(value: string): string {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
 }
+
+function highlightChangedLines(previous: string | undefined, next: string): string {
+  if (!previous) return escapeHtml(next)
+
+  const prevCounts = new Map<string, number>()
+  for (const line of previous.split('\n')) {
+    prevCounts.set(line, (prevCounts.get(line) ?? 0) + 1)
+  }
+
+  return next
+    .split('\n')
+    .map((line) => {
+      const remaining = prevCounts.get(line) ?? 0
+      if (remaining > 0) {
+        prevCounts.set(line, remaining - 1)
+        return escapeHtml(line)
+      }
+      return `<mark class="jacare-devtools__changed">${escapeHtml(line)}</mark>`
+    })
+    .join('\n')
+}
+

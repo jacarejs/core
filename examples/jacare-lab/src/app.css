@@ -13,9 +13,9 @@
   --warn: #f59e0b;
   --radius: 1rem;
   --shadow: 0 18px 40px rgba(6, 26, 20, 0.1);
-  --font-display: "Fraunces", "Iowan Old Style", Palatino, serif;
-  --font-body: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --font-display: "Syne", system-ui, sans-serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --sidebar: 17.5rem;
 }
 
