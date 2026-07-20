@@ -56,12 +56,18 @@ body {
 
 .app {
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 1.5rem 1.25rem 2.5rem;
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+  padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+  overflow-x: clip;
 }
 
 .layout {
   width: min(72rem, 100%);
   margin: 0 auto;
+  min-width: 0;
 }
 
 .header {
@@ -71,6 +77,7 @@ body {
   gap: 1rem;
   margin-bottom: 1.75rem;
   animation: rise 0.55s ease both;
+  min-width: 0;
 }
 
 .brand {
@@ -117,6 +124,7 @@ body {
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid var(--line);
   backdrop-filter: blur(10px);
+  max-width: 100%;
 }
 
 .nav-link {
@@ -126,6 +134,7 @@ body {
   font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
@@ -142,6 +151,7 @@ body {
 
 .main {
   min-height: 22rem;
+  min-width: 0;
   animation: rise 0.7s ease 0.06s both;
 }
 
@@ -151,6 +161,12 @@ body {
   font-size: 0.75rem;
   color: var(--muted);
   letter-spacing: 0.02em;
+  padding-inline: 0.5rem;
+}
+
+.footer span {
+  display: inline-block;
+  max-width: 36rem;
 }
 
 .page {
@@ -1372,13 +1388,101 @@ button:disabled {
   to { opacity: 1; }
 }
 
+@media (max-width: 1100px) {
+  .nav {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 900px) {
+  .app {
+    padding: 1.15rem 1rem 2rem;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .brand {
+    align-self: flex-start;
+  }
+
+  .logo {
+    height: 2.75rem;
+  }
+
+  .nav {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0.2rem;
+    padding: 0.3rem;
+    border-radius: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    flex: 0 0 auto;
+    padding: 0.48rem 0.78rem;
+    font-size: 0.78rem;
+  }
+
+  .page {
+    gap: 1rem;
+  }
+
+  .page-title {
+    font-size: clamp(1.85rem, 8vw, 2.4rem);
+  }
+
+  .page-lead {
+    font-size: 0.95rem;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .metric {
+    min-width: 0;
+    padding: 0.65rem 0.7rem;
+  }
+
+  .metric-value {
+    font-size: 1.2rem;
+  }
+
   .board {
-    grid-template-columns: 1fr;
+    display: flex;
+    grid-template-columns: none;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
 
   .column {
-    min-height: 0;
+    flex: 0 0 min(78vw, 17.5rem);
+    min-height: 14rem;
+    max-height: none;
+    scroll-snap-align: start;
   }
 
   .match-layout,
@@ -1391,31 +1495,78 @@ button:disabled {
   .invite-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .league-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .league-day-nav {
+    justify-content: space-between;
+  }
+
+  .league-actions {
+    width: 100%;
+  }
+
+  .league-actions .btn {
+    flex: 1;
+  }
+
+  .card-actions {
+    gap: 0.25rem;
+  }
+
+  .card-actions .btn-tiny {
+    padding: 0 0.45rem;
+    font-size: 0.65rem;
+  }
+
+  .code-modal {
+    padding: 0.65rem;
+    padding-bottom: max(0.65rem, env(safe-area-inset-bottom));
+    align-items: end;
+  }
+
+  .code-panel {
+    width: 100%;
+    max-height: min(88dvh, 44rem);
+    border-radius: 1rem 1rem 0.75rem 0.75rem;
+  }
 }
 
 @media (max-width: 640px) {
-  .header {
-    flex-direction: column;
-    align-items: stretch;
+  .app {
+    padding: 0.9rem 0.75rem 1.75rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
   }
 
   .page-hero-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
   }
 
   .page-hero-row .btn-ghost {
     width: 100%;
   }
 
-  .nav {
-    justify-content: space-between;
+  .page-hero-row > div {
+    max-width: none;
   }
 
-  .nav-link {
-    flex: 1;
-    text-align: center;
-    padding-inline: 0.5rem;
+  .eyebrow {
+    font-size: 0.68rem;
+  }
+
+  .panel {
+    padding: 0.85rem 0.85rem;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .add-row {
@@ -1425,5 +1576,173 @@ button:disabled {
 
   .add-btn {
     width: 100%;
+  }
+
+  .list li {
+    grid-template-columns: auto 1fr auto;
+    gap: 0.55rem 0.6rem;
+    padding: 0.7rem 0.65rem;
+    align-items: start;
+  }
+
+  .list li .item-body {
+    min-width: 0;
+  }
+
+  .list li .label {
+    overflow-wrap: anywhere;
+  }
+
+  .list li .remove {
+    align-self: start;
+    margin-top: 0.1rem;
+  }
+
+  .match-status {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .match-actions {
+    width: 100%;
+  }
+
+  .match-actions .btn {
+    flex: 1;
+  }
+
+  .grid-ttt {
+    max-width: none;
+    width: 100%;
+  }
+
+  .focus-stage {
+    padding: 1.15rem 0.85rem;
+  }
+
+  .focus-actions {
+    width: 100%;
+  }
+
+  .focus-actions .btn {
+    flex: 1 1 calc(50% - 0.25rem);
+  }
+
+  .invite-steps {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+  }
+
+  .invite-steps li {
+    padding: 0.5rem 0.4rem;
+    font-size: 0.68rem;
+  }
+
+  .invite-panel {
+    max-width: none;
+  }
+
+  .invite-summary > div {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  .invite-actions {
+    width: 100%;
+  }
+
+  .invite-actions .btn {
+    flex: 1;
+  }
+
+  .people-row .btn {
+    flex: 1;
+  }
+
+  .fixture-row {
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0.35rem;
+    padding: 0.65rem 0.55rem;
+  }
+
+  .fixture-name {
+    font-size: 0.72rem;
+  }
+
+  .crest {
+    width: 1.85rem;
+    height: 2.1rem;
+    font-size: 0.55rem;
+  }
+
+  .league-table {
+    font-size: 0.75rem;
+  }
+
+  .league-table th,
+  .league-table td {
+    padding: 0.45rem 0.22rem;
+  }
+
+  .league-table th:nth-child(5),
+  .league-table td:nth-child(5),
+  .league-table th:nth-child(6),
+  .league-table td:nth-child(6),
+  .league-table th:nth-child(7),
+  .league-table td:nth-child(7) {
+    display: none;
+  }
+
+  .club-name {
+    max-width: 7.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .footer {
+    margin-top: 1.5rem;
+    font-size: 0.7rem;
+    line-height: 1.4;
+  }
+
+  .code-body {
+    font-size: 0.7rem;
+    padding: 0.7rem 0.75rem 0.95rem;
+  }
+
+  .code-panel-head,
+  .code-file-head {
+    padding-inline: 0.75rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fixture-name {
+    display: none;
+  }
+
+  .fixture-side {
+    justify-content: center;
+  }
+
+  .fixture-side.away {
+    justify-content: center;
+  }
+
+  .club-name {
+    max-width: 5.5rem;
+  }
+
+  .nav-link {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.74rem;
+  }
+
+  .brand-name {
+    font-size: 1.2rem;
   }
 }

@@ -32,7 +32,7 @@ export <view>
       <main class="main" jacare-frame></main>
 
       <footer class="footer">
-        <span>Fine-grained reactivity · zero VDOM · View code opens the source</span>
+        <span>Fine-grained reactivity · zero VDOM</span>
       </footer>
     </div>
 
