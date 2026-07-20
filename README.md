@@ -558,7 +558,7 @@ cd demo && yarn install && yarn dev
 8. ~~Publish — npm packages (`@jacare/*`, `create-jacare`) and starter templates~~
 9. ~~CPW v1 — compile-time pulse wiring in production~~
 10. ~~Reactive CSS variables (`style---`)~~
-11. Benchmarks — `pulse-update`, `pulse-fanout` (more scenarios planned)
+11. ~~Benchmarks — `pulse-update`, `pulse-fanout`, `list-toggle`, `mount-cold`, `hydrate`, `ssr-throughput`, `compile-app`, `bundle`~~
 
 ## Install
 

@@ -1,0 +1,24 @@
+import { signal } from '@jacare/core'
+
+const count = signal(0)
+
+function increment() {
+  count.update((n) => n + 1)
+}
+
+export <view>
+  <div class="counter">
+    <p>${count}</p>
+    <button type="button" on-click=${increment}>+1</button>
+  </div>
+</view>
+
+export <style>
+.counter {
+  font-family: system-ui, sans-serif;
+  padding: 1rem;
+}
+button {
+  cursor: pointer;
+}
+</style>

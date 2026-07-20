@@ -1,0 +1,12 @@
+{
+  "name": "jacare-bench-counter",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@jacare/core": "file:../../../packages/runtime"
+  },
+  "devDependencies": {
+    "@jacare/vite-plugin": "file:../../../packages/vite-plugin",
+    "vite": "^6.0.3"
+  }
+}

@@ -66,6 +66,7 @@ export function runPulseFanout() {
     runtime,
     cpw,
     speedupCpwVsRuntime: runtime.p95 / cpw.p95,
+    targetP95Ms: 0.5,
   }
 }
 
