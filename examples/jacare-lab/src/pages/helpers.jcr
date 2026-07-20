@@ -20,6 +20,7 @@ const helpers = [
   { name: 'contract block', description: 'Declare props, pulses, slots, and emits so jacare check can validate usage', path: '/components' },
   { name: 'style block', description: 'Scoped CSS per file, with if / for / case and a global() escape', path: '/css' },
   { name: 'createNav / lazy / routeHref', description: 'Layout + screen routing, lazy loading, param and query helpers', path: '/nav' },
+  { name: 'export const title', description: 'Declarative document.title for a route screen — string or (ctx) => string', path: '/lifecycle' },
   { name: 'createForm', description: 'Validated fields with dirty / valid tracking and submit handling', path: '/forms' },
   { name: 'createLifecycle / registerScope', description: 'Screen mount / activate hooks and live DevTools Scope entries', path: '/lifecycle' },
   { name: 'renderToString / resume', description: 'Server render and client hydration for a .jcr module', path: '/ssr' },

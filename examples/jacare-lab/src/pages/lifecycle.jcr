@@ -6,6 +6,7 @@ import Demo from '../components/Demo.jcr'
 import Badge from '../components/Badge.jcr'
 import {
   cycleFlowCode,
+  titleCode,
   hooksCode,
   scopeCode,
   activationCode,
@@ -19,6 +20,8 @@ const unmounts = pulse(0)
 const activePhase = pulse('active')
 let timer
 
+export const title = 'Jacaré Lab · Lifecycle'
+
 export const lifecycle = createLifecycle({
   onMount() {
     timer = setInterval(() => ticks.update((n) => n + 1), 1000)
@@ -26,7 +29,6 @@ export const lifecycle = createLifecycle({
     return () => clearInterval(timer)
   },
   onActivate() {
-    document.title = 'Jacaré Lab · Lifecycle'
     activations.update((n) => n + 1)
     activePhase.set('active')
     return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
@@ -106,7 +108,7 @@ export <view>
           <div class="lifecycle-orbit-node lifecycle-orbit-node--activate">
             <span class="lifecycle-orbit-step">1 · enter</span>
             <code>onActivate</code>
-            <p>Title, analytics, registerScope</p>
+            <p>Analytics, registerScope</p>
             <strong class="lifecycle-orbit-count">${activations}</strong>
           </div>
 
@@ -148,9 +150,13 @@ export <view>
       </div>
     </article>
 
-    <Tip :text=${'onActivate is for document.title, analytics, and registerScope(). onMount is for timers and subscriptions — always return a cleanup function from it.'} />
+    <Tip :text=${'Prefer export const title for the document title. Use onActivate for analytics and registerScope(). Use onMount for timers and subscriptions — always return a cleanup from it.'} />
 
     <div class="lesson-grid">
+      <Demo :title=${'export const title'} :lead=${'Declarative document.title for this route. Check the browser tab — it says Jacaré Lab · Lifecycle without an onActivate assignment.'} :code=${titleCode}>
+        <p class="muted">Static string or <code>(ctx) =&gt; …</code> from route params / search. Applied before onActivate.</p>
+      </Demo>
+
       <Demo :title=${'Full lifecycle export'} :lead=${'This page exports lifecycle with all four hooks — the orbit counters above are wired to them.'} :code=${hooksCode}>
         <div class="nav-live">
           <div class="nav-live-row"><span>phase</span><code>${activePhase}</code></div>

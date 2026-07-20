@@ -1,4 +1,4 @@
-import { createLifecycle, derive, effect, pulse } from '@jacare/core'
+import { derive, effect, pulse } from '@jacare/core'
 import { showCode } from '../code-viewer.js'
 import { matchCode } from '../snippets/pages.js'
 
@@ -195,11 +195,7 @@ effect(() => {
   return () => clearTimeout(id)
 })
 
-export const lifecycle = createLifecycle({
-  onActivate() {
-    document.title = 'Jacaré · Match'
-  },
-})
+export const title = 'Jacaré · Match'
 
 function openCode() {
   showCode('Tic-tac-toe', [{ name: 'pages/tictactoe.jcr', code: matchCode }])

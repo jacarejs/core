@@ -5,6 +5,8 @@ export function screen(mod) {
   return (host, ctx) => {
     const cleanups = []
 
+    applyScreenTitle(mod.title, ctx) // export const title → document.title
+
     const activateCleanup = runScreenLifecycle(lifecycle, 'activate', ctx)
     if (typeof activateCleanup === 'function') cleanups.push(activateCleanup)
 
@@ -21,13 +23,22 @@ export function screen(mod) {
   }
 }`
 
-export const hooksCode = `export const lifecycle = createLifecycle({
+export const titleCode = `export const title = 'Jacaré Lab · Lifecycle'
+
+// or from route context:
+export const title = (ctx) => \`Topic · \${ctx.params.slug}\`
+
+// Applied on activate, before onActivate.
+// Use onActivate only when the title must track live signals.`
+
+export const hooksCode = `export const title = 'Jacaré Lab · Lifecycle'
+
+export const lifecycle = createLifecycle({
   onMount() {
     const timer = setInterval(() => ticks.update((n) => n + 1), 1000)
     return () => clearInterval(timer) // cleanup on unmount
   },
   onActivate(ctx) {
-    document.title = 'Jacaré Lab · Lifecycle'
     activations.update((n) => n + 1)
     return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
   },
@@ -51,8 +62,9 @@ onActivate() {
 
 // clearScope() — wipe every entry (also in Pulse Graph ⚙ Config)`
 
-export const activationCode = `onActivate() {
-  document.title = 'Jacaré Lab · Lifecycle'
+export const activationCode = `export const title = 'Jacaré Lab · Lifecycle'
+
+onActivate() {
   activations.update((n) => n + 1) // runs again every time you come back
   return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
 }

@@ -11,6 +11,8 @@ import {
 import { showCode } from '../code-viewer.js'
 import { kanbanCode, storeCode } from '../snippets/pages.js'
 
+export const title = 'Jacaré · Kanban'
+
 const dropTarget = pulse(null)
 
 function onDraftKeydown(e) {

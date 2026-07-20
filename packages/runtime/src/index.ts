@@ -40,6 +40,7 @@ export type {
   ScreenMatch,
   ScreenModule,
   ScreenModuleMount,
+  ScreenTitle,
 } from './nav/index.js'
 
 export { signal as pulse } from './signal.js'

@@ -1,4 +1,4 @@
-import { batch, createLifecycle, derive, pulse } from '@jacare/core'
+import { batch, derive, pulse } from '@jacare/core'
 import { showCode } from '../code-viewer.js'
 import { leagueCode } from '../snippets/pages.js'
 
@@ -144,11 +144,7 @@ const seasonLine = derive(() => {
 const canPrev = derive(() => matchday() > 1)
 const canNext = derive(() => dayDone() && matchday() < maxDay)
 
-export const lifecycle = createLifecycle({
-  onActivate() {
-    document.title = 'Jacaré · League'
-  },
-})
+export const title = 'Jacaré · League'
 
 function teamOf(id) {
   return TEAM_BY_ID[id]

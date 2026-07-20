@@ -17,9 +17,10 @@ import {
 import { showCode } from '../code-viewer.js'
 import { tasksCode, storeCode } from '../snippets/pages.js'
 
+export const title = 'Jacaré · Tasks'
+
 export const lifecycle = createLifecycle({
   onActivate() {
-    document.title = 'Jacaré · Tasks'
     const stops = [
       registerScope('todo.draft', 'Draft', () => draft()),
       registerScope('todo.filter', 'Filter', () => filter()),

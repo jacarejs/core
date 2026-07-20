@@ -7,6 +7,7 @@ import Demo from '../components/Demo.jcr'
 import Badge from '../components/Badge.jcr'
 import {
   setupCode,
+  titleCode,
   routeCode,
   navApiCode,
   linksCode,
@@ -15,6 +16,8 @@ import {
   warmOnHoverCode,
   shellCode,
 } from '../snippets/navigation.js'
+
+export const title = 'Jacaré Lab · Navigation'
 
 const guardSearch = route.search('guard')
 const visitedSearch = route.search('visited')
@@ -212,6 +215,10 @@ export <view>
     </div>
 
     <div class="lesson-grid">
+      <Demo :title=${'export const title'} :lead=${'Set the browser tab title from the screen module. Lazy routes pick it up automatically through screen().'} :code=${titleCode}>
+        <p class="muted">This page exports <code>title = 'Jacaré Lab · Navigation'</code>. Open a topic route to see a function title with params.slug.</p>
+      </Demo>
+
       <Demo :title=${'Live route reads'} :lead=${'route comes from createRoute(nav.where). Use the buttons below to drive every read — path, search keys, params.slug, and hash.'} :code=${routeCode}>
         <div class="stack">
           <div class="nav-live">

@@ -178,9 +178,6 @@ export function recordValue(cell: DependencyCell, value: unknown): void {
   node.value = value
   node.stale = false
   syncSubscriberCount(cell)
-  if (enabled) {
-    flashBindings(id)
-  }
   emit()
 }
 

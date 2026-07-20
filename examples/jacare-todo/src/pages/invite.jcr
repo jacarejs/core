@@ -1,4 +1,4 @@
-import { createForm, createLifecycle, derive, pulse } from '@jacare/core'
+import { createForm, derive, pulse } from '@jacare/core'
 import Field from '../components/Field.jcr'
 import { showCode } from '../code-viewer.js'
 import { inviteCode } from '../snippets/pages.js'
@@ -32,11 +32,7 @@ const form = createForm({
   },
 })
 
-export const lifecycle = createLifecycle({
-  onActivate() {
-    document.title = 'Jacaré · Invite'
-  },
-})
+export const title = 'Jacaré · Invite'
 
 function goNext() {
   if (step() === 0) {

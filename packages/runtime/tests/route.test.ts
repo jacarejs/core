@@ -52,4 +52,69 @@ describe('screen adapter', () => {
     dispose()
     expect(onDeactivate).toHaveBeenCalled()
   })
+
+  it('applies export const title on activate', () => {
+    const previous = document.title
+    const mount = vi.fn(() => () => {})
+
+    const wrapped = screen({
+      default: mount,
+      title: 'Jacaré · Tasks',
+    })
+
+    const dispose = wrapped(document.createElement('div'), {
+      path: '/',
+      params: {},
+      search: {},
+    })
+
+    expect(document.title).toBe('Jacaré · Tasks')
+    dispose()
+    document.title = previous
+  })
+
+  it('resolves a function title with nav context', () => {
+    const previous = document.title
+    const mount = vi.fn(() => () => {})
+
+    const wrapped = screen({
+      default: mount,
+      title: (ctx) => `Topic · ${ctx.params.slug}`,
+    })
+
+    const dispose = wrapped(document.createElement('div'), {
+      path: '/topic/alpha',
+      params: { slug: 'alpha' },
+      search: {},
+    })
+
+    expect(document.title).toBe('Topic · alpha')
+    dispose()
+    document.title = previous
+  })
+
+  it('lets onActivate override the declarative title', () => {
+    const previous = document.title
+    const mount = vi.fn(() => () => {})
+
+    const wrapped = screen({
+      default: mount,
+      title: 'Static title',
+      lifecycle: {
+        onActivate() {
+          document.title = 'Dynamic title'
+        },
+      },
+    })
+
+    const dispose = wrapped(document.createElement('div'), {
+      path: '/',
+      params: {},
+      search: {},
+    })
+
+    expect(document.title).toBe('Dynamic title')
+    dispose()
+    document.title = previous
+  })
 })

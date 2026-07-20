@@ -1,5 +1,13 @@
 import { viewSnippet } from '../utils/snippet.js'
 
+export const titleCode = `export const title = 'Jacaré Lab · Navigation'
+
+// Dynamic from the matched route:
+export const title = (ctx) => {
+  const slug = ctx.params.slug
+  return slug ? \`Topic · \${slug}\` : 'Jacaré Lab · Navigation'
+}`
+
 export const setupCode = `import { createNav, createRoute, lazy, screen } from '@jacare/core'
 import Shell from './shell.jcr'
 import Home from './pages/index.jcr'
@@ -9,7 +17,7 @@ export const nav = createNav({
   base: '/',                 // optional — strip this prefix from URLs (GitHub Pages uses /core/lab)
   layout: Shell,             // persistent chrome; must contain jacare-frame
   screens: {
-    '/': screen(Home),       // eager screen (wrapped with lifecycle support)
+    '/': screen(Home),       // eager screen (wrapped with lifecycle + title support)
     '/nav': lazy(() => import('./pages/navigation.jcr')),
     '/topic/:slug': lazy(() => import('./pages/topic-param.jcr')), // :slug → params.slug
   },

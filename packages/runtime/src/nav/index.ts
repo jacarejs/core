@@ -12,7 +12,7 @@ export type {
 export { createNav } from './create-nav.js'
 export { lazy } from './lazy.js'
 export { adaptScreen, screen } from './screen.js'
-export type { ScreenModule, ScreenModuleMount } from './screen.js'
+export type { ScreenModule, ScreenModuleMount, ScreenTitle } from './screen.js'
 export {
   createRoute,
   routeHref,

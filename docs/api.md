@@ -1331,6 +1331,24 @@ const tab = routeSearch('tab')
 const href = routeHref('/about', { tab: 'feedback' })
 ```
 
+### Screen title
+
+Export `title` from a screen module to set `document.title` when the route activates. Works with `screen(Module)` and with `lazy(() => import(...))` (lazy loads are wrapped automatically).
+
+```javascript
+export const title = 'Jacaré · Tasks'
+
+// or derive from route context:
+export const title = (ctx) => `Topic · ${ctx.params.slug}`
+```
+
+| Form | Behavior |
+|------|----------|
+| `export const title = '…'` | Static document title on activate |
+| `export const title = (ctx) => …` | Title from `NavContext` (`params`, `search`, `path`) |
+
+Applied **before** `onActivate`. Use `onActivate` only when the title must react to live signals after mount (for example `Tasks (${remaining()})`).
+
 ---
 
 ## 12. Forms
@@ -1413,6 +1431,8 @@ import { createLifecycle, signal } from '@jacare/core'
 const ticks = signal(0)
 let timer
 
+export const title = 'Jacaré · Tasks'
+
 export const lifecycle = createLifecycle({
   onMount() {
     timer = setInterval(() => ticks.update((n) => n + 1), 1000)
@@ -1420,7 +1440,7 @@ export const lifecycle = createLifecycle({
   },
   onActivate(ctx) {
     // screen became visible — ctx has nav info
-    document.title = 'Tasks'
+    // prefer export const title for static titles
   },
   onDeactivate() {
     // screen hidden but kept alive (depending on nav strategy)
@@ -1523,8 +1543,11 @@ function addItem() {
   items.update((list) => [...list, { id, label: 'New', done: false }])
 }
 
+export const title = 'Tasks'
+
 export const lifecycle = createLifecycle({
   onActivate() {
+    // optional: live title from signals
     document.title = `Tasks (${remaining()})`
   },
 })
@@ -1562,7 +1585,7 @@ export <view>
 | Events | `on-click` on Add / row / toggles |
 | Props | `:text`, `:label`, `:onPress` into Badge / IconButton |
 | `class-*` | `class-done=${item.done}` |
-| Lifecycle | `onActivate` updates `document.title` |
+| Lifecycle | `export const title` for the static case; `onActivate` for live titles like `Tasks (${remaining()})` |
 | Immutable update | `items.update(list => list.map/filter/…)` |
 
 ---
@@ -1897,6 +1920,7 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | `mountSlot` | [§9](#9-components-and-slots) | Slot projection |
 | Event `on-*` / `@*` | [§6](#6-events-on---) | DOM listeners |
 | `createNav` / `lazy` | [§11](#11-navigation) | Routing |
+| `export const title` | [§11 Screen title](#screen-title) | Document title per route |
 | `createForm` | [§12](#12-forms) | Forms |
 | `createLifecycle` / `registerScope` | [§13](#13-lifecycle-and-scope) | Lifecycle / debug |
 | `renderToString` / `resumeBindings` | [§14](#14-ssr-and-hydration) | SSR |

@@ -69,9 +69,10 @@ effect(() => {
   return () => clearInterval(id)
 })
 
+export const title = 'Jacaré · Focus'
+
 export const lifecycle = createLifecycle({
   onActivate() {
-    document.title = 'Jacaré · Focus'
     const stops = [
       registerScope('focus.mode', 'Mode', () => mode()),
       registerScope('focus.clock', 'Clock', () => clock()),

@@ -459,6 +459,17 @@ nav.warm('/about')
 
 `createNav({ base: '/app' })` sets the URL prefix for all screens.
 
+### Screen title
+
+```javascript
+export const title = 'Jacaré · About'
+
+// or from route params / search:
+export const title = (ctx) => `Topic · ${ctx.params.slug}`
+```
+
+Nav applies `title` when the screen activates (`screen()` and lazy imports). Prefer this over setting `document.title` by hand for static names.
+
 Layout shells expose a frame slot:
 
 ```html
