@@ -162,11 +162,24 @@ body {
   color: var(--muted);
   letter-spacing: 0.02em;
   padding-inline: 0.5rem;
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
 }
 
 .footer span {
   display: inline-block;
   max-width: 36rem;
+}
+
+.footer-repo {
+  color: var(--lime-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-repo:hover {
+  text-decoration: underline;
 }
 
 .page {

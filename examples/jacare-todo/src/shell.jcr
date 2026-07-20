@@ -33,6 +33,12 @@ export <view>
 
       <footer class="footer">
         <span>Fine-grained reactivity · zero VDOM</span>
+        <a
+          class="footer-repo"
+          href="https://github.com/jacarejs/core"
+          target="_blank"
+          rel="noopener noreferrer"
+        >github.com/jacarejs/core</a>
       </footer>
     </div>
 

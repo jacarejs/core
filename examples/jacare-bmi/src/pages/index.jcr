@@ -188,7 +188,13 @@ export <view>
     </section>
 
     <footer class="foot">
-      Built with Jacaré · educational demo, not medical advice
+      <span>Built with Jacaré · educational demo, not medical advice</span>
+      <a
+        class="footer-repo"
+        href="https://github.com/jacarejs/core"
+        target="_blank"
+        rel="noopener noreferrer"
+      >github.com/jacarejs/core</a>
     </footer>
   </div>
 </view>

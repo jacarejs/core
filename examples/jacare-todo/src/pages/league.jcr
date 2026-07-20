@@ -266,12 +266,12 @@ export <view>
                   style---c1=${() => teamOf(match.home).c1}
                   style---c2=${() => teamOf(match.home).c2}
                   aria-hidden="true"
-                >${() => teamOf(match.home).abbr}</span>
+                >${teamOf(match.home).abbr}</span>
                 <span class="fixture-name">${teamOf(match.home).name}</span>
               </div>
               <div class="fixture-score">
                 #if scoreOf(match.id)
-                  <span class="score-pill">${() => scoreLine(match.id)}</span>
+                  <span class="score-pill">${scoreLine(match.id)}</span>
                 #else
                   <button type="button" class="btn btn-tiny" on-click=${() => simulateOne(match)}>Play</button>
                 #end
@@ -283,7 +283,7 @@ export <view>
                   style---c1=${() => teamOf(match.away).c1}
                   style---c2=${() => teamOf(match.away).c2}
                   aria-hidden="true"
-                >${() => teamOf(match.away).abbr}</span>
+                >${teamOf(match.away).abbr}</span>
               </div>
             </li>
           #end

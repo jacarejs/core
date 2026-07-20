@@ -398,6 +398,19 @@ body {
   text-align: center;
   font-size: 0.8rem;
   color: var(--j-muted);
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+}
+
+.footer-repo {
+  color: var(--j-leaf);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-repo:hover {
+  text-decoration: underline;
 }
 
 .missing-path {

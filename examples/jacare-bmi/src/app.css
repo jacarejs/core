@@ -408,6 +408,19 @@ body {
   font-size: 0.78rem;
   letter-spacing: 0.02em;
   color: color-mix(in srgb, var(--ink) 48%, transparent);
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+}
+
+.footer-repo {
+  color: var(--leaf, #1f8f4e);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-repo:hover {
+  text-decoration: underline;
 }
 
 .missing {

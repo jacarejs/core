@@ -130,13 +130,13 @@ export <view>
           <div class="invite-stack">
             <p class="invite-lead">Double-check before sending</p>
             <dl class="invite-summary">
-              <div><dt>Name</dt><dd>${form.fields.name}</dd></div>
-              <div><dt>Email</dt><dd>${form.fields.email}</dd></div>
-              <div><dt>Guests</dt><dd>${form.fields.guests}</dd></div>
+              <div><dt>Name</dt><dd>${form.fields.name()}</dd></div>
+              <div><dt>Email</dt><dd>${form.fields.email()}</dd></div>
+              <div><dt>Guests</dt><dd>${form.fields.guests()}</dd></div>
               <div><dt>Meal</dt><dd>${vegetarian() ? 'Vegetarian' : 'Standard'}</dd></div>
               <div><dt>Reminder</dt><dd>${reminder() ? 'Yes' : 'No'}</dd></div>
               #if notes().trim()
-                <div><dt>Notes</dt><dd>${notes}</dd></div>
+                <div><dt>Notes</dt><dd>${notes()}</dd></div>
               #end
             </dl>
             <div class="invite-actions">

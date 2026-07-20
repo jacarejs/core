@@ -42,7 +42,13 @@ export <view>
       <main class="main" jacare-frame></main>
 
       <footer class="footer">
-        Built with Jacaré — by Heber Almeida · MIT License
+        <span>Built with Jacaré — by Heber Almeida · MIT License</span>
+        <a
+          class="footer-repo"
+          href="https://github.com/jacarejs/core"
+          target="_blank"
+          rel="noopener noreferrer"
+        >github.com/jacarejs/core</a>
       </footer>
     </div>
   </div>
