@@ -1,11 +1,28 @@
 import { viewSnippet } from '../utils/snippet.js'
 
 export const tasksCode = viewSnippet(
-  `import {
+  `import { createLifecycle, registerScope } from '@jacare/core'
+import {
   active, doneCount, total,
-  draft, filter, filtered,
+  draft, filter, filtered, selectedId,
   addItem, toggleDone, removeItem,
 } from '../store.js'
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    const stops = [
+      registerScope('todo.draft', 'Draft', () => draft()),
+      registerScope('todo.filter', 'Filter', () => filter()),
+      registerScope('todo.active', 'Open tasks', () => active()),
+      registerScope('todo.done', 'Done tasks', () => doneCount()),
+      registerScope('todo.total', 'Total', () => total()),
+      registerScope('todo.selected', 'Selected id', () => selectedId()),
+    ]
+    return () => {
+      for (const stop of stops) stop()
+    }
+  },
+})
 
 function onDraftKeydown(e) {
   if (e.key === 'Enter') addItem()

@@ -4,6 +4,7 @@ export interface DevtoolsUiConfig {
   pulsePosition: PanelCorner
   scopePosition: PanelCorner
   pulseMode: 'open' | 'minimized' | 'hidden'
+  scopeMode: 'open' | 'minimized'
 }
 
 const CONFIG_KEY = 'jacare:devtools:config'
@@ -12,6 +13,7 @@ const DEFAULT_CONFIG: DevtoolsUiConfig = {
   pulsePosition: 'bottom-right',
   scopePosition: 'bottom-left',
   pulseMode: 'open',
+  scopeMode: 'open',
 }
 
 export function readUiConfig(): DevtoolsUiConfig {
@@ -28,6 +30,10 @@ export function readUiConfig(): DevtoolsUiConfig {
         parsed.pulseMode === 'hidden'
           ? parsed.pulseMode
           : DEFAULT_CONFIG.pulseMode,
+      scopeMode:
+        parsed.scopeMode === 'open' || parsed.scopeMode === 'minimized'
+          ? parsed.scopeMode
+          : DEFAULT_CONFIG.scopeMode,
     }
   } catch {
     return { ...DEFAULT_CONFIG }

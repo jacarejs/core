@@ -7,6 +7,8 @@ import {
   type PanelCorner,
 } from './config.js'
 
+type ScopeMode = 'open' | 'minimized'
+
 export interface ScopePanelHandle {
   render(snapshot: ScopeSnapshot): void
   dispose(): void
@@ -31,6 +33,20 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
         font: 13px/1.4 system-ui, -apple-system, sans-serif;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         overflow: hidden;
+      }
+
+      .jacare-scope--minimized {
+        width: auto;
+        max-height: none;
+        grid-template-rows: auto;
+      }
+
+      .jacare-scope--minimized .jacare-scope__body {
+        display: none;
+      }
+
+      .jacare-scope--minimized .jacare-scope__header {
+        border-bottom: none;
       }
 
       .jacare-scope__header {
@@ -141,6 +157,7 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
       </div>
       <div class="jacare-scope__actions">
         <button class="jacare-scope__toggle" type="button" data-clear title="Clear Scope entries" aria-label="Clear Scope">⌫</button>
+        <button class="jacare-scope__toggle" type="button" data-minimize title="Minimize" aria-label="Minimize Scope">−</button>
       </div>
     </header>
     <div class="jacare-scope__body" data-body></div>
@@ -152,13 +169,33 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
   const meta = root.querySelector('[data-meta]') as HTMLElement
   const body = root.querySelector('[data-body]') as HTMLElement
   const clearBtn = root.querySelector('[data-clear]') as HTMLButtonElement
+  const minimizeBtn = root.querySelector('[data-minimize]') as HTMLButtonElement
 
   let ui = readUiConfig()
+  let mode: ScopeMode = ui.scopeMode
   applyCorner(root, ui.scopePosition)
 
   let dragOffsetX = 0
   let dragOffsetY = 0
   let dragging = false
+
+  function applyMode(): void {
+    root.classList.toggle('jacare-scope--minimized', mode === 'minimized')
+    minimizeBtn.textContent = mode === 'minimized' ? '+' : '−'
+    minimizeBtn.setAttribute(
+      'aria-label',
+      mode === 'minimized' ? 'Expand Scope' : 'Minimize Scope',
+    )
+    minimizeBtn.setAttribute('title', mode === 'minimized' ? 'Expand' : 'Minimize')
+    ui = writeUiConfig({ scopeMode: mode })
+  }
+
+  function setMode(next: ScopeMode): void {
+    mode = next
+    applyMode()
+  }
+
+  applyMode()
 
   const onPosition = (event: Event): void => {
     const detail = (event as CustomEvent<{ corner: PanelCorner }>).detail
@@ -167,14 +204,34 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
     root.style.transform = ''
     applyCorner(root, detail.corner)
   }
+
+  const onMode = (event: Event): void => {
+    const detail = (event as CustomEvent<{ mode: ScopeMode }>).detail
+    if (detail?.mode !== 'open' && detail?.mode !== 'minimized') return
+    setMode(detail.mode)
+  }
+
   window.addEventListener('jacare:devtools:scope-position', onPosition)
+  window.addEventListener('jacare:devtools:scope-mode', onMode)
 
   clearBtn.addEventListener('click', (event) => {
     event.stopPropagation()
     clearScope()
   })
 
+  minimizeBtn.addEventListener('click', (event) => {
+    event.stopPropagation()
+    setMode(mode === 'minimized' ? 'open' : 'minimized')
+  })
+
+  header.addEventListener('click', () => {
+    if (mode === 'minimized') {
+      setMode('open')
+    }
+  })
+
   header.addEventListener('pointerdown', (event) => {
+    if (mode !== 'open') return
     const target = event.target as HTMLElement
     if (target.closest('button')) return
     dragging = true
@@ -216,7 +273,7 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
           Scope is a manual watch list. Call <code>registerScope(id, label, () =&gt; value)</code>
           from <code>onActivate</code> / mount code — values refresh ~every 120ms while DevTools is open.
         </p>
-        <p class="jacare-scope__empty">No entries yet. See Lifecycle lesson for a live example.</p>
+        <p class="jacare-scope__empty">No entries yet. Open Tarefas (or Lifecycle) for a live example.</p>
       `
       return
     }
@@ -241,6 +298,7 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
     render,
     dispose() {
       window.removeEventListener('jacare:devtools:scope-position', onPosition)
+      window.removeEventListener('jacare:devtools:scope-mode', onMode)
       root.remove()
     },
   }

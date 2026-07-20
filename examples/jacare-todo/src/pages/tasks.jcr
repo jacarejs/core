@@ -1,3 +1,4 @@
+import { createLifecycle, registerScope } from '@jacare/core'
 import {
   active,
   addItem,
@@ -15,6 +16,23 @@ import {
 } from '../store.js'
 import { showCode } from '../code-viewer.js'
 import { tasksCode, storeCode } from '../snippets/pages.js'
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    document.title = 'Jacaré · Tarefas'
+    const stops = [
+      registerScope('todo.draft', 'Draft', () => draft()),
+      registerScope('todo.filter', 'Filter', () => filter()),
+      registerScope('todo.active', 'Open tasks', () => active()),
+      registerScope('todo.done', 'Done tasks', () => doneCount()),
+      registerScope('todo.total', 'Total', () => total()),
+      registerScope('todo.selected', 'Selected id', () => selectedId()),
+    ]
+    return () => {
+      for (const stop of stops) stop()
+    }
+  },
+})
 
 function onDraftKeydown(e) {
   if (e.key === 'Enter') addItem()
@@ -44,7 +62,7 @@ export <view>
         <div>
           <p class="eyebrow">Lista</p>
           <h1 class="page-title">Tarefas</h1>
-          <p class="page-lead">Anote o que precisa ser feito — as mesmas tasks fluem no Kanban.</p>
+          <p class="page-lead">Anote o que precisa ser feito — as mesmas tasks fluem no Kanban. Com DevTools aberto, o painel Scope mostra draft, filtro e contagens ao vivo.</p>
         </div>
         <button type="button" class="btn btn-ghost" on-click=${openCode}>Ver código</button>
       </div>

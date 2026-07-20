@@ -516,7 +516,11 @@ export function createPanel(host: HTMLElement): PanelHandle {
       pulsePosition: 'bottom-right',
       scopePosition: 'bottom-left',
       pulseMode: 'open',
+      scopeMode: 'open',
     })
+    window.dispatchEvent(
+      new CustomEvent('jacare:devtools:scope-mode', { detail: { mode: 'open' } }),
+    )
     pulseCornerSelect.value = ui.pulsePosition
     scopeCornerSelect.value = ui.scopePosition
     root.style.transform = ''
