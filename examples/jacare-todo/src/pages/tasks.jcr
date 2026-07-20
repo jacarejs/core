@@ -1,129 +1,128 @@
-import { computed, signal } from '@jacare/core'
-
-const items = signal([
-  { id: '1', label: 'Learn Jacaré syntax', done: false },
-  { id: '2', label: 'Build something fast', done: false },
-  { id: '3', label: 'Ship to production', done: false },
-])
-
-const filter = signal('')
-const draft = signal('')
-const selectedId = signal(null)
-
-const filtered = computed(() => {
-  const q = filter().trim().toLowerCase()
-  if (!q) return items()
-  return items().filter((item) => item.label.toLowerCase().includes(q))
-})
-
-const total = computed(() => items().length)
-const active = computed(() => items().filter((item) => !item.done).length)
-const isEmpty = computed(() => items().length === 0)
-const noMatches = computed(() => filter().trim().length > 0 && filtered().length === 0)
-
-function addItem() {
-  const label = draft().trim()
-  if (!label) return
-  const id = String(Date.now())
-  items.update((list) => [...list, { id, label, done: false }])
-  draft.set('')
-}
-
-function removeItem(id) {
-  items.update((list) => list.filter((item) => item.id !== id))
-  if (selectedId() === id) selectedId.set(null)
-}
-
-function toggleItem(id, e) {
-  e.stopPropagation()
-  items.update((list) =>
-    list.map((item) => (item.id === id ? { ...item, done: !item.done } : item)),
-  )
-}
-
-function selectItem(id) {
-  selectedId.set(id)
-}
+import {
+  active,
+  addItem,
+  draft,
+  filter,
+  filtered,
+  isEmpty,
+  noMatches,
+  removeItem,
+  selectItem,
+  selectedId,
+  toggleDone,
+  total,
+  doneCount,
+} from '../store.js'
 
 function onDraftKeydown(e) {
   if (e.key === 'Enter') addItem()
 }
 
+function onToggle(id, e) {
+  e.stopPropagation()
+  toggleDone(id)
+}
+
+function onRemove(id, e) {
+  e.stopPropagation()
+  removeItem(id)
+}
+
 export <view>
-  <section class="page">
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-value">${active}</span>
-        <span class="stat-label">active</span>
+  <section class="page page-todo">
+    <header class="page-hero">
+      <p class="eyebrow">List</p>
+      <h1 class="page-title">Todo</h1>
+      <p class="page-lead">Capture work, mark it done, and keep the same items flowing on the Board.</p>
+    </header>
+
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-value">${active}</span>
+        <span class="metric-label">open</span>
       </div>
-      <div class="stat">
-        <span class="stat-value">${total}</span>
-        <span class="stat-label">total</span>
+      <div class="metric">
+        <span class="metric-value">${doneCount}</span>
+        <span class="metric-label">done</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value">${total}</span>
+        <span class="metric-label">all</span>
       </div>
     </div>
 
-    <section class="composer">
-      <div class="search">
-        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
-          <path d="M20 20l-3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-        <input
-          type="search"
-          class="input search-input"
-          placeholder="Search tasks..."
-          bind-value=${filter}
-        />
-      </div>
+    <section class="panel composer">
+      <label class="field">
+        <span class="field-label">Search</span>
+        <div class="search">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M20 20l-3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <input
+            type="search"
+            class="input search-input"
+            placeholder="Filter by title…"
+            bind-value=${filter}
+          />
+        </div>
+      </label>
 
       <div class="add-row">
-        <input
-          type="text"
-          class="input add-input"
-          placeholder="What needs to be done?"
-          bind-value=${draft}
-          on-keydown=${onDraftKeydown}
-        />
-        <button class="btn btn-primary" on-click=${addItem}>
-          <span>Add</span>
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
+        <label class="field grow">
+          <span class="field-label">New task</span>
+          <input
+            type="text"
+            class="input"
+            placeholder="What needs shipping?"
+            bind-value=${draft}
+            on-keydown=${onDraftKeydown}
+          />
+        </label>
+        <button type="button" class="btn btn-primary add-btn" on-click=${() => addItem()}>
+          Add
         </button>
       </div>
     </section>
 
-    <section class="list-section">
+    <section class="panel list-panel">
       #if isEmpty()
         <div class="empty">
-          <p>No tasks yet. Add one above.</p>
+          <p class="empty-title">Nothing here yet</p>
+          <p class="empty-copy">Add a task above — it also shows up on the Board.</p>
         </div>
       #elif noMatches()
         <div class="empty">
-          <p>No tasks match your search.</p>
+          <p class="empty-title">No matches</p>
+          <p class="empty-copy">Try a shorter search.</p>
         </div>
       #else
         <ul class="list">
           #for filtered() as item (item.id)
             <li
-              class-done=${item.done}
+              class-done=${() => item.column === 'done'}
               class-selected=${() => selectedId() === item.id}
               on-click=${() => selectItem(item.id)}
             >
               <button
+                type="button"
                 class="check"
-                aria-label="Toggle task"
-                on-click=${(e) => toggleItem(item.id, e)}
+                aria-label="Toggle done"
+                on-click=${(e) => onToggle(item.id, e)}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 12l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </button>
-              <span class="label">${item.label}</span>
+              <div class="item-body">
+                <span class="label">${item.label}</span>
+                <span class="chip">${item.column}</span>
+              </div>
               <button
+                type="button"
                 class="remove"
-                aria-label="Remove task"
-                on-click=${(e) => { e.stopPropagation(); removeItem(item.id) }}
+                aria-label="Remove"
+                on-click=${(e) => onRemove(item.id, e)}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />

@@ -1,10 +1,12 @@
 import { appHref } from '../app-base.js'
 
 export <view>
-  <section class="page missing">
-    <h2 class="page-title">404</h2>
-    <p class="lead">This screen does not exist.</p>
-    <p class="missing-path">The path you requested was not found.</p>
-    <a class="btn btn-primary" jacare-go="/" href=${appHref('/')}>Back to tasks</a>
+  <section class="page">
+    <header class="page-hero">
+      <p class="eyebrow">404</p>
+      <h1 class="page-title">Path not found</h1>
+      <p class="page-lead">That route is not part of this suite.</p>
+    </header>
+    <a class="btn btn-primary" jacare-go="/" href=${appHref('/')}>Back to Todo</a>
   </section>
 </view>

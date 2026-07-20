@@ -1,5 +1,5 @@
 export default {
-  title: 'Jacaré Tasks',
-  port: 3000,
+  title: 'Jacaré · Todo suite',
+  port: 3001,
   base: process.env.JACARE_BASE ?? '/',
 }

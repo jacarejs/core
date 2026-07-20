@@ -1,0 +1,112 @@
+import { pulse } from '@jacare/core'
+import {
+  COLUMNS,
+  addItem,
+  draft,
+  items,
+  itemsIn,
+  moveItem,
+  removeItem,
+} from '../store.js'
+
+const dropTarget = pulse(null)
+
+function onDraftKeydown(e) {
+  if (e.key === 'Enter') addItem('todo')
+}
+
+function onDragStart(e, id) {
+  e.dataTransfer.setData('text/plain', id)
+  e.dataTransfer.effectAllowed = 'move'
+}
+
+function onDragOver(e, column) {
+  e.preventDefault()
+  dropTarget.set(column)
+}
+
+function onDragLeave() {
+  dropTarget.set(null)
+}
+
+function onDrop(e, column) {
+  e.preventDefault()
+  const id = e.dataTransfer.getData('text/plain')
+  if (id) moveItem(id, column)
+  dropTarget.set(null)
+}
+
+export <view>
+  <section class="page page-board">
+    <header class="page-hero">
+      <p class="eyebrow">Flow</p>
+      <h1 class="page-title">Board</h1>
+      <p class="page-lead">Same tasks as the Todo list — drag cards across columns to change status.</p>
+    </header>
+
+    <section class="panel composer composer-compact">
+      <div class="add-row">
+        <input
+          type="text"
+          class="input"
+          placeholder="Quick add to To do…"
+          bind-value=${draft}
+          on-keydown=${onDraftKeydown}
+        />
+        <button type="button" class="btn btn-primary" on-click=${() => addItem('todo')}>
+          Add
+        </button>
+      </div>
+    </section>
+
+    <div class="board">
+      #for COLUMNS as col (col.id)
+        <section
+          class="column"
+          class-drop=${() => dropTarget() === col.id}
+          on-dragover=${(e) => onDragOver(e, col.id)}
+          on-dragleave=${onDragLeave}
+          on-drop=${(e) => onDrop(e, col.id)}
+        >
+          <header class="column-head">
+            <div>
+              <h2 class="column-title">${col.label}</h2>
+              <p class="column-hint">${col.hint}</p>
+            </div>
+            <span class="column-count">${() => itemsIn(col.id).length}</span>
+          </header>
+
+          <div class="column-body">
+            #for items() as item (item.id)
+              #if item.column === col.id
+                <article
+                  class="card"
+                  draggable="true"
+                  on-dragstart=${(e) => onDragStart(e, item.id)}
+                >
+                  <p class="card-title">${item.label}</p>
+                  <div class="card-actions">
+                    #for COLUMNS as dest (dest.id)
+                      #if dest.id !== item.column
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-tiny"
+                          on-click=${() => moveItem(item.id, dest.id)}
+                        >${dest.label}</button>
+                      #end
+                    #end
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-tiny danger"
+                      on-click=${() => removeItem(item.id)}
+                    >Remove</button>
+                  </div>
+                </article>
+              #end
+            #end
+          </div>
+        </section>
+      #end
+    </div>
+  </section>
+</view>

@@ -1,0 +1,128 @@
+import { pulse, derive } from '@jacare/core'
+
+const empty = () => Array(9).fill(null)
+
+const board = pulse(empty())
+const turn = pulse('X')
+const winner = pulse(null)
+const scores = pulse({ X: 0, O: 0, draws: 0 })
+
+const status = derive(() => {
+  if (winner() === 'draw') return 'Draw — nice pace.'
+  if (winner()) return `${winner()} wins`
+  return `${turn()} to play`
+})
+
+const canPlay = derive(() => winner() == null)
+
+const LINES = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+]
+
+function findWinner(cells) {
+  for (const [a, b, c] of LINES) {
+    if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+      return cells[a]
+    }
+  }
+  if (cells.every(Boolean)) return 'draw'
+  return null
+}
+
+function play(index) {
+  if (!canPlay()) return
+  if (board()[index]) return
+
+  const next = board().slice()
+  next[index] = turn()
+  board.set(next)
+
+  const result = findWinner(next)
+  if (result) {
+    winner.set(result)
+    scores.update((s) => {
+      if (result === 'draw') return { ...s, draws: s.draws + 1 }
+      return { ...s, [result]: s[result] + 1 }
+    })
+    return
+  }
+
+  turn.set(turn() === 'X' ? 'O' : 'X')
+}
+
+function resetBoard() {
+  board.set(empty())
+  turn.set('X')
+  winner.set(null)
+}
+
+function resetScores() {
+  scores.set({ X: 0, O: 0, draws: 0 })
+  resetBoard()
+}
+
+const cells = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+export <view>
+  <section class="page page-match">
+    <header class="page-hero">
+      <p class="eyebrow">Play</p>
+      <h1 class="page-title">Match</h1>
+      <p class="page-lead">A quick tic-tac-toe break — same fine-grained updates, zero VDOM.</p>
+    </header>
+
+    <div class="match-layout">
+      <section class="panel match-stage">
+        <div class="match-status">
+          <p class="match-turn">${status}</p>
+          <div class="match-actions">
+            <button type="button" class="btn btn-ghost" on-click=${resetBoard}>New round</button>
+            <button type="button" class="btn btn-ghost" on-click=${resetScores}>Reset scores</button>
+          </div>
+        </div>
+
+        <div class="grid-ttt" class-over=${() => !canPlay()}>
+          #for cells as i (i)
+            <button
+              type="button"
+              class="cell"
+              class-x=${() => board()[i] === 'X'}
+              class-o=${() => board()[i] === 'O'}
+              class-filled=${() => board()[i] != null}
+              disabled=${() => !canPlay() || board()[i] != null}
+              on-click=${() => play(i)}
+            >
+              <span>${() => board()[i] ?? ''}</span>
+            </button>
+          #end
+        </div>
+      </section>
+
+      <aside class="panel match-score">
+        <h2 class="aside-title">Scoreboard</h2>
+        <ul class="score-list">
+          <li>
+            <span class="score-mark x">X</span>
+            <span class="score-value">${() => scores().X}</span>
+          </li>
+          <li>
+            <span class="score-mark o">O</span>
+            <span class="score-value">${() => scores().O}</span>
+          </li>
+          <li>
+            <span class="score-mark draw">=</span>
+            <span class="score-value">${() => scores().draws}</span>
+          </li>
+        </ul>
+        <p class="aside-copy">Tap a square to place. New round keeps the score; Reset scores clears everything.</p>
+      </aside>
+    </div>
+  </section>
+</view>
