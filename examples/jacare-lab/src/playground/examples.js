@@ -109,6 +109,34 @@ function toggle() {
     ),
   },
   {
+    id: 'case',
+    label: '#case',
+    source: viewSnippet(
+      `import { pulse } from '@jacare/core'
+
+const role = pulse('member')
+
+function setRole(next) {
+  role.set(next)
+}`,
+      `  <div class="stack">
+    <div class="row">
+      <button type="button" class="btn btn-outline" on-click=\${() => setRole('admin')}>admin</button>
+      <button type="button" class="btn btn-outline" on-click=\${() => setRole('guest')}>guest</button>
+      <button type="button" class="btn btn-outline" on-click=\${() => setRole('member')}>member</button>
+    </div>
+    #case role()
+      #when 'admin'
+        <p class="muted">Admin panel unlocked.</p>
+      #when 'guest'
+        <p class="muted">Guest preview only.</p>
+      #else
+        <p class="muted">Member workspace.</p>
+    #end
+  </div>`,
+    ),
+  },
+  {
     id: 'events',
     label: 'Events',
     source: viewSnippet(

@@ -55,6 +55,7 @@ export default view`
 | `style---pct=${pct}` / `style:pct=${pct}` | `bindStyleVar` (dev) / CPW (prod) |
 | `on-click=${handler}` / `@click=${handler}` | `addEventListener` + `removeEventListener` |
 | `#if` / `#elif` / `#else` / `#end` | `branch()` |
+| `#case` / `#when` / `#else` / `#end` | `branch()` + `Object.is` |
 | `#for items() as item (id)` / `#end` | `reconcileKeyedList()` |
 | `<Child :prop=${value} />` | Component `mount()` call |
 
@@ -165,6 +166,8 @@ The compiler recognizes simple patterns:
 - Event handlers → `addEventListener` with `removeEventListener` in dispose
 - `bind-value` / `bind-checked` on a signal → `bindModel` (two-way)
 - `#if` / `#elif` / `#else` → `branch` (not `showIf`)
+- `#case` / `#when` / `#else` → `branch` with `Object.is` match arms
+- `#for` → `reconcileKeyedList`
 
 ### Prop and signal detection
 

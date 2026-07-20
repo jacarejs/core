@@ -1,6 +1,7 @@
 import type {
   TemplateAST,
   TemplateAttr,
+  TemplateCaseBranch,
   TemplateIfBranch,
   TemplateNode,
   TextPart,
@@ -18,6 +19,8 @@ const IF_OPEN_RE = /^#if[ \t]+([^\n]+)|^@if[ \t]+([^\n]+)/
 const ELSE_IF_RE = /^#elif[ \t]+([^\n]+)|^@elseif[ \t]+([^\n]+)/
 const ELSE_RE = /^#else\b|^@else\b/
 const IF_CLOSE_RE = /^#end\b|^@end\b/
+const CASE_OPEN_RE = /^#case[ \t]+([^\n]+)/
+const WHEN_RE = /^#when[ \t]+([^\n]+)/
 const EACH_OPEN_RE = /^#for\s+(.+?)\s+as\s+([\w$]+)(?:\s*,\s*([\w$]+))?(?:\s*\(([^)]+)\))?|^@each\s+(.+?)\s+as\s+([\w$]+)(?:\s*,\s*([\w$]+))?(?:\s*\(([^)]+)\))?/
 const EACH_CLOSE_RE = /^#end\b|^@end\b/
 
@@ -137,6 +140,17 @@ function parseNodes(
       continue
     }
 
+    if (source.startsWith('#case', pos)) {
+      const parsed = parseCaseBlock(source, pos)
+      nodes.push(parsed.node)
+      pos = parsed.pos
+      continue
+    }
+
+    if (source.startsWith('#when', pos)) {
+      fail('unexpected #when outside #case', pos)
+    }
+
     if (
       source.startsWith('#for', pos) ||
       source.startsWith('@each', pos)
@@ -163,7 +177,7 @@ function findNextSpecial(source: string, pos: number, stops: RegExp[]): number {
   const slice = source.slice(pos)
   const candidates = [
     source.indexOf('<', pos),
-    indexOfAny(source, pos, ['#if', '@if', '#for', '@each']),
+    indexOfAny(source, pos, ['#if', '@if', '#case', '#when', '#for', '@each']),
     ...stops.map((stop) => {
       const match = stop.exec(slice)
       return match ? pos + match.index! : -1
@@ -378,6 +392,85 @@ function parseIfBlock(source: string, pos: number): { node: TemplateNode; pos: n
     }
 
     fail('unclosed #if block', pos)
+  }
+}
+
+function parseCaseBlock(source: string, pos: number): { node: TemplateNode; pos: number } {
+  const open = CASE_OPEN_RE.exec(source.slice(pos))
+  if (!open) {
+    fail('invalid #case', pos)
+  }
+
+  const scrutinee = open[1]!.trim()
+  if (!scrutinee) {
+    fail('invalid #case', pos)
+  }
+
+  let cursor = pos + open[0].length
+  const afterOpen = parseNodes(source, cursor, [WHEN_RE, ELSE_RE, IF_CLOSE_RE])
+  if (afterOpen.nodes.length > 0) {
+    fail('expected #when after #case', pos)
+  }
+  cursor = afterOpen.pos
+
+  const branches: TemplateCaseBranch[] = []
+  const rest = source.slice(cursor)
+  const firstWhen = WHEN_RE.exec(rest)
+  if (!firstWhen) {
+    fail('expected #when after #case', pos)
+  }
+
+  let currentValue = firstWhen[1]!.trim()
+  cursor += firstWhen[0].length
+
+  while (true) {
+    const chunk = parseNodes(source, cursor, [WHEN_RE, ELSE_RE, IF_CLOSE_RE])
+    branches.push({ value: currentValue, children: chunk.nodes })
+    cursor = chunk.pos
+    const tail = source.slice(cursor)
+
+    const closeMatch = IF_CLOSE_RE.exec(tail)
+    if (closeMatch) {
+      return {
+        node: {
+          type: 'case',
+          scrutinee,
+          branches,
+          elseChildren: [],
+          sourceLine: templateLineAt(pos),
+        },
+        pos: cursor + closeMatch[0].length,
+      }
+    }
+
+    const whenMatch = WHEN_RE.exec(tail)
+    if (whenMatch) {
+      currentValue = whenMatch[1]!.trim()
+      cursor += whenMatch[0].length
+      continue
+    }
+
+    const elseMatch = ELSE_RE.exec(tail)
+    if (elseMatch) {
+      cursor += elseMatch[0].length
+      const elseChunk = parseNodes(source, cursor, [IF_CLOSE_RE])
+      const finalClose = IF_CLOSE_RE.exec(source.slice(elseChunk.pos))
+      if (!finalClose) {
+        fail('expected #end', pos)
+      }
+      return {
+        node: {
+          type: 'case',
+          scrutinee,
+          branches,
+          elseChildren: elseChunk.nodes,
+          sourceLine: templateLineAt(pos),
+        },
+        pos: elseChunk.pos + finalClose[0].length,
+      }
+    }
+
+    fail('unclosed #case block', pos)
   }
 }
 

@@ -42,22 +42,23 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 6. [DOM bindings](#5-dom-bindings)
 7. [Events (`on-*` / `@*`)](#6-events-on---)
 8. [Control flow — `#if`](#7-control-flow--if)
-9. [Control flow — `#for`](#8-control-flow--for)
-10. [Components, props, and slots](#9-components-and-slots)
-11. [Scoped CSS](#10-scoped-css)
-12. [Navigation](#11-navigation)
-13. [Forms](#12-forms)
-14. [Lifecycle and scope](#13-lifecycle-and-scope)
-15. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
-16. [SSR and hydration](#14-ssr-and-hydration)
-17. [DevTools](#15-devtools)
-18. [Compiler API](#16-compiler-api)
-19. [CLI](#17-cli)
-20. [Vite plugin](#18-vite-plugin)
-21. [Testing](#19-testing)
-22. [Runtime helpers index](#20-runtime-helpers-index)
+9. [Control flow — `#case`](#7b-control-flow--case)
+10. [Control flow — `#for`](#8-control-flow--for)
+11. [Components, props, and slots](#9-components-and-slots)
+12. [Scoped CSS](#10-scoped-css)
+13. [Navigation](#11-navigation)
+14. [Forms](#12-forms)
+15. [Lifecycle and scope](#13-lifecycle-and-scope)
+16. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
+17. [SSR and hydration](#14-ssr-and-hydration)
+18. [DevTools](#15-devtools)
+19. [Compiler API](#16-compiler-api)
+20. [CLI](#17-cli)
+21. [Vite plugin](#18-vite-plugin)
+22. [Testing](#19-testing)
+23. [Runtime helpers index](#20-runtime-helpers-index)
 
-Jump to: [Tutorial](#tutorial--jacaré-lab) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
+Jump to: [Tutorial](#tutorial--jacaré-lab) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
 
 ---
 
@@ -348,7 +349,7 @@ Runtime helpers imported only when the compiler needs them.
 | `bindModel(el, name, signal)` | Two-way `value` / `checked` |
 | `bindClass(el, className, signal)` | Toggle class |
 | `bindStyleVar(el, name, signal)` | Reactive CSS custom property (`--name`) |
-| `branch(anchor, fn)` | `#if` / `#elif` / `#else` |
+| `branch(anchor, fn)` | `#if` / `#elif` / `#else` and `#case` / `#when` / `#else` |
 | `reconcileKeyedList(anchor, source, key, render)` | `#for` keyed lists |
 | `mountSlot(anchor, children, name?)` | Slot projection |
 | `ensureScopedStyle(scopeId, css)` | Inject scoped stylesheet |
@@ -628,6 +629,100 @@ Compiles to `branch(anchor, (mount) => { if (…) mount(node); … })` from `@ja
 - Optional UI blocks
 
 Avoid giant nested trees — split into components when a branch grows.
+
+---
+
+## 7b. Control flow — `#case`
+
+Match **one expression** against several values. Prefer `#case` over a long `#elif` chain when every condition is `scrutinee === value`.
+
+### Syntax
+
+```
+#case <expr>
+  #when <value>
+    …
+  #when <value>
+    …
+  #else
+    …
+#end
+```
+
+| Part | Required | Notes |
+|------|----------|-------|
+| `#case expr` | yes | Evaluated once per update |
+| `#when value` | yes (at least one) | Compared with `Object.is` |
+| `#else` | no | Fallback when no `#when` matches |
+| `#end` | yes | Closes the block |
+
+### Example
+
+```javascript
+const role = signal('member')
+
+export <view>
+#case role()
+  #when 'admin'
+    <p>Admin panel unlocked.</p>
+  #when 'guest'
+    <p>Guest preview only.</p>
+  #else
+    <p>Member workspace.</p>
+#end
+</view>
+```
+
+### Derived match key
+
+When the decision needs ranges or complex logic, compute a discrete key in script, then match literals in the template:
+
+```javascript
+function gradeKey() {
+  const n = Number(score())
+  if (n >= 90) return 'A'
+  if (n >= 80) return 'B'
+  if (n >= 70) return 'C'
+  if (n >= 60) return 'D'
+  return 'F'
+}
+
+export <view>
+#case gradeKey()
+  #when 'A'
+    <span class="badge">Grade A</span>
+  #when 'B'
+    <span class="badge">Grade B</span>
+  #else
+    <span class="badge">Grade F</span>
+#end
+</view>
+```
+
+### Runtime
+
+Same helper as `#if`: `branch()`. The compiler emits:
+
+```javascript
+const _cv = (role())
+if (Object.is(_cv, ('admin'))) { … }
+else if (Object.is(_cv, ('guest'))) { … }
+else { … }
+```
+
+Inactive arms are not in the DOM.
+
+### Lab
+
+Interactive demos: Jacaré Lab route `/case`.
+
+### `#case` vs `#if`
+
+| Use `#case` when… | Use `#if` when… |
+|-------------------|-----------------|
+| Same expression vs several literals | Open boolean conditions |
+| Status / role / tab machines | `loading()`, `count() > 0`, nested auth |
+| You want the scrutinee evaluated once | Each branch has a different predicate |
 
 ---
 
@@ -1590,7 +1685,7 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | `bindAttribute` / `bindProperty` | [§5](#5-dom-bindings) | Attributes / props |
 | `bindModel` | [§5](#5-dom-bindings) | Two-way input |
 | `bindClass` / `bindStyleVar` | [§5](#5-dom-bindings) | Class / CSS var |
-| `branch` / `showIf` | [§7 `#if`](#7-control-flow--if) | Conditionals |
+| `branch` / `showIf` | [§7 `#if`](#7-control-flow--if) · [§7b `#case`](#7b-control-flow--case) | Conditionals / match |
 | `reconcileKeyedList` | [§8 `#for`](#8-control-flow--for) | Keyed lists |
 | `mountSlot` | [§9](#9-components-and-slots) | Slot projection |
 | Event `on-*` / `@*` | [§6](#6-events-on---) | DOM listeners |

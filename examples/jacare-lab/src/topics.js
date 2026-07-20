@@ -40,6 +40,11 @@ export const LESSONS = [
     blurb: 'Branches, nested conditions, empty states',
   },
   {
+    path: '/case',
+    title: '#case',
+    blurb: 'Match one value — #when arms, #else fallback',
+  },
+  {
     path: '/for',
     title: '#for',
     blurb: 'Keyed lists, reorder, fragments, stable parents',

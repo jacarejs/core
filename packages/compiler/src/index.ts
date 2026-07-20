@@ -28,6 +28,7 @@ export type {
   TemplateEachNode,
   TemplateElementNode,
   TemplateIfNode,
+  TemplateCaseNode,
   TemplateSlotNode,
   TemplateNode,
   TemplateTextNode,

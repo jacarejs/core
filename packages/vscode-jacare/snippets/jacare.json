@@ -107,6 +107,20 @@
     ],
     "description": "Template #if / #else / #end conditional"
   },
+  "Case block": {
+    "prefix": ["jcr-case", "#case"],
+    "body": [
+      "#case ${1:value()}",
+      "  #when ${2:'a'}",
+      "    $0",
+      "  #when ${3:'b'}",
+      "    ",
+      "  #else",
+      "    ",
+      "#end"
+    ],
+    "description": "Template #case / #when / #else / #end match"
+  },
   "For block": {
     "prefix": ["jcr-for", "#for"],
     "body": [

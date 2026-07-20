@@ -104,6 +104,7 @@ The compiler accepts two equivalent forms:
 | Canonical | Alias |
 |-----------|-------|
 | `#if` / `#elif` / `#else` / `#end` | `@if` / `@elseif` / `@else` / `@end` |
+| `#case` / `#when` / `#else` / `#end` | — |
 | `#for items() as item (id)` / `#end` | `@each items() as item (id)` / `@end` |
 | `on-click=${fn}` | `@click=${fn}` |
 | `bind-href=${url}` | `:href=${url}` |
@@ -211,7 +212,7 @@ Use `computed` when the value needs a unit (`50%`, `12rem`). Plain numbers strin
 
 ## Control flow
 
-Full API: [`#if`](api.md#7-control-flow--if) · [`#for`](api.md#8-control-flow--for) · [Events](api.md#6-events-on---)
+Full API: [`#if`](api.md#7-control-flow--if) · [`#case`](api.md#7b-control-flow--case) · [`#for`](api.md#8-control-flow--for) · [Events](api.md#6-events-on---)
 
 ### Conditionals
 
@@ -228,6 +229,25 @@ export <view>
 ```
 
 Siblings inside the active branch keep source order at runtime (`branch` insertion cursor).
+
+### Match (`#case`)
+
+When every branch compares the **same** expression to a value, use `#case` instead of a long `#elif` chain:
+
+```javascript
+export <view>
+#case role()
+  #when 'admin'
+    <AdminPanel />
+  #when 'guest'
+    <GuestHome />
+  #else
+    <MemberArea />
+#end
+</view>
+```
+
+The compiler evaluates the scrutinee once per update and picks the arm with `Object.is`. Inactive arms are not in the DOM.
 
 ### Lists
 

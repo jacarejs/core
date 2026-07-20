@@ -83,6 +83,28 @@ describe('parseTemplate', () => {
     expect(block.type).toBe('if')
   })
 
+  it('parses #case blocks', () => {
+    const ast = parseTemplate(
+      `#case role()
+  #when 'admin'
+    <p>admin</p>
+  #when 'guest'
+    <p>guest</p>
+  #else
+    <p>member</p>
+#end`,
+    )
+    const block = ast.children[0]!
+    expect(block.type).toBe('case')
+    if (block.type === 'case') {
+      expect(block.scrutinee).toBe('role()')
+      expect(block.branches).toHaveLength(2)
+      expect(block.branches[0]!.value).toBe("'admin'")
+      expect(block.branches[1]!.value).toBe("'guest'")
+      expect(block.elseChildren).toHaveLength(1)
+    }
+  })
+
   it('parses #for blocks', () => {
     const ast = parseTemplate('#for items() as item (item.id)<li>{item.label}</li>#end')
     const block = ast.children[0]!
@@ -150,6 +172,27 @@ export default view\`
     const result = compile(source)
     expect(result.code).toContain('branch(')
     expect(result.code).not.toMatch(/\(mount\) => \{\)/)
+  })
+
+  it('generates branch with Object.is for #case', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const role = signal('admin')
+export default view\`
+#case role()
+  #when 'admin'
+    <p>admin</p>
+  #when 'guest'
+    <p>guest</p>
+  #else
+    <p>member</p>
+#end
+\``
+    const result = compile(source)
+    expect(result.code).toContain('branch(')
+    expect(result.code).toContain("createComment('case')")
+    expect(result.code).toContain('Object.is(')
+    expect(result.code).toContain("'admin'")
+    expect(result.code).toContain("'guest'")
   })
 
   it('generates reconcileKeyedList for @each', () => {

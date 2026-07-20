@@ -49,6 +49,8 @@ export {
   themeBgCode,
 } from './conditionals.js'
 
+export { roleCode, statusCode, themeCode, numericCode } from './case.js'
+
 export { keyedCode, indexCode, emptyPatternCode, catalogCode, filterCode, moveTopCode } from './lists.js'
 
 export {

@@ -63,6 +63,11 @@ function templateHasSlot(ast: TemplateAST): boolean {
           if (walk(branch.children)) return true
         }
         if (walk(node.elseChildren)) return true
+      } else if (node.type === 'case') {
+        for (const branch of node.branches) {
+          if (walk(branch.children)) return true
+        }
+        if (walk(node.elseChildren)) return true
       } else if (node.type === 'each') {
         if (walk(node.children)) return true
       }
@@ -326,6 +331,14 @@ function collectRefs(ast: TemplateAST): Set<string> {
           }
           walk(node.elseChildren)
           break
+        case 'case':
+          collectExprRefs(node.scrutinee, refs)
+          for (const branch of node.branches) {
+            collectExprRefs(branch.value, refs)
+            walk(branch.children)
+          }
+          walk(node.elseChildren)
+          break
         case 'each':
           collectExprRefs(node.source, refs)
           if (node.keyExpr) {
@@ -356,6 +369,10 @@ function hasSlotNode(ast: TemplateAST): boolean {
       if (node.type === 'element') walk(node.children)
       if (node.type === 'component') walk(node.children)
       if (node.type === 'if') {
+        for (const branch of node.branches) walk(branch.children)
+        walk(node.elseChildren)
+      }
+      if (node.type === 'case') {
         for (const branch of node.branches) walk(branch.children)
         walk(node.elseChildren)
       }

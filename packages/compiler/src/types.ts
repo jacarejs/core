@@ -74,6 +74,19 @@ export interface TemplateIfNode {
   sourceLine?: number
 }
 
+export interface TemplateCaseBranch {
+  value: string
+  children: TemplateNode[]
+}
+
+export interface TemplateCaseNode {
+  type: 'case'
+  scrutinee: string
+  branches: TemplateCaseBranch[]
+  elseChildren: TemplateNode[]
+  sourceLine?: number
+}
+
 export interface TemplateEachNode {
   type: 'each'
   source: string
@@ -90,6 +103,7 @@ export type TemplateNode =
   | TemplateComponentNode
   | TemplateSlotNode
   | TemplateIfNode
+  | TemplateCaseNode
   | TemplateEachNode
 
 export interface TemplateAST {

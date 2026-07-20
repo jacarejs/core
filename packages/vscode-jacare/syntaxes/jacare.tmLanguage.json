@@ -393,7 +393,7 @@
     "directives": {
       "patterns": [
         {
-          "match": "^\\s*(#if|#elif|#else|#end|#for|@if|@elseif|@else|@end|@each)\\b",
+          "match": "^\\s*(#if|#elif|#else|#end|#case|#when|#for|@if|@elseif|@else|@end|@each)\\b",
           "name": "keyword.control.jacare keyword.control.flow"
         }
       ]

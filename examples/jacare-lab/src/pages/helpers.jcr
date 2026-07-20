@@ -15,6 +15,7 @@ const helpers = [
   { name: 'style---*', description: 'Bind a signal to a reactive CSS custom property', path: '/bindings' },
   { name: 'on-* / @*', description: 'Attach a DOM event listener with automatic cleanup', path: '/events' },
   { name: 'if / elif / else', description: 'Mount exactly one branch at a time', path: '/if' },
+  { name: 'case / when / else', description: 'Match one value with Object.is arms', path: '/case' },
   { name: 'for … as … (key)', description: 'Reconcile a keyed list incrementally instead of re-rendering it', path: '/for' },
   { name: 'contract block', description: 'Declare props, pulses, slots, and emits so jacare check can validate usage', path: '/components' },
   { name: 'style block', description: 'Scoped CSS per file, with a global() escape to opt out', path: '/css' },

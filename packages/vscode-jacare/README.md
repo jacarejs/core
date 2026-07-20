@@ -32,7 +32,7 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | Feature | Description |
 |---------|-------------|
 | **Syntax highlighting** | JavaScript module body, `view` / `style` / `contract` blocks, directives, HTML, and bindings |
-| **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#for` (and `@if` / `@each` aliases) |
+| **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) |
 | **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` fields |
 | **Snippets** | Prefixes for component scaffold, contract, view, style, signals, and template control flow |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
@@ -90,6 +90,7 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 | `jcr-computed` | `computed` | `const name = computed(() => …)` |
 | `jcr-if` | `#if` | `#if` / `#end` |
 | `jcr-ifelse` | `#ifelse` | `#if` / `#else` / `#end` |
+| `jcr-case` | `#case` | `#case` / `#when` / `#else` / `#end` |
 | `jcr-for` | `#for` | `#for items() as item (item.id)` / `#end` |
 | `jcr-bind` | `bind-value` | `bind-value=${signal}` |
 | `jcr-click` | `on-click` | `on-click=${handler}` |

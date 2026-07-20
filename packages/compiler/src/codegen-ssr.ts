@@ -1,4 +1,11 @@
-import type { TemplateAST, TemplateEachNode, TemplateIfNode, TemplateNode, TextPart } from './types.js'
+import type {
+  TemplateAST,
+  TemplateCaseNode,
+  TemplateEachNode,
+  TemplateIfNode,
+  TemplateNode,
+  TextPart,
+} from './types.js'
 import { CodegenContext, escapeHtml, resolveSignalExpr } from './codegen-shared.js'
 
 export function emitSSR(
@@ -82,6 +89,9 @@ function emitSSRNode(ctx: CodegenContext, node: TemplateNode): void {
     case 'if':
       emitSSRIf(ctx, node)
       break
+    case 'case':
+      emitSSRCase(ctx, node)
+      break
     case 'each':
       emitSSREach(ctx, node)
       break
@@ -129,6 +139,38 @@ function emitSSRIf(ctx: CodegenContext, node: TemplateIfNode): void {
     ctx.dedent()
     ctx.line('}')
   }
+}
+
+function emitSSRCase(ctx: CodegenContext, node: TemplateCaseNode): void {
+  const match = ctx.nextId('cv')
+  ctx.line(`{`)
+  ctx.indent()
+  ctx.line(`const ${match} = (${node.scrutinee})`)
+
+  for (let i = 0; i < node.branches.length; i++) {
+    const branch = node.branches[i]!
+    const prefix = i === 0 ? 'if' : 'else if'
+    ctx.line(`${prefix} (Object.is(${match}, (${branch.value}))) {`)
+    ctx.indent()
+    for (const child of branch.children) {
+      emitSSRNode(ctx, child)
+    }
+    ctx.dedent()
+    ctx.line('}')
+  }
+
+  if (node.elseChildren.length > 0) {
+    ctx.line('else {')
+    ctx.indent()
+    for (const child of node.elseChildren) {
+      emitSSRNode(ctx, child)
+    }
+    ctx.dedent()
+    ctx.line('}')
+  }
+
+  ctx.dedent()
+  ctx.line(`}`)
 }
 
 function emitSSREach(ctx: CodegenContext, node: TemplateEachNode): void {

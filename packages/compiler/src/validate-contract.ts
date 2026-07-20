@@ -155,6 +155,9 @@ export function collectComponents(ast: TemplateAST): TemplateComponentNode[] {
       } else if (node.type === 'if') {
         for (const branch of node.branches) walk(branch.children)
         walk(node.elseChildren)
+      } else if (node.type === 'case') {
+        for (const branch of node.branches) walk(branch.children)
+        walk(node.elseChildren)
       } else if (node.type === 'each') {
         walk(node.children)
       }

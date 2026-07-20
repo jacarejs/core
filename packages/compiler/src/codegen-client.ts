@@ -1,6 +1,7 @@
 import type {
   TemplateAttr,
   TemplateAST,
+  TemplateCaseNode,
   TemplateEachNode,
   TemplateIfNode,
   TemplateNode,
@@ -92,6 +93,9 @@ function emitNode(ctx: CodegenContext, node: TemplateNode, target: EmitTarget): 
       break
     case 'if':
       emitIf(ctx, node, target)
+      break
+    case 'case':
+      emitCase(ctx, node, target)
       break
     case 'each':
       emitEach(ctx, node, target)
@@ -196,6 +200,48 @@ function emitIf(ctx: CodegenContext, node: TemplateIfNode, target: EmitTarget): 
     const branch = node.branches[i]!
     const prefix = i === 0 ? 'if' : 'else if'
     ctx.line(`${prefix} (${branch.condition}) {`)
+    ctx.indent()
+    for (const child of branch.children) {
+      emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
+    }
+    ctx.dedent()
+    ctx.line('}')
+  }
+
+  if (node.elseChildren.length > 0) {
+    ctx.line('else {')
+    ctx.indent()
+    for (const child of node.elseChildren) {
+      emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
+    }
+    ctx.dedent()
+    ctx.line('}')
+  }
+
+  ctx.popCleanupScope()
+  ctx.line(`return () => { for (const c of ${scope}) c() }`)
+  ctx.dedent()
+  ctx.line('}))')
+}
+
+function emitCase(ctx: CodegenContext, node: TemplateCaseNode, target: EmitTarget): void {
+  const anchor = ctx.nextId('case')
+  ctx.line(`const ${anchor} = document.createComment('case')`, node.sourceLine)
+  append(ctx, target, anchor)
+
+  const scope = ctx.nextId('bc')
+  const match = ctx.nextId('cv')
+  ctx.useRuntime('branch')
+  ctx.line(`${ctx.cleanupVar}.push(branch(${anchor}, (mount) => {`)
+  ctx.indent()
+  ctx.line(`const ${scope} = []`)
+  ctx.line(`const ${match} = (${node.scrutinee})`)
+  ctx.pushCleanupScope(scope)
+
+  for (let i = 0; i < node.branches.length; i++) {
+    const branch = node.branches[i]!
+    const prefix = i === 0 ? 'if' : 'else if'
+    ctx.line(`${prefix} (Object.is(${match}, (${branch.value}))) {`)
     ctx.indent()
     for (const child of branch.children) {
       emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
