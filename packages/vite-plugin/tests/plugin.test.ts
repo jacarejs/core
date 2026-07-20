@@ -48,7 +48,7 @@ export default <view>
 
     const html = '<html><head><title>Old</title></head><body></body></html>'
     const transformed = await hook.call({} as never, html)
-    expect(transformed).toContain('<title>Jacaré Tasks</title>')
+    expect(transformed).toContain('<title>Jacaré · Suite</title>')
   })
 
   it('emits client bundle by default', () => {

@@ -52,7 +52,7 @@ function loadApp(source: string) {
     .replace(/^export /gm, '')
   return new Function(
     'runtime',
-    `const { signal, computed, pulse, derive, effect, bindText, bindAttribute, bindModel, bindClass, showIf, branch, reconcileKeyedList, resumeBindings } = runtime
+    `const { signal, computed, pulse, derive, effect, bindText, bindAttribute, bindModel, bindClass, showIf, branch, reconcileKeyedList, resumeBindings, runUntracked, devtoolsBind = () => () => {} } = runtime
 ${body}
 return { mount, filter, items }`,
   )(runtime) as {
@@ -123,7 +123,7 @@ function loadForInIf(source: string) {
     .replace(/^export /gm, '')
   return new Function(
     'runtime',
-    `const { signal, computed, pulse, derive, effect, bindText, bindAttribute, bindModel, bindClass, showIf, branch, reconcileKeyedList, resumeBindings } = runtime
+    `const { signal, computed, pulse, derive, effect, bindText, bindAttribute, bindModel, bindClass, showIf, branch, reconcileKeyedList, resumeBindings, runUntracked, devtoolsBind = () => () => {} } = runtime
 ${body}
 return { mount, show, items }`,
   )(runtime) as {
@@ -190,7 +190,7 @@ describe('reactivity demo', () => {
       .replace(/^export /gm, '')
     const mod = new Function(
       'runtime',
-      `const { signal, computed, pulse, derive, effect, bindText, resumeBindings } = runtime
+      `const { signal, computed, pulse, derive, effect, bindText, resumeBindings, runUntracked, devtoolsBind = () => () => {} } = runtime
 ${body}
 return { mount, demoCount }`,
     )(runtime) as {
