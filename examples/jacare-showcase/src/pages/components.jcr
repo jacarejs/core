@@ -1,43 +1,102 @@
-import { signal } from '@jacare/core'
+import { derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import pageCode from './components.jcr?raw'
 import Card from '../components/Card.jcr'
 import Badge from '../components/Badge.jcr'
+import Stat from '../components/Stat.jcr'
 
-const mood = signal('focused')
+const moods = ['focused', 'playful', 'shipping', 'curious']
 
-const moods = ['focused', 'playful', 'shipping']
+const mood = pulse('focused')
+const slotClicks = pulse(0)
+const remixes = pulse(0)
 
-const usageSample = `<Card :title="'Hello'">
-  <p>Slot content</p>
-</Card>`
+const moodIndex = derive(() => moods.indexOf(mood()))
+const nextMood = derive(() => moods[(moodIndex() + 1) % moods.length])
+const moodLabel = derive(() => mood())
 
 function cycleMood() {
-  const index = moods.indexOf(mood())
-  mood.set(moods[(index + 1) % moods.length])
+  mood.set(nextMood())
+  remixes.update((n) => n + 1)
+}
+
+function bumpSlot() {
+  slotClicks.update((n) => n + 1)
+}
+
+function openCode() {
+  showCode('Components', [{ name: 'pages/components.jcr', code: pageCode }])
 }
 
 export <view>
   <section class="page">
-    <div>
-      <h1 class="section-title">Components & slots</h1>
-      <p class="section-lead">
-        PascalCase components, default slots, and co-located scoped <code>style</code> blocks per file.
+    <div class="hero">
+      <p class="hero-eyebrow">Composition</p>
+      <h1 class="hero-title">Components & slots</h1>
+      <p class="hero-lead">
+        PascalCase imports mount as components. Default <code>&lt;slot /&gt;</code> projects
+        parent markup into Card. Badge and Stat are small presentational pieces with co-located
+        scoped CSS that never leaks to siblings.
       </p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+      <div class="stats-row">
+        <Stat :value=${moodLabel} :label=${'Mood'} />
+        <Stat :value=${slotClicks} :label=${'Slot clicks'} />
+        <Stat :value=${remixes} :label=${'Mood cycles'} />
+      </div>
     </div>
 
     <div class="feature-grid">
-      <Card :title=${'Card with slot'} :subtitle=${'Children render inside <slot />'}>
-        <p>This content is projected from the parent page into the Card component.</p>
+      <Card :title=${'Card with slot'} :subtitle=${'Children render inside the Card body slot'}>
+        <p>
+          This paragraph is projected from the page into <code>Card</code>. Slot content stays
+          reactive — Badge below tracks the mood pulse owned by the parent.
+        </p>
         <div class="demo-row">
           <Badge :text=${mood} />
-          <button class="btn btn-primary" on-click=${cycleMood}>Cycle mood</button>
+          <button type="button" class="btn btn-primary" on-click=${cycleMood}>
+            Cycle to ${nextMood}
+          </button>
+          <button type="button" class="btn btn-outline" on-click=${bumpSlot}>
+            Ping slot (${slotClicks})
+          </button>
         </div>
       </Card>
 
-      <Card :title=${'Scoped CSS'} :subtitle=${'Styles never leak to siblings'}>
-        <p>Each .jcr file can ship an <code>export &lt;style&gt;</code> block. Selectors are scoped with <code>data-jacare-s</code>.</p>
+      <Card :title=${'Scoped CSS'} :subtitle=${'export &lt;style&gt; is hashed per file'}>
+        <p>
+          Each <code>.jcr</code> can ship an <code>export &lt;style&gt;</code> block. Selectors
+          are scoped with <code>data-jacare-s</code>, so this accent never paints the sibling card.
+        </p>
+        <div class="comp-swatch">Scoped accent surface</div>
+      </Card>
+
+      <Card :title=${'Badge + Stat'} :subtitle=${'Small building blocks compose without prop drilling'}>
+        <div class="demo-row">
+          <Badge :text=${'card'} />
+          <Badge :text=${'badge'} />
+          <Badge :text=${'stat'} />
+        </div>
+        <p class="demo-label">
+          Stats live in the hero above; badges decorate status. Both accept simple props and
+          update when pulses change.
+        </p>
       </Card>
     </div>
-
-    <pre class="code"><code>${usageSample}</code></pre>
   </section>
 </view>
+
+export <style>
+.comp-swatch {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px dashed #78c018;
+  background: linear-gradient(135deg, #f4fbf6, #e8f8ec);
+  color: #003030;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+</style>

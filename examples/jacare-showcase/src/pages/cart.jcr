@@ -1,4 +1,6 @@
-import { computed, signal } from '@jacare/core'
+import { derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import pageCode from './cart.jcr?raw'
 import Card from '../components/Card.jcr'
 import Badge from '../components/Badge.jcr'
 
@@ -15,10 +17,10 @@ const catalog = [
   { id: 'notebook', name: 'Dev Notebook', price: 18.5, tag: 'gear' },
 ].map((product) => ({ ...product, priceLabel: formatMoney(product.price) }))
 
-const cart = signal([])
-const coupon = signal('')
+const cart = pulse([])
+const coupon = pulse('')
 
-const lines = computed(() =>
+const lines = derive(() =>
   cart()
     .map((line) => {
       const product = catalog.find((item) => item.id === line.productId)
@@ -35,32 +37,32 @@ const lines = computed(() =>
     .filter(Boolean),
 )
 
-const itemCount = computed(() => cart().reduce((sum, line) => sum + line.qty, 0))
-const subtotal = computed(() => lines().reduce((sum, line) => sum + line.lineTotal, 0))
-const volumeDiscount = computed(() => (subtotal() >= 100 ? subtotal() * 0.1 : 0))
-const couponDiscount = computed(() => {
+const itemCount = derive(() => cart().reduce((sum, line) => sum + line.qty, 0))
+const subtotal = derive(() => lines().reduce((sum, line) => sum + line.lineTotal, 0))
+const volumeDiscount = derive(() => (subtotal() >= 100 ? subtotal() * 0.1 : 0))
+const couponDiscount = derive(() => {
   const code = coupon().trim().toUpperCase()
   if (!code) return 0
   if (code === 'JACARE10') return subtotal() * 0.1
   if (code === 'SHIPFREE') return 0
   return 0
 })
-const discount = computed(() => Math.min(subtotal(), volumeDiscount() + couponDiscount()))
-const taxable = computed(() => Math.max(0, subtotal() - discount()))
-const tax = computed(() => taxable() * 0.08)
-const shipping = computed(() => {
+const discount = derive(() => Math.min(subtotal(), volumeDiscount() + couponDiscount()))
+const taxable = derive(() => Math.max(0, subtotal() - discount()))
+const tax = derive(() => taxable() * 0.08)
+const shipping = derive(() => {
   if (itemCount() === 0) return 0
   if (coupon().trim().toUpperCase() === 'SHIPFREE' || subtotal() >= 75) return 0
   return 6.9
 })
-const total = computed(() => taxable() + tax() + shipping())
-const isEmpty = computed(() => itemCount() === 0)
+const total = derive(() => taxable() + tax() + shipping())
+const isEmpty = derive(() => itemCount() === 0)
 
-const subtotalLabel = computed(() => formatMoney(subtotal()))
-const discountLabel = computed(() => formatMoney(discount()))
-const taxLabel = computed(() => formatMoney(tax()))
-const shippingLabel = computed(() => formatMoney(shipping()))
-const totalLabel = computed(() => formatMoney(total()))
+const subtotalLabel = derive(() => formatMoney(subtotal()))
+const discountLabel = derive(() => formatMoney(discount()))
+const taxLabel = derive(() => formatMoney(tax()))
+const shippingLabel = derive(() => formatMoney(shipping()))
+const totalLabel = derive(() => formatMoney(total()))
 
 function addToCart(productId) {
   cart.update((items) => {
@@ -93,14 +95,37 @@ function clearCart() {
   coupon.set('')
 }
 
+function openCode() {
+  showCode('Cart', [{ name: 'pages/cart.jcr', code: pageCode }])
+}
+
 export <view>
   <section class="page">
-    <div>
-      <h1 class="section-title">Shopping cart</h1>
-      <p class="section-lead">
-        Add products, adjust quantities, and watch <code>computed()</code> recalculate subtotal,
-        discounts, tax, and shipping in real time.
+    <div class="hero">
+      <p class="hero-eyebrow">Derived totals</p>
+      <h1 class="hero-title">Shopping cart</h1>
+      <p class="hero-lead">
+        Add products and adjust quantities while a chain of <code>derive()</code> values
+        recalculates subtotal, volume discount, coupon, tax, and shipping — only the bound
+        summary nodes update.
       </p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat">
+          <span class="stat-value">${itemCount}</span>
+          <span class="stat-label">Items</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">${subtotalLabel}</span>
+          <span class="stat-label">Subtotal</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">${totalLabel}</span>
+          <span class="stat-label">Total</span>
+        </div>
+      </div>
     </div>
 
     <div class="cart-layout">
@@ -114,7 +139,7 @@ export <view>
               </div>
               <div class="demo-row">
                 <Badge :text=${product.tag} />
-                <button class="btn btn-primary" on-click=${() => addToCart(product.id)}>Add</button>
+                <button type="button" class="btn btn-primary" on-click=${() => addToCart(product.id)}>Add</button>
               </div>
             </li>
           #end
@@ -138,11 +163,11 @@ export <view>
                   <span class="demo-label">${line.unitLabel} each</span>
                 </div>
                 <div class="demo-row">
-                  <button class="btn btn-outline" on-click=${() => changeQty(line.productId, -1)}>−</button>
+                  <button type="button" class="btn btn-outline" on-click=${() => changeQty(line.productId, -1)}>−</button>
                   <span class="demo-value cart-qty">${line.qty}</span>
-                  <button class="btn btn-outline" on-click=${() => changeQty(line.productId, 1)}>+</button>
+                  <button type="button" class="btn btn-outline" on-click=${() => changeQty(line.productId, 1)}>+</button>
                   <span class="cart-line-total">${line.totalLabel}</span>
-                  <button class="btn btn-outline" on-click=${() => removeFromCart(line.productId)}>Remove</button>
+                  <button type="button" class="btn btn-outline" on-click=${() => removeFromCart(line.productId)}>Remove</button>
                 </div>
               </li>
             #end
@@ -177,17 +202,13 @@ export <view>
           </dl>
 
           <div class="demo-row">
-            <button class="btn btn-primary" on-click=${clearCart} :disabled=${isEmpty}>Clear cart</button>
-            <span class="pill">10% off orders over $100</span>
+            <button type="button" class="btn btn-primary" on-click=${clearCart} :disabled=${isEmpty}>Clear cart</button>
+            <span class="pill">10% off over $100</span>
             <span class="pill">Free shipping over $75</span>
           </div>
         </div>
       </Card>
     </div>
-
-    <pre class="code"><code>const subtotal = computed(() =>
-  lines().reduce((sum, line) => sum + line.lineTotal, 0))
-const total = computed(() => taxable() + tax() + shipping())</code></pre>
   </section>
 </view>
 

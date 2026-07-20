@@ -1,0 +1,38 @@
+export <contract>
+  props: {
+    code: { type: 'any', required: true }
+  }
+</contract>
+
+async function copyToClipboard(text, button) {
+  const value = typeof text === 'function' ? String(text()) : String(text ?? '')
+  const label = button.querySelector('.btn-copy-label')
+  if (!label) return
+  const previous = label.textContent
+  try {
+    await navigator.clipboard.writeText(value)
+    label.textContent = 'Copied'
+    button.disabled = true
+    setTimeout(() => {
+      label.textContent = previous
+      button.disabled = false
+    }, 1400)
+  } catch {
+    label.textContent = 'Failed'
+    setTimeout(() => {
+      label.textContent = previous
+    }, 1400)
+  }
+}
+
+export <view>
+  <button
+    type="button"
+    class="btn btn-copy"
+    aria-label="Copy code"
+    on-click=${(event) => copyToClipboard(code, event.currentTarget)}
+  >
+    <span class="btn-copy-icon" aria-hidden="true"></span>
+    <span class="btn-copy-label">Copy</span>
+  </button>
+</view>

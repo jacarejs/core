@@ -1,0 +1,135 @@
+import { derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import pageCode from './bindings.jcr?raw'
+import Card from '../components/Card.jcr'
+import Badge from '../components/Badge.jcr'
+
+const themes = [
+  { id: 'forest', label: 'Forest' },
+  { id: 'lime', label: 'Lime' },
+  { id: 'night', label: 'Night' },
+]
+
+const progress = pulse(42)
+const theme = pulse('forest')
+const mirror = pulse('Hello Jacaré')
+const turbo = pulse(false)
+
+const pct = derive(() => `${Math.min(100, Math.max(0, Number(progress()) || 0))}%`)
+const progressLabel = derive(() => Math.min(100, Math.max(0, Number(progress()) || 0)))
+const themeLabel = derive(() => themes.find((t) => t.id === theme())?.label ?? theme())
+const mirrorLength = derive(() => mirror().length)
+const turboLabel = derive(() => (turbo() ? 'on' : 'off'))
+
+function bump(delta) {
+  progress.update((n) => Math.min(100, Math.max(0, Number(n) + delta)))
+}
+
+function setTheme(id) {
+  theme.set(id)
+}
+
+function openCode() {
+  showCode('Bindings', [{ name: 'pages/bindings.jcr', code: pageCode }])
+}
+
+export <view>
+  <section class="page">
+    <div class="hero">
+      <p class="hero-eyebrow">DOM wiring</p>
+      <h1 class="hero-title">Bindings</h1>
+      <p class="hero-lead">
+        Three binding flavors in one page: <code>style---pct</code> sets a CSS custom property,
+        <code>class-*</code> toggles individual classes without string concat, and
+        <code>bind-value</code> mirrors input text both ways.
+      </p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <Card :title=${'style---pct progress'} :subtitle=${'Width tracks --pct — no style.width string rebuilds'}>
+        <div class="demo-panel bind-panel" class-theme-forest=${() => theme() === 'forest'} class-theme-lime=${() => theme() === 'lime'} class-theme-night=${() => theme() === 'night'}>
+          <div class="progress-track">
+            <div class="progress-fill" style---pct=${pct}></div>
+          </div>
+          <div class="demo-row">
+            <span class="demo-value">${progressLabel}</span>
+            <span class="demo-label">percent</span>
+            <span class="pill">${pct}</span>
+          </div>
+          <div class="demo-row">
+            <button type="button" class="btn btn-primary" on-click=${() => bump(-10)}>−10</button>
+            <button type="button" class="btn btn-primary" on-click=${() => bump(10)}>+10</button>
+            <button type="button" class="btn btn-outline" on-click=${() => progress.set(0)}>0%</button>
+            <button type="button" class="btn btn-outline" on-click=${() => progress.set(100)}>100%</button>
+          </div>
+        </div>
+      </Card>
+
+      <Card :title=${'class-* theme chips'} :subtitle=${'Each chip toggles a single class binding'}>
+        <div class="demo-panel">
+          <div class="demo-row">
+            #for themes as chip (chip.id)
+              <button
+                type="button"
+                class="btn btn-outline theme-chip"
+                class-active=${() => theme() === chip.id}
+                on-click=${() => setTheme(chip.id)}
+              >${chip.label}</button>
+            #end
+          </div>
+          <div class="demo-row">
+            <Badge :text=${themeLabel} />
+            <button
+              type="button"
+              class="btn btn-primary"
+              class-turbo=${turbo}
+              on-click=${() => turbo.set(!turbo())}
+            >Turbo: ${turboLabel}</button>
+          </div>
+          <p class="demo-label">
+            Active chip uses <code>class-active</code>; the primary button uses <code>class-turbo</code>.
+          </p>
+        </div>
+      </Card>
+
+      <Card :title=${'bind-value mirror'} :subtitle=${'Type once — pulse and preview stay in sync'}>
+        <div class="demo-panel">
+          <label class="demo-label">
+            Message
+            <input class="input" placeholder="Type something…" bind-value=${mirror} />
+          </label>
+          <p class="demo-value bind-mirror">${mirror}</p>
+          <div class="demo-row">
+            <span class="pill">${mirrorLength} chars</span>
+            <button type="button" class="btn btn-outline" on-click=${() => mirror.set('')}>Clear</button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  </section>
+</view>
+
+export <style>
+.bind-panel.theme-lime .progress-fill {
+  background: linear-gradient(90deg, #60a818, #90c018);
+}
+.bind-panel.theme-night .progress-fill {
+  background: linear-gradient(90deg, #003030, #189030);
+}
+.bind-panel.theme-forest .progress-fill {
+  background: linear-gradient(90deg, #189030, #78c018);
+}
+.theme-chip.active {
+  color: #001818;
+  background: linear-gradient(135deg, #d8f3dc, #c8f0d0);
+  border-color: #78c018;
+}
+.bind-mirror {
+  margin: 0;
+  word-break: break-word;
+  min-height: 1.5em;
+}
+</style>

@@ -1,23 +1,60 @@
-import { signal } from '@jacare/core'
+import { pulse } from '@jacare/core'
 import { appHref } from '../app-base.js'
 import Card from '../components/Card.jcr'
 import Badge from '../components/Badge.jcr'
 
-const renders = signal(0)
-const fps = signal(60)
+const mounts = pulse(0)
+mounts.update((n) => n + 1)
 
-renders.update((n) => n + 1)
-
-const features = [
-  { slug: 'reactivity', title: 'Fine-grained reactivity', summary: 'Signals update only what changed — no virtual DOM diff.' },
-  { slug: 'components', title: 'Components & slots', summary: 'Composable UI with scoped CSS and child projection.' },
-  { slug: 'forms', title: 'Forms', summary: 'Two-way bindings and validated fields out of the box.' },
-  { slug: 'playground', title: 'Playground', summary: 'Keyed lists, branches, and live DOM reconciliation.' },
-  { slug: 'performance', title: 'Performance & CPW', summary: 'Compile-time pulse wiring and reactive CSS variables.' },
-  { slug: 'cart', title: 'Shopping cart', summary: 'Add products and recalculate totals with computed signals.' },
+const demos = [
+  {
+    slug: 'reactivity',
+    title: 'Reactivity',
+    summary: 'pulse() writes, derive() reads — only bound DOM nodes update when state changes.',
+  },
+  {
+    slug: 'lists',
+    title: 'Keyed lists',
+    summary: 'Add, filter, toggle, and remove items while #for reconciles by stable keys.',
+  },
+  {
+    slug: 'bindings',
+    title: 'Bindings',
+    summary: 'style---pct CSS variables, class-* toggles, and bind-value mirrors without string rebuilds.',
+  },
+  {
+    slug: 'forms',
+    title: 'Forms',
+    summary: 'createForm + Field: two-way binding, blur validation, and handled submit.',
+  },
+  {
+    slug: 'components',
+    title: 'Components',
+    summary: 'Compose Card, Badge, and Stat with default slots and scoped co-located CSS.',
+  },
+  {
+    slug: 'poll',
+    title: 'Live poll',
+    summary: 'Vote tallies with derive percentages and animated style---pct bars.',
+  },
+  {
+    slug: 'cart',
+    title: 'Shopping cart',
+    summary: 'Catalog, quantities, coupons, and live totals recomputed through derive().',
+  },
+  {
+    slug: 'timers',
+    title: 'Timers',
+    summary: 'Countdown owned by effect() — interval starts and cleans up with dispose.',
+  },
+  {
+    slug: 'performance',
+    title: 'Performance & CPW',
+    summary: 'Compile-Time Pulse Wiring and reactive CSS variables for GPU-friendly updates.',
+  },
 ]
 
-function featureHref(slug) {
+function demoHref(slug) {
   return '/' + slug
 }
 
@@ -25,23 +62,23 @@ export <view>
   <section class="page">
     <div class="hero">
       <p class="hero-eyebrow">Jacaré Showcase</p>
-      <h1 class="hero-title">Reactive UI without the virtual DOM tax</h1>
+      <h1 class="hero-title">Fine-grained UI without a virtual DOM</h1>
       <p class="hero-lead">
-        A polished demo of Jacaré — compile-time templates, incremental DOM updates,
-        file-based routing, and brand-native styling.
+        Nine interactive demos of Jacaré — compile-time templates, pulse/derive reactivity,
+        keyed lists, forms, components, and CPW bindings.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" jacare-go="/playground" href=${appHref('/playground')}>Open playground</a>
-        <a class="btn btn-ghost" jacare-go="/components" href=${appHref('/components')}>See components</a>
+        <a class="btn btn-primary" jacare-go="/reactivity" href=${appHref('/reactivity')}>Start with reactivity</a>
+        <a class="btn btn-ghost" jacare-go="/lists" href=${appHref('/lists')}>Try keyed lists</a>
       </div>
       <div class="stats-row">
         <div class="stat">
-          <span class="stat-value">${renders}</span>
-          <span class="stat-label">Screen mounts</span>
+          <span class="stat-value">${mounts}</span>
+          <span class="stat-label">Home mounts</span>
         </div>
         <div class="stat">
-          <span class="stat-value">${fps}</span>
-          <span class="stat-label">Target FPS</span>
+          <span class="stat-value">9</span>
+          <span class="stat-label">Live demos</span>
         </div>
         <div class="stat">
           <span class="stat-value">0</span>
@@ -51,16 +88,23 @@ export <view>
     </div>
 
     <div>
-      <h2 class="section-title">What Jacaré demonstrates</h2>
-      <p class="section-lead">Each page highlights a core capability of the framework.</p>
+      <h2 class="section-title">Explore the demos</h2>
+      <p class="section-lead">
+        Each page isolates one Jacaré capability with a working demo and a View code button that
+        opens the exact <code>.jcr</code> source.
+      </p>
     </div>
 
     <div class="feature-grid">
-      #for features as item (item.slug)
+      #for demos as item (item.slug)
         <Card :title=${item.title} :subtitle=${item.summary}>
           <div class="demo-row">
             <Badge :text=${item.slug} />
-            <a class="btn btn-primary" jacare-go=${featureHref(item.slug)} href=${appHref(featureHref(item.slug))}>Explore</a>
+            <a
+              class="btn btn-primary"
+              jacare-go=${demoHref(item.slug)}
+              href=${appHref(demoHref(item.slug))}
+            >Explore</a>
           </div>
         </Card>
       #end

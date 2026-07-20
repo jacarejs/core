@@ -1,8 +1,12 @@
-import { computed, signal } from '@jacare/core'
+import { derive, pulse } from '@jacare/core'
 import { appHref, assetUrl } from './app-base.js'
+import { activeCode, hideCode } from './code-viewer.js'
+import CodeModal from './components/CodeModal.jcr'
 
-const menuOpen = signal(false)
-const menuLabel = computed(() => (menuOpen() ? 'Close' : 'Menu'))
+const menuOpen = pulse(false)
+const menuLabel = derive(() => (menuOpen() ? 'Close' : 'Menu'))
+const viewerTitle = derive(() => activeCode()?.title ?? '')
+const viewerFiles = derive(() => activeCode()?.files ?? [])
 
 function toggleMenu() {
   menuOpen.update((open) => !open)
@@ -21,7 +25,7 @@ export <view>
             <img class="logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
             <span class="brand-text">
               <span class="brand-title">Jacaré Showcase</span>
-              <span class="brand-tag">Zero VDOM · Fine-grained reactivity</span>
+              <span class="brand-tag">Fine-grained reactivity · zero VDOM</span>
             </span>
           </a>
           <button type="button" class="nav-toggle btn btn-outline" on-click=${toggleMenu}>
@@ -31,11 +35,14 @@ export <view>
         <nav class="nav" class-nav-open=${menuOpen}>
           <a class="nav-link" jacare-go="/" href=${appHref('/')} on-click=${closeMenu}>Home</a>
           <a class="nav-link" jacare-go="/reactivity" href=${appHref('/reactivity')} on-click=${closeMenu}>Reactivity</a>
-          <a class="nav-link" jacare-go="/components" href=${appHref('/components')} on-click=${closeMenu}>Components</a>
+          <a class="nav-link" jacare-go="/lists" href=${appHref('/lists')} on-click=${closeMenu}>Lists</a>
+          <a class="nav-link" jacare-go="/bindings" href=${appHref('/bindings')} on-click=${closeMenu}>Bindings</a>
           <a class="nav-link" jacare-go="/forms" href=${appHref('/forms')} on-click=${closeMenu}>Forms</a>
-          <a class="nav-link" jacare-go="/playground" href=${appHref('/playground')} on-click=${closeMenu}>Playground</a>
-          <a class="nav-link" jacare-go="/performance" href=${appHref('/performance')} on-click=${closeMenu}>Performance</a>
+          <a class="nav-link" jacare-go="/components" href=${appHref('/components')} on-click=${closeMenu}>Components</a>
+          <a class="nav-link" jacare-go="/poll" href=${appHref('/poll')} on-click=${closeMenu}>Poll</a>
           <a class="nav-link" jacare-go="/cart" href=${appHref('/cart')} on-click=${closeMenu}>Cart</a>
+          <a class="nav-link" jacare-go="/timers" href=${appHref('/timers')} on-click=${closeMenu}>Timers</a>
+          <a class="nav-link" jacare-go="/performance" href=${appHref('/performance')} on-click=${closeMenu}>Performance</a>
         </nav>
       </header>
 
@@ -51,5 +58,9 @@ export <view>
         >github.com/jacarejs/core</a>
       </footer>
     </div>
+
+    #if activeCode()
+      <CodeModal :title=${viewerTitle} :files=${viewerFiles} on-close=${hideCode} />
+    #end
   </div>
 </view>

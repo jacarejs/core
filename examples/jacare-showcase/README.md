@@ -24,13 +24,18 @@ Also see: [Todo](https://jacarejs.github.io/core/todo/) · [Scale BMI](https://j
 
 | Page | What it shows |
 |------|----------------|
-| **Home** | Hero, live stats, feature cards with slots |
-| **Reactivity** | `signal`, `computed`, `#if`, two-way bindings |
-| **Components** | `<Card>` with `<slot />`, `export <style>` blocks |
-| **Forms** | `createForm()`, validation, `Field` component |
-| **Playground** | Keyed `#for` lists, immutable updates |
-| **Performance** | CPW, `style---pct`, `class-*` bindings, compiled output tips |
-| **Cart** | `computed` totals, cart state |
+| **Home** | Gallery of demos with English blurbs |
+| **Reactivity** | `pulse`, `derive`, live metrics |
+| **Lists** | Keyed `#for` — add, filter, toggle, remove |
+| **Bindings** | `style---pct`, `class-*`, `bind-value` |
+| **Forms** | `createForm()`, validation, `Field` |
+| **Components** | Slots, Card / Badge / Stat composition |
+| **Poll** | Live tallies with derived percentage bars |
+| **Cart** | Shopping cart with derived totals and coupons |
+| **Timers** | `effect` intervals with cleanup |
+| **Performance** | CPW story + reactive CSS variables |
+
+Every demo includes **View code** — a modal with copyable source (same pattern as Lab / Todo).
 
 ### Framework capabilities on display
 

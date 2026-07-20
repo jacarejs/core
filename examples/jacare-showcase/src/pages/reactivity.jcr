@@ -1,57 +1,94 @@
-import { computed, signal } from '@jacare/core'
+import { derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import pageCode from './reactivity.jcr?raw'
 import Card from '../components/Card.jcr'
+import Badge from '../components/Badge.jcr'
 
-const count = signal(0)
-const step = signal(1)
-const doubled = computed(() => count() * 2)
-const isEven = computed(() => count() % 2 === 0)
+const count = pulse(0)
+const step = pulse(1)
+
+const doubled = derive(() => count() * 2)
+const parity = derive(() => (count() % 2 === 0 ? 'even' : 'odd'))
+const isEven = derive(() => count() % 2 === 0)
+const absCount = derive(() => Math.abs(count()))
+const stepLabel = derive(() => `±${Number(step()) || 1}`)
 
 function increment() {
-  count.update((n) => n + Number(step()))
+  const delta = Number(step()) || 1
+  count.update((n) => n + delta)
 }
 
 function decrement() {
-  count.update((n) => n - Number(step()))
+  const delta = Number(step()) || 1
+  count.update((n) => n - delta)
 }
 
 function reset() {
   count.set(0)
 }
 
+function openCode() {
+  showCode('Reactivity', [{ name: 'pages/reactivity.jcr', code: pageCode }])
+}
+
 export <view>
   <section class="page">
-    <div>
-      <h1 class="section-title">Reactivity</h1>
-      <p class="section-lead">
-        Signals drive the DOM directly. Only bound nodes re-run — components and siblings stay untouched.
+    <div class="hero">
+      <p class="hero-eyebrow">Core</p>
+      <h1 class="hero-title">Reactivity</h1>
+      <p class="hero-lead">
+        <code>pulse()</code> holds writable state; <code>derive()</code> caches pure reads.
+        Jacaré wires each binding to the exact DOM node — siblings and parent components stay idle
+        when only the count changes.
       </p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat">
+          <span class="stat-value">${count}</span>
+          <span class="stat-label">Count</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">${doubled}</span>
+          <span class="stat-label">Doubled</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">${parity}</span>
+          <span class="stat-label">Parity</span>
+        </div>
+      </div>
     </div>
 
-    <Card :title=${'Live counter'} :subtitle=${'computed() derives doubled; branches toggle parity badge'}>
+    <Card :title=${'Live counter'} :subtitle=${'Change step size, then bump the pulse — derives recalculate instantly'}>
       <div class="demo-panel">
         <div class="demo-row">
           <span class="demo-value">${count}</span>
           <span class="demo-label">count</span>
-          <span class="pill">doubled: ${doubled}</span>
+          <Badge :text=${parity} />
           #if isEven()
-            <span class="pill">even</span>
+            <span class="pill">branch: even</span>
           #else
-            <span class="pill">odd</span>
+            <span class="pill">branch: odd</span>
           #end
         </div>
+
         <div class="demo-row">
-          <button class="btn btn-primary" on-click=${decrement}>−</button>
-          <button class="btn btn-primary" on-click=${increment}>+</button>
-          <button class="btn btn-outline" on-click=${reset}>Reset</button>
+          <button type="button" class="btn btn-primary" on-click=${decrement}>−</button>
+          <button type="button" class="btn btn-primary" on-click=${increment}>+</button>
+          <button type="button" class="btn btn-outline" on-click=${reset}>Reset</button>
+          <span class="pill">step ${stepLabel}</span>
         </div>
+
         <label class="demo-label">
-          Step
-          <input class="input" type="number" bind-value=${step} min="1" max="10" />
+          Step size
+          <input class="input" type="number" min="1" max="25" bind-value=${step} />
         </label>
+
+        <div class="demo-row">
+          <span class="demo-label">Absolute value: <strong class="demo-value">${absCount}</strong></span>
+        </div>
       </div>
     </Card>
-
-    <pre class="code"><code>const count = signal(0)
-const doubled = computed(() => count() * 2)</code></pre>
   </section>
 </view>

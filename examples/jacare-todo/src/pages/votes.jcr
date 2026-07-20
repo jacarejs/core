@@ -1,0 +1,124 @@
+import { batch, derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import votesCode from './votes.jcr?raw'
+
+const OPTIONS = [
+  { id: 'forest', label: 'Forest green', color: '#189030' },
+  { id: 'lime', label: 'Electric lime', color: '#78c018' },
+  { id: 'amber', label: 'Warm amber', color: '#d4a017' },
+  { id: 'sky', label: 'Harbor blue', color: '#0ea5e9' },
+]
+
+const tallies = pulse(
+  Object.fromEntries(OPTIONS.map((o) => [o.id, 0])),
+  { name: 'votes.tallies', file: 'votes.jcr', line: 12 },
+)
+const lastVote = pulse(null, { name: 'votes.lastVote', file: 'votes.jcr', line: 16 })
+
+const total = derive(() => Object.values(tallies()).reduce((a, n) => a + n, 0), {
+  name: 'votes.total',
+  file: 'votes.jcr',
+  line: 18,
+})
+
+const rows = derive(() => {
+  const book = tallies()
+  const sum = Math.max(1, total())
+  return OPTIONS.map((opt) => {
+    const count = book[opt.id] ?? 0
+    return {
+      ...opt,
+      count,
+      pct: Math.round((count / sum) * 100),
+    }
+  }).sort((a, b) => b.count - a.count)
+}, { name: 'votes.rows', file: 'votes.jcr', line: 24 })
+
+const leader = derive(() => rows()[0] ?? null, {
+  name: 'votes.leader',
+  file: 'votes.jcr',
+  line: 36,
+})
+
+const leaderLabel = derive(() => leader()?.label ?? '—')
+const leaderPct = derive(() => leader()?.pct ?? 0)
+
+function cast(id) {
+  batch(() => {
+    tallies.update((book) => ({ ...book, [id]: (book[id] ?? 0) + 1 }))
+    lastVote.set(id)
+  })
+}
+
+function reset() {
+  batch(() => {
+    tallies.set(Object.fromEntries(OPTIONS.map((o) => [o.id, 0])))
+    lastVote.set(null)
+  })
+}
+
+function openCode() {
+  showCode('Votes', [{ name: 'pages/votes.jcr', code: votesCode }])
+}
+
+export <view>
+  <section class="page page-votes">
+    <header class="page-hero">
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Live graph</p>
+          <h1 class="page-title">Votes</h1>
+          <p class="page-lead">Cast a vote and watch derive() recalculate percentages — bars bind through style---pct, no chart library.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </header>
+
+    <div class="votes-layout">
+      <section class="panel">
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-value">${total}</span>
+            <span class="metric-label">votes</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">${leaderPct}%</span>
+            <span class="metric-label">leader</span>
+          </div>
+        </div>
+        <p class="votes-leader">Leading: <strong>${leaderLabel}</strong></p>
+        <div class="vote-actions">
+          #for OPTIONS as opt (opt.id)
+            <button type="button" class="btn btn-primary vote-btn" on-click=${() => cast(opt.id)}>
+              ${opt.label}
+            </button>
+          #end
+          <button type="button" class="btn btn-ghost" on-click=${reset}>Reset</button>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <ul class="vote-bars">
+          #for rows() as row (row.id)
+            <li class="vote-row" class-leading=${() => leader()?.id === row.id}>
+              <div class="vote-row-head">
+                <span>${row.label}</span>
+                <span class="vote-count">${row.count} · ${row.pct}%</span>
+              </div>
+              <div class="vote-track">
+                <div
+                  class="vote-fill"
+                  style---pct=${() => row.pct}
+                  style---swatch=${() => row.color}
+                ></div>
+              </div>
+            </li>
+          #end
+        </ul>
+        #if lastVote()
+          <p class="muted">Last cast: ${lastVote}</p>
+        #end
+      </aside>
+    </div>
+  </section>
+</view>

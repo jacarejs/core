@@ -1,0 +1,130 @@
+import { derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import seatsCode from './seats.jcr?raw'
+
+const ROWS = 5
+const COLS = 8
+const BLOCKED = new Set(['2-3', '2-4', '4-1', '4-2'])
+
+const seats = []
+for (let r = 0; r < ROWS; r++) {
+  for (let c = 0; c < COLS; c++) {
+    const id = `${r}-${c}`
+    seats.push({
+      id,
+      row: r + 1,
+      col: c + 1,
+      blocked: BLOCKED.has(id),
+    })
+  }
+}
+
+const selected = pulse({}, { name: 'seats.selected', file: 'seats.jcr', line: 22 })
+
+const picked = derive(() => Object.keys(selected()).filter((id) => selected()[id]), {
+  name: 'seats.picked',
+  file: 'seats.jcr',
+  line: 24,
+})
+
+const pickedCount = derive(() => picked().length, {
+  name: 'seats.pickedCount',
+  file: 'seats.jcr',
+  line: 29,
+})
+
+const labels = derive(() =>
+  picked()
+    .map((id) => {
+      const [r, c] = id.split('-').map(Number)
+      return `R${r + 1}C${c + 1}`
+    })
+    .join(', '),
+)
+
+const total = derive(() => pickedCount() * 18, {
+  name: 'seats.total',
+  file: 'seats.jcr',
+  line: 42,
+})
+
+const totalLabel = derive(() =>
+  total().toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+)
+
+function toggleSeat(id, blocked) {
+  if (blocked) return
+  selected.update((map) => {
+    const next = { ...map }
+    if (next[id]) delete next[id]
+    else next[id] = true
+    return next
+  })
+}
+
+function clearSeats() {
+  selected.set({})
+}
+
+function openCode() {
+  showCode('Seats', [{ name: 'pages/seats.jcr', code: seatsCode }])
+}
+
+export <view>
+  <section class="page page-seats">
+    <header class="page-hero">
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Selection map</p>
+          <h1 class="page-title">Seats</h1>
+          <p class="page-lead">Pick seats on a venue map — class bindings and derives update the tally and price without re-rendering the grid.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </header>
+
+    <div class="seats-layout">
+      <section class="panel seats-stage">
+        <div class="stage-label">Stage</div>
+        <div class="seat-grid" role="group" aria-label="Seat map">
+          #for seats as seat (seat.id)
+            <button
+              type="button"
+              class="seat"
+              class-blocked=${seat.blocked}
+              class-picked=${() => !!selected()[seat.id]}
+              disabled=${seat.blocked}
+              aria-pressed=${() => !!selected()[seat.id]}
+              aria-label=${() => 'Seat row ' + seat.row + ' seat ' + seat.col}
+              on-click=${() => toggleSeat(seat.id, seat.blocked)}
+            ></button>
+          #end
+        </div>
+        <div class="seat-legend">
+          <span><i class="seat seat-swatch"></i> Free</span>
+          <span><i class="seat seat-swatch picked"></i> Selected</span>
+          <span><i class="seat seat-swatch blocked"></i> Taken</span>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-value">${pickedCount}</span>
+            <span class="metric-label">seats</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">${totalLabel}</span>
+            <span class="metric-label">$18 each</span>
+          </div>
+        </div>
+        #if pickedCount()
+          <p class="seats-picked">Selected: ${labels}</p>
+        #else
+          <p class="muted">Tap free seats to build your ticket.</p>
+        #end
+        <button type="button" class="btn btn-ghost" on-click=${clearSeats}>Clear</button>
+      </aside>
+    </div>
+  </section>
+</view>

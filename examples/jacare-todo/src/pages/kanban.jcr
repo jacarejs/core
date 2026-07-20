@@ -12,32 +12,90 @@ import { showCode } from '../code-viewer.js'
 import kanbanCode from './kanban.jcr?raw'
 import storeCode from '../store.js?raw'
 
-
 const dropTarget = pulse(null)
+const dragging = pulse(false)
+const dragId = pulse(null)
+const ghostX = pulse(0)
+const ghostY = pulse(0)
+const ghostLabel = pulse('')
+
+const DRAG_THRESHOLD = 8
+let pointer = null
 
 function onDraftKeydown(e) {
   if (e.key === 'Enter') addItem('todo')
 }
 
-function onDragStart(e, id) {
-  e.dataTransfer.setData('text/plain', id)
-  e.dataTransfer.effectAllowed = 'move'
+function columnAtPoint(x, y) {
+  const stack = document.elementsFromPoint(x, y)
+  for (const el of stack) {
+    const col = el.closest?.('[data-column]')
+    if (col?.dataset?.column) return col.dataset.column
+  }
+  return null
 }
 
-function onDragOver(e, column) {
-  e.preventDefault()
-  dropTarget.set(column)
-}
-
-function onDragLeave() {
+function clearDrag() {
+  pointer = null
+  dragging.set(false)
+  dragId.set(null)
   dropTarget.set(null)
+  ghostLabel.set('')
 }
 
-function onDrop(e, column) {
+function onCardPointerDown(e, item) {
+  if (e.button != null && e.button !== 0) return
+  if (e.target.closest('button')) return
+  pointer = {
+    id: item.id,
+    label: item.label,
+    pointerId: e.pointerId,
+    startX: e.clientX,
+    startY: e.clientY,
+    active: false,
+    target: e.currentTarget,
+  }
+}
+
+function onCardPointerMove(e) {
+  if (!pointer || pointer.pointerId !== e.pointerId) return
+  const dx = e.clientX - pointer.startX
+  const dy = e.clientY - pointer.startY
+  if (!pointer.active) {
+    if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return
+    pointer.active = true
+    dragging.set(true)
+    dragId.set(pointer.id)
+    ghostLabel.set(pointer.label)
+    try {
+      pointer.target.setPointerCapture(e.pointerId)
+    } catch {
+      /* ignore */
+    }
+  }
   e.preventDefault()
-  const id = e.dataTransfer.getData('text/plain')
-  if (id) moveItem(id, column)
-  dropTarget.set(null)
+  ghostX.set(e.clientX)
+  ghostY.set(e.clientY)
+  dropTarget.set(columnAtPoint(e.clientX, e.clientY))
+}
+
+function onCardPointerUp(e) {
+  if (!pointer || pointer.pointerId !== e.pointerId) return
+  const id = pointer.id
+  const wasActive = pointer.active
+  const col = wasActive ? columnAtPoint(e.clientX, e.clientY) : null
+  try {
+    pointer.target.releasePointerCapture?.(e.pointerId)
+  } catch {
+    /* ignore */
+  }
+  clearDrag()
+  if (wasActive && col) moveItem(id, col)
+}
+
+function onCardPointerCancel(e) {
+  if (!pointer || pointer.pointerId !== e.pointerId) return
+  clearDrag()
 }
 
 function openCode() {
@@ -54,7 +112,7 @@ export <view>
         <div>
           <p class="eyebrow">Flow</p>
           <h1 class="page-title">Kanban</h1>
-          <p class="page-lead">The same tasks from the list — drag cards between columns to change status.</p>
+          <p class="page-lead">The same tasks from the list — drag cards between columns on desktop or mobile. Buttons remain as a fallback.</p>
         </div>
         <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
       </div>
@@ -75,14 +133,12 @@ export <view>
       </div>
     </section>
 
-    <div class="board">
+    <div class="board" class-dragging=${dragging}>
       #for COLUMNS as col (col.id)
         <section
           class="column"
+          data-column=${col.id}
           class-drop=${() => dropTarget() === col.id}
-          on-dragover=${(e) => onDragOver(e, col.id)}
-          on-dragleave=${onDragLeave}
-          on-drop=${(e) => onDrop(e, col.id)}
         >
           <header class="column-head">
             <div>
@@ -97,10 +153,14 @@ export <view>
               #if item.column === col.id
                 <article
                   class="card"
-                  draggable="true"
-                  on-dragstart=${(e) => onDragStart(e, item.id)}
+                  class-card-dragging=${() => dragId() === item.id}
+                  on-pointerdown=${(e) => onCardPointerDown(e, item)}
+                  on-pointermove=${onCardPointerMove}
+                  on-pointerup=${onCardPointerUp}
+                  on-pointercancel=${onCardPointerCancel}
                 >
                   <p class="card-title">${item.label}</p>
+                  <p class="card-drag-hint">Drag to move</p>
                   <div class="card-actions">
                     #for COLUMNS as dest (dest.id)
                       #if dest.id !== item.column
@@ -124,5 +184,14 @@ export <view>
         </section>
       #end
     </div>
+
+    #if dragging()
+      <div
+        class="card-ghost"
+        style---gx=${ghostX}
+        style---gy=${ghostY}
+        aria-hidden="true"
+      >${ghostLabel}</div>
+    #end
   </section>
 </view>

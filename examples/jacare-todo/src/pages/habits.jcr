@@ -1,0 +1,135 @@
+import { derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import habitsCode from './habits.jcr?raw'
+
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+const HABITS = [
+  { id: 'water', label: 'Drink water' },
+  { id: 'walk', label: 'Walk 20 min' },
+  { id: 'read', label: 'Read 10 pages' },
+  { id: 'stretch', label: 'Stretch' },
+]
+
+function emptyGrid() {
+  return Object.fromEntries(
+    HABITS.map((h) => [h.id, Object.fromEntries(DAYS.map((d) => [d, false]))]),
+  )
+}
+
+const grid = pulse(emptyGrid(), { name: 'habits.grid', file: 'habits.jcr', line: 20 })
+
+const doneCount = derive(() => {
+  let n = 0
+  const g = grid()
+  for (const h of HABITS) {
+    for (const d of DAYS) if (g[h.id]?.[d]) n += 1
+  }
+  return n
+}, { name: 'habits.doneCount', file: 'habits.jcr', line: 24 })
+
+const totalCells = HABITS.length * DAYS.length
+
+const completion = derive(() => Math.round((doneCount() / totalCells) * 100), {
+  name: 'habits.completion',
+  file: 'habits.jcr',
+  line: 34,
+})
+
+const streaks = derive(() => {
+  const g = grid()
+  return HABITS.map((h) => {
+    let streak = 0
+    for (let i = DAYS.length - 1; i >= 0; i--) {
+      if (!g[h.id]?.[DAYS[i]]) break
+      streak += 1
+    }
+    return { id: h.id, label: h.label, streak }
+  })
+}, { name: 'habits.streaks', file: 'habits.jcr', line: 40 })
+
+function toggle(habitId, day) {
+  grid.update((g) => ({
+    ...g,
+    [habitId]: {
+      ...g[habitId],
+      [day]: !g[habitId][day],
+    },
+  }))
+}
+
+function clearWeek() {
+  grid.set(emptyGrid())
+}
+
+function openCode() {
+  showCode('Habits', [{ name: 'pages/habits.jcr', code: habitsCode }])
+}
+
+export <view>
+  <section class="page page-habits">
+    <header class="page-hero">
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Keyed grid</p>
+          <h1 class="page-title">Habits</h1>
+          <p class="page-lead">A 7-day habit matrix — toggle cells and derive() recomputes completion and trailing streaks.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </header>
+
+    <div class="habits-layout">
+      <section class="panel">
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-value">${doneCount}</span>
+            <span class="metric-label">checked</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">${completion}%</span>
+            <span class="metric-label">week</span>
+          </div>
+        </div>
+
+        <div class="habit-table" role="grid" aria-label="Habit week">
+          <div class="habit-row habit-head">
+            <span class="habit-label">Habit</span>
+            #for DAYS as day (day)
+              <span class="habit-day">${day}</span>
+            #end
+          </div>
+          #for HABITS as habit (habit.id)
+            <div class="habit-row">
+              <span class="habit-label">${habit.label}</span>
+              #for DAYS as day (day)
+                <button
+                  type="button"
+                  class="habit-cell"
+                  class-on=${() => !!grid()[habit.id][day]}
+                  aria-pressed=${() => !!grid()[habit.id][day]}
+                  aria-label=${() => habit.label + ' ' + day}
+                  on-click=${() => toggle(habit.id, day)}
+                ></button>
+              #end
+            </div>
+          #end
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${clearWeek}>Clear week</button>
+      </section>
+
+      <aside class="panel">
+        <h2 class="aside-title">Streaks</h2>
+        <ul class="streak-list">
+          #for streaks() as row (row.id)
+            <li class="streak-row">
+              <span>${row.label}</span>
+              <strong>${row.streak}d</strong>
+            </li>
+          #end
+        </ul>
+        <p class="muted">Streak counts consecutive days ending today (Sun).</p>
+      </aside>
+    </div>
+  </section>
+</view>

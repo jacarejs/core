@@ -1,0 +1,178 @@
+import { batch, derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import pageCode from './poll.jcr?raw'
+import Card from '../components/Card.jcr'
+import Badge from '../components/Badge.jcr'
+
+const OPTIONS = [
+  { id: 'templates', label: 'Compile-time templates', color: '#189030' },
+  { id: 'reactivity', label: 'Fine-grained reactivity', color: '#78c018' },
+  { id: 'routing', label: 'File-based routing', color: '#d4a017' },
+  { id: 'cpw', label: 'CPW bindings', color: '#0ea5e9' },
+]
+
+const tallies = pulse(Object.fromEntries(OPTIONS.map((o) => [o.id, 0])))
+const lastVote = pulse(null)
+
+const total = derive(() => Object.values(tallies()).reduce((a, n) => a + n, 0))
+
+const rows = derive(() => {
+  const book = tallies()
+  const sum = Math.max(1, total())
+  return OPTIONS.map((opt) => {
+    const count = book[opt.id] ?? 0
+    return {
+      ...opt,
+      count,
+      pct: Math.round((count / sum) * 100),
+    }
+  }).sort((a, b) => b.count - a.count)
+})
+
+const leader = derive(() => rows()[0] ?? null)
+const leaderLabel = derive(() => leader()?.label ?? '—')
+const leaderPct = derive(() => leader()?.pct ?? 0)
+const hasVotes = derive(() => total() > 0)
+
+function cast(id) {
+  batch(() => {
+    tallies.update((book) => ({ ...book, [id]: (book[id] ?? 0) + 1 }))
+    lastVote.set(id)
+  })
+}
+
+function reset() {
+  batch(() => {
+    tallies.set(Object.fromEntries(OPTIONS.map((o) => [o.id, 0])))
+    lastVote.set(null)
+  })
+}
+
+function openCode() {
+  showCode('Poll', [{ name: 'pages/poll.jcr', code: pageCode }])
+}
+
+export <view>
+  <section class="page">
+    <div class="hero">
+      <p class="hero-eyebrow">Live graph</p>
+      <h1 class="hero-title">Poll</h1>
+      <p class="hero-lead">
+        Cast a vote and watch <code>derive()</code> recalculate percentages. Each bar binds
+        width through <code>style---pct</code> — no chart library, no full re-render of the list.
+      </p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat">
+          <span class="stat-value">${total}</span>
+          <span class="stat-label">Votes</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">${leaderPct}%</span>
+          <span class="stat-label">Leader share</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">${leaderLabel}</span>
+          <span class="stat-label">Leading</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="poll-layout">
+      <Card :title=${'Cast a vote'} :subtitle=${'batch() updates tallies + lastVote together'}>
+        <div class="demo-panel">
+          <div class="demo-row poll-actions">
+            #for OPTIONS as opt (opt.id)
+              <button type="button" class="btn btn-primary" on-click=${() => cast(opt.id)}>
+                ${opt.label}
+              </button>
+            #end
+            <button type="button" class="btn btn-outline" on-click=${reset}>Reset</button>
+          </div>
+          #if hasVotes()
+            <div class="demo-row">
+              <Badge :text=${'live'} />
+              <span class="demo-label">Last cast: ${lastVote}</span>
+            </div>
+          #else
+            <p class="demo-label">No votes yet — pick a feature to get the bars moving.</p>
+          #end
+        </div>
+      </Card>
+
+      <Card :title=${'Tallies'} :subtitle=${'Sorted derive rows with style---pct fills'}>
+        <ul class="poll-bars">
+          #for rows() as row (row.id)
+            <li class="poll-row" class-leading=${() => leader()?.id === row.id}>
+              <div class="poll-row-head">
+                <span>${row.label}</span>
+                <span class="poll-count">${row.count} · ${row.pct}%</span>
+              </div>
+              <div class="progress-track">
+                <div
+                  class="progress-fill poll-fill"
+                  style---pct=${() => row.pct}
+                  style---swatch=${() => row.color}
+                ></div>
+              </div>
+            </li>
+          #end
+        </ul>
+      </Card>
+    </div>
+  </section>
+</view>
+
+export <style>
+.poll-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  align-items: start;
+}
+.poll-actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+.poll-actions .btn {
+  justify-content: flex-start;
+}
+.poll-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+.poll-row {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #f8fcf9;
+}
+.poll-row.leading {
+  border-color: #78c018;
+  background: #eef8f0;
+}
+.poll-row-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #003030;
+}
+.poll-count {
+  font-variant-numeric: tabular-nums;
+  color: #3d6b52;
+  font-weight: 700;
+}
+.poll-fill {
+  width: calc(var(--pct, 0) * 1%);
+  background: var(--swatch, linear-gradient(90deg, #189030, #78c018));
+}
+</style>
