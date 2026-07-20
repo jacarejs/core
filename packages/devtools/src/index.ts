@@ -4,6 +4,9 @@ import {
   subscribePulseGraph,
   type PulseGraphSnapshot,
   type PulseNode,
+  type BindingMeta,
+  type PulseBinding,
+  type DevtoolsMeta,
 } from '@jacare/core'
 import { createPanel } from './panel.js'
 import { connectJacareScope } from './scope.js'
@@ -29,6 +32,16 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
   }
 }
 
-export type { PulseGraphSnapshot, PulseNode }
+export type { PulseGraphSnapshot, PulseNode, BindingMeta, PulseBinding, DevtoolsMeta }
 export { connectJacareScope } from './scope.js'
 export type { ConnectScopeOptions, ScopeSnapshot } from './scope.js'
+export {
+  highlightBinding,
+  clearHighlight,
+  flashDom,
+  pickElement,
+  getBindingsForPulse,
+  getPulsesForElement,
+  namePulse,
+  devtoolsBind,
+} from '@jacare/core'

@@ -87,10 +87,24 @@ The Pulse Graph shows every reactive node in your app:
 | `computed` | Derive | Values computed from other nodes |
 | `effect` | Watch | Side effects that track dependencies |
 
+In **DEV**, the Jacaré compiler injects `{ name, file, line }` on `pulse` / `derive` / `effect` declarations and registers DOM bindings via `devtoolsBind`. The panel then shows:
+
+| Instead of | You see |
+|------------|---------|
+| `Pulse #3` | `count` · Counter.jcr:4 |
+| `Derive #2` | `total` · Cart.jcr:12 |
+
+| Action | Feedback |
+|--------|----------|
+| Hover a node | Outline bound DOM elements |
+| Click `◎` | Pick a page element → select pulses that feed it |
+| Value change | List flash + short green flash on bound DOM |
+
 For each node you can see:
 
-- **Id / kind** — Pulse, Derive, or Watch
+- **Name / source** — variable name and `file:line` when known
 - **Value preview** — shown in the list and detail pane; flashes green when it changes
+- **DOM bindings** — kind and location of template bindings
 - **Dependencies** — which nodes this one reads from
 - **Dependents** — which nodes read from this one
 

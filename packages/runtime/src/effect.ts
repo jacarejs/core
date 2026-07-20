@@ -5,6 +5,14 @@ import type { Effect, EffectOptions } from './types.js'
 export function effect(fn: () => void | (() => void), options?: EffectOptions): Effect {
   const owner = new OwnerNode()
   let userCleanup: (() => void) | void
+  const meta =
+    options?.name || options?.file || options?.line != null
+      ? {
+          ...(options.name ? { name: options.name } : {}),
+          ...(options.file ? { file: options.file } : {}),
+          ...(options.line != null ? { line: options.line } : {}),
+        }
+      : undefined
 
   const run = (): void => {
     if (userCleanup) {
@@ -19,15 +27,8 @@ export function effect(fn: () => void | (() => void), options?: EffectOptions): 
   }
 
   owner.run = run
-  devtools.registerEffect(owner)
-
-  if (options?.defer) {
-    queueMicrotask(run)
-  } else {
-    run()
-  }
-
-  return {
+  const id = devtools.registerEffect(owner, meta)
+  const handle = {
     dispose: () => {
       if (userCleanup) {
         userCleanup()
@@ -37,6 +38,15 @@ export function effect(fn: () => void | (() => void), options?: EffectOptions): 
       owner.dispose()
     },
   }
+  devtools.attachPulseSource(handle, id)
+
+  if (options?.defer) {
+    queueMicrotask(run)
+  } else {
+    run()
+  }
+
+  return handle
 }
 
 export function batch<T>(fn: () => T): T {

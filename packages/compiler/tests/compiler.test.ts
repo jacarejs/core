@@ -483,4 +483,28 @@ export default view\`<debug copy>\${cart}</debug>\``
     const result = compile(source, { mode: 'client', debug: false })
     expect(result.code).not.toContain('bindDebug(')
   })
+
+  it('injects pulse names for DevTools in debug mode', () => {
+    const source = `import { pulse, derive, view } from '@jacare/core'
+const count = pulse(0)
+const doubled = derive(() => count() * 2)
+export default view\`<p>\${count}</p>\``
+    const result = compile(source, {
+      mode: 'client',
+      debug: true,
+      filename: '/src/Counter.jcr',
+    })
+    expect(result.code).toContain('name: "count"')
+    expect(result.code).toContain('name: "doubled"')
+    expect(result.code).toContain('devtoolsBind(count,')
+  })
+
+  it('skips pulse name injection when debug is false', () => {
+    const source = `import { pulse, view } from '@jacare/core'
+const count = pulse(0)
+export default view\`<p>\${count}</p>\``
+    const result = compile(source, { mode: 'client', debug: false })
+    expect(result.code).not.toContain('name: "count"')
+    expect(result.code).not.toContain('devtoolsBind(')
+  })
 })

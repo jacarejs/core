@@ -1,6 +1,16 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { resetDevtoolsForTests } from '../src/devtools/registry.js'
-import { computed, effect, enableDevtools, getPulseGraph, signal } from '../src/index.js'
+import {
+  clearHighlight,
+  computed,
+  effect,
+  enableDevtools,
+  getBindingsForPulse,
+  getPulseGraph,
+  highlightBinding,
+  registerBinding,
+  signal,
+} from '../src/index.js'
 
 describe('devtools', () => {
   afterEach(() => {
@@ -72,6 +82,35 @@ describe('devtools', () => {
     expect(updatedSignal?.value).toBe(2)
     expect(updatedComputed?.value).toBe(4)
     expect(runs).toEqual([0, 4])
+  })
+
+  it('stores source names from options', () => {
+    enableDevtools()
+    const count = signal(0, { name: 'count', file: 'Counter.jcr', line: 4 })
+    const total = computed(() => count() * 2, { name: 'total', file: 'Cart.jcr', line: 12 })
+    effect(() => total(), { name: 'titleSync' })
+
+    const graph = getPulseGraph()
+    expect(graph.nodes.find((n) => n.kind === 'signal')?.name).toBe('count')
+    expect(graph.nodes.find((n) => n.kind === 'computed')?.name).toBe('total')
+    expect(graph.nodes.find((n) => n.kind === 'effect')?.name).toBe('titleSync')
+    expect(graph.nodes.find((n) => n.kind === 'signal')?.file).toBe('Counter.jcr')
+  })
+
+  it('registers DOM bindings and highlights them', () => {
+    enableDevtools()
+    const count = signal(0, { name: 'count' })
+    const el = document.createElement('span')
+    document.body.appendChild(el)
+    const dispose = registerBinding(count, el, { kind: 'text', file: 'App.jcr', line: 10 })
+
+    expect(getBindingsForPulse(getPulseGraph().nodes[0]!.id)).toHaveLength(1)
+    highlightBinding(getPulseGraph().nodes[0]!.id)
+    expect(el.classList.contains('jacare-devtools-highlight')).toBe(true)
+    clearHighlight()
+    expect(el.classList.contains('jacare-devtools-highlight')).toBe(false)
+    dispose()
+    el.remove()
   })
 
   it('marks computed nodes stale before refresh', () => {

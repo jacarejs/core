@@ -28,11 +28,39 @@ const result = compile(source, {
 result.code // generated JavaScript
 result.map  // source map`
 
-export const devtoolsCode = `// boot.js -- already wired in this lab
+export const devtoolsCode = `// boot.js — wired in this lab
 if (import.meta.env.DEV) {
   const { connectJacareDevtools } = await import('@jacare/devtools')
   connectJacareDevtools()
-}`
+}
+
+// Compiler (DEV) injects names automatically:
+//   const count = pulse(0, { name: 'count', file: '…', line: 4 })
+//   + devtoolsBind(count, textNode, { kind: 'text' })
+
+// Manual API (optional):
+import { pulse, namePulse, highlightBinding } from '@jacare/core'
+const count = pulse(0, { name: 'count' })
+namePulse(count, 'cartCount', { file: 'Cart.jcr', line: 8 })`
+
+export const namedPulsesCode = `import { pulse, derive } from '@jacare/core'
+
+const count = pulse(0)
+const doubled = derive(() => count() * 2)
+
+function bump() {
+  count.update((n) => n + 1)
+}
+
+export <view>
+  <button on-click=\${bump}>count++</button>
+  <p>count \${count} · doubled \${doubled}</p>
+</view>
+
+// In DEV the Pulse Graph shows:
+//   count · tooling.jcr:N
+//   doubled · tooling.jcr:N
+// Hover → outlines the <p> text nodes.`
 
 export const testingCode = `import { compile } from '@jacare/compiler'
 import { it, expect } from 'vitest'

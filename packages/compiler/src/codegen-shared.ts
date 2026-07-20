@@ -53,6 +53,7 @@ export class CodegenContext {
   private readonly signals?: ReadonlySet<string> | undefined
   readonly cpw: boolean
   readonly debug: boolean
+  readonly filename?: string
   bindingId = 0
 
   constructor(
@@ -63,12 +64,41 @@ export class CodegenContext {
     signals?: ReadonlySet<string> | undefined,
     cpw = false,
     debug = true,
+    filename?: string,
   ) {
     this.runtimeImports = runtimeImports ?? new Set()
     this.componentProps = componentProps
     this.signals = signals
     this.cpw = cpw
     this.debug = debug
+    if (filename) this.filename = filename
+  }
+
+  sourceFile(): string | undefined {
+    if (!this.filename) return undefined
+    const parts = this.filename.replace(/\\/g, '/').split('/')
+    return parts[parts.length - 1] || this.filename
+  }
+
+  /** Absolute path for editor links when available. */
+  sourcePath(): string | undefined {
+    return this.filename
+  }
+
+  pushDevtoolsBind(
+    source: string,
+    target: string,
+    kind: string,
+    templateLine?: number,
+  ): void {
+    if (!this.debug) return
+    const parts = [`kind: ${JSON.stringify(kind)}`]
+    const file = this.sourcePath() ?? this.sourceFile()
+    if (file) parts.push(`file: ${JSON.stringify(file)}`)
+    if (templateLine != null) {
+      parts.push(`line: ${this.viewStartLine + templateLine - 1}`)
+    }
+    this.pushCleanup(`devtoolsBind(${source}, ${target}, { ${parts.join(', ')} })`)
   }
 
   isComponentProp(name: string): boolean {

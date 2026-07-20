@@ -7,6 +7,7 @@ import {
   type TemplateContract,
 } from './parse-contract.js'
 import type { StyleAST } from './parse-style.js'
+import { injectDevtoolsMeta } from './devtools-meta.js'
 
 const RUNTIME_IMPORT_ORDER = [
   'effect',
@@ -19,6 +20,7 @@ const RUNTIME_IMPORT_ORDER = [
   'bindClass',
   'bindStyleVar',
   'bindDebug',
+  'devtoolsBind',
   'branch',
   'reconcileKeyedList',
   'resumeBindings',
@@ -94,17 +96,23 @@ export function generate(
     cpw?: boolean
     contract?: TemplateContract
     debug?: boolean
+    filename?: string
+    lineMap?: number[]
   } = {},
 ): { code: string; mappings: CodegenMapping[] } {
   const mode = options.mode ?? 'full'
   const runtime = options.runtimeImport ?? '@jacare/core'
+  const debug = options.debug !== false
   const props = resolveMountProps(moduleCode, ast, options.contract)
   const signals = detectSignals(moduleCode)
   const runtimeImports = new Set<string>()
-  const { userRuntimeSymbols, body } = extractUserRuntimeImport(
-    cleanupModule(moduleCode),
-    runtime,
-  )
+  const cleaned = cleanupModule(moduleCode)
+  const withMeta = injectDevtoolsMeta(cleaned, {
+    ...(options.filename ? { filename: options.filename } : {}),
+    enabled: debug,
+    ...(options.lineMap ? { lineMap: options.lineMap } : {}),
+  })
+  const { userRuntimeSymbols, body } = extractUserRuntimeImport(withMeta, runtime)
 
   const lines: string[] = []
   if (body) {
@@ -138,7 +146,8 @@ export function generate(
       props.length > 0 ? new Set(props) : undefined,
       signals,
       options.cpw ?? false,
-      options.debug !== false,
+      debug,
+      options.filename,
     )
     emitClient(
       ast,

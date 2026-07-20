@@ -1596,12 +1596,12 @@ connectJacareDevtools()
 
 Panels (dev only — only when you call `connectJacareDevtools()`):
 
-- **Pulse Graph** — signal dependency graph, **live values** in the list (flash on change)
+- **Pulse Graph** — signal dependency graph, **live values**, **source names** (`count` · `Counter.jcr:4`), **DOM highlight** on hover
 - **Scope** — registered scope entries
 
-Controls: `−` minimize · `×` hide to a chip · click chip to restore (remembered in `sessionStorage`). Call the returned dispose function to remove panels entirely.
+Controls: `◎` pick element · `−` minimize · `×` hide to a chip · click chip to restore (remembered in `sessionStorage`). Call the returned dispose function to remove panels entirely.
 
-Zero runtime cost when DevTools are not connected (production should keep the import behind `import.meta.env.DEV`).
+Zero runtime cost when DevTools are not connected (production should keep the import behind `import.meta.env.DEV`). The Vite plugin passes `debug: !isProduction`, so name/bind metadata is stripped from production builds.
 
 ### Pulse Graph nodes
 
@@ -1610,19 +1610,70 @@ Each node in the graph has:
 | Field | Description |
 |-------|-------------|
 | `id` | Stable numeric id |
+| `name` | Source variable name when known (`count`) |
+| `file` / `line` | Declaration location |
 | `kind` | `signal` · `computed` · `effect` |
 | `value` | Last known value |
 | `stale` | Derived node marked dirty |
 | `subscribers` | Downstream dependency count |
 | `disposed` | Effect cleaned up |
 
-The in-app panel labels nodes as `Pulse #1`, `Derive #2`, `Watch #3` based on `kind` and `id`.
+| Label | Example |
+|-------|---------|
+| Named | `count` · Counter.jcr:4 |
+| Fallback | `Pulse #3` |
 
-### Compiler node names (planned)
+### Source names
 
-The compiler will attach source metadata so DevTools can show names like `count` or `items` instead of numeric ids — e.g. `pulse#count` mapped to the `signal` declared in the `.jcr` module. This requires the compiler to emit binding metadata alongside generated `mount()` code.
+In DEV the compiler rewrites declarations:
 
-See [Phase 6 — DevTools](phases/06-devtools.md#compiler-node-names).
+```javascript
+const count = pulse(0, { name: 'count', file: '/src/Counter.jcr', line: 4 })
+const total = derive(() => count() * 2, { name: 'total', file: '…', line: 12 })
+```
+
+You can also pass options manually, or rename later:
+
+```javascript
+import { pulse, namePulse } from '@jacare/core'
+
+const count = pulse(0, { name: 'count' })
+namePulse(count, 'cartCount', { file: 'Cart.jcr', line: 8 })
+```
+
+### DOM highlight
+
+Bindings compiled in DEV also register `(pulse → DOM node)`:
+
+```javascript
+bindText(_text1, count)
+devtoolsBind(count, _text1, { kind: 'text', file: '…', line: 28 })
+```
+
+| Action | Feedback |
+|--------|----------|
+| Hover node in Pulse Graph | Outline on bound DOM elements |
+| Click `◎` (pick) | Click a page element → selects pulses that feed it |
+| Pulse value update | Short green flash on bound nodes (~200ms) |
+
+Runtime helpers:
+
+```javascript
+import {
+  highlightBinding,
+  clearHighlight,
+  flashDom,
+  pickElement,
+  getBindingsForPulse,
+  getPulsesForElement,
+  devtoolsBind,
+} from '@jacare/core'
+
+highlightBinding(pulseId)
+const el = await pickElement()
+```
+
+See [Phase 6 — DevTools](phases/06-devtools.md).
 
 ---
 
@@ -1813,6 +1864,8 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | `bindModel` | [§5](#5-dom-bindings) | Two-way input |
 | `bindClass` / `bindStyleVar` | [§5](#5-dom-bindings) | Class / CSS var |
 | `bindDebug` | [§7c `<debug>`](#7c-dev-debug-debug) | Dev JSON inspector |
+| `namePulse` / `devtoolsBind` | [§15](#15-devtools) | Source names + DOM bindings |
+| `highlightBinding` / `pickElement` | [§15](#15-devtools) | DOM outline / picker |
 | `branch` / `showIf` | [§7 `#if`](#7-control-flow--if) · [§7b `#case`](#7b-control-flow--case) | Conditionals / match |
 | `ensureScopedStyle` | [§10](#10-scoped-css) | Static scoped CSS inject |
 | `bindStyleSheet` / `scopeCss` | [§10](#10-scoped-css) | Reactive style (`#if` / `#for` / `#case`) |

@@ -50,5 +50,25 @@ export {
   enableDevtools,
   getPulseGraph,
   subscribePulseGraph,
+  namePulse,
+  registerBinding,
+  devtoolsBind,
+  getBindingsForPulse,
+  getPulsesForElement,
+  highlightBinding,
+  clearHighlight,
+  flashDom,
+  pickElement,
+  isDevtoolsEnabled,
 } from './devtools/index.js'
-export type { PulseEdge, PulseGraphSnapshot, PulseNode, PulseNodeKind } from './devtools/index.js'
+export type {
+  PulseEdge,
+  PulseGraphSnapshot,
+  PulseNode,
+  PulseNodeKind,
+  PulseSource,
+  DevtoolsMeta,
+  BindingMeta,
+  PulseBinding,
+  BindingKind,
+} from './devtools/index.js'

@@ -6,9 +6,10 @@ import {
   trackDependency,
 } from './context.js'
 import * as devtools from './devtools/registry.js'
+import type { DevtoolsMeta } from './devtools/types.js'
 import type { Computed } from './types.js'
 
-export function computed<T>(fn: () => T): Computed<T> {
+export function computed<T>(fn: () => T, options?: DevtoolsMeta): Computed<T> {
   const cell = new DependencyCell()
   const owner = new OwnerNode()
   let value: T
@@ -24,7 +25,7 @@ export function computed<T>(fn: () => T): Computed<T> {
 
   owner.run = markStale
 
-  devtools.registerComputed(cell, owner)
+  const id = devtools.registerComputed(cell, owner, undefined, options)
 
   const refresh = (): void => {
     owner.clearDependencies()
@@ -46,6 +47,7 @@ export function computed<T>(fn: () => T): Computed<T> {
   }
 
   const comp = read as unknown as Computed<T>
+  devtools.attachPulseSource(comp, id)
 
   Object.defineProperties(comp, {
     peek: {

@@ -37,6 +37,8 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     ...(options.cpw ? { cpw: options.cpw } : {}),
     ...(contract ? { contract } : {}),
     ...(options.debug === false ? { debug: false } : {}),
+    ...(filename ? { filename } : {}),
+    ...(parsed.moduleLineMap.length > 0 ? { lineMap: parsed.moduleLineMap } : {}),
   })
 
   const map = filename

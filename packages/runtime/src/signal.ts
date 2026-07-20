@@ -6,12 +6,13 @@ import {
   trackDependency,
 } from './context.js'
 import * as devtools from './devtools/registry.js'
+import type { DevtoolsMeta } from './devtools/types.js'
 import type { Signal } from './types.js'
 
-export function signal<T>(initial: T): Signal<T> {
+export function signal<T>(initial: T, options?: DevtoolsMeta): Signal<T> {
   const cell = new DependencyCell()
   let value = initial
-  devtools.registerSignal(cell, value)
+  const id = devtools.registerSignal(cell, value, options)
 
   const read = (): T => {
     if (isTracking()) {
@@ -21,6 +22,7 @@ export function signal<T>(initial: T): Signal<T> {
   }
 
   const sig = read as unknown as Signal<T>
+  devtools.attachPulseSource(sig, id)
 
   Object.defineProperties(sig, {
     peek: {

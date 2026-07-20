@@ -144,6 +144,10 @@ function emitDebug(
   if (node.copy) opts.push('copy: true')
   const optsArg = opts.length > 0 ? `{ ${opts.join(', ')} }` : '{}'
   ctx.pushCleanup(`bindDebug(${host}, () => (${readExpr}), ${optsArg})`)
+  const signalSrc = ctx.resolveSignal(node.expr)
+  if (signalSrc) {
+    ctx.pushDevtoolsBind(signalSrc, host, 'debug', node.sourceLine)
+  }
 }
 
 function emitElement(
@@ -386,6 +390,7 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
       const src = ctx.resolveSignal(attr.value)
       if (src) {
         ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${src})`)
+        ctx.pushDevtoolsBind(src, el, 'attr')
       } else if (/=>/.test(attr.value)) {
         ctx.useRuntime('effect')
         ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
@@ -433,6 +438,7 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
         emitCpwClass(ctx, el, attr.name, src)
       } else {
         ctx.pushCleanup(`bindClass(${el}, ${JSON.stringify(attr.name)}, ${src})`)
+        ctx.pushDevtoolsBind(src, el, 'class')
       }
     } else if (/=>/.test(attr.value)) {
       ctx.pushCleanup(
@@ -452,6 +458,7 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
         emitCpwStyleVar(ctx, el, cssVar, src)
       } else {
         ctx.pushCleanup(`bindStyleVar(${el}, ${JSON.stringify(cssVar)}, ${src})`)
+        ctx.pushDevtoolsBind(src, el, 'style')
       }
     } else if (/=>/.test(attr.value)) {
       ctx.pushCleanup(
@@ -475,10 +482,12 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
     if (source) {
       if (useProperty) {
         ctx.pushCleanup(`bindModel(${el}, ${JSON.stringify(attr.name)}, ${source})`)
+        ctx.pushDevtoolsBind(source, el, 'model')
       } else if (ctx.cpw) {
         emitCpwAttribute(ctx, el, attr.name, source)
       } else {
         ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${source})`)
+        ctx.pushDevtoolsBind(source, el, 'attr')
       }
     } else if (useProperty) {
       ctx.pushCleanup(`effect(() => { ${el}[${JSON.stringify(attr.name)}] = (${attr.value}) }).dispose`)
@@ -543,6 +552,7 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
         emitCpwText(ctx, textNode, src)
       } else {
         ctx.pushCleanup(`bindText(${textNode}, ${src})`)
+        ctx.pushDevtoolsBind(src, textNode, 'text')
       }
       return
     }

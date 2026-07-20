@@ -24,4 +24,7 @@ export interface Effect {
 
 export interface EffectOptions {
   defer?: boolean
+  name?: string
+  file?: string
+  line?: number
 }

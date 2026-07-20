@@ -89,6 +89,8 @@ if (import.meta.env.DEV) {
 | Field | Meaning |
 |-------|---------|
 | `id` | Stable numeric id |
+| `name` | Source variable name (`count`) when known |
+| `file` / `line` | Declaration location |
 | `kind` | `signal` · `computed` · `effect` |
 | `value` | Last known value (JSON-serializable) |
 | `stale` | Derive marked dirty |
@@ -99,11 +101,27 @@ Edges run **from source → consumer** (pulse feeds derive, derive feeds watch).
 
 ## UI
 
-Two fixed panels (bottom-right):
+Two fixed panels (bottom-right / bottom-left):
 
-**Pulse Graph** — reactive nodes grouped by kind, selected node value, upstream/downstream edges.
+**Pulse Graph** — reactive nodes with **source names**, selected node value, upstream/downstream edges, **DOM outline** on hover, element picker (`◎`).
 
 **Scope** — live values registered with `registerScope()` from `@jacare/core`. Enabled by default in `connectJacareDevtools()`.
+
+## Source names + DOM bindings
+
+In DEV (`debug: true`), the compiler injects metadata:
+
+```
+.jcr source                     Generated                              Panel label
+─────────────────────────────   ────────────────────────────────────   ──────────────────
+const count = pulse(0)       →  pulse(0, { name: 'count', … })      →  count · File.jcr:4
+const total = derive(…)      →  derive(…, { name: 'total', … })     →  total · Cart.jcr:12
+${count} text binding        →  bindText + devtoolsBind(count, node) →  hover outlines DOM
+```
+
+Runtime APIs: `namePulse`, `devtoolsBind` / `registerBinding`, `highlightBinding`, `pickElement`, `flashDom`.
+
+Production builds (`debug: false`) skip injection — zero overhead.
 
 ## Tests
 
@@ -111,36 +129,16 @@ Two fixed panels (bottom-right):
 - Signal → computed → effect chain and edges
 - Value updates after `set`
 - Stale flag on derived nodes
+- Named nodes from options
+- Binding registry + highlight class
 
 ## Not yet implemented
 
 | Area | Detail |
 |------|--------|
-| Source names | Map nodes to `.jcr` bindings via compiler metadata |
 | Time travel | Snapshot log with scrubber |
 | Chrome extension | Native DevTools panel via `postMessage` |
-| Highlight flashes | Pulse animation on updated nodes |
 | SSR graph | Inspect server-side pulses during hydration |
-
-### Compiler node names
-
-Today the Pulse Graph shows generic labels (`Pulse #3`, `Derive #2`). The compiler will emit metadata mapping each runtime cell to its source declaration:
-
-```
-.jcr source          Compiler metadata       DevTools label
-──────────          ─────────────────       ──────────────
-const count = …  →  pulse#count         →  count (signal)
-const total = …  →  derive#total        →  total (computed)
-effect(() => …)  →  watch#titleSync     →  titleSync (effect)
-```
-
-Implementation path:
-
-1. Compiler records signal/computed/effect variable names during codegen
-2. Runtime registry accepts optional `name` on register hooks
-3. DevTools panel displays `name` when present, falls back to `Pulse #N`
-
-Bindings in templates (`${count}` on a `<p>`) may also map to DOM node labels for easier debugging.
 
 ---
 

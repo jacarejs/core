@@ -1,3 +1,4 @@
+import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import { assetUrl } from '../app-base.js'
@@ -8,10 +9,18 @@ import {
   devtoolsCode,
   testingCode,
   scriptsCode,
+  namedPulsesCode,
 } from '../snippets/tooling.js'
 
 const marketplaceUrl = 'https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare'
 const marketplaceImg = assetUrl('vscode-marketplace.png')
+
+const count = pulse(0)
+const doubled = derive(() => count() * 2)
+
+function bump() {
+  count.update((n) => n + 1)
+}
 
 export <view>
   <section class="page">
@@ -21,9 +30,18 @@ export <view>
       <p class="page-lead">The CLI, Vite plugin, compiler, DevTools — and the VS Code extension for .jcr files.</p>
     </header>
 
-    <Tip :text=${'connectJacareDevtools() is already wired into this lab, behind import.meta.env.DEV in boot.js -- open the Pulse Graph or Scope panel in the corner while you click around any lesson.'} />
+    <Tip :text=${'connectJacareDevtools() is wired in boot.js (DEV only). Open the Pulse Graph — nodes show count / doubled with file:line. Hover a node to outline the DOM it feeds; use the pick button to select an element.'} />
 
     <div class="lesson-grid">
+      <Demo :title=${'Named pulses + DOM highlight'} :lead=${'Compiler injects { name, file, line } in DEV. Hover the Pulse Graph node to outline this counter.'} :code=${namedPulsesCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn" on-click=${bump}>count++</button>
+            <p class="muted">count ${count} · doubled ${doubled}</p>
+          </div>
+        </div>
+      </Demo>
+
       <a class="vscode-card" href=${marketplaceUrl} target="_blank" rel="noopener noreferrer">
         <img
           class="vscode-card-img"
@@ -57,7 +75,7 @@ export <view>
 
       <div class="ref-card">
         <h3>DevTools</h3>
-        <p class="muted">Pulse Graph shows every signal / computed / effect; Scope shows registerScope() entries.</p>
+        <p class="muted">Pulse Graph shows named pulses + DOM highlight; Scope shows registerScope() entries.</p>
         <pre><code>${devtoolsCode}</code></pre>
       </div>
 
