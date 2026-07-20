@@ -222,7 +222,9 @@ function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
     const id = ctx.nextBinding()
     const src = ctx.resolveBindingSignal(expr)
     ctx.useRuntime('escapeHtml')
-    const readExpr = src ? `${src}()` : `(${ctx.rewriteExprForEffect(expr)})`
+    const readExpr = src
+      ? `${src}()`
+      : `(() => { const _v = (${ctx.rewriteExprForEffect(expr)}); return typeof _v === 'function' ? _v() : _v })()`
     ctx.line(
       `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${readExpr})) + '</span>'`,
     )
@@ -230,7 +232,7 @@ function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
       ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${src} })`)
     } else {
       ctx.line(
-        `_bindings.push({ id: '${id}', kind: 'expr', read: () => (${ctx.rewriteExprForEffect(expr)}) })`,
+        `_bindings.push({ id: '${id}', kind: 'expr', read: () => { const _v = (${ctx.rewriteExprForEffect(expr)}); return typeof _v === 'function' ? _v() : _v } })`,
       )
     }
     return

@@ -21,7 +21,7 @@ const helpers = [
   { name: 'style block', description: 'Scoped CSS per file, with if / for / case and a global() escape', path: '/css' },
   { name: 'createNav / lazy / routeHref', description: 'Layout + screen routing, lazy loading, param and query helpers', path: '/nav' },
   { name: 'createNav title', description: 'Per-route document.title via screens: { use, title } — string or (ctx) => string', path: '/nav' },
-  { name: 'setNavTitle', description: 'Update document.title from a screen — pair with effect for live titles', path: '/lifecycle' },
+  { name: 'setNavTitle / getNavTitle', description: 'Read/write document.title from a screen — pair setNavTitle with effect for live titles', path: '/lifecycle' },
   { name: 'createForm', description: 'Validated fields with dirty / valid tracking and submit handling', path: '/forms' },
   { name: 'createLifecycle / registerScope', description: 'Screen mount / activate hooks and live DevTools Scope entries', path: '/lifecycle' },
   { name: 'renderToString / resume', description: 'Server render and client hydration for a .jcr module', path: '/ssr' },

@@ -15,7 +15,7 @@ export { reconcileKeyedList } from './dom/list.js'
 export type { KeyedListOptions } from './dom/list.js'
 export { renderToString, renderToStream, resumeBindings, escapeHtml } from './ssr/index.js'
 export type { SSRBinding, SSRResult, SSRState } from './ssr/index.js'
-export { createNav, lazy, screen, adaptScreen, applyScreenTitle, setNavTitle, createRoute, routeHref, routeParam, routeSearch, screenProps } from './nav/index.js'
+export { createNav, lazy, screen, adaptScreen, applyScreenTitle, setNavTitle, getNavTitle, createRoute, routeHref, routeParam, routeSearch, screenProps } from './nav/index.js'
 export { createLifecycle } from './lifecycle.js'
 export type { ScreenLifecycle } from './lifecycle.js'
 export {

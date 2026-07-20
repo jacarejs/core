@@ -562,7 +562,9 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
       }
       return
     }
-    ctx.pushCleanup(`effect(() => { ${textNode}.data = String(${ctx.rewriteExprForEffect(expr)}) }).dispose`)
+    ctx.pushCleanup(
+      `effect(() => { const _v = (${ctx.rewriteExprForEffect(expr)}); ${textNode}.data = String(typeof _v === 'function' ? _v() : _v) }).dispose`,
+    )
     return
   }
 
@@ -575,7 +577,7 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
       }
       const src = ctx.resolveBindingSignal(p.value)
       if (src) return `\${${src}()}`
-      return `\${${ctx.rewriteExprForEffect(p.value)}}`
+      return `\${(() => { const _v = (${ctx.rewriteExprForEffect(p.value)}); return typeof _v === 'function' ? _v() : _v })()}`
     })
     .join('')
 

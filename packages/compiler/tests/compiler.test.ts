@@ -251,7 +251,7 @@ export default view\`
 const count = pulse(0)
 export default view\`<p>\${count() * 2}</p>\``
     const result = compile(source)
-    expect(result.code).toContain('read: () => count() * 2')
+    expect(result.code).toContain('read: () => { const _v = (count() * 2); return typeof _v === \'function\' ? _v() : _v }')
   })
 
   it('imports only used runtime helpers', () => {
@@ -289,7 +289,8 @@ const code = 'hello'
 export default view\`<pre><code>\${code}</code></pre>\``
     const result = compile(source, { mode: 'client' })
     expect(result.code).not.toContain('bindText(')
-    expect(result.code).toContain('String(code)')
+    expect(result.code).toContain('const _v = (code)')
+    expect(result.code).toContain("typeof _v === 'function' ? _v() : _v")
   })
 
   it('ignores signal-like names inside template literal strings', () => {
@@ -318,6 +319,15 @@ export default view\`<a jacare-go=\${() => href(id)} href=\${() => href(id)}>Go<
     const result = compile(source, { mode: 'client' })
     expect(result.code).toContain('const _v = (() => href(id))()')
     expect(result.code).not.toContain('String(() => href(id))')
+  })
+
+  it('calls arrow functions used as text expressions', () => {
+    const source = `import { view } from '@jacare/core'
+const teamOf = (id) => ({ name: id })
+export default view\`<span>\${() => teamOf('harbor').name}</span>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).toContain("typeof _v === 'function' ? _v()")
+    expect(result.code).not.toMatch(/\.data = String\(\(\) => teamOf/)
   })
 
   it('does not treat secondary module imports as mount props', () => {

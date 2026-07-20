@@ -267,7 +267,7 @@ export <view>
                   style---c2=${() => teamOf(match.home).c2}
                   aria-hidden="true"
                 >${() => teamOf(match.home).abbr}</span>
-                <span class="fixture-name">${() => teamOf(match.home).name}</span>
+                <span class="fixture-name">${teamOf(match.home).name}</span>
               </div>
               <div class="fixture-score">
                 #if scoreOf(match.id)
@@ -277,7 +277,7 @@ export <view>
                 #end
               </div>
               <div class="fixture-side away">
-                <span class="fixture-name">${() => teamOf(match.away).name}</span>
+                <span class="fixture-name">${teamOf(match.away).name}</span>
                 <span
                   class="crest"
                   style---c1=${() => teamOf(match.away).c1}

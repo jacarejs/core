@@ -479,10 +479,10 @@ export const nav = createNav({
 
 Configure `title` on each route in `createNav` (string or `(ctx) => string`). Optional page-level `export const title` still works as a fallback; nav titles win.
 
-For **live** titles (countdown, totals), use `setNavTitle` inside an `effect` from `onActivate`:
+For **live** titles (countdown, totals), use `setNavTitle` / `getNavTitle` inside an `effect` from `onActivate`:
 
 ```javascript
-import { effect, setNavTitle } from '@jacare/core'
+import { effect, getNavTitle, setNavTitle } from '@jacare/core'
 
 export const lifecycle = createLifecycle({
   onActivate() {
@@ -490,6 +490,8 @@ export const lifecycle = createLifecycle({
     return () => titleFx.dispose()
   },
 })
+
+getNavTitle() // current tab title
 ```
 
 Layout shells expose a frame slot:

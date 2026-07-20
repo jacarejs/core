@@ -120,10 +120,11 @@ describe('screen adapter', () => {
 })
 
 describe('setNavTitle', () => {
-  it('sets document.title', async () => {
-    const { setNavTitle } = await import('../src/nav/title.js')
+  it('sets and reads document.title', async () => {
+    const { setNavTitle, getNavTitle } = await import('../src/nav/title.js')
     const previous = document.title
     setNavTitle('Jacaré · Focus · 04:29')
+    expect(getNavTitle()).toBe('Jacaré · Focus · 04:29')
     expect(document.title).toBe('Jacaré · Focus · 04:29')
     document.title = previous
   })
