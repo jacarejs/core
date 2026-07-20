@@ -21,6 +21,24 @@ export function resolveSignalExpr(
   return null
 }
 
+/** Like resolveSignalExpr, but also accepts imported pulse/derive names. */
+export function resolveSignalBinding(
+  expr: string,
+  signals?: ReadonlySet<string>,
+  importedNames?: ReadonlySet<string>,
+): string | null {
+  const known = resolveSignalExpr(expr, signals)
+  if (known) return known
+  const trimmed = expr.trim()
+  const call = SIGNAL_CALL_RE.exec(trimmed)
+  if (call && importedNames?.has(call[1]!)) return call[1]!
+  const ref = SIGNAL_REF_RE.exec(trimmed)
+  if (ref && importedNames?.has(ref[1]!) && !signals?.has(ref[1]!)) {
+    return ref[1]!
+  }
+  return null
+}
+
 export function rewriteSignalsInExpr(
   expr: string,
   signals?: ReadonlySet<string>,
@@ -51,6 +69,7 @@ export class CodegenContext {
   private readonly runtimeImports: Set<string>
   private readonly componentProps?: ReadonlySet<string> | undefined
   private readonly signals?: ReadonlySet<string> | undefined
+  private readonly importedNames?: ReadonlySet<string> | undefined
   readonly cpw: boolean
   readonly debug: boolean
   readonly filename?: string
@@ -65,10 +84,12 @@ export class CodegenContext {
     cpw = false,
     debug = true,
     filename?: string,
+    importedNames?: ReadonlySet<string> | undefined,
   ) {
     this.runtimeImports = runtimeImports ?? new Set()
     this.componentProps = componentProps
     this.signals = signals
+    this.importedNames = importedNames
     this.cpw = cpw
     this.debug = debug
     if (filename) this.filename = filename
@@ -107,6 +128,10 @@ export class CodegenContext {
 
   resolveSignal(expr: string): string | null {
     return resolveSignalExpr(expr, this.signals)
+  }
+
+  resolveBindingSignal(expr: string): string | null {
+    return resolveSignalBinding(expr, this.signals, this.importedNames)
   }
 
   rewriteExprForEffect(expr: string): string {

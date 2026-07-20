@@ -6,29 +6,48 @@ export const COLUMNS = [
   { id: 'done', label: 'Done', hint: 'Shipped' },
 ]
 
-export const items = pulse([
-  { id: '1', label: 'Learn Jacaré syntax', column: 'done' },
-  { id: '2', label: 'Sketch the board layout', column: 'doing' },
-  { id: '3', label: 'Ship the todo suite', column: 'todo' },
-  { id: '4', label: 'Play a round of tic-tac-toe', column: 'todo' },
-])
+export const items = pulse(
+  [
+    { id: '1', label: 'Learn Jacaré syntax', column: 'done' },
+    { id: '2', label: 'Sketch the board layout', column: 'doing' },
+    { id: '3', label: 'Ship the todo suite', column: 'todo' },
+    { id: '4', label: 'Play a round of tic-tac-toe', column: 'todo' },
+  ],
+  { name: 'items', file: 'store.js', line: 9 },
+)
 
-export const draft = pulse('')
-export const filter = pulse('')
-export const selectedId = pulse(null)
+export const draft = pulse('', { name: 'draft', file: 'store.js', line: 18 })
+export const filter = pulse('', { name: 'filter', file: 'store.js', line: 19 })
+export const selectedId = pulse(null, { name: 'selectedId', file: 'store.js', line: 20 })
 
-export const total = derive(() => items().length)
-export const active = derive(() => items().filter((item) => item.column !== 'done').length)
-export const doneCount = derive(() => items().filter((item) => item.column === 'done').length)
+export const total = derive(() => items().length, { name: 'total', file: 'store.js', line: 22 })
+export const active = derive(
+  () => items().filter((item) => item.column !== 'done').length,
+  { name: 'active', file: 'store.js', line: 23 },
+)
+export const doneCount = derive(
+  () => items().filter((item) => item.column === 'done').length,
+  { name: 'doneCount', file: 'store.js', line: 26 },
+)
 
-export const filtered = derive(() => {
-  const q = filter().trim().toLowerCase()
-  if (!q) return items()
-  return items().filter((item) => item.label.toLowerCase().includes(q))
+export const filtered = derive(
+  () => {
+    const q = filter().trim().toLowerCase()
+    if (!q) return items()
+    return items().filter((item) => item.label.toLowerCase().includes(q))
+  },
+  { name: 'filtered', file: 'store.js', line: 30 },
+)
+
+export const isEmpty = derive(() => items().length === 0, {
+  name: 'isEmpty',
+  file: 'store.js',
+  line: 38,
 })
-
-export const isEmpty = derive(() => items().length === 0)
-export const noMatches = derive(() => filter().trim().length > 0 && filtered().length === 0)
+export const noMatches = derive(
+  () => filter().trim().length > 0 && filtered().length === 0,
+  { name: 'noMatches', file: 'store.js', line: 42 },
+)
 
 export function addItem(column = 'todo') {
   const label = draft().trim()

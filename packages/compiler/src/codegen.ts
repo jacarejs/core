@@ -105,6 +105,7 @@ export function generate(
   const debug = options.debug !== false
   const props = resolveMountProps(moduleCode, ast, options.contract)
   const signals = detectSignals(moduleCode)
+  const importedNames = detectImportedNames(moduleCode)
   const runtimeImports = new Set<string>()
   const cleaned = cleanupModule(moduleCode)
   const withMeta = injectDevtoolsMeta(cleaned, {
@@ -148,6 +149,7 @@ export function generate(
       options.cpw ?? false,
       debug,
       options.filename,
+      importedNames,
     )
     emitClient(
       ast,
@@ -325,6 +327,20 @@ export function detectSignals(script: string): Set<string> {
     signals.add(match[1]!)
   }
   return signals
+}
+
+export function detectImportedNames(script: string): Set<string> {
+  const names = new Set<string>()
+  const source = stripTemplateLiterals(script)
+  for (const match of source.matchAll(/\bimport\s*\{([^}]+)\}/g)) {
+    for (const part of match[1]!.split(',')) {
+      const trimmed = part.trim()
+      if (!trimmed) continue
+      const alias = trimmed.match(/([\w$]+)(?:\s+as\s+([\w$]+))?/)
+      if (alias) names.add(alias[2] ?? alias[1]!)
+    }
+  }
+  return names
 }
 
 function collectRefs(ast: TemplateAST): Set<string> {

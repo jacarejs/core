@@ -144,7 +144,7 @@ function emitDebug(
   if (node.copy) opts.push('copy: true')
   const optsArg = opts.length > 0 ? `{ ${opts.join(', ')} }` : '{}'
   ctx.pushCleanup(`bindDebug(${host}, () => (${readExpr}), ${optsArg})`)
-  const signalSrc = ctx.resolveSignal(node.expr)
+  const signalSrc = ctx.resolveBindingSignal(node.expr)
   if (signalSrc) {
     ctx.pushDevtoolsBind(signalSrc, host, 'debug', node.sourceLine)
   }
@@ -325,6 +325,10 @@ function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarge
 
   const parentExpr = target.kind === 'parent' ? target.name : `${anchor}.parentNode`
   ctx.useRuntime('reconcileKeyedList')
+  const listSource = ctx.resolveBindingSignal(node.source)
+  if (listSource && target.kind === 'parent') {
+    ctx.pushDevtoolsBind(listSource, target.name, 'list', node.sourceLine)
+  }
   ctx.line(`${ctx.cleanupVar}.push(reconcileKeyedList({`)
   ctx.indent()
   ctx.line(`parent: ${parentExpr},`)
@@ -387,7 +391,7 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
     if (attr.name === 'class') {
       ctx.line(`${el}.className = String(${attr.value})`)
     } else {
-      const src = ctx.resolveSignal(attr.value)
+      const src = ctx.resolveBindingSignal(attr.value)
       if (src) {
         ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${src})`)
         ctx.pushDevtoolsBind(src, el, 'attr')
@@ -432,7 +436,7 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
   }
 
   if (attr.kind === 'class') {
-    const src = ctx.resolveSignal(attr.value)
+    const src = ctx.resolveBindingSignal(attr.value)
     if (src) {
       if (ctx.cpw) {
         emitCpwClass(ctx, el, attr.name, src)
@@ -452,7 +456,7 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
 
   if (attr.kind === 'style') {
     const cssVar = `--${attr.name}`
-    const src = ctx.resolveSignal(attr.value)
+    const src = ctx.resolveBindingSignal(attr.value)
     if (src) {
       if (ctx.cpw) {
         emitCpwStyleVar(ctx, el, cssVar, src)
@@ -475,7 +479,7 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
   if (attr.kind === 'bind') {
     const useProperty = PROPERTY_BINDINGS.has(attr.name)
     const trimmed = attr.value.trim()
-    const src = ctx.resolveSignal(attr.value)
+    const src = ctx.resolveBindingSignal(attr.value)
     const propSource =
       SIGNAL_REF_RE.test(trimmed) && ctx.isComponentProp(trimmed) ? trimmed : null
     const source = src ?? propSource
@@ -546,7 +550,7 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
 
   if (parts.length === 1 && parts[0]!.type === 'expr') {
     const expr = parts[0]!.value
-    const src = ctx.resolveSignal(expr)
+    const src = ctx.resolveBindingSignal(expr)
     if (src) {
       if (ctx.cpw) {
         emitCpwText(ctx, textNode, src)
@@ -567,7 +571,7 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
       if (SIGNAL_REF_RE.test(trimmed) && ctx.isComponentProp(trimmed)) {
         return `\${typeof ${trimmed} === 'function' ? ${trimmed}() : ${trimmed} ?? ''}`
       }
-      const src = ctx.resolveSignal(p.value)
+      const src = ctx.resolveBindingSignal(p.value)
       if (src) return `\${${src}()}`
       return `\${${ctx.rewriteExprForEffect(p.value)}}`
     })

@@ -304,16 +304,19 @@ function ensureHighlightStyle(): void {
   style.setAttribute('data-jacare-devtools-highlight', '')
   style.textContent = `
     .jacare-devtools-highlight {
-      outline: 2px solid #2563eb !important;
-      outline-offset: 2px !important;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
+      outline: 3px solid #2563eb !important;
+      outline-offset: 3px !important;
+      box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.28) !important;
+      border-radius: 6px;
+      position: relative;
+      z-index: 2147483000;
     }
     .jacare-devtools-flash {
-      animation: jacare-devtools-dom-flash 0.2s ease;
+      animation: jacare-devtools-dom-flash 0.22s ease;
     }
     @keyframes jacare-devtools-dom-flash {
-      0% { outline: 2px solid #22c55e; outline-offset: 2px; }
-      100% { outline: 2px solid transparent; outline-offset: 2px; }
+      0% { outline: 3px solid #22c55e; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.3); }
+      100% { outline: 3px solid transparent; outline-offset: 3px; box-shadow: none; }
     }
   `
   document.head.appendChild(style)
