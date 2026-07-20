@@ -4,7 +4,6 @@ import { route } from '../nav.js'
 import Tip from '../components/Tip.jcr'
 import Badge from '../components/Badge.jcr'
 
-export const title = (ctx) => `Jacaré Lab · Topic · ${ctx.params.slug ?? '…'}`
 
 const pathLabel = derive(() => route.path())
 

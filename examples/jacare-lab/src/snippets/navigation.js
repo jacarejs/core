@@ -1,12 +1,21 @@
 import { viewSnippet } from '../utils/snippet.js'
 
-export const titleCode = `export const title = 'Jacaré Lab · Navigation'
-
-// Dynamic from the matched route:
-export const title = (ctx) => {
-  const slug = ctx.params.slug
-  return slug ? \`Topic · \${slug}\` : 'Jacaré Lab · Navigation'
-}`
+export const titleCode = `export const nav = createNav({
+  layout: Shell,
+  screens: {
+    '/nav': {
+      use: lazy(() => import('./pages/navigation.jcr')),
+      title: 'Jacaré Lab · Navigation',
+    },
+    '/topic/:slug': {
+      use: lazy(() => import('./pages/topic-param.jcr')),
+      title: (ctx) => {
+        const slug = ctx.params.slug
+        return slug ? \`Topic · \${slug}\` : 'Jacaré Lab · Navigation'
+      },
+    },
+  },
+})`
 
 export const setupCode = `import { createNav, createRoute, lazy, screen } from '@jacare/core'
 import Shell from './shell.jcr'
@@ -17,9 +26,12 @@ export const nav = createNav({
   base: '/',                 // optional — strip this prefix from URLs (GitHub Pages uses /core/lab)
   layout: Shell,             // persistent chrome; must contain jacare-frame
   screens: {
-    '/': screen(Home),       // eager screen (wrapped with lifecycle + title support)
-    '/nav': lazy(() => import('./pages/navigation.jcr')),
-    '/topic/:slug': lazy(() => import('./pages/topic-param.jcr')), // :slug → params.slug
+    '/': { use: screen(Home), title: 'Jacaré Lab' },
+    '/nav': { use: lazy(() => import('./pages/navigation.jcr')), title: 'Jacaré Lab · Navigation' },
+    '/topic/:slug': {
+      use: lazy(() => import('./pages/topic-param.jcr')),
+      title: (ctx) => \`Topic · \${ctx.params.slug}\`,
+    },
   },
   missing: NotFound,         // unmatched paths
   beforeGo(to, from) {       // guard: return true | false | redirect path

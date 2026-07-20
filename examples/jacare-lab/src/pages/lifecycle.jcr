@@ -20,7 +20,6 @@ const unmounts = pulse(0)
 const activePhase = pulse('active')
 let timer
 
-export const title = 'Jacaré Lab · Lifecycle'
 
 export const lifecycle = createLifecycle({
   onMount() {
@@ -150,11 +149,11 @@ export <view>
       </div>
     </article>
 
-    <Tip :text=${'Prefer export const title for the document title. Use onActivate for analytics and registerScope(). Use onMount for timers and subscriptions — always return a cleanup from it.'} />
+    <Tip :text=${'Configure document.title in createNav screens with { use, title }. Use onActivate for analytics and registerScope(). Use onMount for timers and subscriptions — always return a cleanup from it.'} />
 
     <div class="lesson-grid">
-      <Demo :title=${'export const title'} :lead=${'Declarative document.title for this route. Check the browser tab — it says Jacaré Lab · Lifecycle without an onActivate assignment.'} :code=${titleCode}>
-        <p class="muted">Static string or <code>(ctx) =&gt; …</code> from route params / search. Applied before onActivate.</p>
+      <Demo :title=${'Screen title in nav'} :lead=${'Set document.title on each route in createNav — string or (ctx) => string. Check the browser tab for Jacaré Lab · Lifecycle.'} :code=${titleCode}>
+        <p class="muted">Configured in <code>nav.js</code> as <code>{ use, title }</code>. Nav titles win over a page-level export.</p>
       </Demo>
 
       <Demo :title=${'Full lifecycle export'} :lead=${'This page exports lifecycle with all four hooks — the orbit counters above are wired to them.'} :code=${hooksCode}>

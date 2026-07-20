@@ -1,5 +1,5 @@
 import type { Signal } from '../types.js'
-import type { ScreenModule } from './screen.js'
+import type { ScreenModule, ScreenTitle } from './screen.js'
 
 export type NavMount = (target: HTMLElement, ctx: NavContext) => () => void
 
@@ -23,9 +23,17 @@ export type NavGuard = (
   from: NavPlace | null,
 ) => void | string | false | Promise<void | string | false>
 
+/** Screen entry in createNav — mount/loader, or `{ use, title }` for a nav-level title. */
+export interface ScreenRouteConfig {
+  use: NavMount | NavLoader
+  title?: ScreenTitle
+}
+
+export type ScreenDefinition = NavMount | NavLoader | ScreenRouteConfig
+
 export interface NavOptions {
   layout?: NavMount
-  screens: Record<string, NavMount | NavLoader>
+  screens: Record<string, ScreenDefinition>
   missing?: NavMount | NavLoader
   base?: string
   beforeGo?: NavGuard
@@ -35,6 +43,7 @@ export interface ScreenEntry {
   pattern: string
   mount?: NavMount
   load?: NavLoader
+  title?: ScreenTitle
 }
 
 export interface ScreenMatch {

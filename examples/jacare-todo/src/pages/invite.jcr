@@ -32,7 +32,6 @@ const form = createForm({
   },
 })
 
-export const title = 'Jacaré · Invite'
 
 function goNext() {
   if (step() === 0) {

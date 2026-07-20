@@ -21,7 +21,7 @@ export function adaptScreen(mount: ScreenModuleMount): NavMount {
   return (host, ctx) => mount(host, screenProps(ctx))
 }
 
-function applyScreenTitle(title: ScreenTitle | undefined, ctx: NavContext): void {
+export function applyScreenTitle(title: ScreenTitle | undefined, ctx: NavContext): void {
   if (title == null) return
   const next = typeof title === 'function' ? title(ctx) : title
   if (typeof next === 'string' && next.length > 0) {

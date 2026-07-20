@@ -195,7 +195,6 @@ effect(() => {
   return () => clearTimeout(id)
 })
 
-export const title = 'Jacaré · Match'
 
 function openCode() {
   showCode('Tic-tac-toe', [{ name: 'pages/tictactoe.jcr', code: matchCode }])

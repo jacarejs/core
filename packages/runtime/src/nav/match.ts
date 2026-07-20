@@ -1,4 +1,4 @@
-import type { NavLoader, NavMount, ScreenEntry, ScreenMatch } from './types.js'
+import type { NavLoader, NavMount, ScreenDefinition, ScreenEntry, ScreenMatch } from './types.js'
 import { isLoader } from './lazy.js'
 
 export function joinPaths(base: string, segment: string): string {
@@ -19,15 +19,27 @@ export function normalizePath(path: string): string {
 }
 
 export function normalizeScreens(
-  screens: Record<string, NavMount | NavLoader>,
+  screens: Record<string, ScreenDefinition>,
   base = '',
 ): ScreenEntry[] {
   return Object.entries(screens).map(([path, handler]) => {
     const pattern = joinPaths(base, path)
-    if (isLoader(handler)) {
-      return { pattern, load: handler }
+
+    if (typeof handler === 'function') {
+      if (isLoader(handler)) {
+        return { pattern, load: handler }
+      }
+      return { pattern, mount: handler }
     }
-    return { pattern, mount: handler }
+
+    const entry: ScreenEntry = { pattern }
+    if (handler.title != null) entry.title = handler.title
+    if (isLoader(handler.use)) {
+      entry.load = handler.use
+    } else {
+      entry.mount = handler.use
+    }
+    return entry
   })
 }
 

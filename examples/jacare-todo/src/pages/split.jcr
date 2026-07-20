@@ -38,7 +38,6 @@ const tipLabel = derive(() => usd(tipAmount()), { name: 'split.tipLabel', file: 
 const totalLabel = derive(() => usd(total()), { name: 'split.totalLabel', file: 'split.jcr', line: 35 })
 const eachLabel = derive(() => usd(each()), { name: 'split.eachLabel', file: 'split.jcr', line: 36 })
 
-export const title = 'Jacaré · Split'
 
 function setTip(pct) {
   tipPct.set(pct)

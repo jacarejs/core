@@ -107,7 +107,7 @@ In **DEV**, the Jacaré compiler injects `{ name, file, line }` on `pulse` / `de
 |--------|----------|
 | Hover a node | Outline bound DOM elements |
 | Click `◎` | Pick a page element → select pulses that feed it |
-| Value change | List flash + short green flash on bound DOM |
+| Value change | List flash + value panel flash in the Pulse Graph |
 
 For each node you can see:
 

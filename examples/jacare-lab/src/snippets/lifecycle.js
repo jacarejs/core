@@ -1,11 +1,27 @@
 import { viewSnippet } from '../utils/snippet.js'
 
+export const titleCode = `export const nav = createNav({
+  layout: Shell,
+  screens: {
+    '/lifecycle': {
+      use: lazy(() => import('./pages/lifecycle.jcr')),
+      title: 'Jacaré Lab · Lifecycle',
+    },
+    '/topic/:slug': {
+      use: lazy(() => import('./pages/topic-param.jcr')),
+      title: (ctx) => \`Topic · \${ctx.params.slug}\`,
+    },
+  },
+})
+
+// Configured in nav — applied when the route activates.`
+
 export const cycleFlowCode = `// packages/runtime/src/nav/screen.ts (simplified)
 export function screen(mod) {
   return (host, ctx) => {
     const cleanups = []
 
-    applyScreenTitle(mod.title, ctx) // export const title → document.title
+    applyScreenTitle(mod.title, ctx) // optional page-level title
 
     const activateCleanup = runScreenLifecycle(lifecycle, 'activate', ctx)
     if (typeof activateCleanup === 'function') cleanups.push(activateCleanup)
@@ -21,19 +37,11 @@ export function screen(mod) {
       for (const cleanup of cleanups) cleanup()
     }
   }
-}`
+}
 
-export const titleCode = `export const title = 'Jacaré Lab · Lifecycle'
+// createNav then applies screens[path].title if configured`
 
-// or from route context:
-export const title = (ctx) => \`Topic · \${ctx.params.slug}\`
-
-// Applied on activate, before onActivate.
-// Use onActivate only when the title must track live signals.`
-
-export const hooksCode = `export const title = 'Jacaré Lab · Lifecycle'
-
-export const lifecycle = createLifecycle({
+export const hooksCode = `export const lifecycle = createLifecycle({
   onMount() {
     const timer = setInterval(() => ticks.update((n) => n + 1), 1000)
     return () => clearInterval(timer) // cleanup on unmount
@@ -62,9 +70,7 @@ onActivate() {
 
 // clearScope() — wipe every entry (also in Pulse Graph ⚙ Config)`
 
-export const activationCode = `export const title = 'Jacaré Lab · Lifecycle'
-
-onActivate() {
+export const activationCode = `onActivate() {
   activations.update((n) => n + 1) // runs again every time you come back
   return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
 }

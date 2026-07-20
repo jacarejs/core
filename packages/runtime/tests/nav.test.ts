@@ -7,6 +7,7 @@ import {
   normalizePath,
   normalizeScreens,
 } from '../src/nav/match.js'
+import type { NavMount } from '../src/nav/types.js'
 
 describe('matchPath', () => {
   it('matches static paths', () => {
@@ -32,6 +33,22 @@ describe('normalizeScreens', () => {
     })
 
     expect(screens.map((screen) => screen.pattern)).toEqual(['/', '/about'])
+  })
+
+  it('keeps title on { use, title } entries', () => {
+    const mount = ((_host: HTMLElement) => () => {}) as NavMount
+    const screens = normalizeScreens({
+      '/tasks': { use: mount, title: 'Jacaré · Tasks' },
+      '/topic/:slug': {
+        use: lazy(async () => mount),
+        title: (ctx) => `Topic · ${ctx.params.slug}`,
+      },
+    })
+
+    expect(screens[0]).toMatchObject({ pattern: '/tasks', mount, title: 'Jacaré · Tasks' })
+    expect(screens[1]?.pattern).toBe('/topic/:slug')
+    expect(typeof screens[1]?.title).toBe('function')
+    expect(screens[1]?.load).toBeTypeOf('function')
   })
 })
 
@@ -406,6 +423,31 @@ describe('createNav', () => {
     expect(layout).toHaveBeenCalledTimes(2)
     expect(target.querySelectorAll('.shell')).toHaveLength(1)
     expect(target.querySelector('[jacare-frame]')?.textContent).toBe('home')
+  })
+
+  it('applies nav route title after screen mount', async () => {
+    window.history.pushState({}, '', '/tasks')
+    const previous = document.title
+    const Tasks = vi.fn((target: HTMLElement) => {
+      target.textContent = 'tasks'
+      return () => {}
+    })
+
+    const nav = createNav({
+      screens: {
+        '/tasks': { use: Tasks, title: 'Jacaré · Tasks' },
+      },
+    })
+
+    const target = document.createElement('div')
+    const dispose = nav.attach(target)
+    await flush()
+
+    expect(document.title).toBe('Jacaré · Tasks')
+
+    dispose()
+    document.title = previous
+    window.history.pushState({}, '', '/')
   })
 })
 

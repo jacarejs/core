@@ -144,7 +144,6 @@ const seasonLine = derive(() => {
 const canPrev = derive(() => matchday() > 1)
 const canNext = derive(() => dayDone() && matchday() < maxDay)
 
-export const title = 'Jacaré · League'
 
 function teamOf(id) {
   return TEAM_BY_ID[id]

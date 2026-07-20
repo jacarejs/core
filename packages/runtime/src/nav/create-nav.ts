@@ -1,7 +1,7 @@
 import { effect } from '../effect.js'
 import { signal } from '../signal.js'
 import { isLoader } from './lazy.js'
-import { screen, type ScreenModule } from './screen.js'
+import { screen, applyScreenTitle, type ScreenModule } from './screen.js'
 import {
   buildPath,
   matchScreen,
@@ -162,7 +162,11 @@ export function createNav(options: NavOptions): Nav {
   async function mountScreenContent(host: HTMLElement, match: ScreenMatch): Promise<() => void> {
     const ctx = buildContext(where.peek.path, match.params)
     const mount = await resolveMount(match.entry)
-    return mount(host, ctx)
+    const dispose = mount(host, ctx)
+    if (match.entry.title != null) {
+      applyScreenTitle(match.entry.title, ctx)
+    }
+    return dispose
   }
 
   async function mountMissingContent(path: string, host: HTMLElement): Promise<() => void> {

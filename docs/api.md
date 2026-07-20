@@ -1333,21 +1333,28 @@ const href = routeHref('/about', { tab: 'feedback' })
 
 ### Screen title
 
-Export `title` from a screen module to set `document.title` when the route activates. Works with `screen(Module)` and with `lazy(() => import(...))` (lazy loads are wrapped automatically).
+Configure `title` on each route in `createNav` — applied when that screen activates:
 
 ```javascript
-export const title = 'Jacaré · Tasks'
-
-// or derive from route context:
-export const title = (ctx) => `Topic · ${ctx.params.slug}`
+export const nav = createNav({
+  layout: Shell,
+  screens: {
+    '/': { use: screen(Home), title: 'Jacaré · Home' },
+    '/about': { use: lazy(() => import('./pages/about.jcr')), title: 'Jacaré · About' },
+    '/topic/:slug': {
+      use: lazy(() => import('./pages/topic.jcr')),
+      title: (ctx) => `Topic · ${ctx.params.slug}`,
+    },
+  },
+})
 ```
 
 | Form | Behavior |
 |------|----------|
-| `export const title = '…'` | Static document title on activate |
-| `export const title = (ctx) => …` | Title from `NavContext` (`params`, `search`, `path`) |
+| `title: '…'` | Static document title on activate |
+| `title: (ctx) => …` | Title from `NavContext` (`params`, `search`, `path`) |
 
-Applied **before** `onActivate`. Use `onActivate` only when the title must react to live signals after mount (for example `Tasks (${remaining()})`).
+Nav titles win over an optional page-level `export const title`. Use `onActivate` only when the title must track live signals after mount (for example `Tasks (${remaining()})`).
 
 ---
 
@@ -1431,7 +1438,7 @@ import { createLifecycle, signal } from '@jacare/core'
 const ticks = signal(0)
 let timer
 
-export const title = 'Jacaré · Tasks'
+// Prefer title on the route in createNav: { use: screen(This), title: 'Jacaré · Tasks' }
 
 export const lifecycle = createLifecycle({
   onMount() {
@@ -1440,7 +1447,6 @@ export const lifecycle = createLifecycle({
   },
   onActivate(ctx) {
     // screen became visible — ctx has nav info
-    // prefer export const title for static titles
   },
   onDeactivate() {
     // screen hidden but kept alive (depending on nav strategy)
@@ -1543,11 +1549,9 @@ function addItem() {
   items.update((list) => [...list, { id, label: 'New', done: false }])
 }
 
-export const title = 'Tasks'
-
 export const lifecycle = createLifecycle({
   onActivate() {
-    // optional: live title from signals
+    // optional: live title from signals (prefer createNav title for static names)
     document.title = `Tasks (${remaining()})`
   },
 })
@@ -1585,7 +1589,7 @@ export <view>
 | Events | `on-click` on Add / row / toggles |
 | Props | `:text`, `:label`, `:onPress` into Badge / IconButton |
 | `class-*` | `class-done=${item.done}` |
-| Lifecycle | `export const title` for the static case; `onActivate` for live titles like `Tasks (${remaining()})` |
+| Lifecycle | `createNav` `{ use, title }` for static titles; `onActivate` for live titles like `Tasks (${remaining()})` |
 | Immutable update | `items.update(list => list.map/filter/…)` |
 
 ---
@@ -1701,7 +1705,7 @@ devtoolsBind(count, _text1, { kind: 'text', file: '…', line: 28 })
 |--------|----------|
 | Hover node in Pulse Graph | Outline on bound DOM elements |
 | Click `◎` (pick) | Click a page element → selects pulses that feed it |
-| Pulse value update | Short green flash on bound nodes (~200ms) |
+| Pulse value update | List + value panel flash in the Pulse Graph (no DOM blink) |
 
 Runtime helpers:
 
@@ -1920,7 +1924,7 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | `mountSlot` | [§9](#9-components-and-slots) | Slot projection |
 | Event `on-*` / `@*` | [§6](#6-events-on---) | DOM listeners |
 | `createNav` / `lazy` | [§11](#11-navigation) | Routing |
-| `export const title` | [§11 Screen title](#screen-title) | Document title per route |
+| `screens: { use, title }` | [§11 Screen title](#screen-title) | Document title per route |
 | `createForm` | [§12](#12-forms) | Forms |
 | `createLifecycle` / `registerScope` | [§13](#13-lifecycle-and-scope) | Lifecycle / debug |
 | `renderToString` / `resumeBindings` | [§14](#14-ssr-and-hydration) | SSR |

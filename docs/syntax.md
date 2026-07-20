@@ -462,13 +462,22 @@ nav.warm('/about')
 ### Screen title
 
 ```javascript
-export const title = 'Jacaré · About'
-
-// or from route params / search:
-export const title = (ctx) => `Topic · ${ctx.params.slug}`
+export const nav = createNav({
+  layout: Shell,
+  screens: {
+    '/about': {
+      use: lazy(() => import('./pages/about.jcr')),
+      title: 'Jacaré · About',
+    },
+    '/topic/:slug': {
+      use: lazy(() => import('./pages/topic.jcr')),
+      title: (ctx) => `Topic · ${ctx.params.slug}`,
+    },
+  },
+})
 ```
 
-Nav applies `title` when the screen activates (`screen()` and lazy imports). Prefer this over setting `document.title` by hand for static names.
+Configure `title` on each route in `createNav` (string or `(ctx) => string`). Optional page-level `export const title` still works as a fallback; nav titles win.
 
 Layout shells expose a frame slot:
 

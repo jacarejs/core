@@ -69,7 +69,6 @@ effect(() => {
   return () => clearInterval(id)
 })
 
-export const title = 'Jacaré · Focus'
 
 export const lifecycle = createLifecycle({
   onActivate() {

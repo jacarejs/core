@@ -54,7 +54,6 @@ function scheduleRun() {
   timer = setTimeout(runNow, 220)
 }
 
-export const title = 'Jacaré Lab · Playground'
 
 export const lifecycle = createLifecycle({
   onMount() {

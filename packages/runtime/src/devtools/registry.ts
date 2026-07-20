@@ -349,12 +349,6 @@ export function flashDom(target: Node): void {
   }, 200)
 }
 
-function flashBindings(pulseId: number): void {
-  for (const binding of getBindingsForPulse(pulseId)) {
-    flashDom(binding.target)
-  }
-}
-
 export function pickElement(): Promise<Element | null> {
   ensureHighlightStyle()
   return new Promise((resolve) => {

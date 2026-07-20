@@ -6,13 +6,16 @@ export type {
   NavMount,
   NavOptions,
   NavPlace,
+  ScreenDefinition,
   ScreenEntry,
   ScreenMatch,
+  ScreenRouteConfig,
 } from './types.js'
 export { createNav } from './create-nav.js'
 export { lazy } from './lazy.js'
-export { adaptScreen, screen } from './screen.js'
+export { adaptScreen, applyScreenTitle, screen } from './screen.js'
 export type { ScreenModule, ScreenModuleMount, ScreenTitle } from './screen.js'
+
 export {
   createRoute,
   routeHref,
