@@ -22,15 +22,27 @@ export function resumeBindings(target: ParentNode, state: SSRState): Array<() =>
 
   for (const binding of state.bindings) {
     const host = target.querySelector(`[data-jacare-bind="${binding.id}"]`)
-    if (!host) continue
+    if (!host || !binding.read) continue
 
-    if (binding.read) {
-      const text = findTextNode(host)
-      cleanups.push(bindText(text, binding.read as ReadonlySignal<string | number>))
-    }
+    const text = findTextNode(host)
+    cleanups.push(bindText(text, coerceBindingRead(binding)))
   }
 
   return cleanups
+}
+
+function coerceBindingRead(binding: SSRBinding): ReadonlySignal<string | number> {
+  const read = binding.read!
+  if (binding.kind === 'signal') {
+    return read as ReadonlySignal<string | number>
+  }
+
+  return (() => {
+    const value = (read as () => unknown)()
+    return typeof value === 'function'
+      ? (value as () => string | number)()
+      : (value as string | number)
+  }) as ReadonlySignal<string | number>
 }
 
 function findTextNode(host: Element): Text {

@@ -50,11 +50,11 @@ export <view>
     <header class="page-hero">
       <div class="page-hero-row">
         <div>
-          <p class="eyebrow">Fluxo</p>
+          <p class="eyebrow">Flow</p>
           <h1 class="page-title">Kanban</h1>
-          <p class="page-lead">As mesmas tarefas da lista — arraste os cards entre colunas para mudar o status.</p>
+          <p class="page-lead">The same tasks from the list — drag cards between columns to change status.</p>
         </div>
-        <button type="button" class="btn btn-ghost" on-click=${openCode}>Ver código</button>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
       </div>
     </header>
 
@@ -63,12 +63,12 @@ export <view>
         <input
           type="text"
           class="input"
-          placeholder="Adicionar em To do…"
+          placeholder="Add to To do…"
           bind-value=${draft}
           on-keydown=${onDraftKeydown}
         />
         <button type="button" class="btn btn-primary" on-click=${() => addItem('todo')}>
-          Adicionar
+          Add
         </button>
       </div>
     </section>
@@ -113,7 +113,7 @@ export <view>
                       type="button"
                       class="btn btn-ghost btn-tiny danger"
                       on-click=${() => removeItem(item.id)}
-                    >Remover</button>
+                    >Remove</button>
                   </div>
                 </article>
               #end

@@ -1,3 +1,4 @@
+import './app.css'
 import { nav } from './nav.js'
 import { restoreSpaPath } from './app-base.js'
 

@@ -106,7 +106,8 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
     },
 
     transform(code, id, transformOptions) {
-      if (!id.endsWith('.jcr')) return
+      const fileId = id.split('?', 1)[0] ?? id
+      if (id.includes('?raw') || !fileId.endsWith('.jcr')) return
       if (/export function mount\(/.test(code) || /export function render\(/.test(code)) return
       if (!hasViewSource(code)) return
 
@@ -119,7 +120,7 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
               ? false
               : isProduction && mode === 'client'
         const result = compile(code, {
-          filename: id,
+          filename: fileId,
           mode,
           cpw,
           debug: !isProduction,

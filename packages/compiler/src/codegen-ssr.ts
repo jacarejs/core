@@ -6,7 +6,7 @@ import type {
   TemplateNode,
   TextPart,
 } from './types.js'
-import { CodegenContext, escapeHtml, resolveSignalExpr } from './codegen-shared.js'
+import { CodegenContext, escapeHtml } from './codegen-shared.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
 
@@ -18,8 +18,19 @@ export function emitSSR(
   scopeId?: string,
   scopedStyle?: string,
   styleAst?: StyleAST,
+  importedNames?: ReadonlySet<string>,
 ): string[] {
-  const ctx = new CodegenContext(0, 1, runtimeImports, undefined, signals)
+  const ctx = new CodegenContext(
+    0,
+    1,
+    runtimeImports,
+    undefined,
+    signals,
+    false,
+    true,
+    undefined,
+    importedNames,
+  )
 
   if (props.length > 0) {
     ctx.line('export function render(props = {}) {')
@@ -209,13 +220,18 @@ function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
   if (parts.length === 1 && parts[0]!.type === 'expr') {
     const expr = parts[0]!.value
     const id = ctx.nextBinding()
-    const src = ctx.resolveSignal(expr)
+    const src = ctx.resolveBindingSignal(expr)
     ctx.useRuntime('escapeHtml')
-    ctx.line(`_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${expr})) + '</span>'`)
+    const readExpr = src ? `${src}()` : `(${ctx.rewriteExprForEffect(expr)})`
+    ctx.line(
+      `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${readExpr})) + '</span>'`,
+    )
     if (src) {
       ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${src} })`)
     } else {
-      ctx.line(`_bindings.push({ id: '${id}', kind: 'expr', read: () => ${expr} })`)
+      ctx.line(
+        `_bindings.push({ id: '${id}', kind: 'expr', read: () => (${ctx.rewriteExprForEffect(expr)}) })`,
+      )
     }
     return
   }
@@ -228,9 +244,9 @@ function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
   const template = parts
     .map((p) => {
       if (p.type === 'static') return escapeHtml(p.value)
-      const src = ctx.resolveSignal(p.value)
+      const src = ctx.resolveBindingSignal(p.value)
       if (src) return `' + escapeHtml(String(${src}())) + '`
-      return `' + escapeHtml(String(${p.value})) + '`
+      return `' + escapeHtml(String(${ctx.rewriteExprForEffect(p.value)})) + '`
     })
     .join('')
 

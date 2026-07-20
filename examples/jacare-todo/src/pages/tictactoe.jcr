@@ -10,9 +10,9 @@ const winner = pulse(null)
 const scores = pulse({ X: 0, O: 0, draws: 0 })
 
 const status = derive(() => {
-  if (winner() === 'draw') return 'Empate — bom ritmo.'
-  if (winner()) return `${winner()} venceu`
-  return `${turn()} joga`
+  if (winner() === 'draw') return 'Draw — nice pace.'
+  if (winner()) return `${winner()} wins`
+  return `${turn()} to play`
 })
 
 const canPlay = derive(() => winner() == null)
@@ -71,7 +71,7 @@ function resetScores() {
 }
 
 function openCode() {
-  showCode('Jogo da velha', [{ name: 'pages/tictactoe.jcr', code: matchCode }])
+  showCode('Tic-tac-toe', [{ name: 'pages/tictactoe.jcr', code: matchCode }])
 }
 
 const cells = [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -81,11 +81,11 @@ export <view>
     <header class="page-hero">
       <div class="page-hero-row">
         <div>
-          <p class="eyebrow">Jogar</p>
-          <h1 class="page-title">Jogo da velha</h1>
-          <p class="page-lead">Uma pausa rápida — mesma reatividade fine-grained, zero VDOM.</p>
+          <p class="eyebrow">Play</p>
+          <h1 class="page-title">Tic-tac-toe</h1>
+          <p class="page-lead">A quick break — same fine-grained reactivity, zero VDOM.</p>
         </div>
-        <button type="button" class="btn btn-ghost" on-click=${openCode}>Ver código</button>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
       </div>
     </header>
 
@@ -94,8 +94,8 @@ export <view>
         <div class="match-status">
           <p class="match-turn">${status}</p>
           <div class="match-actions">
-            <button type="button" class="btn btn-ghost" on-click=${resetBoard}>Nova rodada</button>
-            <button type="button" class="btn btn-ghost" on-click=${resetScores}>Zerar placar</button>
+            <button type="button" class="btn btn-ghost" on-click=${resetBoard}>New round</button>
+            <button type="button" class="btn btn-ghost" on-click=${resetScores}>Reset score</button>
           </div>
         </div>
 
@@ -117,7 +117,7 @@ export <view>
       </section>
 
       <aside class="panel match-score">
-        <h2 class="aside-title">Placar</h2>
+        <h2 class="aside-title">Score</h2>
         <ul class="score-list">
           <li>
             <span class="score-mark x">X</span>
@@ -132,7 +132,7 @@ export <view>
             <span class="score-value">${scores().draws}</span>
           </li>
         </ul>
-        <p class="aside-copy">Toque em uma casa. Nova rodada mantém o placar; Zerar limpa tudo.</p>
+        <p class="aside-copy">Tap a cell. New round keeps the score; Reset clears everything.</p>
       </aside>
     </div>
   </section>

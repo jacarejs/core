@@ -19,7 +19,7 @@ import { tasksCode, storeCode } from '../snippets/pages.js'
 
 export const lifecycle = createLifecycle({
   onActivate() {
-    document.title = 'Jacaré · Tarefas'
+    document.title = 'Jacaré · Tasks'
     const stops = [
       registerScope('todo.draft', 'Draft', () => draft()),
       registerScope('todo.filter', 'Filter', () => filter()),
@@ -49,7 +49,7 @@ function onRemove(id, e) {
 }
 
 function openCode() {
-  showCode('Tarefas', [
+  showCode('Tasks', [
     { name: 'pages/tasks.jcr', code: tasksCode },
     { name: 'store.js', code: storeCode },
   ])
@@ -60,32 +60,32 @@ export <view>
     <header class="page-hero">
       <div class="page-hero-row">
         <div>
-          <p class="eyebrow">Lista</p>
-          <h1 class="page-title">Tarefas</h1>
-          <p class="page-lead">Anote o que precisa ser feito — as mesmas tasks fluem no Kanban. Com DevTools aberto, o painel Scope mostra draft, filtro e contagens ao vivo.</p>
+          <p class="eyebrow">List</p>
+          <h1 class="page-title">Tasks</h1>
+          <p class="page-lead">Capture what needs doing — the same tasks flow into the Kanban board. With DevTools open, the Scope panel shows draft, filter, and live counts.</p>
         </div>
-        <button type="button" class="btn btn-ghost" on-click=${openCode}>Ver código</button>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
       </div>
     </header>
 
     <div class="metrics">
       <div class="metric">
         <span class="metric-value">${active}</span>
-        <span class="metric-label">abertas</span>
+        <span class="metric-label">open</span>
       </div>
       <div class="metric">
         <span class="metric-value">${doneCount}</span>
-        <span class="metric-label">feitas</span>
+        <span class="metric-label">done</span>
       </div>
       <div class="metric">
         <span class="metric-value">${total}</span>
-        <span class="metric-label">todas</span>
+        <span class="metric-label">all</span>
       </div>
     </div>
 
     <section class="panel composer">
       <label class="field">
-        <span class="field-label">Buscar</span>
+        <span class="field-label">Search</span>
         <div class="search">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
@@ -94,7 +94,7 @@ export <view>
           <input
             type="search"
             class="input search-input"
-            placeholder="Filtrar por título…"
+            placeholder="Filter by title…"
             bind-value=${filter}
           />
         </div>
@@ -102,17 +102,17 @@ export <view>
 
       <div class="add-row">
         <label class="field grow">
-          <span class="field-label">Nova tarefa</span>
+          <span class="field-label">New task</span>
           <input
             type="text"
             class="input"
-            placeholder="O que precisa sair?"
+            placeholder="What needs to ship?"
             bind-value=${draft}
             on-keydown=${onDraftKeydown}
           />
         </label>
         <button type="button" class="btn btn-primary add-btn" on-click=${() => addItem()}>
-          Adicionar
+          Add
         </button>
       </div>
     </section>
@@ -120,13 +120,13 @@ export <view>
     <section class="panel list-panel">
       #if isEmpty()
         <div class="empty">
-          <p class="empty-title">Nada por aqui</p>
-          <p class="empty-copy">Adicione uma tarefa — ela também aparece no Kanban.</p>
+          <p class="empty-title">Nothing here yet</p>
+          <p class="empty-copy">Add a task — it also shows up on the Kanban board.</p>
         </div>
       #elif noMatches()
         <div class="empty">
-          <p class="empty-title">Sem resultados</p>
-          <p class="empty-copy">Tente um termo mais curto.</p>
+          <p class="empty-title">No matches</p>
+          <p class="empty-copy">Try a shorter search term.</p>
         </div>
       #else
         <ul class="list">
@@ -139,7 +139,7 @@ export <view>
               <button
                 type="button"
                 class="check"
-                aria-label="Alternar concluída"
+                aria-label="Toggle done"
                 on-click=${(e) => onToggle(item.id, e)}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -153,7 +153,7 @@ export <view>
               <button
                 type="button"
                 class="remove"
-                aria-label="Remover"
+                aria-label="Remove"
                 on-click=${(e) => onRemove(item.id, e)}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">

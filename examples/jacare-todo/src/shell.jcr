@@ -19,16 +19,16 @@ export <view>
           </div>
         </a>
         <nav class="nav" aria-label="Primary">
-          <a class="nav-link" jacare-go="/" href=${appHref('/')}>Tarefas</a>
+          <a class="nav-link" jacare-go="/" href=${appHref('/')}>Tasks</a>
           <a class="nav-link" jacare-go="/board" href=${appHref('/board')}>Kanban</a>
-          <a class="nav-link" jacare-go="/match" href=${appHref('/match')}>Velha</a>
+          <a class="nav-link" jacare-go="/match" href=${appHref('/match')}>Match</a>
         </nav>
       </header>
 
       <main class="main" jacare-frame></main>
 
       <footer class="footer">
-        <span>Fine-grained reactivity · zero VDOM · Ver código abre o source</span>
+        <span>Fine-grained reactivity · zero VDOM · View code opens the source</span>
       </footer>
     </div>
 

@@ -133,6 +133,7 @@ export function generate(
         options.scopeId,
         options.scopedStyle,
         options.styleAst,
+        importedNames,
       ),
     )
     lines.push('')

@@ -48,7 +48,7 @@ export function rewriteSignalsInExpr(
   if (names.size === 0) return expr
   let out = expr
   for (const name of [...names].sort((a, b) => b.length - a.length)) {
-    const re = new RegExp(`(?<![.\\w$])${name}(?!\\s*\\()`, 'g')
+    const re = new RegExp(`(?<![.\\w$])${name}(?![\\w$])(?!\\s*\\()`, 'g')
     out = out.replace(re, `${name}()`)
   }
   return out

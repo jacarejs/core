@@ -1,0 +1,197 @@
+import {
+  batch,
+  createLifecycle,
+  derive,
+  effect,
+  pulse,
+  registerScope,
+} from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import { focusCode } from '../snippets/pages.js'
+
+const WORK = 25 * 60
+const BREAK = 5 * 60
+
+const phase = pulse('idle', { name: 'focus.phase', file: 'focus.jcr', line: 16 })
+const running = pulse(false, { name: 'focus.running', file: 'focus.jcr', line: 17 })
+const remaining = pulse(WORK, { name: 'focus.remaining', file: 'focus.jcr', line: 18 })
+const completed = pulse(0, { name: 'focus.completed', file: 'focus.jcr', line: 19 })
+
+const totalSecs = derive(() => (phase() === 'break' ? BREAK : WORK), {
+  name: 'focus.totalSecs',
+  file: 'focus.jcr',
+  line: 21,
+})
+
+const progress = derive(() => {
+  const total = totalSecs()
+  return Math.round(((total - remaining()) / total) * 100)
+}, { name: 'focus.progress', file: 'focus.jcr', line: 27 })
+
+const clock = derive(() => {
+  const secs = Math.max(0, remaining())
+  const m = String(Math.floor(secs / 60)).padStart(2, '0')
+  const s = String(secs % 60).padStart(2, '0')
+  return `${m}:${s}`
+}, { name: 'focus.clock', file: 'focus.jcr', line: 33 })
+
+const mode = derive(() => {
+  if (phase() === 'idle') return 'idle'
+  if (phase() === 'work') return running() ? 'work' : 'paused'
+  return running() ? 'break' : 'break-paused'
+}, { name: 'focus.mode', file: 'focus.jcr', line: 40 })
+
+effect(() => {
+  if (!running()) return
+  const id = setInterval(() => {
+    if (remaining() <= 1) {
+      batch(() => {
+        running.set(false)
+        if (phase() === 'work') {
+          completed.update((n) => n + 1)
+          phase.set('break')
+          remaining.set(BREAK)
+        } else {
+          phase.set('idle')
+          remaining.set(WORK)
+        }
+      })
+      return
+    }
+    remaining.update((n) => n - 1)
+  }, 1000)
+  return () => clearInterval(id)
+})
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    document.title = 'Jacaré · Focus'
+    const stops = [
+      registerScope('focus.mode', 'Mode', () => mode()),
+      registerScope('focus.clock', 'Clock', () => clock()),
+      registerScope('focus.progress', 'Progress %', () => progress()),
+      registerScope('focus.completed', 'Sessions done', () => completed()),
+    ]
+    return () => {
+      for (const stop of stops) stop()
+    }
+  },
+  onDeactivate() {
+    running.set(false)
+  },
+})
+
+function start() {
+  batch(() => {
+    if (phase() === 'idle') {
+      phase.set('work')
+      remaining.set(WORK)
+    }
+    running.set(true)
+  })
+}
+
+function pause() {
+  running.set(false)
+}
+
+function skip() {
+  batch(() => {
+    running.set(false)
+    if (phase() === 'work') {
+      completed.update((n) => n + 1)
+      phase.set('break')
+      remaining.set(BREAK)
+    } else {
+      phase.set('idle')
+      remaining.set(WORK)
+    }
+  })
+}
+
+function reset() {
+  batch(() => {
+    running.set(false)
+    phase.set('idle')
+    remaining.set(WORK)
+  })
+}
+
+function openCode() {
+  showCode('Focus', [{ name: 'pages/focus.jcr', code: focusCode }])
+}
+
+export <view>
+  <section class="page page-focus">
+    <header class="page-hero">
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Timer</p>
+          <h1 class="page-title">Focus</h1>
+          <p class="page-lead">A Pomodoro clock driven by effect() — the interval cleans up when you pause or leave the page. Open DevTools Scope to watch the live countdown.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </header>
+
+    <div class="focus-layout">
+      <section class="panel focus-stage">
+        <div class="focus-ring" style---pct=${progress}>
+          <div class="focus-ring-inner">
+            <p class="focus-clock">${clock}</p>
+            #case mode()
+              #when 'idle'
+                <p class="focus-mode">Ready for a deep work block</p>
+              #when 'work'
+                <p class="focus-mode">Focus — stay with it</p>
+              #when 'paused'
+                <p class="focus-mode">Paused — pick it back up</p>
+              #when 'break'
+                <p class="focus-mode">Break — stretch and reset</p>
+              #when 'break-paused'
+                <p class="focus-mode">Break paused</p>
+            #end
+          </div>
+        </div>
+
+        <div class="focus-actions">
+          #if running()
+            <button type="button" class="btn btn-primary" on-click=${pause}>Pause</button>
+          #else
+            <button type="button" class="btn btn-primary" on-click=${start}>
+              #case phase()
+                #when 'idle'
+                  Start focus
+                #when 'break'
+                  Start break
+                #else
+                  Resume
+              #end
+            </button>
+          #end
+          <button type="button" class="btn btn-ghost" on-click=${skip}>Skip</button>
+          <button type="button" class="btn btn-ghost" on-click=${reset}>Reset</button>
+        </div>
+      </section>
+
+      <aside class="panel focus-side">
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-value">${completed}</span>
+            <span class="metric-label">sessions</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">${progress}%</span>
+            <span class="metric-label">progress</span>
+          </div>
+        </div>
+        <ul class="focus-hints">
+          <li>25 min focus · 5 min break</li>
+          <li><code>effect</code> owns the tick; cleanup clears the interval</li>
+          <li><code>style---pct</code> drives the ring fill</li>
+          <li><code>#case</code> switches copy by mode</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+</view>

@@ -507,4 +507,40 @@ export default view\`<p>\${count}</p>\``
     expect(result.code).not.toContain('name: "count"')
     expect(result.code).not.toContain('devtoolsBind(')
   })
+
+  it('binds imported pulses/derives without stringifying the getter', () => {
+    const source = `import { active, draft, total } from './store.js'
+export <view>
+  <span>\${active}</span>
+  <span>\${total}</span>
+  <input bind-value=\${draft} />
+</view>`
+    const client = compile(source, { mode: 'client', debug: false })
+    expect(client.code).toContain('bindText(_text')
+    expect(client.code).toContain('bindText(_text2, active)')
+    expect(client.code).toMatch(/bindText\([^,]+, total\)/)
+    expect(client.code).toMatch(/bindModel\([^,]+, "value", draft\)/)
+    expect(client.code).not.toContain('String(active)')
+    expect(client.code).not.toContain('String(total)')
+
+    const server = compile(source, { mode: 'server', debug: false })
+    expect(server.code).toContain('String(active())')
+    expect(server.code).toContain('String(total())')
+    expect(server.code).toContain("kind: 'signal', read: active")
+    expect(server.code).toContain("kind: 'signal', read: total")
+    expect(server.code).not.toContain('String(active)')
+    expect(server.code).not.toContain('read: () => active')
+  })
+
+  it('does not rewrite signal prefixes inside longer identifiers', () => {
+    const source = `import { items, itemsIn } from './store.js'
+export <view>
+  <span>\${itemsIn(col.id).length}</span>
+  <span>\${items().length}</span>
+</view>`
+    const result = compile(source, { mode: 'client', debug: false })
+    expect(result.code).toContain('itemsIn(col.id).length')
+    expect(result.code).not.toContain('items()In')
+    expect(result.code).toContain('items().length')
+  })
 })

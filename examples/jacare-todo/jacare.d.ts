@@ -8,3 +8,9 @@ declare module '*.jcr' {
   const _default: typeof mount
   export default _default
 }
+
+declare module '*?raw' {
+  const source: string
+  export default source
+}
+
