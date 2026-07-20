@@ -1,14 +1,17 @@
 # Jacaré Todo suite
 
-A focused demo app with three surfaces sharing Jacaré’s fine-grained reactivity:
+A focused demo app with six surfaces showing Jacaré’s fine-grained reactivity:
 
 | Route | Page |
 |-------|------|
-| `/` | **Todo** — search, add, toggle, remove |
+| `/` | **Tasks** — search, add, toggle, remove |
 | `/board` | **Kanban** — same tasks, drag across columns |
 | `/match` | **Tic-tac-toe** — quick two-player match |
+| `/focus` | **Focus** — Pomodoro with `effect` + `#case` + `style---pct` |
+| `/invite` | **Invite** — multi-step RSVP with `createForm` |
+| `/split` | **Split** — tip calculator driven by `derive` |
 
-Todo and Board share one store (`src/store.js`), so moving a card updates the list and vice versa.
+Tasks and Kanban share one store (`src/store.js`), so moving a card updates the list and vice versa.
 
 ## Run
 

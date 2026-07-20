@@ -11,9 +11,15 @@ export const nav = createNav({
     '/': screen(Tasks),
     '/board': lazy(() => import('./pages/kanban.jcr')),
     '/match': lazy(() => import('./pages/tictactoe.jcr')),
+    '/focus': lazy(() => import('./pages/focus.jcr')),
+    '/invite': lazy(() => import('./pages/invite.jcr')),
+    '/split': lazy(() => import('./pages/split.jcr')),
   },
   missing: NotFound,
 })
 
 nav.warm('/board')
 nav.warm('/match')
+nav.warm('/focus')
+nav.warm('/invite')
+nav.warm('/split')

@@ -41,6 +41,12 @@ const mode = derive(() => {
   return running() ? 'break' : 'break-paused'
 }, { name: 'focus.mode', file: 'focus.jcr', line: 40 })
 
+const startLabel = derive(() => {
+  if (phase() === 'idle') return 'Start focus'
+  if (phase() === 'break') return 'Start break'
+  return 'Resume'
+}, { name: 'focus.startLabel', file: 'focus.jcr', line: 47 })
+
 effect(() => {
   if (!running()) return
   const id = setInterval(() => {
@@ -158,16 +164,7 @@ export <view>
           #if running()
             <button type="button" class="btn btn-primary" on-click=${pause}>Pause</button>
           #else
-            <button type="button" class="btn btn-primary" on-click=${start}>
-              #case phase()
-                #when 'idle'
-                  Start focus
-                #when 'break'
-                  Start break
-                #else
-                  Resume
-              #end
-            </button>
+            <button type="button" class="btn btn-primary" on-click=${start}>${startLabel}</button>
           #end
           <button type="button" class="btn btn-ghost" on-click=${skip}>Skip</button>
           <button type="button" class="btn btn-ghost" on-click=${reset}>Reset</button>
@@ -189,7 +186,7 @@ export <view>
           <li>25 min focus · 5 min break</li>
           <li><code>effect</code> owns the tick; cleanup clears the interval</li>
           <li><code>style---pct</code> drives the ring fill</li>
-          <li><code>#case</code> switches copy by mode</li>
+          <li>Mode copy switches with a case block</li>
         </ul>
       </aside>
     </div>

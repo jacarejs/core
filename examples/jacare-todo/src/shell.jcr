@@ -22,6 +22,9 @@ export <view>
           <a class="nav-link" jacare-go="/" href=${appHref('/')}>Tasks</a>
           <a class="nav-link" jacare-go="/board" href=${appHref('/board')}>Kanban</a>
           <a class="nav-link" jacare-go="/match" href=${appHref('/match')}>Match</a>
+          <a class="nav-link" jacare-go="/focus" href=${appHref('/focus')}>Focus</a>
+          <a class="nav-link" jacare-go="/invite" href=${appHref('/invite')}>Invite</a>
+          <a class="nav-link" jacare-go="/split" href=${appHref('/split')}>Split</a>
         </nav>
       </header>
 

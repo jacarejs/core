@@ -1,0 +1,135 @@
+import { createLifecycle, derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import { splitCode } from '../snippets/pages.js'
+
+const TIP_PRESETS = [10, 15, 18, 20, 25]
+
+const bill = pulse('86.40', { name: 'split.bill', file: 'split.jcr', line: 7 })
+const tipPct = pulse(18, { name: 'split.tipPct', file: 'split.jcr', line: 8 })
+const people = pulse(3, { name: 'split.people', file: 'split.jcr', line: 9 })
+
+const billNum = derive(() => {
+  const n = Number(bill())
+  return Number.isFinite(n) && n >= 0 ? n : 0
+}, { name: 'split.billNum', file: 'split.jcr', line: 11 })
+
+const tipAmount = derive(() => billNum() * (tipPct() / 100), {
+  name: 'split.tipAmount',
+  file: 'split.jcr',
+  line: 16,
+})
+
+const total = derive(() => billNum() + tipAmount(), {
+  name: 'split.total',
+  file: 'split.jcr',
+  line: 22,
+})
+
+const each = derive(() => total() / Math.max(1, people()), {
+  name: 'split.each',
+  file: 'split.jcr',
+  line: 27,
+})
+
+const usd = (n) =>
+  n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+
+const tipLabel = derive(() => usd(tipAmount()), { name: 'split.tipLabel', file: 'split.jcr', line: 34 })
+const totalLabel = derive(() => usd(total()), { name: 'split.totalLabel', file: 'split.jcr', line: 35 })
+const eachLabel = derive(() => usd(each()), { name: 'split.eachLabel', file: 'split.jcr', line: 36 })
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    document.title = 'Jacaré · Split'
+  },
+})
+
+function setTip(pct) {
+  tipPct.set(pct)
+}
+
+function onTipRange(e) {
+  tipPct.set(Number(e.target.value))
+}
+
+function bumpPeople(delta) {
+  people.update((n) => Math.min(24, Math.max(1, n + delta)))
+}
+
+function openCode() {
+  showCode('Split', [{ name: 'pages/split.jcr', code: splitCode }])
+}
+
+export <view>
+  <section class="page page-split">
+    <header class="page-hero">
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Derived</p>
+          <h1 class="page-title">Split</h1>
+          <p class="page-lead">Tip and per-person totals recompute from pulses — no event handlers wiring the math, just derive().</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </header>
+
+    <div class="split-layout">
+      <section class="panel composer">
+        <label class="field">
+          <span class="field-label">Bill</span>
+          <input class="input" type="number" min="0" step="0.01" bind-value=${bill} />
+        </label>
+
+        <div class="field">
+          <span class="field-label">Tip · ${tipPct}%</span>
+          <div class="tip-presets">
+            #for TIP_PRESETS as pct (pct)
+              <button
+                type="button"
+                class="btn btn-tiny tip-chip"
+                class-active=${() => tipPct() === pct}
+                on-click=${() => setTip(pct)}
+              >${pct}%</button>
+            #end
+          </div>
+          <input
+            class="range"
+            type="range"
+            min="0"
+            max="40"
+            step="1"
+            value=${tipPct}
+            on-input=${onTipRange}
+          />
+        </div>
+
+        <div class="field">
+          <span class="field-label">People</span>
+          <div class="people-row">
+            <button type="button" class="btn btn-ghost" on-click=${() => bumpPeople(-1)} aria-label="Fewer people">−</button>
+            <span class="people-count">${people}</span>
+            <button type="button" class="btn btn-ghost" on-click=${() => bumpPeople(1)} aria-label="More people">+</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel split-result">
+        <div class="split-hero-amount">
+          <span class="split-hero-label">Each pays</span>
+          <strong class="split-hero-value">${eachLabel}</strong>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-value">${tipLabel}</span>
+            <span class="metric-label">tip</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">${totalLabel}</span>
+            <span class="metric-label">total</span>
+          </div>
+        </div>
+        <p class="split-note">Change the bill or tip — every label updates from the same derived graph.</p>
+      </aside>
+    </div>
+  </section>
+</view>

@@ -1,3 +1,12 @@
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+    field: { type: 'any', required: true }
+    type: { type: 'string', default: 'text' }
+    placeholder: { type: 'string', default: '' }
+  }
+</contract>
+
 export <view>
 <label class="field">
   <span class="field-label">${label}</span>

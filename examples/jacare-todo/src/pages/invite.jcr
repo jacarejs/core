@@ -1,0 +1,165 @@
+import { createForm, createLifecycle, derive, pulse } from '@jacare/core'
+import Field from '../components/Field.jcr'
+import { showCode } from '../code-viewer.js'
+import { inviteCode } from '../snippets/pages.js'
+
+const step = pulse(0, { name: 'invite.step', file: 'invite.jcr', line: 6 })
+const vegetarian = pulse(false, { name: 'invite.vegetarian', file: 'invite.jcr', line: 7 })
+const reminder = pulse(true, { name: 'invite.reminder', file: 'invite.jcr', line: 8 })
+const notes = pulse('', { name: 'invite.notes', file: 'invite.jcr', line: 9 })
+const submitted = pulse(null, { name: 'invite.submitted', file: 'invite.jcr', line: 10 })
+
+const doneName = derive(() => submitted()?.name ?? '')
+const doneEmail = derive(() => submitted()?.email ?? '')
+const doneGuests = derive(() => submitted()?.guests ?? 0)
+
+const form = createForm({
+  name: {
+    value: '',
+    validate: (value) => (value.trim().length < 2 ? 'Name is too short' : undefined),
+  },
+  email: {
+    value: '',
+    validate: (value) => (value.includes('@') ? undefined : 'Enter a valid email'),
+  },
+  guests: {
+    value: '2',
+    validate: (value) => {
+      const n = Number(value)
+      if (!Number.isInteger(n) || n < 1 || n > 8) return 'Guests must be between 1 and 8'
+      return undefined
+    },
+  },
+})
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    document.title = 'Jacaré · Invite'
+  },
+})
+
+function goNext() {
+  if (step() === 0) {
+    const ok =
+      form.fields.name.validate() &&
+      form.fields.email.validate() &&
+      form.fields.guests.validate()
+    if (!ok) return
+  }
+  step.update((n) => Math.min(n + 1, 3))
+}
+
+function goBack() {
+  step.update((n) => Math.max(n - 1, 0))
+}
+
+function confirmInvite() {
+  submitted.set({
+    name: form.fields.name(),
+    email: form.fields.email(),
+    guests: Number(form.fields.guests()),
+    vegetarian: vegetarian(),
+    reminder: reminder(),
+    notes: notes().trim(),
+  })
+  step.set(3)
+}
+
+function startOver() {
+  form.reset()
+  vegetarian.set(false)
+  reminder.set(true)
+  notes.set('')
+  submitted.set(null)
+  step.set(0)
+}
+
+function openCode() {
+  showCode('Invite', [{ name: 'pages/invite.jcr', code: inviteCode }])
+}
+
+export <view>
+  <section class="page page-invite">
+    <header class="page-hero">
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Forms</p>
+          <h1 class="page-title">Invite</h1>
+          <p class="page-lead">A multi-step RSVP with createForm validation, dirty fields, and a case block for each stage — product flow, not a form tutorial dump.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </header>
+
+    <ol class="invite-steps" aria-label="Progress">
+      <li class-active=${() => step() === 0} class-done=${() => step() > 0}>Details</li>
+      <li class-active=${() => step() === 1} class-done=${() => step() > 1}>Prefs</li>
+      <li class-active=${() => step() === 2} class-done=${() => step() > 2}>Review</li>
+      <li class-active=${() => step() === 3}>Done</li>
+    </ol>
+
+    <section class="panel invite-panel">
+      #case step()
+        #when 0
+          <div class="invite-stack">
+            <p class="invite-lead">Who’s coming?</p>
+            <Field :label=${'Name'} :field=${form.fields.name} :type=${'text'} :placeholder=${'Ada Lovelace'} />
+            <Field :label=${'Email'} :field=${form.fields.email} :type=${'email'} :placeholder=${'ada@jacare.dev'} />
+            <Field :label=${'Guests'} :field=${form.fields.guests} :type=${'number'} :placeholder=${'2'} />
+            <p class="invite-meta">valid: ${form.valid() ? 'yes' : 'no'} · dirty: ${form.dirty() ? 'yes' : 'no'}</p>
+            <div class="invite-actions">
+              <button type="button" class="btn btn-primary" on-click=${goNext}>Continue</button>
+            </div>
+          </div>
+        #when 1
+          <div class="invite-stack">
+            <p class="invite-lead">Preferences for the evening</p>
+            <label class="check-row">
+              <input type="checkbox" bind-checked=${vegetarian} />
+              <span>Vegetarian meal</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" bind-checked=${reminder} />
+              <span>Send a reminder the day before</span>
+            </label>
+            <label class="field">
+              <span class="field-label">Notes</span>
+              <input class="input" type="text" placeholder="Allergies, arrival time…" bind-value=${notes} />
+            </label>
+            <div class="invite-actions">
+              <button type="button" class="btn btn-ghost" on-click=${goBack}>Back</button>
+              <button type="button" class="btn btn-primary" on-click=${goNext}>Continue</button>
+            </div>
+          </div>
+        #when 2
+          <div class="invite-stack">
+            <p class="invite-lead">Double-check before sending</p>
+            <dl class="invite-summary">
+              <div><dt>Name</dt><dd>${form.fields.name}</dd></div>
+              <div><dt>Email</dt><dd>${form.fields.email}</dd></div>
+              <div><dt>Guests</dt><dd>${form.fields.guests}</dd></div>
+              <div><dt>Meal</dt><dd>${vegetarian() ? 'Vegetarian' : 'Standard'}</dd></div>
+              <div><dt>Reminder</dt><dd>${reminder() ? 'Yes' : 'No'}</dd></div>
+              #if notes().trim()
+                <div><dt>Notes</dt><dd>${notes}</dd></div>
+              #end
+            </dl>
+            <div class="invite-actions">
+              <button type="button" class="btn btn-ghost" on-click=${goBack}>Back</button>
+              <button type="button" class="btn btn-primary" on-click=${confirmInvite}>Send invite</button>
+            </div>
+          </div>
+        #when 3
+          <div class="invite-stack invite-done">
+            <p class="invite-lead">You’re on the list</p>
+            #if submitted()
+              <p class="page-lead">We saved a seat for <strong>${doneName}</strong> (${doneEmail}) with ${doneGuests} guest(s).</p>
+            #end
+            <div class="invite-actions">
+              <button type="button" class="btn btn-primary" on-click=${startOver}>New invite</button>
+            </div>
+          </div>
+      #end
+    </section>
+  </section>
+</view>
