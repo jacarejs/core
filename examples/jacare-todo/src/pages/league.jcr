@@ -1,0 +1,343 @@
+import { batch, createLifecycle, derive, pulse } from '@jacare/core'
+import { showCode } from '../code-viewer.js'
+import { leagueCode } from '../snippets/pages.js'
+
+const TEAMS = [
+  { id: 'harbor', name: 'North Harbor', abbr: 'NH', c1: '#0b3d5c', c2: '#e8b923' },
+  { id: 'redcliff', name: 'Redcliff United', abbr: 'RU', c1: '#b91c1c', c2: '#f8fafc' },
+  { id: 'greenfield', name: 'Greenfield Athletic', abbr: 'GA', c1: '#166534', c2: '#a3e635' },
+  { id: 'ironbridge', name: 'Ironbridge City', abbr: 'IC', c1: '#334155', c2: '#38bdf8' },
+  { id: 'sunset', name: 'Sunset Rovers', abbr: 'SR', c1: '#c2410c', c2: '#fdba74' },
+  { id: 'crownhill', name: 'Crownhill Town', abbr: 'CT', c1: '#5b21b6', c2: '#fde68a' },
+]
+
+const TEAM_BY_ID = Object.fromEntries(TEAMS.map((t) => [t.id, t]))
+
+function buildFixtures() {
+  const ids = TEAMS.map((t) => t.id)
+  const rounds = []
+  const n = ids.length
+  const rotation = ids.slice(1)
+  for (let round = 0; round < n - 1; round++) {
+    const order = [ids[0], ...rotation]
+    for (let i = 0; i < n / 2; i++) {
+      const home = order[i]
+      const away = order[n - 1 - i]
+      rounds.push({
+        id: `r${round + 1}-${home}-${away}`,
+        matchday: round + 1,
+        home,
+        away,
+      })
+    }
+    rotation.unshift(rotation.pop())
+  }
+  return rounds
+}
+
+function rollGoals(strength) {
+  const roll = Math.random() * (2.2 + strength)
+  if (roll < 0.55) return 0
+  if (roll < 1.25) return 1
+  if (roll < 1.9) return 2
+  if (roll < 2.4) return 3
+  return 4
+}
+
+const fixtures = pulse(buildFixtures(), { name: 'league.fixtures', file: 'league.jcr', line: 48 })
+const scores = pulse({}, { name: 'league.scores', file: 'league.jcr', line: 49 })
+const matchday = pulse(1, { name: 'league.matchday', file: 'league.jcr', line: 50 })
+const flash = pulse(null, { name: 'league.flash', file: 'league.jcr', line: 51 })
+
+const maxDay = TEAMS.length - 1
+
+const dayFixtures = derive(() => fixtures().filter((m) => m.matchday === matchday()), {
+  name: 'league.dayFixtures',
+  file: 'league.jcr',
+  line: 56,
+})
+
+const dayDone = derive(() => dayFixtures().every((m) => scores()[m.id]), {
+  name: 'league.dayDone',
+  file: 'league.jcr',
+  line: 61,
+})
+
+const seasonDone = derive(() => fixtures().every((m) => scores()[m.id]), {
+  name: 'league.seasonDone',
+  file: 'league.jcr',
+  line: 66,
+})
+
+const playedCount = derive(() => Object.keys(scores()).length, {
+  name: 'league.playedCount',
+  file: 'league.jcr',
+  line: 71,
+})
+
+const standings = derive(() => {
+  const table = TEAMS.map((team) => ({
+    ...team,
+    played: 0,
+    won: 0,
+    drawn: 0,
+    lost: 0,
+    gf: 0,
+    ga: 0,
+    pts: 0,
+  }))
+  const byId = Object.fromEntries(table.map((row) => [row.id, row]))
+  const book = scores()
+
+  for (const match of fixtures()) {
+    const result = book[match.id]
+    if (!result) continue
+    const home = byId[match.home]
+    const away = byId[match.away]
+    home.played += 1
+    away.played += 1
+    home.gf += result.hg
+    home.ga += result.ag
+    away.gf += result.ag
+    away.ga += result.hg
+    if (result.hg > result.ag) {
+      home.won += 1
+      home.pts += 3
+      away.lost += 1
+    } else if (result.hg < result.ag) {
+      away.won += 1
+      away.pts += 3
+      home.lost += 1
+    } else {
+      home.drawn += 1
+      away.drawn += 1
+      home.pts += 1
+      away.pts += 1
+    }
+  }
+
+  return table
+    .map((row) => ({ ...row, gd: row.gf - row.ga }))
+    .sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name))
+    .map((row, index) => ({ ...row, rank: index + 1 }))
+}, { name: 'league.standings', file: 'league.jcr', line: 78 })
+
+const leader = derive(() => standings()[0] ?? null, {
+  name: 'league.leader',
+  file: 'league.jcr',
+  line: 122,
+})
+
+const leaderAbbr = derive(() => leader()?.abbr ?? '—')
+const leaderName = derive(() => leader()?.name ?? '')
+const leaderPts = derive(() => leader()?.pts ?? 0)
+const simulateLabel = derive(() => (dayDone() ? 'Matchday done' : 'Simulate matchday'))
+const flashLine = derive(() => {
+  const play = flash()
+  if (!play) return ''
+  return `Latest: ${play.home} ${play.hg}–${play.ag} ${play.away}`
+})
+const seasonLine = derive(() => {
+  if (!seasonDone()) return ''
+  return `Season complete — ${leaderName()} take the title on ${leaderPts()} points.`
+})
+const canPrev = derive(() => matchday() > 1)
+const canNext = derive(() => dayDone() && matchday() < maxDay)
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    document.title = 'Jacaré · League'
+  },
+})
+
+function teamOf(id) {
+  return TEAM_BY_ID[id]
+}
+
+function scoreOf(matchId) {
+  return scores()[matchId] ?? null
+}
+
+function scoreLine(matchId) {
+  const result = scores()[matchId]
+  if (!result) return 'vs'
+  return `${result.hg} – ${result.ag}`
+}
+
+function simulateOne(match) {
+  if (scores()[match.id]) return
+  const homeBoost = Math.random() * 0.45
+  const hg = rollGoals(0.35 + homeBoost)
+  const ag = rollGoals(0.15)
+  scores.update((book) => ({ ...book, [match.id]: { hg, ag } }))
+  flash.set({
+    id: match.id,
+    home: teamOf(match.home).name,
+    away: teamOf(match.away).name,
+    hg,
+    ag,
+  })
+}
+
+function simulateMatchday() {
+  if (dayDone()) return
+  batch(() => {
+    for (const match of dayFixtures()) {
+      if (!scores()[match.id]) simulateOne(match)
+    }
+  })
+}
+
+function nextMatchday() {
+  if (!canNext()) return
+  matchday.update((d) => d + 1)
+  flash.set(null)
+}
+
+function prevMatchday() {
+  if (!canPrev()) return
+  matchday.update((d) => d - 1)
+  flash.set(null)
+}
+
+function resetSeason() {
+  batch(() => {
+    scores.set({})
+    matchday.set(1)
+    flash.set(null)
+  })
+}
+
+function openCode() {
+  showCode('League', [{ name: 'pages/league.jcr', code: leagueCode }])
+}
+
+export <view>
+  <section class="page page-league">
+    <header class="page-hero">
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Simulator</p>
+          <h1 class="page-title">League</h1>
+          <p class="page-lead">Play out a six-club season — simulate matchdays, watch crests climb the table, and reset for another campaign.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </header>
+
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-value">${matchday}</span>
+        <span class="metric-label">matchday</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value">${playedCount}</span>
+        <span class="metric-label">played</span>
+      </div>
+      <div class="metric">
+        <span class="metric-value">${leaderAbbr}</span>
+        <span class="metric-label">leader</span>
+      </div>
+    </div>
+
+    <div class="league-layout">
+      <section class="panel league-fixtures">
+        <div class="league-toolbar">
+          <div class="league-day-nav">
+            <button type="button" class="btn btn-ghost btn-tiny" on-click=${prevMatchday} disabled=${() => !canPrev()}>Prev</button>
+            <h2 class="aside-title">Matchday ${matchday}</h2>
+            <button type="button" class="btn btn-ghost btn-tiny" on-click=${nextMatchday} disabled=${() => !canNext()}>Next</button>
+          </div>
+          <div class="league-actions">
+            <button type="button" class="btn btn-primary" on-click=${simulateMatchday} disabled=${dayDone}>${simulateLabel}</button>
+            <button type="button" class="btn btn-ghost" on-click=${resetSeason}>Reset season</button>
+          </div>
+        </div>
+
+        #if flash()
+          <p class="league-flash">${flashLine}</p>
+        #end
+
+        #if seasonDone()
+          <p class="league-banner">${seasonLine}</p>
+        #end
+
+        <ul class="fixture-list">
+          #for dayFixtures() as match (match.id)
+            <li class="fixture-row" class-played=${() => !!scoreOf(match.id)}>
+              <div class="fixture-side home">
+                <span
+                  class="crest"
+                  style---c1=${() => teamOf(match.home).c1}
+                  style---c2=${() => teamOf(match.home).c2}
+                  aria-hidden="true"
+                >${() => teamOf(match.home).abbr}</span>
+                <span class="fixture-name">${() => teamOf(match.home).name}</span>
+              </div>
+              <div class="fixture-score">
+                #if scoreOf(match.id)
+                  <span class="score-pill">${() => scoreLine(match.id)}</span>
+                #else
+                  <button type="button" class="btn btn-tiny" on-click=${() => simulateOne(match)}>Play</button>
+                #end
+              </div>
+              <div class="fixture-side away">
+                <span class="fixture-name">${() => teamOf(match.away).name}</span>
+                <span
+                  class="crest"
+                  style---c1=${() => teamOf(match.away).c1}
+                  style---c2=${() => teamOf(match.away).c2}
+                  aria-hidden="true"
+                >${() => teamOf(match.away).abbr}</span>
+              </div>
+            </li>
+          #end
+        </ul>
+      </section>
+
+      <aside class="panel league-table-panel">
+        <h2 class="aside-title">Table</h2>
+        <div class="table-scroll">
+          <table class="league-table">
+            <thead>
+              <tr>
+                <th class="col-pos">#</th>
+                <th class="col-club">Club</th>
+                <th>P</th>
+                <th>W</th>
+                <th>D</th>
+                <th>L</th>
+                <th>GD</th>
+                <th>Pts</th>
+              </tr>
+            </thead>
+            <tbody>
+              #for standings() as row (row.id)
+                <tr class-top=${() => row.rank === 1}>
+                  <td class="col-pos">${row.rank}</td>
+                  <td class="col-club">
+                    <span class="club-cell">
+                      <span
+                        class="crest crest-sm"
+                        style---c1=${() => row.c1}
+                        style---c2=${() => row.c2}
+                        aria-hidden="true"
+                      >${row.abbr}</span>
+                      <span class="club-name">${row.name}</span>
+                    </span>
+                  </td>
+                  <td>${row.played}</td>
+                  <td>${row.won}</td>
+                  <td>${row.drawn}</td>
+                  <td>${row.lost}</td>
+                  <td>${row.gd}</td>
+                  <td class="col-pts">${row.pts}</td>
+                </tr>
+              #end
+            </tbody>
+          </table>
+        </div>
+      </aside>
+    </div>
+  </section>
+</view>

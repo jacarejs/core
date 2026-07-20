@@ -25,6 +25,7 @@ export <view>
           <a class="nav-link" jacare-go="/focus" href=${appHref('/focus')}>Focus</a>
           <a class="nav-link" jacare-go="/invite" href=${appHref('/invite')}>Invite</a>
           <a class="nav-link" jacare-go="/split" href=${appHref('/split')}>Split</a>
+          <a class="nav-link" jacare-go="/league" href=${appHref('/league')}>League</a>
         </nav>
       </header>
 

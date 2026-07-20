@@ -14,6 +14,7 @@ export const nav = createNav({
     '/focus': lazy(() => import('./pages/focus.jcr')),
     '/invite': lazy(() => import('./pages/invite.jcr')),
     '/split': lazy(() => import('./pages/split.jcr')),
+    '/league': lazy(() => import('./pages/league.jcr')),
   },
   missing: NotFound,
 })
@@ -23,3 +24,4 @@ nav.warm('/match')
 nav.warm('/focus')
 nav.warm('/invite')
 nav.warm('/split')
+nav.warm('/league')

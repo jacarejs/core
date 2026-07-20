@@ -1,6 +1,6 @@
 # Jacaré Todo suite
 
-A focused demo app with six surfaces showing Jacaré’s fine-grained reactivity:
+A focused demo app with seven surfaces showing Jacaré’s fine-grained reactivity:
 
 | Route | Page |
 |-------|------|
@@ -10,6 +10,7 @@ A focused demo app with six surfaces showing Jacaré’s fine-grained reactivity
 | `/focus` | **Focus** — Pomodoro with `effect` + `#case` + `style---pct` |
 | `/invite` | **Invite** — multi-step RSVP with `createForm` |
 | `/split` | **Split** — tip calculator driven by `derive` |
+| `/league` | **League** — football simulator with crests and standings |
 
 Tasks and Kanban share one store (`src/store.js`), so moving a card updates the list and vice versa.
 
