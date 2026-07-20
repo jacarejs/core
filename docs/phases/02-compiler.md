@@ -56,6 +56,7 @@ export default view`
 | `on-click=${handler}` / `@click=${handler}` | `addEventListener` + `removeEventListener` |
 | `#if` / `#elif` / `#else` / `#end` | `branch()` |
 | `#case` / `#when` / `#else` / `#end` | `branch()` + `Object.is` |
+| `#if` / `#for` / `#case` inside `export <style>` | `bindStyleSheet` + runtime `scopeCss` |
 | `#for items() as item (id)` / `#end` | `reconcileKeyedList()` |
 | `<Child :prop=${value} />` | Component `mount()` call |
 

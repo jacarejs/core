@@ -3,7 +3,15 @@ import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import ScopedA from '../components/ScopedA.jcr'
 import ScopedB from '../components/ScopedB.jcr'
-import { scopedCode, globalCode, spotlightCode, hueChipCode } from '../snippets/css.js'
+import {
+  scopedCode,
+  globalCode,
+  spotlightCode,
+  hueChipCode,
+  styleIfCode,
+  styleCaseCode,
+  styleForCode,
+} from '../snippets/css.js'
 
 const outlineOn = pulse(true)
 
@@ -19,15 +27,44 @@ function toggleSpotlight() {
 
 const accentHue = pulse(140)
 
+const theme = pulse('day')
+const themes = ['day', 'dusk', 'night']
+
+function setTheme(next) {
+  theme.set(next)
+}
+
+const tone = pulse('ok')
+const tones = ['ok', 'warn', 'danger']
+
+function setTone(next) {
+  tone.set(next)
+}
+
+const accents = pulse([
+  { id: 'leaf', color: '#8fd12a' },
+  { id: 'amber', color: '#f59e0b' },
+  { id: 'rose', color: '#f43f5e' },
+])
+
+function shuffleAccents() {
+  accents.update((list) => {
+    const next = list.slice()
+    const last = next.pop()
+    if (last) next.unshift(last)
+    return next
+  })
+}
+
 export <view>
   <section class="page">
     <header class="page-hero">
       <p class="page-kicker">API §10</p>
       <h1 class="page-title">Scoped CSS</h1>
-      <p class="page-lead">Every style block is scoped to its own file with a data-jacare-s attribute — the same class name in two files never collides.</p>
+      <p class="page-lead">Style blocks are scoped per file — and can use the same if / for / case control flow as the view to rebuild CSS from pulses.</p>
     </header>
 
-    <Tip :text=${'Use :global(.selector) inside a style block to opt a rule out of scoping — handy for shared utility classes like the outline demo below.'} />
+    <Tip :text=${'Put control-flow directives on their own lines inside export style. The compiler rebuilds and re-scopes the sheet when a pulse changes.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'Same class name, two components'} :lead=${'ScopedA and ScopedB both use class="box" — their styles never leak into each other.'} :code=${scopedCode}>
@@ -62,6 +99,42 @@ export <view>
           <input class="input" type="range" min="0" max="360" bind-value=${accentHue} />
         </div>
       </Demo>
+
+      <Demo :title=${'if inside style'} :lead=${'Theme switches CSS properties without remounting the card — only the stylesheet updates.'} :code=${styleIfCode}>
+        <div class="stack">
+          <div class="row">
+            #for themes as t (t)
+              <button type="button" class="btn btn-outline" class-active=${() => theme() === t} on-click=${() => setTheme(t)}>${t}</button>
+            #end
+          </div>
+          <div class="theme-card">
+            <strong>Theme card</strong>
+            <p>Background and text come from style if branches.</p>
+          </div>
+        </div>
+      </Demo>
+
+      <Demo :title=${'case inside style'} :lead=${'Match a tone pulse to whole badge rulesets with when arms.'} :code=${styleCaseCode}>
+        <div class="stack">
+          <div class="row">
+            #for tones as t (t)
+              <button type="button" class="btn btn-outline" class-active=${() => tone() === t} on-click=${() => setTone(t)}>${t}</button>
+            #end
+          </div>
+          <span class="tone-badge">Tone badge</span>
+        </div>
+      </Demo>
+
+      <Demo :title=${'for inside style'} :lead=${'Generate chip selectors from a pulse list — ids and colors interpolate into CSS.'} :code=${styleForCode}>
+        <div class="stack">
+          <div class="row">
+            #for accents() as accent (accent.id)
+              <span class=${'chip-' + accent.id}>${accent.id}</span>
+            #end
+          </div>
+          <button type="button" class="btn btn-outline" on-click=${shuffleAccents}>Rotate accents</button>
+        </div>
+      </Demo>
     </div>
   </section>
 </view>
@@ -86,4 +159,86 @@ export <style>
   border: 1px solid var(--line);
   background: hsl(var(--hue) 70% 55%);
 }
+
+.theme-card {
+  padding: 1rem 1.1rem;
+  border-radius: 0.9rem;
+  border: 1px solid transparent;
+
+  #if theme() === 'night'
+    background: #0b1a14;
+    color: #e8f8dc;
+    border-color: #1f8f4e;
+  #elif theme() === 'dusk'
+    background: #ffe8c7;
+    color: #7a3e05;
+    border-color: #f0b35a;
+  #else
+    background: #f8fffb;
+    color: #0b1a14;
+    border-color: color-mix(in srgb, var(--leaf) 25%, white);
+  #end
+}
+
+.theme-card strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-display);
+}
+
+.theme-card p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+#case tone()
+  #when 'ok'
+.tone-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #166534;
+}
+  #when 'warn'
+.tone-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 700;
+  background: #fef3c7;
+  color: #92400e;
+}
+  #when 'danger'
+.tone-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 700;
+  background: #fee2e2;
+  color: #991b1b;
+}
+  #else
+.tone-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 700;
+  background: #f3f4f6;
+  color: #374151;
+}
+#end
+
+#for accents() as accent (accent.id)
+.chip-${accent.id} {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid ${accent.color};
+  background: color-mix(in srgb, ${accent.color} 22%, white);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+#end
 </style>

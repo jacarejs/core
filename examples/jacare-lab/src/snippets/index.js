@@ -62,7 +62,7 @@ export {
   optionalLeadCode,
 } from './components.js'
 
-export { scopedCode, globalCode, spotlightCode, hueChipCode } from './css.js'
+export { scopedCode, globalCode, spotlightCode, hueChipCode, styleIfCode, styleCaseCode, styleForCode } from './css.js'
 
 export {
   setupCode,
@@ -143,7 +143,7 @@ import {
   nestedCode as componentsNestedCode2,
   optionalLeadCode,
 } from './components.js'
-import { scopedCode, globalCode, spotlightCode, hueChipCode } from './css.js'
+import { scopedCode, globalCode, spotlightCode, hueChipCode, styleIfCode, styleCaseCode, styleForCode } from './css.js'
 import {
   setupCode,
   routeCode,
@@ -242,6 +242,9 @@ export const SNIPPET_CATALOG = [
   { id: 'css.global', title: 'Global opt-out', lesson: '/css', code: globalCode },
   { id: 'css.spotlight', title: 'Toggle a locally scoped class', lesson: '/css', code: spotlightCode },
   { id: 'css.hue-chip', title: 'Scoped style, reactive CSS variable', lesson: '/css', code: hueChipCode },
+  { id: 'css.style-if', title: 'if inside style', lesson: '/css', code: styleIfCode },
+  { id: 'css.style-case', title: 'case inside style', lesson: '/css', code: styleCaseCode },
+  { id: 'css.style-for', title: 'for inside style', lesson: '/css', code: styleForCode },
 
   { id: 'navigation.setup', title: 'createNav setup', lesson: '/nav', code: setupCode },
   { id: 'navigation.route', title: 'Live route reads', lesson: '/nav', code: routeCode },

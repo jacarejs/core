@@ -339,6 +339,35 @@ The compiler scopes selectors with `[data-jacare-s]` on the mount target and inj
 
 Use `:global(.shared)` inside `style` to opt out of scoping for a selector.
 
+### Reactive style directives
+
+`#if`, `#elif`, `#else`, `#case`, `#when`, `#for`, and `${expr}` work inside `export <style>`. Directives must start on their own line (optional indent).
+
+```javascript
+const theme = signal('day')
+const accents = signal([
+  { id: 'leaf', color: '#8fd12a' },
+])
+
+export <style>
+.card {
+  #if theme() === 'night'
+    background: #0b1a14;
+  #else
+    background: #f8fffb;
+  #end
+}
+
+#for accents() as accent (accent.id)
+.chip-${accent.id} {
+  border-color: ${accent.color};
+}
+#end
+</style>
+```
+
+Static style sheets still use a shared scoped inject. Reactive sheets use a per-mount stylesheet so instances do not clash.
+
 ## Meta-framework
 
 `@jacare/meta` adds file-based routing via a Vite plugin:

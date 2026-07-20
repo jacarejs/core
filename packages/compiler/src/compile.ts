@@ -6,6 +6,7 @@ import type { CodegenMapping } from './codegen-shared.js'
 import { parseModule } from './parse-module.js'
 import { parseTemplate } from './parse-template.js'
 import { hasContractSurface } from './parse-contract.js'
+import { isReactiveStyle, parseStyle } from './parse-style.js'
 import { scopeCss, scopeIdFromFilename } from './scope-css.js'
 import type { CompileOptions, CompileResult } from './types.js'
 
@@ -17,8 +18,13 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     baseLine: parsed.viewStartLine,
   })
   const scopeId = options.scopeId ?? (filename ? scopeIdFromFilename(filename) : undefined)
+  const styleAst =
+    parsed.styleCss != null
+      ? parseStyle(parsed.styleCss, filename ? { filename } : {})
+      : null
+  const reactiveStyle = styleAst != null && isReactiveStyle(styleAst)
   const scopedStyle =
-    parsed.styleCss && scopeId ? scopeCss(parsed.styleCss, scopeId) : undefined
+    parsed.styleCss && scopeId && !reactiveStyle ? scopeCss(parsed.styleCss, scopeId) : undefined
   const contract =
     parsed.contract && hasContractSurface(parsed.contract) ? parsed.contract : undefined
   const generated = generate(ast, parsed.code, {
@@ -27,6 +33,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     mode: options.mode ?? 'full',
     ...(scopeId ? { scopeId } : {}),
     ...(scopedStyle ? { scopedStyle } : {}),
+    ...(reactiveStyle && styleAst ? { styleAst } : {}),
     ...(options.cpw ? { cpw: options.cpw } : {}),
     ...(contract ? { contract } : {}),
   })

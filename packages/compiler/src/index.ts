@@ -4,6 +4,14 @@ export { parseModule, findViewTemplates, hasViewSource } from './parse-module.js
 export { flattenViewLiteral } from './flatten-literal.js'
 export { flattenViewBlock, findViewBlocks } from './flatten-view-block.js'
 export { parseTemplate } from './parse-template.js'
+export { parseStyle, isReactiveStyle } from './parse-style.js'
+export type {
+  StyleAST,
+  StyleNode,
+  StyleIfNode,
+  StyleCaseNode,
+  StyleForNode,
+} from './parse-style.js'
 export { generate, detectProps, resolveMountProps } from './codegen.js'
 export {
   parseContractBody,

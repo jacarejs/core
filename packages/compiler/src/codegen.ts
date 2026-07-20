@@ -6,6 +6,7 @@ import {
   contractPropNames,
   type TemplateContract,
 } from './parse-contract.js'
+import type { StyleAST } from './parse-style.js'
 
 const RUNTIME_IMPORT_ORDER = [
   'effect',
@@ -22,6 +23,8 @@ const RUNTIME_IMPORT_ORDER = [
   'resumeBindings',
   'escapeHtml',
   'ensureScopedStyle',
+  'bindStyleSheet',
+  'scopeCss',
   'mountSlot',
 ] as const
 
@@ -86,6 +89,7 @@ export function generate(
     mode?: 'client' | 'server' | 'full'
     scopeId?: string
     scopedStyle?: string
+    styleAst?: StyleAST
     cpw?: boolean
     contract?: TemplateContract
   } = {},
@@ -109,7 +113,17 @@ export function generate(
   let mappings: CodegenMapping[] = []
 
   if (mode === 'server' || mode === 'full') {
-    lines.push(...emitSSR(ast, props, runtimeImports, signals, options.scopeId, options.scopedStyle))
+    lines.push(
+      ...emitSSR(
+        ast,
+        props,
+        runtimeImports,
+        signals,
+        options.scopeId,
+        options.scopedStyle,
+        options.styleAst,
+      ),
+    )
     lines.push('')
   }
 
@@ -123,7 +137,15 @@ export function generate(
       signals,
       options.cpw ?? false,
     )
-    emitClient(ast, props, clientCtx, options.scopeId, options.scopedStyle, options.contract)
+    emitClient(
+      ast,
+      props,
+      clientCtx,
+      options.scopeId,
+      options.scopedStyle,
+      options.contract,
+      options.styleAst,
+    )
     lines.push(...clientCtx.join())
     mappings = clientCtx.getMappings()
     lines.push('')

@@ -15,6 +15,8 @@ import {
 } from './codegen-cpw.js'
 import { append, CodegenContext, resolveSignalExpr, type EmitTarget } from './codegen-shared.js'
 import type { TemplateContract } from './parse-contract.js'
+import type { StyleAST } from './parse-style.js'
+import { emitStyleBuild } from './codegen-style.js'
 
 const SIGNAL_REF_RE = /^([A-Za-z_$][\w$]*)$/
 
@@ -25,6 +27,7 @@ export function emitClient(
   scopeId?: string,
   scopedStyle?: string,
   contract?: TemplateContract,
+  styleAst?: StyleAST,
 ): void {
   const needsPropsObject =
     props.length > 0 || (contract != null && Object.keys(contract.emits).length > 0)
@@ -56,15 +59,33 @@ export function emitClient(
     ctx.indent()
   }
 
-  if (scopeId) {
-    ctx.line(`target.setAttribute('data-jacare-s', ${JSON.stringify(scopeId)})`)
-    if (scopedStyle) {
-      ctx.useRuntime('ensureScopedStyle')
-      ctx.line(`ensureScopedStyle(${JSON.stringify(scopeId)}, ${JSON.stringify(scopedStyle)})`)
+  if (scopeId || styleAst) {
+    if (styleAst) {
+      ctx.useRuntime('bindStyleSheet')
+      ctx.line('const _cleanups = []')
+      ctx.line(
+        `${ctx.cleanupVar}.push(bindStyleSheet(target, ${JSON.stringify(scopeId ?? 'local')}, () => {`,
+      )
+      ctx.indent()
+      ctx.line('let _css = ""')
+      emitStyleBuild(ctx, styleAst)
+      ctx.line('return _css')
+      ctx.dedent()
+      ctx.line('}))')
+    } else if (scopeId) {
+      ctx.line(`target.setAttribute('data-jacare-s', ${JSON.stringify(scopeId)})`)
+      if (scopedStyle) {
+        ctx.useRuntime('ensureScopedStyle')
+        ctx.line(`ensureScopedStyle(${JSON.stringify(scopeId)}, ${JSON.stringify(scopedStyle)})`)
+      }
+      ctx.line('const _cleanups = []')
+    } else {
+      ctx.line('const _cleanups = []')
     }
+  } else {
+    ctx.line('const _cleanups = []')
   }
 
-  ctx.line('const _cleanups = []')
   ctx.line('const _frag = document.createDocumentFragment()')
 
   for (const child of ast.children) {

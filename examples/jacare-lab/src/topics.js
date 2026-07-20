@@ -57,7 +57,7 @@ export const LESSONS = [
   {
     path: '/css',
     title: 'Scoped CSS',
-    blurb: 'export <style>, isolation, :global',
+    blurb: 'export <style>, isolation, :global, reactive if/for/case',
   },
   {
     path: '/nav',

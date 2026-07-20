@@ -73,3 +73,88 @@ export const hueChipCode = viewSnippet(
   background: hsl(var(--hue) 70% 55%);
 }`,
 )
+
+export const styleIfCode = viewSnippet(
+  `const theme = pulse('day')
+const themes = ['day', 'dusk', 'night']
+
+function setTheme(next) {
+  theme.set(next)
+}`,
+  `  <div class="stack">
+    <div class="row">
+      #for themes as t (t)
+        <button class="btn btn-outline" class-active=\${() => theme() === t} on-click=\${() => setTheme(t)}>\${t}</button>
+      #end
+    </div>
+    <div class="theme-card">
+      <strong>Theme card</strong>
+      <p>Background and text come from style if branches.</p>
+    </div>
+  </div>`,
+  `.theme-card {
+  padding: 1rem 1.1rem;
+  border-radius: 0.9rem;
+  border: 1px solid transparent;
+
+  #if theme() === 'night'
+    background: #0b1a14;
+    color: #e8f8dc;
+    border-color: #1f8f4e;
+  #elif theme() === 'dusk'
+    background: #ffe8c7;
+    color: #7a3e05;
+    border-color: #f0b35a;
+  #else
+    background: #f8fffb;
+    color: #0b1a14;
+    border-color: color-mix(in srgb, var(--leaf) 25%, white);
+  #end
+}`,
+)
+
+export const styleCaseCode = viewSnippet(
+  `const tone = pulse('ok')
+const tones = ['ok', 'warn', 'danger']
+
+function setTone(next) {
+  tone.set(next)
+}`,
+  `  <div class="stack">
+    <div class="row">
+      #for tones as t (t)
+        <button class="btn btn-outline" class-active=\${() => tone() === t} on-click=\${() => setTone(t)}>\${t}</button>
+      #end
+    </div>
+    <span class="tone-badge">Tone badge</span>
+  </div>`,
+  `#case tone()
+  #when 'ok'
+.tone-badge { background: #dcfce7; color: #166534; }
+  #when 'warn'
+.tone-badge { background: #fef3c7; color: #92400e; }
+  #when 'danger'
+.tone-badge { background: #fee2e2; color: #991b1b; }
+  #else
+.tone-badge { background: #f3f4f6; color: #374151; }
+#end`,
+)
+
+export const styleForCode = viewSnippet(
+  `const accents = pulse([
+  { id: 'leaf', color: '#8fd12a' },
+  { id: 'amber', color: '#f59e0b' },
+  { id: 'rose', color: '#f43f5e' },
+])`,
+  `  <div class="row">
+    #for accents() as accent (accent.id)
+      <span class=\${'chip-' + accent.id}>\${accent.id}</span>
+    #end
+  </div>`,
+  `#for accents() as accent (accent.id)
+.chip-\${accent.id} {
+  border: 1px solid \${accent.color};
+  background: color-mix(in srgb, \${accent.color} 22%, white);
+}
+#end`,
+)

@@ -7,6 +7,8 @@ import type {
   TextPart,
 } from './types.js'
 import { CodegenContext, escapeHtml, resolveSignalExpr } from './codegen-shared.js'
+import type { StyleAST } from './parse-style.js'
+import { emitStyleBuild } from './codegen-style.js'
 
 export function emitSSR(
   ast: TemplateAST,
@@ -15,6 +17,7 @@ export function emitSSR(
   signals?: ReadonlySet<string>,
   scopeId?: string,
   scopedStyle?: string,
+  styleAst?: StyleAST,
 ): string[] {
   const ctx = new CodegenContext(0, 1, runtimeImports, undefined, signals)
 
@@ -33,7 +36,14 @@ export function emitSSR(
   ctx.line('let _html = ""')
   ctx.line('const _bindings = []')
 
-  if (scopedStyle && scopeId) {
+  if (styleAst && scopeId) {
+    ctx.useRuntime('scopeCss')
+    ctx.line('let _css = ""')
+    emitStyleBuild(ctx, styleAst)
+    ctx.line(
+      `_html += '<style data-jacare-s="${scopeId}">' + scopeCss(_css, ${JSON.stringify(scopeId)}) + '</style>'`,
+    )
+  } else if (scopedStyle && scopeId) {
     ctx.line(`_html += '<style data-jacare-s="${scopeId}">' + ${JSON.stringify(scopedStyle)} + '</style>'`)
   }
 

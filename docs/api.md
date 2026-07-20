@@ -1125,6 +1125,62 @@ Opt out for shared selectors:
 :global(.shared) { color: red; }
 ```
 
+### Reactive control flow in `export <style>`
+
+The same `#if` / `#for` / `#case` directives work inside the style block. When any pulse they read changes, Jacaré rebuilds the CSS string, re-scopes it, and updates a per-mount `<style>` tag.
+
+```javascript
+const theme = signal('day')
+
+export <view>
+  <div class="card">Hello</div>
+</view>
+
+export <style>
+.card {
+  padding: 1rem;
+
+  #if theme() === 'night'
+    background: #0b1a14;
+    color: #e8f8dc;
+  #else
+    background: #f8fffb;
+    color: #0b1a14;
+  #end
+}
+</style>
+```
+
+`#case` matches one value (same `Object.is` semantics as in the view):
+
+```css
+#case tone()
+  #when 'ok'
+.badge { background: #dcfce7; }
+  #when 'warn'
+.badge { background: #fef3c7; }
+  #else
+.badge { background: #f3f4f6; }
+#end
+```
+
+`#for` + `${}` generate rules from lists (static arrays or pulses):
+
+```css
+#for accents() as accent (accent.id)
+.chip-${accent.id} {
+  border-color: ${accent.color};
+}
+#end
+```
+
+| Mode | Runtime |
+|------|---------|
+| Static style (no directives / `${}`) | `ensureScopedStyle` — one shared sheet per file |
+| Reactive style | `bindStyleSheet` — per-mount sheet + `effect` |
+
+Lab demos: `/css` (if / case / for panels).
+
 Preprocessor attribute (parsed, not yet compiled):
 
 ```javascript
@@ -1686,6 +1742,8 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | `bindModel` | [§5](#5-dom-bindings) | Two-way input |
 | `bindClass` / `bindStyleVar` | [§5](#5-dom-bindings) | Class / CSS var |
 | `branch` / `showIf` | [§7 `#if`](#7-control-flow--if) · [§7b `#case`](#7b-control-flow--case) | Conditionals / match |
+| `ensureScopedStyle` | [§10](#10-scoped-css) | Static scoped CSS inject |
+| `bindStyleSheet` / `scopeCss` | [§10](#10-scoped-css) | Reactive style (`#if` / `#for` / `#case`) |
 | `reconcileKeyedList` | [§8 `#for`](#8-control-flow--for) | Keyed lists |
 | `mountSlot` | [§9](#9-components-and-slots) | Slot projection |
 | Event `on-*` / `@*` | [§6](#6-events-on---) | DOM listeners |
