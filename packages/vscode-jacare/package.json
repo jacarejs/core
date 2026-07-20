@@ -2,7 +2,7 @@
   "name": "jacare",
   "displayName": "Jacaré",
   "description": "Syntax highlighting, snippets, and icons for Jacaré .jcr files",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "publisher": "heberalmeida",
   "author": {
     "name": "Heber Almeida"
