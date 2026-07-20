@@ -160,8 +160,8 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'registerScope for DevTools'} :lead=${'Registered values show up live in the Scope panel while @jacare/devtools is connected.'} :code=${scopeCode}>
-        <p class="muted">Open the Scope panel (bottom-right, dev only) and look for "Lifecycle ticks" — it mirrors the timer in the orbit center.</p>
+      <Demo :title=${'registerScope for DevTools'} :lead=${'Registered values show up live in the Scope panel (bottom-left by default) while @jacare/devtools is connected.'} :code=${scopeCode}>
+        <p class="muted">Open the Scope panel and look for "Lifecycle ticks" — it mirrors the timer in the orbit center. Use ⚙ on the Pulse Graph to move panels or Clear Scope.</p>
       </Demo>
 
       <Demo :title=${'onActivate on every visit'} :lead=${'Navigate away to another lesson and back — activations increments again while the onMount timer keeps counting if the screen stayed cached.'} :code=${activationCode}>

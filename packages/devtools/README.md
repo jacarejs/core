@@ -60,12 +60,21 @@ Two floating panels appear in the bottom-right corner of the page (dev only):
 
 | Action | How |
 |--------|-----|
+| Config | `⚙` — corners, clear highlight/selection/Scope, reset layout |
+| Move | Drag the header, or pick a corner in Config |
 | Minimize | `−` in the panel header (or click the collapsed header to expand) |
 | Hide | `×` — collapses to a dark **Pulse Graph** chip |
 | Show again | Click the chip |
-| Remember | Mode is stored in `sessionStorage` for the tab |
+| Remember | Mode + corners stored in `sessionStorage` |
 | Remove entirely | Call the dispose function returned by `connectJacareDevtools()` |
 | Never load | Omit `connectJacareDevtools()` or guard with `import.meta.env.DEV` (production builds tree-shake it) |
+
+```javascript
+connectJacareDevtools({
+  position: 'bottom-right',
+  scopePosition: 'bottom-left',
+})
+```
 
 Call the returned dispose function to remove panels:
 
@@ -118,16 +127,9 @@ Pulses created **before** `connectJacareDevtools()` are still tracked (registrat
 
 ## Scope panel
 
-The Scope panel shows values registered with `registerScope()` from `@jacare/core`.
+Scope is a **manual** watch list — nothing appears until you call `registerScope()`. Useful for cart totals, form drafts, filters, etc.
 
-This is useful for watching:
-
-- Form field values
-- Draft text before submit
-- Filter/search state
-- Any custom value you want visible during development
-
-Values refresh automatically on a short interval (default 120ms) and whenever scope subscriptions fire.
+Values refresh ~every 120ms. Clear with `clearScope()`, the Scope `⌫` button, or Pulse Graph **Clear Scope**. Default position: bottom-left.
 
 ---
 
@@ -141,15 +143,15 @@ import { pulse, registerScope } from '@jacare/core'
 const draft = pulse('')
 const filter = pulse('')
 
-registerScope('draft', () => draft())
-registerScope('filter', () => filter())
+registerScope('draft', 'Draft', () => draft())
+registerScope('filter', 'Filter', () => filter())
 ```
 
 The Scope panel will show:
 
 ```
-draft   "hello world"
-filter  ""
+DRAFT    "hello world"
+FILTER   ""
 ```
 
 Register as many values as you need. Use descriptive names — they appear as labels in the panel.

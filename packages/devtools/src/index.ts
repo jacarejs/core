@@ -10,13 +10,26 @@ import {
 } from '@jacare/core'
 import { createPanel } from './panel.js'
 import { connectJacareScope } from './scope.js'
+import { writeUiConfig, type PanelCorner } from './config.js'
 
 export interface ConnectOptions {
   target?: HTMLElement
+  /** Mount the Scope panel (default true). */
   scope?: boolean
+  /** Initial Pulse Graph corner (persisted in sessionStorage). */
+  position?: PanelCorner
+  /** Initial Scope corner (persisted in sessionStorage). */
+  scopePosition?: PanelCorner
 }
 
 export function connectJacareDevtools(options: ConnectOptions = {}): () => void {
+  if (options.position || options.scopePosition) {
+    writeUiConfig({
+      ...(options.position ? { pulsePosition: options.position } : {}),
+      ...(options.scopePosition ? { scopePosition: options.scopePosition } : {}),
+    })
+  }
+
   enableDevtools()
   const host = options.target ?? document.body
   const panel = createPanel(host)
@@ -32,7 +45,7 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
   }
 }
 
-export type { PulseGraphSnapshot, PulseNode, BindingMeta, PulseBinding, DevtoolsMeta }
+export type { PulseGraphSnapshot, PulseNode, BindingMeta, PulseBinding, DevtoolsMeta, PanelCorner }
 export { connectJacareScope } from './scope.js'
 export type { ConnectScopeOptions, ScopeSnapshot } from './scope.js'
 export {
@@ -44,4 +57,6 @@ export {
   getPulsesForElement,
   namePulse,
   devtoolsBind,
+  clearScope,
 } from '@jacare/core'
+export { readUiConfig, writeUiConfig } from './config.js'

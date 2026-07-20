@@ -40,8 +40,16 @@ export const hooksCode = `export const lifecycle = createLifecycle({
 })`
 
 export const scopeCode = `registerScope(id, label, readFn)
-// readFn is called on a short interval and whenever any scope entry changes,
-// so the DevTools Scope panel always shows a live value`
+
+// Manual watch list for the Scope panel (bottom-left by default).
+// readFn is polled ~every 120ms while DevTools is connected.
+// Return the disposer from onActivate so the entry clears on leave.
+
+onActivate() {
+  return registerScope('lab-lifecycle.ticks', 'Lifecycle ticks', () => ticks())
+}
+
+// clearScope() — wipe every entry (also in Pulse Graph ⚙ Config)`
 
 export const activationCode = `onActivate() {
   document.title = 'Jacaré Lab · Lifecycle'

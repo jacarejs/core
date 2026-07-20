@@ -1463,14 +1463,30 @@ if (import.meta.hot) {
 
 ### Scope debugging
 
+Scope is a **manual watch list** for values you care about during development — separate from the Pulse Graph (which tracks every `pulse` / `derive` / `effect` automatically).
+
 ```javascript
 import { registerScope } from '@jacare/core'
 
-registerScope('cart.total', 'Cart total', () => total())
+// typically inside onActivate / mount
+const stop = registerScope('cart.total', 'Cart total', () => total())
 registerScope('cart.count', 'Items', () => itemCount())
+
+// later (or return stop from onActivate cleanup)
+stop()
 ```
 
-Visible in the DevTools Scope panel when `connectJacareDevtools()` is active.
+| Piece | Role |
+|-------|------|
+| `id` | Stable key (replacing the same id updates the entry) |
+| `label` | Human label in the Scope panel |
+| `read` | Getter polled ~every 120ms while DevTools is connected |
+| Return value | Unsubscribe / remove that entry |
+| `clearScope()` | Remove all entries at once |
+
+Visible in the **Scope** panel (default bottom-left) when `connectJacareDevtools()` is active. Use it for cart totals, form drafts, filters — anything you want to glance at without hunting through the full Pulse Graph.
+
+Open **⚙ Config** on the Pulse Graph to move either panel, clear highlights/selection, or clear Scope entries.
 
 ---
 
@@ -1597,9 +1613,17 @@ connectJacareDevtools()
 Panels (dev only — only when you call `connectJacareDevtools()`):
 
 - **Pulse Graph** — signal dependency graph, **live values**, **source names** (`count` · `Counter.jcr:4`), **DOM highlight** on hover
-- **Scope** — registered scope entries
+- **Scope** — values you register with `registerScope()` (manual watch list; see [§13](#13-lifecycle-and-scope))
 
-Controls: `◎` pick element · `−` minimize · `×` hide to a chip · click chip to restore (remembered in `sessionStorage`). Call the returned dispose function to remove panels entirely.
+Controls: `⚙` config · `◎` pick element · `−` minimize · `×` hide · **drag header** to move. Config lets you pick corners, clear highlight/selection, clear Scope, or reset layout. Preferences persist in `sessionStorage`.
+
+```javascript
+connectJacareDevtools({
+  position: 'bottom-right',  // Pulse Graph
+  scopePosition: 'bottom-left',
+  scope: true,
+})
+```
 
 Zero runtime cost when DevTools are not connected (production should keep the import behind `import.meta.env.DEV`). The Vite plugin passes `debug: !isProduction`, so name/bind metadata is stripped from production builds.
 

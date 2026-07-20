@@ -30,7 +30,7 @@ export <view>
       <p class="page-lead">The CLI, Vite plugin, compiler, DevTools — and the VS Code extension for .jcr files.</p>
     </header>
 
-    <Tip :text=${'connectJacareDevtools() is wired in boot.js (DEV only). Open the Pulse Graph — nodes show count / doubled with file:line. Hover a node to outline the DOM it feeds; use the pick button to select an element.'} />
+    <Tip :text=${'connectJacareDevtools() is wired in boot.js (DEV only). Pulse Graph = every pulse/derive/effect. Scope = only what you registerScope(). Open ⚙ for position, clear highlight/selection, Clear Scope, or reset layout. Drag either header to move.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'Named pulses + DOM highlight'} :lead=${'Compiler injects { name, file, line } in DEV. Hover the Pulse Graph node to outline this counter.'} :code=${namedPulsesCode}>

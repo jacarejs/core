@@ -56,7 +56,7 @@ export function applyCorner(el: HTMLElement, corner: PanelCorner): void {
   el.style.right = ''
   el.style.bottom = ''
   el.style.left = ''
-  el.dataset.corner = corner
+  el.dataset['corner'] = corner
   switch (corner) {
     case 'bottom-right':
       el.style.right = '1rem'

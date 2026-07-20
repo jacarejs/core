@@ -31,17 +31,21 @@ result.map  // source map`
 export const devtoolsCode = `// boot.js — wired in this lab
 if (import.meta.env.DEV) {
   const { connectJacareDevtools } = await import('@jacare/devtools')
-  connectJacareDevtools()
+  connectJacareDevtools({
+    position: 'bottom-right',
+    scopePosition: 'bottom-left',
+  })
 }
 
-// Compiler (DEV) injects names automatically:
-//   const count = pulse(0, { name: 'count', file: '…', line: 4 })
-//   + devtoolsBind(count, textNode, { kind: 'text' })
+// Pulse Graph ⚙ Config:
+//   - move panels to any corner
+//   - Clear highlight / selection / Scope
+//   - Reset layout
+// Drag either panel header to move freely.
 
-// Manual API (optional):
-import { pulse, namePulse, highlightBinding } from '@jacare/core'
-const count = pulse(0, { name: 'count' })
-namePulse(count, 'cartCount', { file: 'Cart.jcr', line: 8 })`
+// Scope (manual watch list):
+import { registerScope, clearScope } from '@jacare/core'
+registerScope('cart.total', 'Cart total', () => total())`
 
 export const namedPulsesCode = `import { pulse, derive } from '@jacare/core'
 
