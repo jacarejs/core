@@ -228,3 +228,29 @@ function onDoubleClick() {
     <p class="muted">dblclick count: \${doubles}</p>
   </div>`,
 )
+
+export const debugEventsCode = viewSnippet(
+  `const clicks = pulse(0)
+const fruits = pulse([
+  { id: 'a', label: 'Apple', picks: 0 },
+  { id: 'b', label: 'Banana', picks: 0 },
+])
+
+function handleClick() {
+  clicks.update((n) => n + 1)
+}
+
+function pick(id) {
+  fruits.update((list) =>
+    list.map((fruit) => (fruit.id === id ? { ...fruit, picks: fruit.picks + 1 } : fruit)),
+  )
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <button type="button" class="btn" on-click=\${handleClick}>Click</button>
+      <button type="button" class="btn btn-outline" on-click=\${() => pick('a')}>Pick apple</button>
+    </div>
+    <p class="muted">Clicks: \${clicks}</p>
+    <debug copy label="events">\${{ clicks, fruits }}</debug>
+  </div>`,
+)

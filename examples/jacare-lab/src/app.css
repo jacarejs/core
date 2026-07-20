@@ -1583,6 +1583,46 @@ body {
   white-space: pre-wrap;
 }
 
+.jacare-debug {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px dashed color-mix(in srgb, var(--lime) 45%, var(--line));
+  background: color-mix(in srgb, var(--panel) 88%, #0f172a);
+}
+
+.jacare-debug-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.jacare-debug-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+.jacare-debug-copy {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+}
+
+.jacare-debug-body {
+  margin: 0;
+  overflow: auto;
+  max-height: 14rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text);
+  white-space: pre;
+}
+
 @media (max-width: 920px) {
   .playground-grid {
     grid-template-columns: 1fr;

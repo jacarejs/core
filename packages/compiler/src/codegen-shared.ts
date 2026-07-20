@@ -52,6 +52,7 @@ export class CodegenContext {
   private readonly componentProps?: ReadonlySet<string> | undefined
   private readonly signals?: ReadonlySet<string> | undefined
   readonly cpw: boolean
+  readonly debug: boolean
   bindingId = 0
 
   constructor(
@@ -61,11 +62,13 @@ export class CodegenContext {
     componentProps?: ReadonlySet<string> | undefined,
     signals?: ReadonlySet<string> | undefined,
     cpw = false,
+    debug = true,
   ) {
     this.runtimeImports = runtimeImports ?? new Set()
     this.componentProps = componentProps
     this.signals = signals
     this.cpw = cpw
+    this.debug = debug
   }
 
   isComponentProp(name: string): boolean {

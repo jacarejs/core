@@ -105,6 +105,8 @@ function emitSSRNode(ctx: CodegenContext, node: TemplateNode): void {
     case 'each':
       emitSSREach(ctx, node)
       break
+    case 'debug':
+      break
   }
 }
 

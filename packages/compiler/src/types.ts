@@ -5,6 +5,7 @@ export interface CompileOptions {
   mode?: 'client' | 'server' | 'full'
   scopeId?: string
   cpw?: boolean
+  debug?: boolean
 }
 
 export interface CompileResult {
@@ -97,6 +98,14 @@ export interface TemplateEachNode {
   sourceLine?: number
 }
 
+export interface TemplateDebugNode {
+  type: 'debug'
+  expr: string
+  label?: string
+  copy?: boolean
+  sourceLine?: number
+}
+
 export type TemplateNode =
   | TemplateTextNode
   | TemplateElementNode
@@ -105,6 +114,7 @@ export type TemplateNode =
   | TemplateIfNode
   | TemplateCaseNode
   | TemplateEachNode
+  | TemplateDebugNode
 
 export interface TemplateAST {
   children: TemplateNode[]

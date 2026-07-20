@@ -36,6 +36,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     ...(reactiveStyle && styleAst ? { styleAst } : {}),
     ...(options.cpw ? { cpw: options.cpw } : {}),
     ...(contract ? { contract } : {}),
+    ...(options.debug === false ? { debug: false } : {}),
   })
 
   const map = filename

@@ -158,6 +158,13 @@
     ],
     "description": "Named or default slot placeholder"
   },
+  "Debug JSON": {
+    "prefix": ["jcr-debug", "debug"],
+    "body": [
+      "<debug${1: copy}${2: label=\"${3:state}\"}>\\${${4:value}}</debug>"
+    ],
+    "description": "Dev-only pretty JSON inspector with optional copy button"
+  },
   "Component usage": {
     "prefix": ["jcr-use", "component-tag"],
     "body": [

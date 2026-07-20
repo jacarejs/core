@@ -13,6 +13,7 @@ import {
   preventLinkCode,
   hoverCode,
   dblClickCode,
+  debugEventsCode,
 } from '../snippets/events.js'
 
 const clicks = pulse(0)
@@ -253,6 +254,17 @@ export <view>
         <div class="stack">
           <button type="button" class="btn" on-dblclick=${onDoubleClick}>Double-click me</button>
           <p class="muted">dblclick count: ${doubles}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'<debug>: event state'} :lead=${'Inspect reactive state after clicks — use copy to grab the JSON.'} :code=${debugEventsCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn" on-click=${handleClick}>Click</button>
+            <button type="button" class="btn btn-outline" on-click=${() => pick('a')}>Pick apple</button>
+          </div>
+          <p class="muted">Clicks: ${clicks}</p>
+          <debug copy label="events">${{ clicks, fruits, outerClicks, innerClicks }}</debug>
         </div>
       </Demo>
     </div>

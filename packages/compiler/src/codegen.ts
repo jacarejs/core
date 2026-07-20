@@ -18,6 +18,7 @@ const RUNTIME_IMPORT_ORDER = [
   'bindModel',
   'bindClass',
   'bindStyleVar',
+  'bindDebug',
   'branch',
   'reconcileKeyedList',
   'resumeBindings',
@@ -92,6 +93,7 @@ export function generate(
     styleAst?: StyleAST
     cpw?: boolean
     contract?: TemplateContract
+    debug?: boolean
   } = {},
 ): { code: string; mappings: CodegenMapping[] } {
   const mode = options.mode ?? 'full'
@@ -136,6 +138,7 @@ export function generate(
       props.length > 0 ? new Set(props) : undefined,
       signals,
       options.cpw ?? false,
+      options.debug !== false,
     )
     emitClient(
       ast,
@@ -367,6 +370,9 @@ function collectRefs(ast: TemplateAST): Set<string> {
             collectExprRefs(node.keyExpr, refs)
           }
           walk(node.children)
+          break
+        case 'debug':
+          collectExprRefs(node.expr, refs)
           break
       }
     }

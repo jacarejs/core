@@ -111,6 +111,17 @@ describe('parseTemplate', () => {
     expect(block.type).toBe('each')
   })
 
+  it('parses debug tag', () => {
+    const ast = parseTemplate('<debug copy label="cart">{cart}</debug>')
+    const node = ast.children[0]!
+    expect(node.type).toBe('debug')
+    if (node.type === 'debug') {
+      expect(node.expr).toBe('cart')
+      expect(node.label).toBe('cart')
+      expect(node.copy).toBe(true)
+    }
+  })
+
   it('parses on-click with arrow functions', () => {
     const ast = parseTemplate('<button on-click={() => remove(id)}>+</button>')
     const btn = ast.children[0]!
@@ -455,5 +466,21 @@ export default view\`<pre>.x { width: var(--pct); }</pre>\``
     const result = compile(source, { mode: 'client' })
     expect(result.code).not.toContain('props["var"]')
     expect(result.code).not.toContain('const var')
+  })
+
+  it('emits bindDebug for debug tags in dev mode', () => {
+    const source = `import { pulse, view } from '@jacare/core'
+const cart = pulse([])
+export default view\`<debug copy>\${cart}</debug>\``
+    const result = compile(source, { mode: 'client', debug: true })
+    expect(result.code).toContain('bindDebug(')
+  })
+
+  it('strips debug tags when debug is false', () => {
+    const source = `import { pulse, view } from '@jacare/core'
+const cart = pulse([])
+export default view\`<debug copy>\${cart}</debug>\``
+    const result = compile(source, { mode: 'client', debug: false })
+    expect(result.code).not.toContain('bindDebug(')
   })
 })

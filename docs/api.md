@@ -43,20 +43,21 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 7. [Events (`on-*` / `@*`)](#6-events-on---)
 8. [Control flow — `#if`](#7-control-flow--if)
 9. [Control flow — `#case`](#7b-control-flow--case)
-10. [Control flow — `#for`](#8-control-flow--for)
-11. [Components, props, and slots](#9-components-and-slots)
-12. [Scoped CSS](#10-scoped-css)
-13. [Navigation](#11-navigation)
-14. [Forms](#12-forms)
-15. [Lifecycle and scope](#13-lifecycle-and-scope)
-16. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
-17. [SSR and hydration](#14-ssr-and-hydration)
-18. [DevTools](#15-devtools)
-19. [Compiler API](#16-compiler-api)
-20. [CLI](#17-cli)
-21. [Vite plugin](#18-vite-plugin)
-22. [Testing](#19-testing)
-23. [Runtime helpers index](#20-runtime-helpers-index)
+10. [Dev debug — `<debug>`](#7c-dev-debug-debug)
+11. [Control flow — `#for`](#8-control-flow--for)
+12. [Components, props, and slots](#9-components-and-slots)
+13. [Scoped CSS](#10-scoped-css)
+14. [Navigation](#11-navigation)
+15. [Forms](#12-forms)
+16. [Lifecycle and scope](#13-lifecycle-and-scope)
+17. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
+18. [SSR and hydration](#14-ssr-and-hydration)
+19. [DevTools](#15-devtools)
+20. [Compiler API](#16-compiler-api)
+21. [CLI](#17-cli)
+22. [Vite plugin](#18-vite-plugin)
+23. [Testing](#19-testing)
+24. [Runtime helpers index](#20-runtime-helpers-index)
 
 Jump to: [Tutorial](#tutorial--jacaré-lab) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
 
@@ -349,6 +350,7 @@ Runtime helpers imported only when the compiler needs them.
 | `bindModel(el, name, signal)` | Two-way `value` / `checked` |
 | `bindClass(el, className, signal)` | Toggle class |
 | `bindStyleVar(el, name, signal)` | Reactive CSS custom property (`--name`) |
+| `bindDebug(host, read, options?)` | Dev-only JSON inspector ([§7c](#7c-dev-debug-debug)) |
 | `branch(anchor, fn)` | `#if` / `#elif` / `#else` and `#case` / `#when` / `#else` |
 | `reconcileKeyedList(anchor, source, key, render)` | `#for` keyed lists |
 | `mountSlot(anchor, children, name?)` | Slot projection |
@@ -723,6 +725,75 @@ Interactive demos: Jacaré Lab route `/case`.
 | Same expression vs several literals | Open boolean conditions |
 | Status / role / tab machines | `loading()`, `count() > 0`, nested auth |
 | You want the scrutinee evaluated once | Each branch has a different predicate |
+
+---
+
+## 7c. Dev debug (`<debug>`)
+
+Pretty-print reactive state as JSON during development. Unlike `${obj}` in normal text nodes (which goes through `escapeHtml`), `<debug>` writes raw JSON to a `<pre>` via `textContent` — quotes stay readable.
+
+### Syntax
+
+```javascript
+<debug>${cart}</debug>
+<debug copy label="cart">${cart}</debug>
+<debug>${{ score, mood, removed }}</debug>
+```
+
+| Part | Notes |
+|------|-------|
+| Body | Exactly one `${expr}` |
+| `label="…"` | Optional caption in the debug header |
+| `copy` | Boolean flag — shows a **Copy JSON** button |
+
+### Props / state (Lab: Components)
+
+```javascript
+const score = pulse(0)
+const mood = pulse('curious')
+const removed = pulse(0)
+
+export <view>
+  <Counter :label=${'Score'} :count=${score} on-inc=${onScoreInc} />
+  <debug copy label="props">${{ score, mood, removed }}</debug>
+</view>
+```
+
+Bare pulse names inside object literals are auto-unwrapped (`score` → `score()`).
+
+### Event-driven state (Lab: Events)
+
+```javascript
+const clicks = pulse(0)
+const fruits = pulse([{ id: 'a', label: 'Apple', picks: 0 }])
+
+export <view>
+  <button on-click=${handleClick}>Click</button>
+  <debug copy label="events">${{ clicks, fruits }}</debug>
+</view>
+```
+
+Updates reactively as handlers mutate pulses.
+
+### Production strip
+
+The Vite plugin passes `debug: !isProduction` to `compile()`. With `debug: false`, `<debug>` nodes emit **no DOM** and no `bindDebug` import.
+
+```javascript
+compile(source, { debug: false, mode: 'client' })
+```
+
+SSR `render()` skips debug output entirely.
+
+### Runtime helper
+
+```javascript
+import { bindDebug } from '@jacare/core'
+
+bindDebug(host, () => cart(), { label: 'cart', copy: true })
+```
+
+Returns a dispose function (registered on the mount cleanup stack by the compiler).
 
 ---
 
@@ -1741,6 +1812,7 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | `bindAttribute` / `bindProperty` | [§5](#5-dom-bindings) | Attributes / props |
 | `bindModel` | [§5](#5-dom-bindings) | Two-way input |
 | `bindClass` / `bindStyleVar` | [§5](#5-dom-bindings) | Class / CSS var |
+| `bindDebug` | [§7c `<debug>`](#7c-dev-debug-debug) | Dev JSON inspector |
 | `branch` / `showIf` | [§7 `#if`](#7-control-flow--if) · [§7b `#case`](#7b-control-flow--case) | Conditionals / match |
 | `ensureScopedStyle` | [§10](#10-scoped-css) | Static scoped CSS inject |
 | `bindStyleSheet` / `scopeCss` | [§10](#10-scoped-css) | Reactive style (`#if` / `#for` / `#case`) |

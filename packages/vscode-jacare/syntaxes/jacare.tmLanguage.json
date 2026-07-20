@@ -436,7 +436,7 @@
           }
         },
         {
-          "match": "(</?)(slot|div|span|p|a|button|input|label|ul|ol|li|nav|main|header|footer|section|article|h[1-6]|form|select|option|textarea|pre|code|table|tr|td|th|thead|tbody|img|br|hr|dl|dt|dd|strong|em|small|figure|figcaption|template|view|style|contract)(\\s|/?>)",
+          "match": "(</?)(slot|debug|div|span|p|a|button|input|label|ul|ol|li|nav|main|header|footer|section|article|h[1-6]|form|select|option|textarea|pre|code|table|tr|td|th|thead|tbody|img|br|hr|dl|dt|dd|strong|em|small|figure|figcaption|template|view|style|contract)(\\s|/?>)",
           "captures": {
             "1": {
               "name": "punctuation.definition.tag.begin.html"

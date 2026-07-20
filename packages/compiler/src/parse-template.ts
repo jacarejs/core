@@ -258,6 +258,29 @@ function parseElement(source: string, pos: number): { node: TemplateNode; pos: n
     }
   }
 
+  if (tagName === 'debug') {
+    if (selfClosing) {
+      fail('<debug> requires a body expression', pos)
+    }
+    const inner = parseNodes(source, afterOpen)
+    const closeTag = '</debug>'
+    if (!source.startsWith(closeTag, inner.pos)) {
+      fail('expected </debug>', pos)
+    }
+    const label = attrs.find((a) => a.name === 'label' && a.kind === 'static')?.value
+    const copy = attrs.some((a) => a.name === 'copy')
+    return {
+      node: {
+        type: 'debug',
+        expr: extractDebugExpr(inner.nodes, pos),
+        ...(label ? { label } : {}),
+        ...(copy ? { copy: true } : {}),
+        sourceLine: templateLineAt(pos),
+      },
+      pos: inner.pos + closeTag.length,
+    }
+  }
+
   if (isVoid) {
     return {
       node: {
@@ -507,6 +530,23 @@ function parseEachBlock(source: string, pos: number): { node: TemplateNode; pos:
     node,
     pos: chunk.pos + close[0].length,
   }
+}
+
+function extractDebugExpr(nodes: TemplateNode[], pos: number): string {
+  if (nodes.length !== 1 || nodes[0]!.type !== 'text') {
+    fail('<debug> body must be a single ${...} expression', pos)
+  }
+
+  const parts = nodes[0]!.parts.filter(
+    (part) => part.type !== 'static' || part.value.trim().length > 0,
+  )
+  const exprParts = parts.filter((part) => part.type === 'expr')
+
+  if (exprParts.length !== 1 || parts.length !== 1) {
+    fail('<debug> body must be a single ${...} expression', pos)
+  }
+
+  return exprParts[0]!.value
 }
 
 function parseTextParts(raw: string): TextPart[] {

@@ -97,3 +97,22 @@ export const optionalLeadCode = codeFiles(
   ),
   [{ name: 'components/Card.jcr', code: CARD_SOURCE }],
 )
+
+export const debugPropsCode = viewSnippet(
+  `const score = pulse(0)
+const mood = pulse('curious')
+const removed = pulse(0)
+const playerName = pulse('Jacaré')
+
+function onScoreInc() {
+  score.update((n) => n + 1)
+}
+
+function cycleMood() {
+  mood.set(mood() === 'curious' ? 'focused' : 'curious')
+}`,
+  `  <div class="stack">
+    <Counter :label=\${'Score'} :count=\${score} on-inc=\${onScoreInc} />
+    <debug copy label="props">\${{ score, mood, removed, playerName }}</debug>
+  </div>`,
+)

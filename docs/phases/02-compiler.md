@@ -58,6 +58,7 @@ export default view`
 | `#case` / `#when` / `#else` / `#end` | `branch()` + `Object.is` |
 | `#if` / `#for` / `#case` inside `export <style>` | `bindStyleSheet` + runtime `scopeCss` |
 | `#for items() as item (id)` / `#end` | `reconcileKeyedList()` |
+| `<debug copy label="…">${expr}</debug>` | `bindDebug()` (dev only; stripped when `debug: false`) |
 | `<Child :prop=${value} />` | Component `mount()` call |
 
 ## Alternatives

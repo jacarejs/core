@@ -121,7 +121,29 @@ function emitNode(ctx: CodegenContext, node: TemplateNode, target: EmitTarget): 
     case 'each':
       emitEach(ctx, node, target)
       break
+    case 'debug':
+      emitDebug(ctx, node, target)
+      break
   }
+}
+
+function emitDebug(
+  ctx: CodegenContext,
+  node: Extract<TemplateNode, { type: 'debug' }>,
+  target: EmitTarget,
+): void {
+  if (!ctx.debug) return
+
+  const host = ctx.nextId('dbg')
+  ctx.line(`const ${host} = document.createElement('div')`, node.sourceLine)
+  append(ctx, target, host)
+  ctx.useRuntime('bindDebug')
+  const readExpr = ctx.rewriteExprForEffect(node.expr)
+  const opts: string[] = []
+  if (node.label) opts.push(`label: ${JSON.stringify(node.label)}`)
+  if (node.copy) opts.push('copy: true')
+  const optsArg = opts.length > 0 ? `{ ${opts.join(', ')} }` : '{}'
+  ctx.pushCleanup(`bindDebug(${host}, () => (${readExpr}), ${optsArg})`)
 }
 
 function emitElement(

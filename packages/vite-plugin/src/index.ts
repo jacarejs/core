@@ -122,6 +122,7 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
           filename: id,
           mode,
           cpw,
+          debug: !isProduction,
           ...(options.runtimeImport ? { runtimeImport: options.runtimeImport } : {}),
         })
 

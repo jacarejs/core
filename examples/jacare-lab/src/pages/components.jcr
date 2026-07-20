@@ -13,6 +13,7 @@ import {
   modelFieldCode,
   nestedCode,
   optionalLeadCode,
+  debugPropsCode,
 } from '../snippets/components.js'
 
 const moods = ['curious', 'focused', 'shipping']
@@ -96,6 +97,16 @@ export <view>
             <p class="muted">subtitle has a default of '' in the contract, so the conditional subtitle block simply does not render.</p>
             <input class="input" bind-value=${noteText} placeholder="Optional note" />
           </Card>
+        </div>
+      </Demo>
+
+      <Demo :title=${'<debug>: props and state'} :lead=${'Pretty-print any value as JSON — no HTML escaping. Stripped from production builds.'} :code=${debugPropsCode}>
+        <div class="stack">
+          <div class="row">
+            <Counter :label=${'Score'} :count=${score} on-inc=${onScoreInc} />
+            <button type="button" class="btn btn-outline" on-click=${cycleMood}>Cycle mood</button>
+          </div>
+          <debug copy label="props">${{ score, mood, removed, playerName }}</debug>
         </div>
       </Demo>
     </div>

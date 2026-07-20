@@ -212,7 +212,7 @@ Use `computed` when the value needs a unit (`50%`, `12rem`). Plain numbers strin
 
 ## Control flow
 
-Full API: [`#if`](api.md#7-control-flow--if) · [`#case`](api.md#7b-control-flow--case) · [`#for`](api.md#8-control-flow--for) · [Events](api.md#6-events-on---)
+Full API: [`#if`](api.md#7-control-flow--if) · [`#case`](api.md#7b-control-flow--case) · [`#for`](api.md#8-control-flow--for) · [`<debug>`](api.md#7c-dev-debug-debug) · [Events](api.md#6-events-on---)
 
 ### Conditionals
 
@@ -264,6 +264,27 @@ export <view>
 The expression in parentheses is the key used for DOM reconciliation.
 
 When an item keeps the same key but changes identity (immutable updates with spread), Jacaré re-renders that row automatically.
+
+### Dev debug (`<debug>`)
+
+Use `<debug>` instead of `<pre>${obj}</pre>` when you want **pretty JSON** without HTML escaping (`&quot;` in attribute strings).
+
+```javascript
+export <view>
+  <debug copy label="cart">${cart}</debug>
+  <debug>${{ score, mood, removed }}</debug>
+</view>
+```
+
+| Attribute | Effect |
+|-----------|--------|
+| *(body)* | Single `${expr}` — object, array, pulse, or inline literal |
+| `label="…"` | Optional heading above the JSON |
+| `copy` | Adds a **Copy JSON** button |
+
+Stripped from **production** builds (`debug: false` via the Vite plugin). No SSR output.
+
+Full API: [§7c](api.md#7c-dev-debug-debug)
 
 ## Components
 
