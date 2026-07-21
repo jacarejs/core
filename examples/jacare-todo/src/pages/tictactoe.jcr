@@ -224,13 +224,13 @@ export <view>
               <button
                 type="button"
                 class="btn btn-tiny tip-chip"
-                class-active=${() => mode() === 'cpu'}
+                class-active=${mode() === 'cpu'}
                 on-click=${() => setMode('cpu')}
               >vs CPU</button>
               <button
                 type="button"
                 class="btn btn-tiny tip-chip"
-                class-active=${() => mode() === 'human'}
+                class-active=${mode() === 'human'}
                 on-click=${() => setMode('human')}
               >2 players</button>
             </div>
@@ -261,7 +261,7 @@ export <view>
           </div>
         </div>
 
-        <div class="grid-ttt" class-over=${() => !canPlay()} class-locked=${cpuThinking}>
+        <div class="grid-ttt" class-over=${!canPlay()} class-locked=${cpuThinking}>
           #for cells as i (i)
             <button
               type="button"

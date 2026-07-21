@@ -225,6 +225,7 @@ jacare build          # production build
 jacare compile file   # compile one .jcr file
 jacare check          # compile all .jcr files in project
 jacare check --bindings  # same + list Binding IR sites per file
+jacare check --strict-style  # fail on redundant ${() => …} style warnings
 ```
 
 ### Vite templates

@@ -239,9 +239,9 @@ export <view>
       <section class="panel league-fixtures">
         <div class="league-toolbar">
           <div class="league-day-nav">
-            <button type="button" class="btn btn-ghost btn-tiny" on-click=${prevMatchday} disabled=${() => !canPrev()}>Prev</button>
+            <button type="button" class="btn btn-ghost btn-tiny" on-click=${prevMatchday} disabled=${!canPrev()}>Prev</button>
             <h2 class="aside-title">Matchday ${matchday}</h2>
-            <button type="button" class="btn btn-ghost btn-tiny" on-click=${nextMatchday} disabled=${() => !canNext()}>Next</button>
+            <button type="button" class="btn btn-ghost btn-tiny" on-click=${nextMatchday} disabled=${!canNext()}>Next</button>
           </div>
           <div class="league-actions">
             <button type="button" class="btn btn-primary" on-click=${simulateMatchday} disabled=${dayDone}>${simulateLabel}</button>

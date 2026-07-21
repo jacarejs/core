@@ -3,14 +3,14 @@ import { topicHref, topicRoute } from '../tutorial/topics.js'
 export <view>
 <nav class="lesson-nav" aria-label="Lesson navigation">
   #if prev
-    <a class="lesson-nav-link" jacare-go=${() => topicRoute(prev.slug)} href=${() => topicHref(prev.slug)}>
+    <a class="lesson-nav-link" jacare-go=${topicRoute(prev.slug)} href=${topicHref(prev.slug)}>
       ← ${prev.title}
     </a>
   #else
     <span></span>
   #end
   #if next
-    <a class="lesson-nav-link lesson-nav-next" jacare-go=${() => topicRoute(next.slug)} href=${() => topicHref(next.slug)}>
+    <a class="lesson-nav-link lesson-nav-next" jacare-go=${topicRoute(next.slug)} href=${topicHref(next.slug)}>
       ${next.title} →
     </a>
   #end

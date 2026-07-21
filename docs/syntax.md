@@ -114,6 +114,19 @@ Prefer the canonical form in new code.
 
 ## Template bindings
 
+Prefer **bare expressions** when there is no loop/local to capture — `${cart.count()}` and `${() => cart.count()}` are both reactive; the first is the Jacaré style.
+
+Use an arrow when the expression must close over a `#for` item or an event argument:
+
+```javascript
+#for items() as item (item.id)
+  <span>${() => label(item.id)}</span>
+  <button on-click=${() => remove(item.id)}>×</button>
+#end
+```
+
+`jacare check` emits a soft style warning for redundant nullary arrows (`--no-style` to silence, `--strict-style` to fail CI).
+
 ### Text
 
 ```javascript
@@ -550,6 +563,7 @@ jacare compile src/app.jcr
 jacare compile src/app.jcr --watch
 jacare check
 jacare check --bindings   # list IR sites: text · count · bindText · signal
+jacare check --strict-style   # fail on redundant ${() => …} style warnings
 ```
 
 See [Phase 2 — Compiler](phases/02-compiler.md#binding-ir).

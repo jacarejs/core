@@ -12,7 +12,7 @@ export <view>
     <span class="field-label">${label}</span>
     <input
       class="input field-input"
-      class-invalid=${() => !!field.error()}
+      class-invalid=${!!field.error()}
       type=${type}
       placeholder=${placeholder}
       bind-value=${field}

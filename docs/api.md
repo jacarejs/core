@@ -1848,6 +1848,8 @@ npm install -g @jacare/cli
 | `jacare compile <file> [out] [--watch]` | Compile one file |
 | `jacare check` | Compile-check all `.jcr` in CWD (contracts included) |
 | `jacare check --bindings` | Same as `check`, plus IR binding sites per file |
+| `jacare check --no-style` | Skip soft style hints (redundant `${() => …}`) |
+| `jacare check --strict-style` | Fail when style warnings are present |
 
 ### `jacare.config.js`
 

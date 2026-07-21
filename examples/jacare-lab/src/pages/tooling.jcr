@@ -7,6 +7,7 @@ import {
   vitePluginCode,
   compileApiCode,
   checkBindingsCode,
+  expressionStyleCode,
   bindingIrCode,
   devtoolsCode,
   testingCode,
@@ -67,6 +68,12 @@ export <view>
         <h3>jacare check --bindings</h3>
         <p class="muted">Prints every lowered binding site from the Binding IR — the same classification used for client and SSR emit.</p>
         <pre><code>${checkBindingsCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>Expression style</h3>
+        <p class="muted">Prefer bare calls when there is no loop local. jacare check warns on redundant nullary arrows.</p>
+        <pre><code>${expressionStyleCode}</code></pre>
       </div>
 
       <div class="ref-card">

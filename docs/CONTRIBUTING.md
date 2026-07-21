@@ -110,6 +110,7 @@ yarn lab:dev        # interactive API tutorial (jacare-lab)
 yarn lab:build      # build jacare-lab
 jacare check                # compile all .jcr files (from app root)
 jacare check --bindings     # same + print IR binding sites per file
+jacare check --strict-style # fail on redundant ${() => …} style warnings
 ```
 
 ## Testing

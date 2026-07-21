@@ -19,6 +19,22 @@ ok …/Field.jcr
 
 102 file(s) ok`
 
+export const expressionStyleCode = `<!-- prefer — no free locals -->
+\${cart.count()}
+\${t('home.lead')}
+class-on=\${open()}
+:disabled=\${!canEdit()}
+
+<!-- keep arrow — captures loop / handler args -->
+#for items() as item (item.id)
+  <span>\${() => label(item.id)}</span>
+  <button on-click=\${() => remove(item.id)}>×</button>
+#end
+
+# jacare check          # soft warn on redundant () =>
+# jacare check --strict-style
+# jacare check --no-style`
+
 export const bindingIrCode = `import {
   inspectTemplateBindings,
   lowerMountAst,
@@ -34,6 +50,7 @@ inspectTemplateBindings(ast)
 
 // Forest shared by mount() and render()
 lowerMountAst(ast, { signals: new Set(['open']), cpw: false })`
+
 
 export const vitePluginCode = `import jacare from '@jacare/vite-plugin'
 

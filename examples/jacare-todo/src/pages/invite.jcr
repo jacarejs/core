@@ -87,10 +87,10 @@ export <view>
     </header>
 
     <ol class="invite-steps" aria-label="Progress">
-      <li class-active=${() => step() === 0} class-done=${() => step() > 0}>Details</li>
-      <li class-active=${() => step() === 1} class-done=${() => step() > 1}>Prefs</li>
-      <li class-active=${() => step() === 2} class-done=${() => step() > 2}>Review</li>
-      <li class-active=${() => step() === 3}>Done</li>
+      <li class-active=${step() === 0} class-done=${step() > 0}>Details</li>
+      <li class-active=${step() === 1} class-done=${step() > 1}>Prefs</li>
+      <li class-active=${step() === 2} class-done=${step() > 2}>Review</li>
+      <li class-active=${step() === 3}>Done</li>
     </ol>
 
     <section class="panel invite-panel">

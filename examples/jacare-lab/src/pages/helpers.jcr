@@ -14,6 +14,7 @@ const helpers = [
   { name: 'class-*', description: 'Toggle a class from a boolean signal or expression (shared client/SSR leaf IR)', path: '/bindings' },
   { name: 'style---*', description: 'Bind a signal to a reactive CSS custom property', path: '/bindings' },
   { name: 'jacare check --bindings', description: 'Compile-check all .jcr files and print Binding IR sites', path: '/tooling' },
+  { name: 'expression style', description: 'Prefer ${count()} over ${() => count()} unless capturing a #for local', path: '/bindings' },
   { name: 'inspectTemplateBindings', description: 'Programmatic Binding IR inspection from @jacare/compiler', path: '/tooling' },
   { name: 'on-* / @*', description: 'Attach a DOM event listener with automatic cleanup', path: '/events' },
   { name: '<debug>', description: 'Dev-only JSON inspector — label, copy, object shorthand; stripped in production', path: '/debug' },

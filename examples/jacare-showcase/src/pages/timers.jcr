@@ -142,7 +142,7 @@ export <view>
               type="button"
               class="btn btn-outline"
               class-active=${() => duration() === preset.secs}
-              :disabled=${() => !canEdit()}
+              :disabled=${!canEdit()}
               on-click=${() => setPreset(preset.secs)}
             >${preset.label}</button>
           #end

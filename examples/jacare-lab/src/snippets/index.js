@@ -92,6 +92,7 @@ export {
 export {
   cliCode,
   checkBindingsCode,
+  expressionStyleCode,
   bindingIrCode,
   vitePluginCode,
   compileApiCode,
@@ -176,6 +177,7 @@ import {
 import {
   cliCode,
   checkBindingsCode,
+  expressionStyleCode,
   bindingIrCode,
   vitePluginCode,
   compileApiCode,
@@ -295,6 +297,7 @@ export const SNIPPET_CATALOG = [
 
   { id: 'tooling.cli', title: 'CLI commands', lesson: '/tooling', code: cliCode },
   { id: 'tooling.check-bindings', title: 'jacare check --bindings', lesson: '/tooling', code: checkBindingsCode },
+  { id: 'tooling.expression-style', title: 'Expression style', lesson: '/tooling', code: expressionStyleCode },
   { id: 'tooling.binding-ir', title: 'Binding IR (compiler)', lesson: '/tooling', code: bindingIrCode },
   { id: 'tooling.vite-plugin', title: 'Vite plugin options', lesson: '/tooling', code: vitePluginCode },
   { id: 'tooling.compile-api', title: 'Compiler API', lesson: '/tooling', code: compileApiCode },

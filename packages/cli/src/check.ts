@@ -5,20 +5,28 @@ import {
   collectComponents,
   formatContractIssue,
   inspectTemplateBindings,
+  lintRedundantArrows,
   JacareCompileError,
   parseModule,
   parseTemplate,
   validateContractUsage,
+  type TemplateStyleWarning,
 } from '@jacare/compiler'
 
 export type CheckOptions = {
   bindings?: boolean
+  /** Soft style hints (default true). */
+  style?: boolean
+  /** Fail the process when style warnings are present. */
+  strictStyle?: boolean
 }
 
 export function runCheck(cwd: string, options: CheckOptions = {}): number {
   const root = resolve(cwd)
   const files = findJacareFiles(root)
   let errors = 0
+  let styleWarnings = 0
+  const styleEnabled = options.style !== false
 
   if (files.length === 0) {
     console.log('No .jcr files found')
@@ -35,6 +43,13 @@ export function runCheck(cwd: string, options: CheckOptions = {}): number {
       console.log(`ok ${file}`)
       if (options.bindings) {
         printBindings(file, source)
+      }
+      if (styleEnabled) {
+        const warnings = collectStyleWarnings(file, source)
+        styleWarnings += warnings.length
+        for (const warning of warnings) {
+          printStyleWarning(file, warning)
+        }
       }
     } catch (error) {
       errors++
@@ -73,8 +88,37 @@ export function runCheck(cwd: string, options: CheckOptions = {}): number {
     return 1
   }
 
+  if (styleWarnings > 0) {
+    console.log(`\n${files.length} file(s) ok · ${styleWarnings} style warning(s)`)
+    if (options.strictStyle) {
+      console.error('strict style: failing on template style warnings')
+      return 1
+    }
+    return 0
+  }
+
   console.log(`\n${files.length} file(s) ok`)
   return 0
+}
+
+function collectStyleWarnings(file: string, source: string): TemplateStyleWarning[] {
+  try {
+    const mod = parseModule(source, file)
+    if (!mod.viewHtml) return []
+    const ast = parseTemplate(mod.viewHtml, {
+      filename: file,
+      baseLine: mod.viewStartLine,
+    })
+    return lintRedundantArrows(ast)
+  } catch {
+    return []
+  }
+}
+
+function printStyleWarning(file: string, warning: TemplateStyleWarning): void {
+  const loc = warning.sourceLine != null ? `${file}:${warning.sourceLine}` : file
+  console.warn(`warn ${loc}: ${warning.message}`)
+  console.warn(`  help: ${warning.help}`)
 }
 
 function printBindings(file: string, source: string): void {

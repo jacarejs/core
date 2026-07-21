@@ -53,7 +53,7 @@ export <view>
         <div class="stack">
           <p class="muted">${hydrationStatus}</p>
           <div class="row">
-            <button type="button" class="btn" disabled=${() => !hydrated()} on-click=${onHydratedClick}>
+            <button type="button" class="btn" disabled=${!hydrated()} on-click=${onHydratedClick}>
               Click me (needs resume())
             </button>
             <button type="button" class="btn btn-outline" on-click=${simulateResume}>Simulate resume()</button>

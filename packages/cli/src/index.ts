@@ -23,7 +23,7 @@ Usage:
   jacare dev [--port=3000] [--open=false]
   jacare build
   jacare compile <file.jcr> [output.js] [--watch]
-  jacare check [--bindings]
+  jacare check [--bindings] [--no-style] [--strict-style]
 
 Examples:
   jacare new my-shop --template=todo
@@ -76,6 +76,8 @@ async function main(): Promise<void> {
     case 'check': {
       const code = runCheck(process.cwd(), {
         bindings: flagBool(flags, 'bindings'),
+        style: !flagBool(flags, 'no-style'),
+        strictStyle: flagBool(flags, 'strict-style'),
       })
       process.exit(code)
       return

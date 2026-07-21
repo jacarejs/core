@@ -220,7 +220,7 @@ export <view>
                 type="button"
                 class="btn btn-tiny tip-chip"
                 class-active=${() => workSecs() === preset.secs}
-                disabled=${() => !canEditPresets()}
+                disabled=${!canEditPresets()}
                 on-click=${() => setWorkPreset(preset.secs)}
               >${preset.label}</button>
             #end
@@ -235,7 +235,7 @@ export <view>
                 type="button"
                 class="btn btn-tiny tip-chip"
                 class-active=${() => breakSecs() === preset.secs}
-                disabled=${() => !canEditPresets()}
+                disabled=${!canEditPresets()}
                 on-click=${() => setBreakPreset(preset.secs)}
               >${preset.label}</button>
             #end

@@ -51,7 +51,7 @@ export <view>
 
     <div class="feature-grid">
       <Card :title=${'style---pct progress'} :subtitle=${'Width tracks --pct — no style.width string rebuilds'}>
-        <div class="demo-panel bind-panel" class-theme-forest=${() => theme() === 'forest'} class-theme-lime=${() => theme() === 'lime'} class-theme-night=${() => theme() === 'night'}>
+        <div class="demo-panel bind-panel" class-theme-forest=${theme() === 'forest'} class-theme-lime=${theme() === 'lime'} class-theme-night=${theme() === 'night'}>
           <div class="progress-track">
             <div class="progress-fill" style---pct=${pct}></div>
           </div>

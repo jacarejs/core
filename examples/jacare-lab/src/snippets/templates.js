@@ -103,7 +103,7 @@ const trendLabel = derive(() => (price() > previous() ? '▲ Up' : price() < pre
   `  <div class="stack">
     <p class="metric">\${price}</p>
     <div class="row">
-      <span class="badge" class-badge-danger=\${() => price() > previous()} class-badge-warn=\${() => price() < previous()}>\${trendLabel}</span>
+      <span class="badge" class-badge-danger=\${price() > previous()} class-badge-warn=\${price() < previous()}>\${trendLabel}</span>
       <button type="button" class="btn btn-outline" on-click=\${() => nudge(-1.5)}>−1.5</button>
       <button type="button" class="btn" on-click=\${() => nudge(1.5)}>+1.5</button>
     </div>

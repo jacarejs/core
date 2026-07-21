@@ -29,7 +29,7 @@ export const BADGE_SOURCE = `export <contract>
 </contract>
 
 export <view>
-  <span class="badge" class-badge-warn=\${() => tone === 'warn'} class-badge-danger=\${() => tone === 'danger'}>
+  <span class="badge" class-badge-warn=\${tone === 'warn'} class-badge-danger=\${tone === 'danger'}>
     \${text}
   </span>
 </view>`
@@ -77,7 +77,7 @@ export <view>
     <span class="field-label">\${label}</span>
     <input
       class="input field-input"
-      class-invalid=\${() => !!field.error()}
+      class-invalid=\${!!field.error()}
       type=\${type}
       placeholder=\${placeholder}
       bind-value=\${field}

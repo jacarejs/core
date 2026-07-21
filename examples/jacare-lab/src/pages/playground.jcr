@@ -106,7 +106,7 @@ export <view>
           </button>
         #end
       </div>
-      <span class="playground-status" class-error=${() => error().length > 0}>${status}</span>
+      <span class="playground-status" class-error=${error().length > 0}>${status}</span>
     </div>
 
     <div class="playground-grid">
