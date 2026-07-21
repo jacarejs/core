@@ -22,7 +22,7 @@ export const LESSONS = [
   {
     path: '/bag',
     title: 'Pulse bags',
-    blurb: 'createBag, ripple, shared cart across views',
+    blurb: 'createBag, ripple, deep nesting without props',
   },
   {
     path: '/templates',

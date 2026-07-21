@@ -1,0 +1,15 @@
+export <contract>
+  props: {
+    label: { type: 'string', required: true }
+  }
+  slots: ['default']
+</contract>
+
+export <view>
+  <div class="bag-depth">
+    <p class="bag-depth-label">${label}</p>
+    <div class="bag-depth-body">
+      <slot />
+    </div>
+  </div>
+</view>

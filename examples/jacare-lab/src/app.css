@@ -1633,3 +1633,29 @@ body {
     min-height: 16rem;
   }
 }
+
+.bag-depth {
+  margin-top: 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border-left: 3px solid color-mix(in srgb, var(--lime) 65%, var(--line));
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: color-mix(in srgb, var(--panel) 88%, var(--lime-soft));
+}
+
+.bag-depth .bag-depth {
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+}
+
+.bag-depth-label {
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.bag-depth-body {
+  display: grid;
+  gap: 0.35rem;
+}

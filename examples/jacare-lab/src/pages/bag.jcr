@@ -1,10 +1,12 @@
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import BagTreeParent from '../components/BagTreeParent.jcr'
 import { demoCart } from '../bags/cart.js'
 import {
   defineBagCode,
   useBagCode,
   snapHydrateCode,
+  deepTreeCode,
 } from '../snippets/bag.js'
 
 const PRODUCTS = [
@@ -20,7 +22,7 @@ export <view>
       <h1 class="page-title">Pulse bags</h1>
       <p class="page-lead">
         Shared pulses with a stable address. Define once with <code>createBag</code>,
-        import anywhere — catalog, badge, checkout all read the same cells.
+        import anywhere — catalog, badge, checkout, or a leaf four levels deep.
       </p>
     </header>
 
@@ -60,6 +62,14 @@ export <view>
             </ul>
           #end
         </div>
+      </Demo>
+
+      <Demo
+        :title=${'Parent → child → grandchild → leaf'}
+        :lead=${'Four nested components. Parent and child read the bag; grandchild is a pass-through; the leaf writes. Zero cart props.'}
+        :code=${deepTreeCode}
+      >
+        <BagTreeParent />
       </Demo>
 
       <Demo :title=${'snap / hydrate / reset'} :lead=${'Persist writable pulses, restore them, or rebuild the bag factory.'} :code=${snapHydrateCode}>

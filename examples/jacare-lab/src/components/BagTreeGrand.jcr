@@ -1,0 +1,9 @@
+import BagDepth from './BagDepth.jcr'
+import BagTreeLeaf from './BagTreeLeaf.jcr'
+
+export <view>
+  <BagDepth :label=${'Grandchild · no bag import (pass-through)'}>
+    <p class="muted">This level only nests — it never touches the bag.</p>
+    <BagTreeLeaf />
+  </BagDepth>
+</view>

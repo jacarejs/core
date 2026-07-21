@@ -45,3 +45,20 @@ export const snapHydrateCode = `const snap = cart.snap()
 
 cart.hydrate(snap)
 cart.reset()  // next access re-runs the factory`
+
+export const deepTreeCode = `// BagTreeParent.jcr
+import { demoCart } from '../bags/cart.js'
+import BagTreeChild from './BagTreeChild.jcr'
+
+export <view>
+  <p>Parent count: \${demoCart.count()}</p>
+  <BagTreeChild />
+</view>
+
+// BagTreeChild.jcr — imports demoCart again
+// BagTreeGrand.jcr — no bag import (pass-through)
+// BagTreeLeaf.jcr — imports demoCart and calls add()
+
+// Parent · Child · Grandchild · Great-grandchild
+// Same @lab-cart/* cells — no cart props at any level`
+

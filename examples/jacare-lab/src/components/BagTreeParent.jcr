@@ -1,0 +1,10 @@
+import { demoCart } from '../bags/cart.js'
+import BagDepth from './BagDepth.jcr'
+import BagTreeChild from './BagTreeChild.jcr'
+
+export <view>
+  <BagDepth :label=${'Parent · reads cart.count'}>
+    <p class="muted">Items in bag: <strong>${demoCart.count}</strong></p>
+    <BagTreeChild />
+  </BagDepth>
+</view>

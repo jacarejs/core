@@ -350,7 +350,7 @@ export <view>
 </view>
 ```
 
-Prefer bare `${cart.count()}` when there is no loop local to capture. Live demos: **Lab → Pulse bags** and **Todo → Shop**.
+Prefer bare `${cart.count()}` when there is no loop local to capture. Live demos: **Lab → Pulse bags** (including a four-level component tree) and **Todo → Shop**.
 
 ---
 

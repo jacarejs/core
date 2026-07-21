@@ -26,6 +26,7 @@ export {
   defineBagCode,
   useBagCode,
   snapHydrateCode,
+  deepTreeCode,
 } from './bag.js'
 
 export { textBindingCode, attrCode, progressCode, multiAttrCode, trendCode } from './templates.js'
@@ -131,6 +132,7 @@ import {
   defineBagCode,
   useBagCode,
   snapHydrateCode,
+  deepTreeCode,
 } from './bag.js'
 import { textBindingCode, attrCode, progressCode, multiAttrCode, trendCode } from './templates.js'
 import { mirrorCode, classCode, gaugeCode, numberBindCode, multiClassCode } from './bindings.js'
@@ -226,6 +228,7 @@ export const SNIPPET_CATALOG = [
 
   { id: 'bag.define', title: 'createBag + live cart', lesson: '/bag', code: defineBagCode },
   { id: 'bag.use', title: 'Same bag, another view', lesson: '/bag', code: useBagCode },
+  { id: 'bag.deep', title: 'Parent → child → grandchild → leaf', lesson: '/bag', code: deepTreeCode },
   { id: 'bag.snap', title: 'snap / hydrate / reset', lesson: '/bag', code: snapHydrateCode },
 
   { id: 'templates.text-binding', title: 'Bare vs mixed text', lesson: '/templates', code: textBindingCode },
