@@ -1,27 +1,15 @@
-import type {
-  TemplateAST,
-  TemplateCaseNode,
-  TemplateEachNode,
-  TemplateIfNode,
-  TemplateNode,
-  TextPart,
-} from './types.js'
-import { CodegenContext, escapeHtml } from './codegen-shared.js'
+import type { TemplateAST } from './types.js'
+import { CodegenContext } from './codegen-shared.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
+import { emitComponentPropEntrySSR } from './ir/lower-component.js'
+import type { CaseFlowPlan, IfFlowPlan, ListFlowPlan } from './ir/lower-flow.js'
+import { emitSSRElementOpen, emitSSRLoweredText } from './ir/emit-ssr-leaf.js'
 import {
-  lowerCase,
-  lowerEach,
-  lowerIf,
-  type CaseFlowPlan,
-  type IfFlowPlan,
-  type ListFlowPlan,
-} from './ir/lower-flow.js'
-import {
-  emitComponentPropEntrySSR,
-  lowerComponent,
-} from './ir/lower-component.js'
-import { optimizeIfPlan } from './ir/optimize.js'
+  lowerMountAst,
+  type MountPlan,
+} from './ir/mount-plan.js'
+import type { OptimizedIf } from './ir/optimize.js'
 
 export function emitSSR(
   ast: TemplateAST,
@@ -71,8 +59,9 @@ export function emitSSR(
     ctx.line(`_html += '<style data-jacare-s="${scopeId}">' + ${JSON.stringify(scopedStyle)} + '</style>'`)
   }
 
-  for (const child of ast.children) {
-    emitSSRNode(ctx, child)
+  const forest = lowerMountAst(ast, ctx.leafContext())
+  for (const plan of forest) {
+    emitSSRPlan(ctx, plan)
   }
 
   ctx.line('return { html: _html, state: { bindings: _bindings } }')
@@ -106,67 +95,50 @@ export function emitResume(ast: TemplateAST, props: string[], runtimeImports?: S
   return ctx.join()
 }
 
-function emitSSRNode(ctx: CodegenContext, node: TemplateNode): void {
-  switch (node.type) {
+function emitSSRPlan(ctx: CodegenContext, plan: MountPlan): void {
+  switch (plan.kind) {
     case 'text':
-      emitSSRText(ctx, node.parts)
-      break
+      emitSSRLoweredText(ctx, plan.lowered)
+      return
     case 'element':
-      emitSSRElement(ctx, node)
-      break
+      emitSSRElementOpen(ctx, plan.tag, plan.bindings)
+      for (const child of plan.children) emitSSRPlan(ctx, child)
+      ctx.line(`_html += ${JSON.stringify(`</${plan.tag}>`)}`)
+      return
     case 'component': {
-      const plan = lowerComponent(node, ctx.leafContext())
       const propsArg =
-        plan.props.length > 0
-          ? `{ ${plan.props.map(emitComponentPropEntrySSR).join(', ')} }`
+        plan.plan.props.length > 0
+          ? `{ ${plan.plan.props.map(emitComponentPropEntrySSR).join(', ')} }`
           : '{}'
       ctx.line(
-        `_html += ${plan.name}.render ? ${plan.name}.render(${propsArg}).html : ""`,
+        `_html += ${plan.plan.name}.render ? ${plan.plan.name}.render(${propsArg}).html : ""`,
       )
-      break
+      return
     }
     case 'slot':
       ctx.line(`_html += '<span data-jacare-slot="default"></span>'`)
-      break
+      return
     case 'if':
-      emitSSRIf(ctx, node)
-      break
+      emitSSROptimizedIf(ctx, plan.optimized)
+      return
     case 'case':
-      emitSSRCase(ctx, node)
-      break
-    case 'each':
-      emitSSREach(ctx, node)
-      break
+      emitSSRCasePlan(ctx, plan.plan)
+      return
+    case 'list':
+      emitSSREachPlan(ctx, plan.plan)
+      return
     case 'debug':
-      break
+      return
   }
 }
 
-function emitSSRElement(
-  ctx: CodegenContext,
-  node: Extract<TemplateNode, { type: 'element' }>,
-): void {
-  const attrs = node.attrs
-    .filter((a) => a.kind === 'static')
-    .map((a) => `${a.name}="${escapeHtml(a.value)}"`)
-    .join(' ')
-
-  const open = attrs.length > 0 ? `<${node.tag} ${attrs}>` : `<${node.tag}>`
-  ctx.line(`_html += ${JSON.stringify(open)}`)
-
-  for (const child of node.children) {
-    emitSSRNode(ctx, child)
-  }
-
-  ctx.line(`_html += ${JSON.stringify(`</${node.tag}>`)}`)
-}
-
-function emitSSRIf(ctx: CodegenContext, node: TemplateIfNode): void {
-  const optimized = optimizeIfPlan(lowerIf(node))
+function emitSSROptimizedIf(ctx: CodegenContext, optimized: OptimizedIf): void {
   if (optimized.kind === 'static') {
-    for (const child of optimized.children) {
-      emitSSRNode(ctx, child)
-    }
+    const children = lowerMountAst(
+      { children: optimized.children },
+      ctx.leafContext(),
+    )
+    for (const child of children) emitSSRPlan(ctx, child)
     return
   }
   emitSSRIfPlan(ctx, optimized.plan)
@@ -178,8 +150,8 @@ function emitSSRIfPlan(ctx: CodegenContext, plan: IfFlowPlan): void {
     const prefix = i === 0 ? 'if' : 'else if'
     ctx.line(`${prefix} (${branch.test}) {`)
     ctx.indent()
-    for (const child of branch.children) {
-      emitSSRNode(ctx, child)
+    for (const child of lowerMountAst({ children: branch.children }, ctx.leafContext())) {
+      emitSSRPlan(ctx, child)
     }
     ctx.dedent()
     ctx.line('}')
@@ -188,16 +160,12 @@ function emitSSRIfPlan(ctx: CodegenContext, plan: IfFlowPlan): void {
   if (plan.elseChildren.length > 0) {
     ctx.line('else {')
     ctx.indent()
-    for (const child of plan.elseChildren) {
-      emitSSRNode(ctx, child)
+    for (const child of lowerMountAst({ children: plan.elseChildren }, ctx.leafContext())) {
+      emitSSRPlan(ctx, child)
     }
     ctx.dedent()
     ctx.line('}')
   }
-}
-
-function emitSSRCase(ctx: CodegenContext, node: TemplateCaseNode): void {
-  emitSSRCasePlan(ctx, lowerCase(node))
 }
 
 function emitSSRCasePlan(ctx: CodegenContext, plan: CaseFlowPlan): void {
@@ -211,8 +179,8 @@ function emitSSRCasePlan(ctx: CodegenContext, plan: CaseFlowPlan): void {
     const prefix = i === 0 ? 'if' : 'else if'
     ctx.line(`${prefix} (Object.is(${match}, (${branch.value}))) {`)
     ctx.indent()
-    for (const child of branch.children) {
-      emitSSRNode(ctx, child)
+    for (const child of lowerMountAst({ children: branch.children }, ctx.leafContext())) {
+      emitSSRPlan(ctx, child)
     }
     ctx.dedent()
     ctx.line('}')
@@ -221,8 +189,8 @@ function emitSSRCasePlan(ctx: CodegenContext, plan: CaseFlowPlan): void {
   if (plan.elseChildren.length > 0) {
     ctx.line('else {')
     ctx.indent()
-    for (const child of plan.elseChildren) {
-      emitSSRNode(ctx, child)
+    for (const child of lowerMountAst({ children: plan.elseChildren }, ctx.leafContext())) {
+      emitSSRPlan(ctx, child)
     }
     ctx.dedent()
     ctx.line('}')
@@ -232,76 +200,15 @@ function emitSSRCasePlan(ctx: CodegenContext, plan: CaseFlowPlan): void {
   ctx.line(`}`)
 }
 
-function emitSSREach(ctx: CodegenContext, node: TemplateEachNode): void {
-  emitSSREachPlan(ctx, lowerEach(node, ctx.leafContext()))
-}
-
 function emitSSREachPlan(ctx: CodegenContext, plan: ListFlowPlan): void {
   ctx.line(
     `for (let ${plan.indexName} = 0; ${plan.indexName} < (${plan.sourceExpr}).length; ${plan.indexName}++) {`,
   )
   ctx.indent()
   ctx.line(`const ${plan.itemName} = (${plan.sourceExpr})[${plan.indexName}]`)
-  for (const child of plan.children) {
-    emitSSRNode(ctx, child)
+  for (const child of lowerMountAst({ children: plan.children }, ctx.leafContext())) {
+    emitSSRPlan(ctx, child)
   }
   ctx.dedent()
   ctx.line('}')
-}
-
-function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
-  const onlyStatic = parts.length === 1 && parts[0]!.type === 'static'
-  if (onlyStatic) {
-    if (parts[0]!.value) {
-      ctx.line(`_html += ${JSON.stringify(parts[0]!.value)}`)
-    }
-    return
-  }
-
-  if (parts.length === 1 && parts[0]!.type === 'expr') {
-    const expr = parts[0]!.value
-    const id = ctx.nextBinding()
-    // No preferProp: bare props fall through to expr read (parity with pre-IR SSR).
-    const source = ctx.lowerSource(expr)
-    ctx.useRuntime('escapeHtml')
-    if (source.kind === 'signal' && source.local) {
-      ctx.line(
-        `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${source.name}())) + '</span>'`,
-      )
-      ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${source.name} })`)
-    } else if (source.kind === 'signal') {
-      const readExpr = `typeof ${source.name} === 'function' ? ${source.name}() : ${source.name}`
-      ctx.line(
-        `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${readExpr})) + '</span>'`,
-      )
-      ctx.line(
-        `_bindings.push({ id: '${id}', kind: 'expr', read: () => ${readExpr} })`,
-      )
-    } else {
-      const readExpr = `(() => { const _v = (${ctx.rewriteExprForEffect(expr)}); return typeof _v === 'function' ? _v() : _v })()`
-      ctx.line(
-        `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${readExpr})) + '</span>'`,
-      )
-      ctx.line(
-        `_bindings.push({ id: '${id}', kind: 'expr', read: () => { const _v = (${ctx.rewriteExprForEffect(expr)}); return typeof _v === 'function' ? _v() : _v } })`,
-      )
-    }
-    return
-  }
-
-  const hasDynamic = parts.some((p) => p.type === 'expr')
-  if (hasDynamic) {
-    ctx.useRuntime('escapeHtml')
-  }
-
-  const template = parts
-    .map((p) => {
-      if (p.type === 'static') return escapeHtml(p.value)
-      const source = ctx.lowerSource(p.value)
-      if (source.kind === 'signal') return `' + escapeHtml(String(${source.name}())) + '`
-      return `' + escapeHtml(String(${ctx.rewriteExprForEffect(p.value)})) + '`
-    })
-    .join('')
-
-  ctx.line(`_html += \`${template}\``)
 }

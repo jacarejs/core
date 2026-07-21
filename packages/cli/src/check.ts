@@ -4,13 +4,18 @@ import {
   compile,
   collectComponents,
   formatContractIssue,
+  inspectTemplateBindings,
   JacareCompileError,
   parseModule,
   parseTemplate,
   validateContractUsage,
 } from '@jacare/compiler'
 
-export function runCheck(cwd: string): number {
+export type CheckOptions = {
+  bindings?: boolean
+}
+
+export function runCheck(cwd: string, options: CheckOptions = {}): number {
   const root = resolve(cwd)
   const files = findJacareFiles(root)
   let errors = 0
@@ -28,6 +33,9 @@ export function runCheck(cwd: string): number {
       const result = compile(source, { filename: file })
       compiled.set(file, result)
       console.log(`ok ${file}`)
+      if (options.bindings) {
+        printBindings(file, source)
+      }
     } catch (error) {
       errors++
       if (error instanceof JacareCompileError) {
@@ -67,6 +75,29 @@ export function runCheck(cwd: string): number {
 
   console.log(`\n${files.length} file(s) ok`)
   return 0
+}
+
+function printBindings(file: string, source: string): void {
+  try {
+    const mod = parseModule(source, file)
+    if (!mod.viewHtml) return
+    const ast = parseTemplate(mod.viewHtml, {
+      filename: file,
+      baseLine: mod.viewStartLine,
+    })
+    const sites = inspectTemplateBindings(ast)
+    if (sites.length === 0) return
+    console.log(`  bindings (${sites.length}):`)
+    for (const site of sites) {
+      const bits = [site.kind, site.label]
+      if (site.mode) bits.push(site.mode)
+      if (site.sourceKind) bits.push(site.sourceKind)
+      if (site.lazy) bits.push('lazy')
+      console.log(`    - ${bits.join(' · ')}`)
+    }
+  } catch {
+    // bindings dump is best-effort
+  }
 }
 
 function checkContracts(

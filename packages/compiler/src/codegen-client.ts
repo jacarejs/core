@@ -1,31 +1,17 @@
-import type {
-  TemplateAST,
-  TemplateCaseNode,
-  TemplateEachNode,
-  TemplateIfNode,
-  TemplateNode,
-  TextPart,
-} from './types.js'
+import type { TemplateAST } from './types.js'
 import { append, CodegenContext, type EmitTarget } from './codegen-shared.js'
 import type { TemplateContract } from './parse-contract.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
 import { emitLeafOp } from './ir/emit-leaf.js'
-import {
-  lowerCase,
-  lowerEach,
-  lowerIf,
-  type CaseFlowPlan,
-  type IfFlowPlan,
-  type ListFlowPlan,
-} from './ir/lower-flow.js'
+import type { CaseFlowPlan, IfFlowPlan, ListFlowPlan } from './ir/lower-flow.js'
 import {
   emitComponentPropEntry,
-  lowerComponent,
   type ComponentPlan,
 } from './ir/lower-component.js'
-import { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
-import { markCpwOps, markCpwText, optimizeIfPlan } from './ir/optimize.js'
+import { lowerMountAst, lowerMountForest, type MountPlan } from './ir/mount-plan.js'
+import { markCpwOps, markCpwText, type OptimizedIf } from './ir/optimize.js'
+import type { LoweredText } from './ir/types.js'
 
 export function emitClient(
   ast: TemplateAST,
@@ -95,8 +81,8 @@ export function emitClient(
 
   ctx.line('const _frag = document.createDocumentFragment()')
 
-  for (const child of ast.children) {
-    emitNode(ctx, child, { kind: 'parent', name: '_frag' })
+  for (const plan of lowerMountAst(ast, ctx.leafContext())) {
+    emitClientPlan(ctx, plan, { kind: 'parent', name: '_frag' })
   }
 
   ctx.line('target.appendChild(_frag)')
@@ -105,87 +91,100 @@ export function emitClient(
   ctx.line('}')
 }
 
-function emitNode(ctx: CodegenContext, node: TemplateNode, target: EmitTarget): void {
-  switch (node.type) {
+function emitClientPlan(ctx: CodegenContext, plan: MountPlan, target: EmitTarget): void {
+  switch (plan.kind) {
     case 'text':
-      emitText(ctx, node.parts, target)
-      break
+      emitLoweredText(ctx, plan.lowered, target)
+      return
     case 'element':
-      emitElement(ctx, node, target)
-      break
+      emitElementPlan(ctx, plan, target)
+      return
     case 'component':
-      emitComponent(ctx, node, target)
-      break
+      emitComponentPlan(ctx, plan.plan, target)
+      return
     case 'slot':
-      emitSlot(ctx, node, target)
-      break
+      emitSlotPlan(ctx, plan, target)
+      return
     case 'if':
-      emitIf(ctx, node, target)
-      break
+      emitOptimizedIf(ctx, plan.optimized, target)
+      return
     case 'case':
-      emitCase(ctx, node, target)
-      break
-    case 'each':
-      emitEach(ctx, node, target)
-      break
+      emitCasePlan(ctx, plan.plan, target)
+      return
+    case 'list':
+      emitEachPlan(ctx, plan.plan, target)
+      return
     case 'debug':
-      emitDebug(ctx, node, target)
-      break
+      emitDebugPlan(ctx, plan, target)
+      return
   }
 }
 
-function emitDebug(
+function emitForest(
   ctx: CodegenContext,
-  node: Extract<TemplateNode, { type: 'debug' }>,
+  children: MountPlan[],
+  target: EmitTarget,
+): void {
+  for (const child of children) emitClientPlan(ctx, child, target)
+}
+
+function emitNodesAsForest(
+  ctx: CodegenContext,
+  nodes: Parameters<typeof lowerMountForest>[0],
+  target: EmitTarget,
+): void {
+  emitForest(ctx, lowerMountForest(nodes, ctx.leafContext()), target)
+}
+
+function emitDebugPlan(
+  ctx: CodegenContext,
+  plan: Extract<MountPlan, { kind: 'debug' }>,
   target: EmitTarget,
 ): void {
   if (!ctx.debug) return
 
   const host = ctx.nextId('dbg')
-  ctx.line(`const ${host} = document.createElement('div')`, node.sourceLine)
+  ctx.line(`const ${host} = document.createElement('div')`, plan.sourceLine)
   append(ctx, target, host)
   ctx.useRuntime('bindDebug')
-  const readExpr = ctx.rewriteExprForEffect(node.expr)
+  const readExpr = ctx.rewriteExprForEffect(plan.expr)
   const opts: string[] = []
-  if (node.label) opts.push(`label: ${JSON.stringify(node.label)}`)
-  if (node.copy) opts.push('copy: true')
+  if (plan.label) opts.push(`label: ${JSON.stringify(plan.label)}`)
+  if (plan.copy) opts.push('copy: true')
   const optsArg = opts.length > 0 ? `{ ${opts.join(', ')} }` : '{}'
   ctx.pushCleanup(`bindDebug(${host}, () => (${readExpr}), ${optsArg})`)
-  const signalSrc = ctx.resolveBindingSignal(node.expr)
+  const signalSrc = ctx.resolveBindingSignal(plan.expr)
   if (signalSrc) {
-    ctx.pushDevtoolsBind(signalSrc, host, 'debug', node.sourceLine)
+    ctx.pushDevtoolsBind(signalSrc, host, 'debug', plan.sourceLine)
   }
 }
 
-function emitElement(
+function emitElementPlan(
   ctx: CodegenContext,
-  node: Extract<TemplateNode, { type: 'element' }>,
+  plan: Extract<MountPlan, { kind: 'element' }>,
   target: EmitTarget,
 ): void {
   const el = ctx.nextId('el')
-  ctx.line(`const ${el} = document.createElement('${node.tag}')`, node.sourceLine)
+  ctx.line(`const ${el} = document.createElement('${plan.tag}')`, plan.sourceLine)
 
-  for (const op of markCpwOps(lowerElementBindings(node.attrs, ctx.leafContext()), ctx.cpw)) {
+  for (const op of markCpwOps(plan.bindings, ctx.cpw)) {
     emitLeafOp(ctx, el, op)
   }
 
-  for (const child of node.children) {
-    emitNode(ctx, child, { kind: 'parent', name: el })
-  }
-
+  emitForest(ctx, plan.children, { kind: 'parent', name: el })
   append(ctx, target, el)
 }
 
-function emitSlot(
+function emitSlotPlan(
   ctx: CodegenContext,
-  node: Extract<TemplateNode, { type: 'slot' }>,
+  plan: Extract<MountPlan, { kind: 'slot' }>,
   target: EmitTarget,
 ): void {
   const anchor = ctx.nextId('slot')
-  ctx.line(`const ${anchor} = document.createElement('span')`, node.sourceLine)
+  ctx.line(`const ${anchor} = document.createElement('span')`, plan.sourceLine)
   append(ctx, target, anchor)
   ctx.useRuntime('mountSlot')
-  const slotKey = node.name ? JSON.stringify(node.name) : 'undefined'
+  const slotKey = plan.name ? JSON.stringify(plan.name) : 'undefined'
   ctx.line(`if (typeof children === 'function') {`)
   ctx.indent()
   const dispose = ctx.nextId('slotDispose')
@@ -193,14 +192,6 @@ function emitSlot(
   ctx.line(`if (${dispose}) _cleanups.push(${dispose})`)
   ctx.dedent()
   ctx.line('}')
-}
-
-function emitComponent(
-  ctx: CodegenContext,
-  node: Extract<TemplateNode, { type: 'component' }>,
-  target: EmitTarget,
-): void {
-  emitComponentPlan(ctx, lowerComponent(node, ctx.leafContext()), target)
 }
 
 function emitComponentPlan(
@@ -221,9 +212,7 @@ function emitComponentPlan(
     ctx.indent()
     ctx.line(`const ${slotScope} = []`)
     ctx.pushCleanupScope(slotScope)
-    for (const child of plan.children) {
-      emitNode(ctx, child, { kind: 'parent', name: 'slotTarget' })
-    }
+    emitNodesAsForest(ctx, plan.children, { kind: 'parent', name: 'slotTarget' })
     ctx.popCleanupScope()
     ctx.line(`return () => { for (const c of ${slotScope}) c() }`)
     ctx.dedent()
@@ -239,12 +228,13 @@ function emitComponentPlan(
   ctx.pushCleanup(dispose)
 }
 
-function emitIf(ctx: CodegenContext, node: TemplateIfNode, target: EmitTarget): void {
-  const optimized = optimizeIfPlan(lowerIf(node))
+function emitOptimizedIf(
+  ctx: CodegenContext,
+  optimized: OptimizedIf,
+  target: EmitTarget,
+): void {
   if (optimized.kind === 'static') {
-    for (const child of optimized.children) {
-      emitNode(ctx, child, target)
-    }
+    emitNodesAsForest(ctx, optimized.children, target)
     return
   }
   emitIfPlan(ctx, optimized.plan, target)
@@ -267,9 +257,7 @@ function emitIfPlan(ctx: CodegenContext, plan: IfFlowPlan, target: EmitTarget): 
     const prefix = i === 0 ? 'if' : 'else if'
     ctx.line(`${prefix} (${branch.test}) {`)
     ctx.indent()
-    for (const child of branch.children) {
-      emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
-    }
+    emitNodesAsForest(ctx, branch.children, { kind: 'mount', fn: 'mount' })
     ctx.dedent()
     ctx.line('}')
   }
@@ -277,9 +265,7 @@ function emitIfPlan(ctx: CodegenContext, plan: IfFlowPlan, target: EmitTarget): 
   if (plan.elseChildren.length > 0) {
     ctx.line('else {')
     ctx.indent()
-    for (const child of plan.elseChildren) {
-      emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
-    }
+    emitNodesAsForest(ctx, plan.elseChildren, { kind: 'mount', fn: 'mount' })
     ctx.dedent()
     ctx.line('}')
   }
@@ -288,10 +274,6 @@ function emitIfPlan(ctx: CodegenContext, plan: IfFlowPlan, target: EmitTarget): 
   ctx.line(`return () => { for (const c of ${scope}) c() }`)
   ctx.dedent()
   ctx.line('}))')
-}
-
-function emitCase(ctx: CodegenContext, node: TemplateCaseNode, target: EmitTarget): void {
-  emitCasePlan(ctx, lowerCase(node), target)
 }
 
 function emitCasePlan(ctx: CodegenContext, plan: CaseFlowPlan, target: EmitTarget): void {
@@ -313,9 +295,7 @@ function emitCasePlan(ctx: CodegenContext, plan: CaseFlowPlan, target: EmitTarge
     const prefix = i === 0 ? 'if' : 'else if'
     ctx.line(`${prefix} (Object.is(${match}, (${branch.value}))) {`)
     ctx.indent()
-    for (const child of branch.children) {
-      emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
-    }
+    emitNodesAsForest(ctx, branch.children, { kind: 'mount', fn: 'mount' })
     ctx.dedent()
     ctx.line('}')
   }
@@ -323,9 +303,7 @@ function emitCasePlan(ctx: CodegenContext, plan: CaseFlowPlan, target: EmitTarge
   if (plan.elseChildren.length > 0) {
     ctx.line('else {')
     ctx.indent()
-    for (const child of plan.elseChildren) {
-      emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
-    }
+    emitNodesAsForest(ctx, plan.elseChildren, { kind: 'mount', fn: 'mount' })
     ctx.dedent()
     ctx.line('}')
   }
@@ -334,10 +312,6 @@ function emitCasePlan(ctx: CodegenContext, plan: CaseFlowPlan, target: EmitTarge
   ctx.line(`return () => { for (const c of ${scope}) c() }`)
   ctx.dedent()
   ctx.line('}))')
-}
-
-function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarget): void {
-  emitEachPlan(ctx, lowerEach(node, ctx.leafContext()), target)
 }
 
 function emitEachPlan(ctx: CodegenContext, plan: ListFlowPlan, target: EmitTarget): void {
@@ -363,28 +337,22 @@ function emitEachPlan(ctx: CodegenContext, plan: ListFlowPlan, target: EmitTarge
   ctx.line(`const ${itemScope} = []`)
   ctx.pushCleanupScope(itemScope)
 
+  const children = lowerMountForest(plan.children, ctx.leafContext())
   const root = ctx.nextId('item')
-  const singleChild = plan.children.length === 1 ? plan.children[0]! : null
-  const hasSingleElement = singleChild?.type === 'element'
-  const hasSingleComponent = singleChild?.type === 'component'
+  const singleChild = children.length === 1 ? children[0]! : null
 
-  if (hasSingleElement) {
-    const child = singleChild as Extract<TemplateNode, { type: 'element' }>
-    ctx.line(`const ${root} = document.createElement('${child.tag}')`)
-    for (const op of markCpwOps(lowerElementBindings(child.attrs, ctx.leafContext()), ctx.cpw)) {
+  if (singleChild?.kind === 'element') {
+    ctx.line(`const ${root} = document.createElement('${singleChild.tag}')`)
+    for (const op of markCpwOps(singleChild.bindings, ctx.cpw)) {
       emitLeafOp(ctx, root, op)
     }
-    for (const grandchild of child.children) {
-      emitNode(ctx, grandchild, { kind: 'parent', name: root })
-    }
+    emitForest(ctx, singleChild.children, { kind: 'parent', name: root })
     ctx.line(`mount(${root})`)
-  } else if (hasSingleComponent) {
-    emitNode(ctx, singleChild, { kind: 'mount', fn: 'mount' })
+  } else if (singleChild?.kind === 'component') {
+    emitClientPlan(ctx, singleChild, { kind: 'mount', fn: 'mount' })
   } else {
     ctx.line(`const ${root} = document.createDocumentFragment()`)
-    for (const child of plan.children) {
-      emitNode(ctx, child, { kind: 'parent', name: root })
-    }
+    emitForest(ctx, children, { kind: 'parent', name: root })
     ctx.line(`mount(${root})`)
   }
 
@@ -396,13 +364,17 @@ function emitEachPlan(ctx: CodegenContext, plan: ListFlowPlan, target: EmitTarge
   ctx.line('}))')
 }
 
-function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): void {
-  const lowered = markCpwText(lowerTextParts(parts, ctx.leafContext()), ctx.cpw)
-  if (lowered.kind === 'skip') return
+function emitLoweredText(
+  ctx: CodegenContext,
+  lowered: LoweredText,
+  target: EmitTarget,
+): void {
+  const marked = markCpwText(lowered, ctx.cpw)
+  if (marked.kind === 'skip') return
 
-  if (lowered.kind === 'static') {
+  if (marked.kind === 'static') {
     const text = ctx.nextId('text')
-    ctx.line(`const ${text} = document.createTextNode(${JSON.stringify(lowered.value)})`)
+    ctx.line(`const ${text} = document.createTextNode(${JSON.stringify(marked.value)})`)
     append(ctx, target, text)
     return
   }
@@ -410,7 +382,7 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
   const textNode = ctx.nextId('text')
   ctx.line(`const ${textNode} = document.createTextNode('')`)
   append(ctx, target, textNode)
-  emitLeafOp(ctx, textNode, lowered.op)
+  emitLeafOp(ctx, textNode, marked.op)
 }
 
 function literalJs(value: unknown): string {

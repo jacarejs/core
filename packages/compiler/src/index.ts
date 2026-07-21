@@ -33,7 +33,9 @@ export { markCpwOps, markCpwText, optimizeIfPlan, mergeStaticTextParts } from '.
 export { lowerIf, lowerCase, lowerEach } from './ir/lower-flow.js'
 export { lowerComponent, emitComponentPropEntry } from './ir/lower-component.js'
 export { inspectTemplateBindings } from './ir/inspect.js'
+export { lowerMountAst, lowerMountForest } from './ir/mount-plan.js'
 export type { BindingSiteInfo } from './ir/inspect.js'
+export type { MountPlan } from './ir/mount-plan.js'
 export type {
   BindingSource,
   LowerSourceContext,
