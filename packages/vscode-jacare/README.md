@@ -34,9 +34,9 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | **Syntax highlighting** | JavaScript module body, `view` / `style` / `contract` blocks, directives, HTML, and bindings |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) |
 | **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` fields |
-| **Snippets** | Prefixes for component scaffold, contract, view, style, signals, and template control flow |
+| **Snippets** | Prefixes for component scaffold, contract, view, style, signals, expression style, and control flow |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
-| **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `on-inc` (contract emits), `class-active`, `${expr}` |
+| **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `class-active`, `${expr}` — prefer bare calls over `${() => …}` when no local is captured |
 | **Scoped CSS** | `style` tagged templates and `export <style>` highlighted as CSS |
 | **File icons** | Jacaré logo for `.jcr` files in the Explorer |
 | **Editor helpers** | Auto-closing brackets, quotes, and template literals |
@@ -81,22 +81,51 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 
 | Prefix | Aliases | Inserts |
 |--------|---------|---------|
+| `jcr-import` | `import-jacare` | `import { … } from '@jacare/core'` |
 | `jcr-component` | `jacare-component` | Full scaffold: `export <contract>` + `<view>` + `<style>` |
 | `jcr-contract` | `export-contract` | Contract with `props`, `pulses`, `slots`, and `emits` |
 | `jcr-props` | `contract-props` | Minimal contract (`required` + `model` props) |
 | `jcr-view` | `export-view` | `export <view>…</view>` |
 | `jcr-style` | `export-style` | `export <style>…</style>` |
 | `jcr-signal` | `signal` | `const name = signal(…)` |
+| `jcr-pulse` | `pulse` | `const name = pulse(…)` |
 | `jcr-computed` | `computed` | `const name = computed(() => …)` |
+| `jcr-derive` | `derive` | `const name = derive(() => …)` |
+| `jcr-text` | `jcr-expr` | `${count()}` — prefer bare (no redundant arrow) |
+| `jcr-text-arrow` | `jcr-expr-arrow` | `${() => label(item.id)}` — when capturing a `#for` local |
+| `jcr-class` | `class-active` | `class-active=${open()}` |
 | `jcr-if` | `#if` | `#if` / `#end` |
 | `jcr-ifelse` | `#ifelse` | `#if` / `#else` / `#end` |
 | `jcr-case` | `#case` | `#case` / `#when` / `#else` / `#end` |
 | `jcr-for` | `#for` | `#for items() as item (item.id)` / `#end` |
 | `jcr-bind` | `bind-value` | `bind-value=${signal}` |
 | `jcr-click` | `on-click` | `on-click=${handler}` |
+| `jcr-click-arrow` | — | `on-click=${() => remove(item.id)}` |
 | `jcr-emit` | `emit` | `emit('change')` |
 | `jcr-slot` | `slot` | `<slot name="…" />` |
 | `jcr-use` | `component-tag` | `<Component :prop=${value}>…</Component>` |
+| `jcr-debug` | `debug` | `<debug copy label="…">${value}</debug>` |
+
+### Template expression style
+
+Both forms are reactive. Prefer the **bare** call when nothing from a `#for` (or other local) needs capturing:
+
+```javascript
+${cart.count()}
+${t('home.lead')}
+class-on=${open()}
+```
+
+Use an arrow when the expression must close over a loop item or handler argument:
+
+```javascript
+#for items() as item (item.id)
+  <span>${() => label(item.id)}</span>
+  <button on-click=${() => remove(item.id)}>×</button>
+#end
+```
+
+`jacare check` warns on redundant nullary arrows (`--strict-style` to fail CI). See [syntax — Template bindings](https://github.com/jacarejs/core/blob/main/docs/syntax.md#template-bindings).
 
 ### Snippet examples
 
@@ -343,7 +372,7 @@ Optional `settings.json` for Jacaré projects:
 | IntelliSense / autocomplete | Use snippets (`jcr-*`) plus TypeScript with `jacare.d.ts` in your project |
 | Go to definition in templates | Planned for a future release |
 | Formatting | Format the JavaScript parts with your Prettier/ESLint setup |
-| Contract / template diagnostics | Use `jacare check` from `@jacare/cli` (validates `export <contract>` against parents) |
+| Contract / template diagnostics | Use `jacare check` from `@jacare/cli` (contracts + soft style warnings for redundant `${() => …}`) |
 
 ---
 

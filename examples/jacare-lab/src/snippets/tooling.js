@@ -19,7 +19,14 @@ ok …/Field.jcr
 
 102 file(s) ok`
 
-export const expressionStyleCode = `<!-- prefer — no free locals -->
+export const expressionStyleCode = `import { pulse, derive } from '@jacare/core'
+import { cart } from '../bags/cart.js'
+import { t } from '../i18n/index.js'
+
+const open = pulse(false)
+const canEdit = derive(() => true)
+
+<!-- prefer — no free locals -->
 \${cart.count()}
 \${t('home.lead')}
 class-on=\${open()}

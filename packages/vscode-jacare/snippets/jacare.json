@@ -73,6 +73,41 @@
     ],
     "description": "Declare an export <style> scoped CSS block"
   },
+  "Import core": {
+    "prefix": ["jcr-import", "import-jacare"],
+    "body": [
+      "import { ${1|pulse,signal,derive,computed,effect,batch,untrack,createForm,createNav|} } from '@jacare/core'"
+    ],
+    "description": "Import helpers from @jacare/core"
+  },
+  "Text binding (prefer bare)": {
+    "prefix": ["jcr-text", "jcr-expr"],
+    "body": [
+      "\\${${1:count()}}"
+    ],
+    "description": "Prefer bare ${count()} / ${cart.total()} — reactive without a redundant arrow"
+  },
+  "Text binding (capture local)": {
+    "prefix": ["jcr-text-arrow", "jcr-expr-arrow"],
+    "body": [
+      "\\${() => ${1:label(item.id)}}"
+    ],
+    "description": "Use () => when the expression captures a #for item / local"
+  },
+  "Class toggle (prefer bare)": {
+    "prefix": ["jcr-class", "class-active"],
+    "body": [
+      "class-${1:active}=\\${${2:open()}}"
+    ],
+    "description": "class-* toggle — prefer bare open() unless capturing a loop local"
+  },
+  "On click (with capture)": {
+    "prefix": ["jcr-click-arrow"],
+    "body": [
+      "on-click=\\${() => ${1:remove(item.id)}}"
+    ],
+    "description": "on-click with arrow when the handler needs an argument or #for local"
+  },
   "Signal": {
     "prefix": ["jcr-signal", "signal"],
     "body": [
@@ -80,12 +115,26 @@
     ],
     "description": "Create a Jacaré signal (reactive state)"
   },
+  "Pulse": {
+    "prefix": ["jcr-pulse", "pulse"],
+    "body": [
+      "const ${1:count} = pulse(${2:0})"
+    ],
+    "description": "Create a Jacaré pulse (alias of signal)"
+  },
   "Computed": {
     "prefix": ["jcr-computed", "computed"],
     "body": [
       "const ${1:value} = computed(() => ${2:})"
     ],
     "description": "Create a computed value derived from signals"
+  },
+  "Derive": {
+    "prefix": ["jcr-derive", "derive"],
+    "body": [
+      "const ${1:value} = derive(() => ${2:})"
+    ],
+    "description": "Create a derive (alias of computed)"
   },
   "If block": {
     "prefix": ["jcr-if", "#if"],
@@ -142,7 +191,7 @@
     "body": [
       "on-click=\\${${1:handler}}"
     ],
-    "description": "Event handler attribute on-click"
+    "description": "Event handler — bare ref when no extra args; use jcr-click-arrow to capture locals"
   },
   "Emit event": {
     "prefix": ["jcr-emit", "emit"],
