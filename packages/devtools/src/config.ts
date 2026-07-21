@@ -1,5 +1,5 @@
 export type PanelCorner = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
-export type DevtoolsTab = 'graph' | 'mesh'
+export type DevtoolsTab = 'graph' | 'mesh' | 'scope'
 
 export interface DevtoolsUiConfig {
   pulsePosition: PanelCorner
@@ -10,6 +10,8 @@ export interface DevtoolsUiConfig {
   meshMode: 'open' | 'minimized'
   /** When true, Mesh is a separate floating window; otherwise a tab inside Pulse Graph. */
   meshDetached: boolean
+  /** When true, Scope is a separate floating window; otherwise a tab inside Pulse Graph. */
+  scopeDetached: boolean
   activeTab: DevtoolsTab
 }
 
@@ -23,7 +25,13 @@ const DEFAULT_CONFIG: DevtoolsUiConfig = {
   scopeMode: 'open',
   meshMode: 'open',
   meshDetached: false,
+  scopeDetached: false,
   activeTab: 'graph',
+}
+
+function parseTab(value: unknown): DevtoolsTab {
+  if (value === 'mesh' || value === 'scope') return value
+  return 'graph'
 }
 
 export function readUiConfig(): DevtoolsUiConfig {
@@ -50,7 +58,8 @@ export function readUiConfig(): DevtoolsUiConfig {
           ? parsed.meshMode
           : DEFAULT_CONFIG.meshMode,
       meshDetached: parsed.meshDetached === true,
-      activeTab: parsed.activeTab === 'mesh' ? 'mesh' : 'graph',
+      scopeDetached: parsed.scopeDetached === true,
+      activeTab: parseTab(parsed.activeTab),
     }
   } catch {
     return { ...DEFAULT_CONFIG }

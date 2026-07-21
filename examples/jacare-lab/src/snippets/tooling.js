@@ -88,12 +88,11 @@ if (import.meta.env.DEV) {
   const { connectJacareDevtools } = await import('@jacare/devtools')
   connectJacareDevtools({
     position: 'bottom-right',
-    scopePosition: 'bottom-left',
   })
 }
 
-// Pulse Graph tabs: Graph | Mesh
-// Mesh ↗ Pop out → separate window (↙ docks back)
+// Pulse Graph tabs: Graph | Mesh | Scope
+// ↗ Pop out → separate window (↙ docks back)
 // ⚙ Config: corners, clear highlight / selection / Scope, reset layout
 
 // Scope (manual watch list):

@@ -1,4 +1,4 @@
-import type { MeshSnapshot, PulseGraphSnapshot, PulseNode, PulseNodeKind } from '@jacare/core'
+import type { MeshSnapshot, PulseGraphSnapshot, PulseNode, PulseNodeKind, ScopeSnapshot } from '@jacare/core'
 import {
   clearHighlight,
   clearScope,
@@ -21,6 +21,7 @@ import {
   MESH_VIEW_STYLES,
   renderMeshView,
 } from './mesh-view.js'
+import { renderScopeView, scopeSummary, SCOPE_VIEW_STYLES } from './scope-view.js'
 
 const KIND_LABEL: Record<PulseNodeKind, string> = {
   signal: 'Pulse',
@@ -31,11 +32,14 @@ const KIND_LABEL: Record<PulseNodeKind, string> = {
 export interface PanelOptions {
   /** Show Mesh as a tab (and optional pop-out window). Default true. */
   mesh?: boolean
+  /** Show Scope as a tab (and optional pop-out window). Default true. */
+  scope?: boolean
 }
 
 export interface PanelHandle {
   render(snapshot: PulseGraphSnapshot): void
   renderMesh(snapshot: MeshSnapshot): void
+  renderScope(snapshot: ScopeSnapshot): void
   dispose(): void
 }
 
@@ -43,6 +47,8 @@ type PanelMode = 'open' | 'minimized' | 'hidden'
 
 export function createPanel(host: HTMLElement, options: PanelOptions = {}): PanelHandle {
   const meshEnabled = options.mesh !== false
+  const scopeEnabled = options.scope !== false
+  const tabsEnabled = meshEnabled || scopeEnabled
   const root = document.createElement('div')
   root.className = 'jacare-devtools'
   root.innerHTML = `
@@ -72,11 +78,13 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       .jacare-devtools--minimized .jacare-devtools__body,
       .jacare-devtools--minimized .jacare-devtools__tabs,
       .jacare-devtools--minimized .jacare-devtools__mesh-pane,
+      .jacare-devtools--minimized .jacare-devtools__scope-pane,
       .jacare-devtools--minimized .jacare-devtools__hint,
       .jacare-devtools--minimized .jacare-devtools__config,
       .jacare-devtools--hidden .jacare-devtools__body,
       .jacare-devtools--hidden .jacare-devtools__tabs,
       .jacare-devtools--hidden .jacare-devtools__mesh-pane,
+      .jacare-devtools--hidden .jacare-devtools__scope-pane,
       .jacare-devtools--hidden .jacare-devtools__header,
       .jacare-devtools--hidden .jacare-devtools__hint,
       .jacare-devtools--hidden .jacare-devtools__config {
@@ -123,17 +131,20 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         flex: 1;
       }
 
-      .jacare-devtools__mesh-pane {
+      .jacare-devtools__mesh-pane,
+      .jacare-devtools__scope-pane {
         display: none;
         overflow: auto;
         min-height: 0;
       }
 
-      .jacare-devtools__mesh-pane.is-active {
+      .jacare-devtools__mesh-pane.is-active,
+      .jacare-devtools__scope-pane.is-active {
         display: block;
       }
 
-      .jacare-devtools__mesh-toolbar {
+      .jacare-devtools__mesh-toolbar,
+      .jacare-devtools__scope-toolbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -143,28 +154,32 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         background: #fff;
       }
 
-      .jacare-devtools__mesh-toolbar-meta {
+      .jacare-devtools__mesh-toolbar-meta,
+      .jacare-devtools__scope-toolbar-meta {
         font-size: 0.75rem;
         color: #71717a;
       }
 
-      .jacare-devtools__body.is-mesh-tab {
+      .jacare-devtools__body.is-alt-tab {
         display: none;
       }
 
-      .jacare-devtools__hint.is-mesh-tab {
+      .jacare-devtools__hint.is-alt-tab {
         display: none;
       }
 
-      .jacare-devtools__config-row[data-mesh-corner-row] {
+      .jacare-devtools__config-row[data-mesh-corner-row],
+      .jacare-devtools__config-row[data-scope-corner-row] {
         display: none;
       }
 
-      .jacare-devtools__config-row[data-mesh-corner-row].is-visible {
+      .jacare-devtools__config-row[data-mesh-corner-row].is-visible,
+      .jacare-devtools__config-row[data-scope-corner-row].is-visible {
         display: grid;
       }
 
       ${MESH_VIEW_STYLES}
+      ${SCOPE_VIEW_STYLES}
 
       .jacare-devtools--hidden {
         width: auto;
@@ -507,12 +522,14 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       </div>
     </header>
     ${
-      meshEnabled
+      tabsEnabled
         ? `<nav class="jacare-devtools__tabs" data-tabs aria-label="Pulse Graph tabs">
       <button type="button" class="jacare-devtools__tab" data-tab="graph">Graph</button>
-      <button type="button" class="jacare-devtools__tab" data-tab="mesh">Mesh</button>
+      ${meshEnabled ? `<button type="button" class="jacare-devtools__tab" data-tab="mesh">Mesh</button>` : ''}
+      ${scopeEnabled ? `<button type="button" class="jacare-devtools__tab" data-tab="scope">Scope</button>` : ''}
       <span class="jacare-devtools__tab-spacer"></span>
-      <button type="button" class="jacare-devtools__toggle" data-pop-mesh title="Open Mesh in a separate window" aria-label="Pop out Mesh" hidden>↗</button>
+      ${meshEnabled ? `<button type="button" class="jacare-devtools__toggle" data-pop-mesh title="Open Mesh in a separate window" aria-label="Pop out Mesh" hidden>↗</button>` : ''}
+      ${scopeEnabled ? `<button type="button" class="jacare-devtools__toggle" data-pop-scope title="Open Scope in a separate window" aria-label="Pop out Scope" hidden>↗</button>` : ''}
     </nav>`
         : ''
     }
@@ -523,8 +540,8 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
           ${cornerOptions()}
         </select>
       </div>
-      <div class="jacare-devtools__config-row">
-        <label for="jacare-scope-corner">Scope position</label>
+      <div class="jacare-devtools__config-row" data-scope-corner-row>
+        <label for="jacare-scope-corner">Scope window position</label>
         <select id="jacare-scope-corner" data-scope-corner>
           ${cornerOptions()}
         </select>
@@ -542,8 +559,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         <button type="button" data-reset-layout>Reset layout</button>
       </div>
       <p class="jacare-devtools__config-note">
-        Mesh is a tab here by default — use ↗ to pop it into a separate window (↙ docks it back).
-        Scope = <code>registerScope</code> watch list.
+        Mesh and Scope are tabs here by default — use ↗ to pop either into a separate window (↙ docks back).
       </p>
     </div>
     <p class="jacare-devtools__hint" data-graph-hint>Hover a node to outline DOM · ⚙ config · ◎ pick · drag header to move</p>
@@ -562,6 +578,17 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     </div>`
         : ''
     }
+    ${
+      scopeEnabled
+        ? `<div class="jacare-devtools__scope-pane" data-scope-pane>
+      <div class="jacare-devtools__scope-toolbar">
+        <span class="jacare-devtools__scope-toolbar-meta" data-scope-meta></span>
+        <button type="button" class="jacare-devtools__toggle" data-pop-scope-inline title="Open Scope in a separate window" aria-label="Pop out Scope">↗ Pop out</button>
+      </div>
+      <div class="jacare-scope-view" data-scope-body></div>
+    </div>`
+        : ''
+    }
   `
 
   host.appendChild(root)
@@ -573,6 +600,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   const pulseCornerSelect = root.querySelector('[data-pulse-corner]') as HTMLSelectElement
   const scopeCornerSelect = root.querySelector('[data-scope-corner]') as HTMLSelectElement
   const meshCornerSelect = root.querySelector('[data-mesh-corner]') as HTMLSelectElement
+  const scopeCornerRow = root.querySelector('[data-scope-corner-row]') as HTMLElement | null
   const meshCornerRow = root.querySelector('[data-mesh-corner-row]') as HTMLElement | null
   const pickBtn = root.querySelector('[data-pick]') as HTMLButtonElement
   const minimizeBtn = root.querySelector('[data-minimize]') as HTMLButtonElement
@@ -585,9 +613,15 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   const meshPane = root.querySelector('[data-mesh-pane]') as HTMLElement | null
   const meshBody = root.querySelector('[data-mesh-body]') as HTMLElement | null
   const meshMeta = root.querySelector('[data-mesh-meta]') as HTMLElement | null
+  const scopePane = root.querySelector('[data-scope-pane]') as HTMLElement | null
+  const scopeBody = root.querySelector('[data-scope-body]') as HTMLElement | null
+  const scopeMeta = root.querySelector('[data-scope-meta]') as HTMLElement | null
   const tabButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')]
   const popMeshBtns = [
     ...root.querySelectorAll<HTMLButtonElement>('[data-pop-mesh], [data-pop-mesh-inline]'),
+  ]
+  const popScopeBtns = [
+    ...root.querySelectorAll<HTMLButtonElement>('[data-pop-scope], [data-pop-scope-inline]'),
   ]
   const meshViewState = createMeshViewState()
 
@@ -595,10 +629,12 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   let selectedId: number | null = null
   let mode: PanelMode = ui.pulseMode
   let configOpen = false
-  let activeTab: DevtoolsTab = meshEnabled ? ui.activeTab : 'graph'
+  let activeTab: DevtoolsTab = resolveInitialTab(ui.activeTab, meshEnabled, scopeEnabled)
   let meshDetached = meshEnabled ? ui.meshDetached : false
+  let scopeDetached = scopeEnabled ? ui.scopeDetached : false
   let latest: PulseGraphSnapshot = { nodes: [], edges: [], updatedAt: 0 }
   let latestMesh: MeshSnapshot = { bags: [], lastRipple: null, updatedAt: 0 }
+  let latestScope: ScopeSnapshot = { entries: [], updatedAt: 0 }
   const previousValues = new Map<number, string>()
   let dragOffsetX = 0
   let dragOffsetY = 0
@@ -636,24 +672,33 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
 
   function applyTabUi(): void {
     const onMesh = meshEnabled && activeTab === 'mesh'
+    const onScope = scopeEnabled && activeTab === 'scope'
+    const onAlt = onMesh || onScope
     for (const btn of tabButtons) {
       btn.classList.toggle('is-active', btn.dataset['tab'] === activeTab)
     }
-    graphBody.classList.toggle('is-mesh-tab', onMesh)
-    graphHint.classList.toggle('is-mesh-tab', onMesh)
+    graphBody.classList.toggle('is-alt-tab', onAlt)
+    graphHint.classList.toggle('is-alt-tab', onAlt)
     meshPane?.classList.toggle('is-active', onMesh)
+    scopePane?.classList.toggle('is-active', onScope)
     meshCornerRow?.classList.toggle('is-visible', meshDetached)
+    scopeCornerRow?.classList.toggle('is-visible', scopeDetached)
     for (const btn of popMeshBtns) {
       btn.hidden = !meshEnabled || meshDetached || !onMesh
+    }
+    for (const btn of popScopeBtns) {
+      btn.hidden = !scopeEnabled || scopeDetached || !onScope
     }
   }
 
   function setActiveTab(next: DevtoolsTab): void {
-    if (!meshEnabled && next === 'mesh') return
+    if (next === 'mesh' && !meshEnabled) return
+    if (next === 'scope' && !scopeEnabled) return
     activeTab = next
     ui = writeUiConfig({ activeTab: next })
     applyTabUi()
     if (next === 'mesh') renderMeshIntoTab()
+    else if (next === 'scope') renderScopeIntoTab()
     else render(latest)
   }
 
@@ -672,6 +717,21 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     renderMeshIntoTab()
   }
 
+  function setScopeDetached(detached: boolean): void {
+    if (!scopeEnabled) return
+    scopeDetached = detached
+    ui = writeUiConfig({
+      scopeDetached: detached,
+      ...(detached ? {} : { activeTab: 'scope' }),
+    })
+    if (!detached) activeTab = 'scope'
+    applyTabUi()
+    window.dispatchEvent(
+      new CustomEvent('jacare:devtools:scope-detached', { detail: { detached } }),
+    )
+    renderScopeIntoTab()
+  }
+
   function renderMeshIntoTab(): void {
     if (!meshEnabled || !meshBody || !meshMeta) return
     meshMeta.textContent = meshSummary(latestMesh)
@@ -686,13 +746,29 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     renderMeshView(meshBody, latestMesh, meshViewState)
   }
 
+  function renderScopeIntoTab(): void {
+    if (!scopeEnabled || !scopeBody || !scopeMeta) return
+    scopeMeta.textContent = scopeSummary(latestScope)
+    if (scopeDetached) {
+      scopeBody.innerHTML = `
+        <p class="jacare-scope-view__hint">
+          Scope is open in a separate window. Click <strong>↙</strong> on that window to dock it back here.
+        </p>
+      `
+      return
+    }
+    renderScopeView(scopeBody, latestScope)
+  }
+
   applyMode()
   applyTabUi()
 
   for (const btn of tabButtons) {
     btn.addEventListener('click', (event) => {
       event.stopPropagation()
-      const tab = btn.dataset['tab'] === 'mesh' ? 'mesh' : 'graph'
+      const raw = btn.dataset['tab']
+      const tab: DevtoolsTab =
+        raw === 'mesh' ? 'mesh' : raw === 'scope' ? 'scope' : 'graph'
       setActiveTab(tab)
     })
   }
@@ -701,6 +777,13 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     btn.addEventListener('click', (event) => {
       event.stopPropagation()
       setMeshDetached(true)
+    })
+  }
+
+  for (const btn of popScopeBtns) {
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation()
+      setScopeDetached(true)
     })
   }
 
@@ -719,6 +802,22 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     renderMeshIntoTab()
   }
   window.addEventListener('jacare:devtools:mesh-detached', onMeshDetached)
+
+  const onScopeDetached = (event: Event): void => {
+    const detail = (event as CustomEvent<{ detached: boolean }>).detail
+    if (typeof detail?.detached !== 'boolean') return
+    if (detail.detached === scopeDetached) {
+      applyTabUi()
+      renderScopeIntoTab()
+      return
+    }
+    scopeDetached = detail.detached
+    ui = readUiConfig()
+    if (!detail.detached) activeTab = 'scope'
+    applyTabUi()
+    renderScopeIntoTab()
+  }
+  window.addEventListener('jacare:devtools:scope-detached', onScopeDetached)
 
   configBtn.addEventListener('click', (event) => {
     event.stopPropagation()
@@ -772,6 +871,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       scopeMode: 'open',
       meshMode: 'open',
       meshDetached: false,
+      scopeDetached: false,
       activeTab: 'graph',
     })
     window.dispatchEvent(
@@ -783,8 +883,12 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     window.dispatchEvent(
       new CustomEvent('jacare:devtools:mesh-detached', { detail: { detached: false } }),
     )
+    window.dispatchEvent(
+      new CustomEvent('jacare:devtools:scope-detached', { detail: { detached: false } }),
+    )
     activeTab = 'graph'
     meshDetached = false
+    scopeDetached = false
     pulseCornerSelect.value = ui.pulsePosition
     scopeCornerSelect.value = ui.scopePosition
     meshCornerSelect.value = ui.meshPosition
@@ -1070,12 +1174,28 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       if (activeTab === 'mesh') renderMeshIntoTab()
       else if (meshMeta) meshMeta.textContent = meshSummary(snapshot)
     },
+    renderScope(snapshot: ScopeSnapshot) {
+      latestScope = snapshot
+      if (activeTab === 'scope') renderScopeIntoTab()
+      else if (scopeMeta) scopeMeta.textContent = scopeSummary(snapshot)
+    },
     dispose() {
       window.removeEventListener('jacare:devtools:mesh-detached', onMeshDetached)
+      window.removeEventListener('jacare:devtools:scope-detached', onScopeDetached)
       clearHighlight()
       root.remove()
     },
   }
+}
+
+function resolveInitialTab(
+  saved: DevtoolsTab,
+  meshEnabled: boolean,
+  scopeEnabled: boolean,
+): DevtoolsTab {
+  if (saved === 'mesh' && meshEnabled) return 'mesh'
+  if (saved === 'scope' && scopeEnabled) return 'scope'
+  return 'graph'
 }
 
 function cornerOptions(): string {

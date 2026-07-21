@@ -1744,8 +1744,8 @@ connectJacareDevtools()
 Panels (dev only — only when you call `connectJacareDevtools()`):
 
 - **Pulse Graph** — signal dependency graph, **live values**, **source names** (`count` · `Counter.jcr:4`), **DOM highlight** on hover
-- **Mesh** (tab inside Pulse Graph) — `createBag` cells as `@cart/total`, intent ports, ripple flash; **↗ Pop out** opens a separate window (↙ docks back)
-- **Scope** — values you register with `registerScope()` (manual watch list; see [§13](#13-lifecycle-and-scope))
+- **Mesh** (tab) — `createBag` cells as `@cart/total`; **↗ Pop out** opens a separate window
+- **Scope** (tab) — `registerScope()` watch list; same **↗ / ↙** pop-out / dock
 
 Controls: `⚙` config · `◎` pick element · `−` minimize · `×` hide · **drag header** to move. Config lets you pick corners, clear highlight/selection, clear Scope, or reset layout. Preferences persist in `sessionStorage`.
 
@@ -1754,7 +1754,8 @@ connectJacareDevtools({
   position: 'bottom-right',  // Pulse Graph
   scopePosition: 'bottom-left',
   meshPosition: 'top-left',  // when Mesh is popped out
-  meshDetached: false,       // true = start as separate window
+  meshDetached: false,       // true = start Mesh as separate window
+  scopeDetached: false,      // true = start Scope as separate window
   scope: true,
   mesh: true,
 })

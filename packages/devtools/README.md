@@ -6,9 +6,9 @@
 [![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
 [![demo](https://img.shields.io/badge/demo-Todo-78c018.svg)](https://jacarejs.github.io/core/todo/)
 
-Development tools for Jacaré — a **Pulse Graph** inspector (with a **Mesh** tab for `createBag`), plus a live **Scope** panel.
+Development tools for Jacaré — a **Pulse Graph** inspector with **Graph**, **Mesh**, and **Scope** tabs (each of Mesh/Scope can pop out to its own window).
 
-Use this package during development to visualize reactive dependencies, inspect live pulse values (with flash-on-change), pop Mesh into its own window when needed, and watch registered scope variables.
+Use this package during development to visualize reactive dependencies, inspect live pulse values, watch `createBag` mesh cells, and register Scope values — without cluttering the page with three floating panels by default.
 
 ---
 
@@ -53,8 +53,8 @@ if (import.meta.env.DEV) {
 
 Two floating panels appear (dev only):
 
-1. **Pulse Graph** — reactive nodes + **Mesh** tab (`createBag` as `@id/key`; ↗ pops out to a separate window)
-2. **Scope** — registered variables from `registerScope()`
+1. **Pulse Graph** — tabs **Graph** | **Mesh** | **Scope** (↗ pops Mesh or Scope into a separate window)
+2. *(optional)* detached Mesh / Scope windows when popped out
 
 ### Show / hide Pulse Graph
 
@@ -230,24 +230,26 @@ interface PulseEdge {
 ```javascript
 connectJacareDevtools({
   target: document.body,  // where to mount panels
-  scope: true,              // set false to hide Scope panel
+  scope: true,              // set false to hide Scope tab
   mesh: true,               // set false to hide Mesh tab
   position: 'bottom-right',
-  scopePosition: 'bottom-left',
+  scopePosition: 'bottom-left', // used when Scope is popped out
   meshPosition: 'top-left', // used when Mesh is popped out
   meshDetached: false,      // true = start Mesh as its own window
+  scopeDetached: false,     // true = start Scope as its own window
 })
 ```
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `target` | `HTMLElement` | `document.body` | DOM element to append panels to |
-| `scope` | `boolean` | `true` | Enable Scope panel (`connectJacareScope`) |
+| `scope` | `boolean` | `true` | Enable Scope tab (and optional pop-out window) |
 | `mesh` | `boolean` | `true` | Enable Mesh tab (and optional pop-out window) |
 | `position` | corner | `bottom-right` | Pulse Graph corner |
-| `scopePosition` | corner | `bottom-left` | Scope corner |
+| `scopePosition` | corner | `bottom-left` | Scope window corner when detached |
 | `meshPosition` | corner | `top-left` | Mesh window corner when detached |
 | `meshDetached` | `boolean` | `false` | Start with Mesh in a separate window |
+| `scopeDetached` | `boolean` | `false` | Start with Scope in a separate window |
 
 ### connectJacareScope
 

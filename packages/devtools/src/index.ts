@@ -2,9 +2,12 @@ import {
   enableDevtools,
   getMeshSnapshot,
   getPulseGraph,
+  getScopeSnapshot,
   startMeshPulse,
+  startScopePulse,
   subscribeMesh,
   subscribePulseGraph,
+  subscribeScope,
   type PulseGraphSnapshot,
   type PulseNode,
   type BindingMeta,
@@ -18,18 +21,20 @@ import { readUiConfig, writeUiConfig, type PanelCorner } from './config.js'
 
 export interface ConnectOptions {
   target?: HTMLElement
-  /** Mount the Scope panel (default true). */
+  /** Enable Scope tab (and optional pop-out window). Default true. */
   scope?: boolean
   /** Enable Mesh tab (and optional pop-out window). Default true. */
   mesh?: boolean
   /** Initial Pulse Graph corner (persisted in sessionStorage). */
   position?: PanelCorner
-  /** Initial Scope corner (persisted in sessionStorage). */
+  /** Initial Scope window corner when popped out (persisted in sessionStorage). */
   scopePosition?: PanelCorner
   /** Initial Mesh window corner when popped out (persisted in sessionStorage). */
   meshPosition?: PanelCorner
   /** Start with Mesh in a separate window (default false — Mesh is a tab). */
   meshDetached?: boolean
+  /** Start with Scope in a separate window (default false — Scope is a tab). */
+  scopeDetached?: boolean
 }
 
 export function connectJacareDevtools(options: ConnectOptions = {}): () => void {
@@ -37,20 +42,23 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
     options.position ||
     options.scopePosition ||
     options.meshPosition ||
-    options.meshDetached != null
+    options.meshDetached != null ||
+    options.scopeDetached != null
   ) {
     writeUiConfig({
       ...(options.position ? { pulsePosition: options.position } : {}),
       ...(options.scopePosition ? { scopePosition: options.scopePosition } : {}),
       ...(options.meshPosition ? { meshPosition: options.meshPosition } : {}),
       ...(options.meshDetached != null ? { meshDetached: options.meshDetached } : {}),
+      ...(options.scopeDetached != null ? { scopeDetached: options.scopeDetached } : {}),
     })
   }
 
   enableDevtools()
   const host = options.target ?? document.body
   const meshEnabled = options.mesh !== false
-  const panel = createPanel(host, { mesh: meshEnabled })
+  const scopeEnabled = options.scope !== false
+  const panel = createPanel(host, { mesh: meshEnabled, scope: scopeEnabled })
   const unsubscribe = subscribePulseGraph(() => {
     panel.render(getPulseGraph())
   })
@@ -60,6 +68,10 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
   let stopMeshPulse: (() => void) | null = null
   let unsubscribeMesh: (() => void) | null = null
 
+  let disposeScopeWindow: (() => void) | null = null
+  let stopScopePulse: (() => void) | null = null
+  let unsubscribeScope: (() => void) | null = null
+
   function syncMeshWindow(): void {
     const detached = meshEnabled && readUiConfig().meshDetached
     if (detached && !disposeMeshWindow) {
@@ -67,6 +79,16 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
     } else if (!detached && disposeMeshWindow) {
       disposeMeshWindow()
       disposeMeshWindow = null
+    }
+  }
+
+  function syncScopeWindow(): void {
+    const detached = scopeEnabled && readUiConfig().scopeDetached
+    if (detached && !disposeScopeWindow) {
+      disposeScopeWindow = connectJacareScope({ target: host, pulseMs: false })
+    } else if (!detached && disposeScopeWindow) {
+      disposeScopeWindow()
+      disposeScopeWindow = null
     }
   }
 
@@ -79,20 +101,35 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
     syncMeshWindow()
   }
 
+  if (scopeEnabled) {
+    stopScopePulse = startScopePulse(120)
+    unsubscribeScope = subscribeScope(() => {
+      panel.renderScope(getScopeSnapshot())
+    })
+    panel.renderScope(getScopeSnapshot())
+    syncScopeWindow()
+  }
+
   const onMeshDetached = (): void => {
     syncMeshWindow()
   }
+  const onScopeDetached = (): void => {
+    syncScopeWindow()
+  }
   window.addEventListener('jacare:devtools:mesh-detached', onMeshDetached)
+  window.addEventListener('jacare:devtools:scope-detached', onScopeDetached)
 
-  const disposeScope = options.scope === false ? null : connectJacareScope({ target: host })
   return () => {
     window.removeEventListener('jacare:devtools:mesh-detached', onMeshDetached)
+    window.removeEventListener('jacare:devtools:scope-detached', onScopeDetached)
     unsubscribe()
     unsubscribeMesh?.()
     stopMeshPulse?.()
     disposeMeshWindow?.()
+    unsubscribeScope?.()
+    stopScopePulse?.()
+    disposeScopeWindow?.()
     panel.dispose()
-    disposeScope?.()
   }
 }
 

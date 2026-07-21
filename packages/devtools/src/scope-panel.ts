@@ -6,6 +6,7 @@ import {
   writeUiConfig,
   type PanelCorner,
 } from './config.js'
+import { renderScopeView, scopeSummary, SCOPE_VIEW_STYLES } from './scope-view.js'
 
 type ScopeMode = 'open' | 'minimized'
 
@@ -14,6 +15,7 @@ export interface ScopePanelHandle {
   dispose(): void
 }
 
+/** Floating Scope window — used when the Scope tab is popped out of Pulse Graph. */
 export function createScopePanel(host: HTMLElement): ScopePanelHandle {
   const root = document.createElement('div')
   root.className = 'jacare-scope'
@@ -103,52 +105,10 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
 
       .jacare-scope__body {
         overflow: auto;
-        padding: 0.5rem 0.65rem;
+        min-height: 0;
       }
 
-      .jacare-scope__empty {
-        margin: 0;
-        color: #71717a;
-        font-size: 0.8125rem;
-      }
-
-      .jacare-scope__list {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        display: grid;
-        gap: 0.45rem;
-      }
-
-      .jacare-scope__item {
-        padding: 0.45rem 0.55rem;
-        border-radius: 6px;
-        background: #f4f4f5;
-      }
-
-      .jacare-scope__label {
-        display: block;
-        font-size: 0.6875rem;
-        font-weight: 600;
-        color: #71717a;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        margin-bottom: 0.2rem;
-      }
-
-      .jacare-scope__value {
-        margin: 0;
-        font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
-        white-space: pre-wrap;
-        word-break: break-word;
-      }
-
-      .jacare-scope__hint {
-        margin: 0 0 0.5rem;
-        font-size: 0.6875rem;
-        color: #71717a;
-        line-height: 1.4;
-      }
+      ${SCOPE_VIEW_STYLES}
     </style>
     <header class="jacare-scope__header" data-drag>
       <div>
@@ -156,11 +116,12 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
         <span class="jacare-scope__meta" data-meta></span>
       </div>
       <div class="jacare-scope__actions">
+        <button class="jacare-scope__toggle" type="button" data-dock title="Dock into Pulse Graph" aria-label="Dock Scope into Pulse Graph">↙</button>
         <button class="jacare-scope__toggle" type="button" data-clear title="Clear Scope entries" aria-label="Clear Scope">⌫</button>
         <button class="jacare-scope__toggle" type="button" data-minimize title="Minimize" aria-label="Minimize Scope">−</button>
       </div>
     </header>
-    <div class="jacare-scope__body" data-body></div>
+    <div class="jacare-scope__body jacare-scope-view" data-body></div>
   `
 
   host.appendChild(root)
@@ -168,6 +129,7 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
   const header = root.querySelector('[data-drag]') as HTMLElement
   const meta = root.querySelector('[data-meta]') as HTMLElement
   const body = root.querySelector('[data-body]') as HTMLElement
+  const dockBtn = root.querySelector('[data-dock]') as HTMLButtonElement
   const clearBtn = root.querySelector('[data-clear]') as HTMLButtonElement
   const minimizeBtn = root.querySelector('[data-minimize]') as HTMLButtonElement
 
@@ -214,6 +176,14 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
   window.addEventListener('jacare:devtools:scope-position', onPosition)
   window.addEventListener('jacare:devtools:scope-mode', onMode)
 
+  dockBtn.addEventListener('click', (event) => {
+    event.stopPropagation()
+    writeUiConfig({ scopeDetached: false, activeTab: 'scope' })
+    window.dispatchEvent(
+      new CustomEvent('jacare:devtools:scope-detached', { detail: { detached: false } }),
+    )
+  })
+
   clearBtn.addEventListener('click', (event) => {
     event.stopPropagation()
     clearScope()
@@ -225,9 +195,7 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
   })
 
   header.addEventListener('click', () => {
-    if (mode === 'minimized') {
-      setMode('open')
-    }
+    if (mode === 'minimized') setMode('open')
   })
 
   header.addEventListener('pointerdown', (event) => {
@@ -255,43 +223,9 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
     dragging = false
   })
 
-  function formatValue(value: unknown): string {
-    if (value === undefined) return '—'
-    if (value === '') return '(empty)'
-    try {
-      return JSON.stringify(value, null, 2)
-    } catch {
-      return String(value)
-    }
-  }
-
   function render(snapshot: ScopeSnapshot): void {
-    meta.textContent = ` · ${snapshot.entries.length} live`
-    if (snapshot.entries.length === 0) {
-      body.innerHTML = `
-        <p class="jacare-scope__hint">
-          Scope is a manual watch list. Call <code>registerScope(id, label, () =&gt; value)</code>
-          from <code>onActivate</code> / mount code — values refresh ~every 120ms while DevTools is open.
-        </p>
-        <p class="jacare-scope__empty">No entries yet. Open Tarefas (or Lifecycle) for a live example.</p>
-      `
-      return
-    }
-
-    body.innerHTML = `
-      <ul class="jacare-scope__list">
-        ${snapshot.entries
-          .map(
-            (entry) => `
-          <li class="jacare-scope__item">
-            <span class="jacare-scope__label">${escapeHtml(entry.label)}</span>
-            <pre class="jacare-scope__value">${escapeHtml(formatValue(entry.value))}</pre>
-          </li>
-        `,
-          )
-          .join('')}
-      </ul>
-    `
+    meta.textContent = ` · ${scopeSummary(snapshot)}`
+    renderScopeView(body, snapshot)
   }
 
   return {
@@ -302,11 +236,4 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
       root.remove()
     },
   }
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
 }
