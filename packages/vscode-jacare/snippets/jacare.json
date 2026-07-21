@@ -37,7 +37,7 @@
       "  emits: ['${6:change}']",
       "</contract>"
     ],
-    "description": "Declare export <contract> with props, pulses, slots, and emits"
+    "description": "Declare export <contract> with props, pulses, slots, and emits (add links with jcr-links)"
   },
   "Export contract (props only)": {
     "prefix": ["jcr-props", "contract-props"],
@@ -91,19 +91,48 @@
       "  return { ${2:items}, ${4:count}, ${5:add} }",
       "})"
     ],
-    "description": "Shared pulse bag — createBag + ripple for multi-write waves"
+    "description": "Pulse Bag — createBag publishes Mesh ports (@id/key); factory is lazy until first property read"
   },
   "Bag read (prefer bare)": {
     "prefix": ["jcr-bag-read"],
     "body": [
       "\\${${1:cart}.${2:count}()}"
     ],
-    "description": "Read a bag cell in a template — prefer bare call, no redundant arrow"
+    "description": "Mesh Port read via import — prefer bare cart.count(), no redundant arrow"
+  },
+  "Mesh address sugar": {
+    "prefix": ["jcr-mesh", "jcr-at", "@bag"],
+    "body": [
+      "\\${@${1:cart}/${2:count}}"
+    ],
+    "description": "Mesh address sugar ${@bag/key} — resolves via getBag, no bag import in this file"
+  },
+  "Mesh address event": {
+    "prefix": ["jcr-mesh-click", "@bag-click"],
+    "body": [
+      "on-click=\\${@${1:cart}/${2:clear}}"
+    ],
+    "description": "Event via mesh address — on-click=${@bag/intent}"
+  },
+  "Contract links": {
+    "prefix": ["jcr-links", "contract-links"],
+    "body": [
+      "export <contract>",
+      "  links: {",
+      "    ${1:count}: { from: '${2:cart}.${1:count}', mode: '${3|read,write,mirror|}' }",
+      "  }",
+      "</contract>",
+      "",
+      "export <view>",
+      "  <span>\\${${1:count}}</span>",
+      "</view>"
+    ],
+    "description": "Contract Mesh links — alias ports without importing the bag; jacare check verifies @bag/key"
   },
   "Import core": {
     "prefix": ["jcr-import", "import-jacare"],
     "body": [
-      "import { ${1|pulse,signal,derive,computed,effect,batch,untrack,createBag,ripple,createForm,createNav|} } from '@jacare/core'"
+      "import { ${1|pulse,signal,derive,computed,effect,batch,untrack,createBag,ripple,getBag,createForm,createNav|} } from '@jacare/core'"
     ],
     "description": "Import helpers from @jacare/core"
   },

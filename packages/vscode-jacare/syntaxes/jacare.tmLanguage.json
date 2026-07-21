@@ -75,6 +75,9 @@
           "include": "#contract-fields"
         },
         {
+          "include": "#contract-link-keys"
+        },
+        {
           "include": "source.js"
         }
       ]
@@ -82,6 +85,14 @@
     "contract-fields": {
       "match": "\\b(props|pulses|slots|emits|forwards|links)\\b(?=\\s*:)",
       "name": "keyword.other.contract.jacare support.type.property-name.json"
+    },
+    "contract-link-keys": {
+      "match": "\\b(from|mode)\\b(?=\\s*:)",
+      "name": "keyword.other.contract.jacare support.type.property-name.json"
+    },
+    "mesh-address": {
+      "match": "@[A-Za-z_$][\\w$-]*/[A-Za-z_$][\\w$]*",
+      "name": "variable.other.mesh-address.jacare constant.other.symbol"
     },
     "style-blocks": {
       "patterns": [
@@ -415,8 +426,7 @@
       "contentName": "source.js",
       "patterns": [
         {
-          "match": "@[A-Za-z_$][\\w$-]*/[A-Za-z_$][\\w$]*",
-          "name": "variable.other.mesh-address.jacare constant.other.symbol"
+          "include": "#mesh-address"
         },
         {
           "include": "source.js"

@@ -32,9 +32,10 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | Feature | Description |
 |---------|-------------|
 | **Syntax highlighting** | JavaScript module body, `view` / `style` / `contract` blocks, directives, HTML, and bindings |
+| **Pulse Mesh** | Highlight `${@bag/key}` addresses; snippets for `createBag`, contract `links`, and mesh sugar |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) |
-| **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` fields |
-| **Snippets** | Prefixes for component scaffold, contract, view, style, signals, expression style, and control flow |
+| **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` (`from` / `mode`) |
+| **Snippets** | Component scaffold, contracts, Pulse bags, Mesh addresses, signals, control flow |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
 | **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `class-active`, `${expr}` — prefer bare calls over `${() => …}` when no local is captured |
 | **Scoped CSS** | `style` tagged templates and `export <style>` highlighted as CSS |
@@ -64,7 +65,7 @@ cd packages/vscode-jacare
 yarn install
 yarn build
 yarn package
-code --install-extension jacare-0.0.10.vsix --force
+code --install-extension jacare-0.0.13.vsix --force
 ```
 
 ### Development mode
@@ -81,9 +82,12 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 
 | Prefix | Aliases | Inserts |
 |--------|---------|---------|
-| `jcr-bag` | `createBag` | Shared pulse bag factory + `ripple` |
-| `jcr-bag-read` | — | `${cart.count()}` — bare bag read |
-| `jcr-import` | `import-jacare` | `import { … } from '@jacare/core'` |
+| `jcr-bag` | `createBag` | Pulse Bag factory + `ripple` (lazy publish) |
+| `jcr-bag-read` | — | `${cart.count()}` — Mesh Port via import |
+| `jcr-mesh` | `jcr-at`, `@bag` | `${@cart/count}` — address sugar via `getBag` |
+| `jcr-mesh-click` | `@bag-click` | `on-click=${@cart/clear}` |
+| `jcr-links` | `contract-links` | Contract `links` + view alias (no bag import) |
+| `jcr-import` | `import-jacare` | `import { … }` including `createBag` / `getBag` / `ripple` |
 | `jcr-component` | `jacare-component` | Full scaffold: `export <contract>` + `<view>` + `<style>` |
 | `jcr-contract` | `export-contract` | Contract with `props`, `pulses`, `slots`, and `emits` |
 | `jcr-props` | `contract-props` | Minimal contract (`required` + `model` props) |
@@ -167,6 +171,16 @@ export <contract>
   slots: ['default', 'actions']
   emits: ['change']
 </contract>
+```
+
+**Pulse bag** (`jcr-bag`) / **Mesh sugar** (`jcr-mesh`) / **Contract links** (`jcr-links`):
+
+```javascript
+export const cart = createBag('cart', () => { /* … */ })
+
+export <view>
+  <span>${@cart/count}</span>
+</view>
 ```
 
 **Control flow** (`jcr-if`, `jcr-for`):
@@ -270,8 +284,42 @@ Parent usage (validated at check time):
 | `pulses` | Props expected to be pulses/signals |
 | `slots` | Slot names (`default` → `children`) |
 | `emits` | Events via `emit('name')` — parent listens with `on-name` |
+| `links` | Mesh aliases `{ alias: { from: 'bag.key', mode: 'read'\|'write'\|'mirror' } }` |
 
-See the [API — Template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract) section for the full reference.
+See the [API — Template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract) and [Pulse bags](https://github.com/jacarejs/core/blob/main/docs/api.md#3b-pulse-bags-shared-state) sections for the full reference.
+
+**Pulse Mesh (shared state)**
+
+Jacaré-native shared pulses — highlight and snippets for bags, contract `links`, and `${@bag/key}` address sugar.
+
+```javascript
+import { createBag, pulse, ripple } from '@jacare/core'
+
+export const cart = createBag('cart', () => {
+  const count = pulse(0)
+  return { count, bump: () => ripple(() => count.update((n) => n + 1)) }
+})
+```
+
+```javascript
+export <view>
+  <span>${cart.count}</span>
+  <span>${@cart/count}</span>
+  <button type="button" on-click=${@cart/bump}>+</button>
+</view>
+```
+
+```javascript
+export <contract>
+  links: {
+    count: { from: 'cart.count', mode: 'read' }
+  }
+</contract>
+
+export <view>
+  <span>${count}</span>
+</view>
+```
 
 **Template directives**
 
@@ -316,7 +364,8 @@ export <style>
 | `keyword.control.jacare` | `#if`, `#for`, `#end`, `@each`, etc. |
 | `entity.name.tag.jacare` | `view`, `style`, and `contract` block tags |
 | `entity.name.tag.jacare.contract` | `<contract>` / `</contract>` specifically |
-| `keyword.other.contract.jacare` | Contract fields: `props`, `pulses`, `slots`, `emits`, `forwards`, `links` |
+| `keyword.other.contract.jacare` | Contract fields: `props`, `pulses`, `slots`, `emits`, `forwards`, `links`, `from`, `mode` |
+| `variable.other.mesh-address.jacare` | Mesh address sugar `${@bag/key}` |
 | `entity.name.type.tag.jacare` | PascalCase components |
 | `entity.name.tag` | HTML elements (`div`, `slot`, `button`, `view`, `style`, …) |
 | `entity.other.attribute-name` | `bind-*`, `on-*`, `class-*`, `:prop` |
@@ -374,14 +423,16 @@ Optional `settings.json` for Jacaré projects:
 | IntelliSense / autocomplete | Use snippets (`jcr-*`) plus TypeScript with `jacare.d.ts` in your project |
 | Go to definition in templates | Planned for a future release |
 | Formatting | Format the JavaScript parts with your Prettier/ESLint setup |
-| Contract / template diagnostics | Use `jacare check` from `@jacare/cli` (contracts + soft style warnings for redundant `${() => …}`) |
+| Contract / template diagnostics | Use `jacare check` from `@jacare/cli` (contracts, Mesh `links` vs published bags, soft style warnings) |
 
 ---
 
 ## Related documentation
 
 - [Jacaré repository](https://github.com/jacarejs/core)
-- [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md) — including [template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract)
+- [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md) — [template contracts](https://github.com/jacarejs/core/blob/main/docs/api.md#template-contracts-export-contract) · [Pulse bags / Mesh](https://github.com/jacarejs/core/blob/main/docs/api.md#3b-pulse-bags-shared-state)
+- [Jacaré Lab](https://jacarejs.github.io/core/lab/) — interactive demos including **Pulse bags**
+- [Main README](https://github.com/jacarejs/core/blob/main/README.md)
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Live demos](https://jacarejs.github.io/core/) — [Todo](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [Lab](https://jacarejs.github.io/core/lab/)
 - [Compiler docs](https://github.com/jacarejs/core/blob/main/docs/phases/02-compiler.md)
