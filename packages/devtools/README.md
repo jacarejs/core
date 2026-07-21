@@ -6,9 +6,9 @@
 [![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
 [![demo](https://img.shields.io/badge/demo-Todo-78c018.svg)](https://jacarejs.github.io/core/todo/)
 
-Development tools for Jacaré — a **Pulse Graph** inspector and a live **Scope** panel.
+Development tools for Jacaré — a **Pulse Graph** inspector, a live **Scope** panel, and a **Mesh** panel for `createBag` addresses.
 
-Use this package during development to visualize reactive dependencies, inspect live pulse values (with flash-on-change), minimize/hide the panel, and watch registered scope variables update in real time.
+Use this package during development to visualize reactive dependencies, inspect live pulse values (with flash-on-change), minimize/hide the panel, watch registered scope variables, and inspect shared bag cells (`@cart/total`) with ripple flash.
 
 ---
 
@@ -51,10 +51,11 @@ if (import.meta.env.DEV) {
 }
 ```
 
-Two floating panels appear in the bottom-right corner of the page (dev only):
+Two floating panels appear (dev only):
 
 1. **Pulse Graph** — reactive nodes, dependencies, and **live values**
 2. **Scope** — registered variables from `registerScope()`
+3. **Mesh** — `createBag` cells as `@id/key` (top-left by default)
 
 ### Show / hide Pulse Graph
 
@@ -231,6 +232,10 @@ interface PulseEdge {
 connectJacareDevtools({
   target: document.body,  // where to mount panels
   scope: true,              // set false to hide Scope panel
+  mesh: true,               // set false to hide Mesh panel
+  position: 'bottom-right',
+  scopePosition: 'bottom-left',
+  meshPosition: 'top-left',
 })
 ```
 
@@ -238,6 +243,10 @@ connectJacareDevtools({
 |--------|------|---------|-------------|
 | `target` | `HTMLElement` | `document.body` | DOM element to append panels to |
 | `scope` | `boolean` | `true` | Enable Scope panel (`connectJacareScope`) |
+| `mesh` | `boolean` | `true` | Enable Mesh panel (`connectJacareMesh`) |
+| `position` | corner | `bottom-right` | Pulse Graph corner |
+| `scopePosition` | corner | `bottom-left` | Scope corner |
+| `meshPosition` | corner | `top-left` | Mesh corner |
 
 ### connectJacareScope
 
@@ -256,6 +265,21 @@ const dispose = connectJacareScope({
 |--------|------|---------|-------------|
 | `target` | `HTMLElement` | `document.body` | Where to mount the panel |
 | `pulseMs` | `number` | `120` | How often to poll scope values |
+
+### connectJacareMesh
+
+Inspect `createBag` cells independently:
+
+```javascript
+import { connectJacareMesh } from '@jacare/devtools'
+
+const dispose = connectJacareMesh({
+  target: document.body,
+  pulseMs: 120,
+})
+```
+
+Shows bag ids, `@id/key` addresses, intent ports, DOM bind sources, and the last `ripple` flash.
 
 ---
 

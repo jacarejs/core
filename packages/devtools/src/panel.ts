@@ -418,6 +418,12 @@ export function createPanel(host: HTMLElement): PanelHandle {
           ${cornerOptions()}
         </select>
       </div>
+      <div class="jacare-devtools__config-row">
+        <label for="jacare-mesh-corner">Mesh position</label>
+        <select id="jacare-mesh-corner" data-mesh-corner>
+          ${cornerOptions()}
+        </select>
+      </div>
       <div class="jacare-devtools__config-actions">
         <button type="button" data-clear-highlight>Clear highlight</button>
         <button type="button" data-clear-selection>Clear selection</button>
@@ -425,8 +431,9 @@ export function createPanel(host: HTMLElement): PanelHandle {
         <button type="button" data-reset-layout>Reset layout</button>
       </div>
       <p class="jacare-devtools__config-note">
-        Scope lists values you register with <code>registerScope(id, label, read)</code> —
-        useful for cart totals, form drafts, filters. Drag the header to move freely.
+        Scope = <code>registerScope</code> watch list.
+        Mesh = <code>createBag</code> cells as <code>@id/key</code> (Lab <code>/bag</code>).
+        Drag headers to move freely.
       </p>
     </div>
     <p class="jacare-devtools__hint">Hover a node to outline DOM · ⚙ config · ◎ pick · drag header to move</p>
@@ -444,6 +451,7 @@ export function createPanel(host: HTMLElement): PanelHandle {
   const configPanel = root.querySelector('[data-config-panel]') as HTMLElement
   const pulseCornerSelect = root.querySelector('[data-pulse-corner]') as HTMLSelectElement
   const scopeCornerSelect = root.querySelector('[data-scope-corner]') as HTMLSelectElement
+  const meshCornerSelect = root.querySelector('[data-mesh-corner]') as HTMLSelectElement
   const pickBtn = root.querySelector('[data-pick]') as HTMLButtonElement
   const minimizeBtn = root.querySelector('[data-minimize]') as HTMLButtonElement
   const hideBtn = root.querySelector('[data-hide]') as HTMLButtonElement
@@ -463,8 +471,10 @@ export function createPanel(host: HTMLElement): PanelHandle {
 
   pulseCornerSelect.value = ui.pulsePosition
   scopeCornerSelect.value = ui.scopePosition
+  meshCornerSelect.value = ui.meshPosition
   applyCorner(root, ui.pulsePosition)
   notifyScopePosition(ui.scopePosition)
+  notifyMeshPosition(ui.meshPosition)
 
   function applyMode(): void {
     root.classList.toggle('jacare-devtools--minimized', mode === 'minimized')
@@ -509,6 +519,12 @@ export function createPanel(host: HTMLElement): PanelHandle {
     notifyScopePosition(corner)
   })
 
+  meshCornerSelect.addEventListener('change', () => {
+    const corner = meshCornerSelect.value as PanelCorner
+    ui = writeUiConfig({ meshPosition: corner })
+    notifyMeshPosition(corner)
+  })
+
   root.querySelector('[data-clear-highlight]')?.addEventListener('click', (event) => {
     event.stopPropagation()
     clearHighlight()
@@ -532,17 +548,24 @@ export function createPanel(host: HTMLElement): PanelHandle {
     ui = writeUiConfig({
       pulsePosition: 'bottom-right',
       scopePosition: 'bottom-left',
+      meshPosition: 'top-left',
       pulseMode: 'open',
       scopeMode: 'open',
+      meshMode: 'open',
     })
     window.dispatchEvent(
       new CustomEvent('jacare:devtools:scope-mode', { detail: { mode: 'open' } }),
     )
+    window.dispatchEvent(
+      new CustomEvent('jacare:devtools:mesh-mode', { detail: { mode: 'open' } }),
+    )
     pulseCornerSelect.value = ui.pulsePosition
     scopeCornerSelect.value = ui.scopePosition
+    meshCornerSelect.value = ui.meshPosition
     root.style.transform = ''
     applyCorner(root, ui.pulsePosition)
     notifyScopePosition(ui.scopePosition)
+    notifyMeshPosition(ui.meshPosition)
     setMode('open')
     setConfigOpen(false)
   })
@@ -833,6 +856,10 @@ function basename(path: string): string {
 
 function notifyScopePosition(corner: PanelCorner): void {
   window.dispatchEvent(new CustomEvent('jacare:devtools:scope-position', { detail: { corner } }))
+}
+
+function notifyMeshPosition(corner: PanelCorner): void {
+  window.dispatchEvent(new CustomEvent('jacare:devtools:mesh-position', { detail: { corner } }))
 }
 
 function escapeHtml(value: string): string {

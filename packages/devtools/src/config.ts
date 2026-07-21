@@ -3,8 +3,10 @@ export type PanelCorner = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-le
 export interface DevtoolsUiConfig {
   pulsePosition: PanelCorner
   scopePosition: PanelCorner
+  meshPosition: PanelCorner
   pulseMode: 'open' | 'minimized' | 'hidden'
   scopeMode: 'open' | 'minimized'
+  meshMode: 'open' | 'minimized'
 }
 
 const CONFIG_KEY = 'jacare:devtools:config'
@@ -12,8 +14,10 @@ const CONFIG_KEY = 'jacare:devtools:config'
 const DEFAULT_CONFIG: DevtoolsUiConfig = {
   pulsePosition: 'bottom-right',
   scopePosition: 'bottom-left',
+  meshPosition: 'top-left',
   pulseMode: 'open',
   scopeMode: 'open',
+  meshMode: 'open',
 }
 
 export function readUiConfig(): DevtoolsUiConfig {
@@ -24,6 +28,7 @@ export function readUiConfig(): DevtoolsUiConfig {
     return {
       pulsePosition: isCorner(parsed.pulsePosition) ? parsed.pulsePosition : DEFAULT_CONFIG.pulsePosition,
       scopePosition: isCorner(parsed.scopePosition) ? parsed.scopePosition : DEFAULT_CONFIG.scopePosition,
+      meshPosition: isCorner(parsed.meshPosition) ? parsed.meshPosition : DEFAULT_CONFIG.meshPosition,
       pulseMode:
         parsed.pulseMode === 'open' ||
         parsed.pulseMode === 'minimized' ||
@@ -34,6 +39,10 @@ export function readUiConfig(): DevtoolsUiConfig {
         parsed.scopeMode === 'open' || parsed.scopeMode === 'minimized'
           ? parsed.scopeMode
           : DEFAULT_CONFIG.scopeMode,
+      meshMode:
+        parsed.meshMode === 'open' || parsed.meshMode === 'minimized'
+          ? parsed.meshMode
+          : DEFAULT_CONFIG.meshMode,
     }
   } catch {
     return { ...DEFAULT_CONFIG }

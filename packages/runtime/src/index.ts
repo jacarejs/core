@@ -34,8 +34,20 @@ export {
   listBags,
   ripple,
   resetBagRegistry,
+  getMeshSnapshot,
+  subscribeMesh,
+  startMeshPulse,
 } from './bag.js'
-export type { BagApi, BagSnap } from './bag.js'
+export type {
+  BagApi,
+  BagSnap,
+  MeshSnapshot,
+  MeshBagSnapshot,
+  MeshCellSnapshot,
+  MeshPortSnapshot,
+  MeshRippleSnapshot,
+  MeshCellKind,
+} from './bag.js'
 export type {
   Nav,
   NavContext,
@@ -62,6 +74,7 @@ export {
   getPulseGraph,
   subscribePulseGraph,
   namePulse,
+  resolvePulseId,
   registerBinding,
   devtoolsBind,
   getBindingsForPulse,

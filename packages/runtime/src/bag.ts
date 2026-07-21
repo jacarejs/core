@@ -1,5 +1,5 @@
 import { batch } from './effect.js'
-import { namePulse } from './devtools/index.js'
+import { getBindingsForPulse, namePulse, resolvePulseId } from './devtools/index.js'
 import type { ReadonlySignal, Signal } from './types.js'
 
 type CellLike = ReadonlySignal<unknown> | Signal<unknown>
@@ -16,18 +16,74 @@ export type BagApi<T extends object> = T & {
   reset(): void
 }
 
+export type MeshCellKind = 'pulse' | 'derive'
+
+export interface MeshCellSnapshot {
+  address: string
+  bagId: string
+  key: string
+  kind: MeshCellKind
+  value: unknown
+  pulseId?: number
+  /** DOM binding count when DevTools registry knows the pulse. */
+  bindings: number
+  /** Unique source files from DOM bindings (stand-in until Mesh Ports). */
+  boundFrom: string[]
+}
+
+export interface MeshPortSnapshot {
+  address: string
+  bagId: string
+  key: string
+  kind: 'intent'
+}
+
+export interface MeshBagSnapshot {
+  id: string
+  published: boolean
+  cells: MeshCellSnapshot[]
+  ports: MeshPortSnapshot[]
+}
+
+export interface MeshRippleSnapshot {
+  at: number
+  bagIds: string[]
+  addresses: string[]
+}
+
+export interface MeshSnapshot {
+  bags: MeshBagSnapshot[]
+  lastRipple: MeshRippleSnapshot | null
+  updatedAt: number
+}
+
 type BagRecord = {
   id: string
   ensure: () => object
   cells: () => Map<string, CellLike>
+  api: () => object | null
   handle: BagApi<object>
 }
 
 const bags = new Map<string, BagRecord>()
+const meshListeners = new Set<() => void>()
+let lastRipple: MeshRippleSnapshot | null = null
+
+function emitMesh(): void {
+  for (const listener of meshListeners) {
+    listener()
+  }
+}
 
 /** Coalesce mesh writes into a single notification wave. */
 export function ripple<T>(fn: () => T): T {
-  return batch(fn)
+  const before = bags.size > 0 ? capturePublishedPeeks() : null
+  const result = batch(fn)
+  lastRipple = before
+    ? diffRipple(before)
+    : { at: Date.now(), bagIds: [], addresses: [] }
+  if (meshListeners.size > 0) emitMesh()
+  return result
 }
 
 /** Look up a published bag by id (runs the factory on first use). */
@@ -65,6 +121,7 @@ export function createBag<T extends object>(id: string, factory: () => T): BagAp
     if (api) return api
     api = factory()
     cellMap = publishCells(id, api)
+    emitMesh()
     return api
   }
 
@@ -94,6 +151,7 @@ export function createBag<T extends object>(id: string, factory: () => T): BagAp
   function reset(): void {
     api = null
     cellMap = new Map()
+    emitMesh()
   }
 
   const handle = new Proxy({} as BagApi<T>, {
@@ -144,15 +202,128 @@ export function createBag<T extends object>(id: string, factory: () => T): BagAp
     id,
     ensure: () => ensure(),
     cells: () => cellMap,
+    api: () => api,
     handle: handle as BagApi<object>,
   })
+  emitMesh()
 
   return handle
+}
+
+/** Live mesh view for DevTools (bags, cell addresses, last ripple). */
+export function getMeshSnapshot(): MeshSnapshot {
+  const bagSnapshots: MeshBagSnapshot[] = []
+
+  for (const record of bags.values()) {
+    const api = record.api()
+    const cellMap = record.cells()
+    const cells: MeshCellSnapshot[] = []
+    const ports: MeshPortSnapshot[] = []
+
+    if (api) {
+      for (const [key, cell] of cellMap) {
+        const address = `@${record.id}/${key}`
+        const pulseId = resolvePulseId(cell)
+        const bindings = pulseId != null ? getBindingsForPulse(pulseId) : []
+        const boundFrom = uniqueFiles(bindings.map((b) => b.file).filter(Boolean) as string[])
+        cells.push({
+          address,
+          bagId: record.id,
+          key,
+          kind: isWritablePulse(cell) ? 'pulse' : 'derive',
+          value: cell.peek,
+          ...(pulseId != null ? { pulseId } : {}),
+          bindings: bindings.length,
+          boundFrom,
+        })
+      }
+
+      for (const key of Object.keys(api)) {
+        if (cellMap.has(key)) continue
+        const value = (api as Record<string, unknown>)[key]
+        if (typeof value !== 'function') continue
+        ports.push({
+          address: `@${record.id}/${key}`,
+          bagId: record.id,
+          key,
+          kind: 'intent',
+        })
+      }
+    }
+
+    bagSnapshots.push({
+      id: record.id,
+      published: api != null,
+      cells,
+      ports,
+    })
+  }
+
+  return {
+    bags: bagSnapshots,
+    lastRipple,
+    updatedAt: Date.now(),
+  }
+}
+
+export function subscribeMesh(listener: () => void): () => void {
+  meshListeners.add(listener)
+  return () => {
+    meshListeners.delete(listener)
+  }
+}
+
+/** Poll mesh values while DevTools Mesh panel is open. */
+export function startMeshPulse(intervalMs = 120): () => void {
+  const timer = setInterval(() => emitMesh(), intervalMs)
+  return () => clearInterval(timer)
 }
 
 /** Clear the bag registry (tests). */
 export function resetBagRegistry(): void {
   bags.clear()
+  lastRipple = null
+  emitMesh()
+}
+
+function capturePublishedPeeks(): Map<string, unknown> {
+  const peeks = new Map<string, unknown>()
+  for (const record of bags.values()) {
+    for (const [key, cell] of record.cells()) {
+      peeks.set(`@${record.id}/${key}`, cell.peek)
+    }
+  }
+  return peeks
+}
+
+function diffRipple(before: Map<string, unknown>): MeshRippleSnapshot {
+  const addresses: string[] = []
+  const bagIds = new Set<string>()
+
+  for (const record of bags.values()) {
+    for (const [key, cell] of record.cells()) {
+      const address = `@${record.id}/${key}`
+      const prev = before.get(address)
+      if (!Object.is(prev, cell.peek)) {
+        addresses.push(address)
+        bagIds.add(record.id)
+      }
+    }
+  }
+
+  return {
+    at: Date.now(),
+    bagIds: [...bagIds],
+    addresses,
+  }
+}
+
+function uniqueFiles(files: string[]): string[] {
+  return [...new Set(files.map(basename))]
+}
+
+function basename(path: string): string {
+  return path.replace(/\\/g, '/').split('/').pop() || path
 }
 
 function publishCells(bagId: string, api: object): Map<string, CellLike> {
@@ -170,10 +341,7 @@ function publishCells(bagId: string, api: object): Map<string, CellLike> {
 function isPulseCell(value: unknown): value is CellLike {
   if (typeof value !== 'function') return false
   const cell = value as CellLike
-  return (
-    typeof cell.subscribe === 'function' &&
-    'peek' in cell
-  )
+  return typeof cell.subscribe === 'function' && 'peek' in cell
 }
 
 function isWritablePulse(value: CellLike): value is Signal<unknown> {

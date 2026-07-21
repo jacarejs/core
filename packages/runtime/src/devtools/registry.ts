@@ -358,7 +358,12 @@ export function pickElement(): Promise<Element | null> {
     const onMove = (event: MouseEvent): void => {
       clearHighlight()
       const el = event.target
-      if (!(el instanceof Element) || el.closest('.jacare-devtools') || el.closest('.jacare-scope')) {
+      if (
+        !(el instanceof Element) ||
+        el.closest('.jacare-devtools') ||
+        el.closest('.jacare-scope') ||
+        el.closest('.jacare-mesh')
+      ) {
         return
       }
       el.classList.add('jacare-devtools-highlight')
@@ -378,7 +383,12 @@ export function pickElement(): Promise<Element | null> {
       const el = event.target
       cleanup()
       clearHighlight()
-      if (!(el instanceof Element) || el.closest('.jacare-devtools') || el.closest('.jacare-scope')) {
+      if (
+        !(el instanceof Element) ||
+        el.closest('.jacare-devtools') ||
+        el.closest('.jacare-scope') ||
+        el.closest('.jacare-mesh')
+      ) {
         resolve(null)
         return
       }

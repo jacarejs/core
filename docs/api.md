@@ -295,6 +295,7 @@ A **pulse bag** publishes a named group of pulses on a shared mesh. Any `.jcr` t
 | `getBag(id)` | Look up a registered bag |
 | `bag.snap()` / `bag.hydrate(data)` | Persist / restore writable pulses |
 | `bag.reset()` | Drop cells; next access rebuilds the factory |
+| `getMeshSnapshot()` / `subscribeMesh` | DevTools Mesh view (`@id/key`, last ripple) |
 
 ### Define a bag
 
@@ -1744,6 +1745,7 @@ Panels (dev only — only when you call `connectJacareDevtools()`):
 
 - **Pulse Graph** — signal dependency graph, **live values**, **source names** (`count` · `Counter.jcr:4`), **DOM highlight** on hover
 - **Scope** — values you register with `registerScope()` (manual watch list; see [§13](#13-lifecycle-and-scope))
+- **Mesh** — `createBag` cells as stable addresses (`@cart/total`), intent ports, and **ripple flash** (see [§3b](#3b-pulse-bags-shared-state))
 
 Controls: `⚙` config · `◎` pick element · `−` minimize · `×` hide · **drag header** to move. Config lets you pick corners, clear highlight/selection, clear Scope, or reset layout. Preferences persist in `sessionStorage`.
 
@@ -1751,7 +1753,9 @@ Controls: `⚙` config · `◎` pick element · `−` minimize · `×` hide · *
 connectJacareDevtools({
   position: 'bottom-right',  // Pulse Graph
   scopePosition: 'bottom-left',
+  meshPosition: 'top-left',
   scope: true,
+  mesh: true,
 })
 ```
 
@@ -2041,7 +2045,7 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | `computed` / `derive` | [§3](#3-reactivity) | Derived value |
 | `effect` / `watch` | [§3](#3-reactivity) | Side effect |
 | `batch` | [§3](#3-reactivity) | Coalesce updates |
-| `createBag` / `ripple` / `getBag` | [§3b](#3b-pulse-bags-shared-state) | Shared pulse mesh |
+| `createBag` / `ripple` / `getBag` / `getMeshSnapshot` | [§3b](#3b-pulse-bags-shared-state) | Shared pulse mesh |
 | `bindText` / `bindPropText` | [§5](#5-dom-bindings) | Text node |
 | `bindAttribute` / `bindProperty` | [§5](#5-dom-bindings) | Attributes / props |
 | `bindModel` | [§5](#5-dom-bindings) | Two-way input |
