@@ -38,28 +38,29 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 2. [Quick start](#1-quick-start)
 3. [Module format (.jcr)](#2-module-format-jcr)
 4. [Reactivity](#3-reactivity)
-5. [Templates](#4-templates)
-6. [DOM bindings](#5-dom-bindings)
-7. [Events (`on-*` / `@*`)](#6-events-on---)
-8. [Control flow — `#if`](#7-control-flow--if)
-9. [Control flow — `#case`](#7b-control-flow--case)
-10. [Dev debug — `<debug>`](#7c-dev-debug-debug)
-11. [Control flow — `#for`](#8-control-flow--for)
-12. [Components, props, and slots](#9-components-and-slots)
-13. [Scoped CSS](#10-scoped-css)
-14. [Navigation](#11-navigation)
-15. [Forms](#12-forms)
-16. [Lifecycle and scope](#13-lifecycle-and-scope)
-17. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
-18. [SSR and hydration](#14-ssr-and-hydration)
-19. [DevTools](#15-devtools)
-20. [Compiler API](#16-compiler-api)
-21. [CLI](#17-cli)
-22. [Vite plugin](#18-vite-plugin)
-23. [Testing](#19-testing)
-24. [Runtime helpers index](#20-runtime-helpers-index)
+5. [Pulse bags (shared state)](#3b-pulse-bags-shared-state)
+6. [Templates](#4-templates)
+7. [DOM bindings](#5-dom-bindings)
+8. [Events (`on-*` / `@*`)](#6-events-on---)
+9. [Control flow — `#if`](#7-control-flow--if)
+10. [Control flow — `#case`](#7b-control-flow--case)
+11. [Dev debug — `<debug>`](#7c-dev-debug-debug)
+12. [Control flow — `#for`](#8-control-flow--for)
+13. [Components, props, and slots](#9-components-and-slots)
+14. [Scoped CSS](#10-scoped-css)
+15. [Navigation](#11-navigation)
+16. [Forms](#12-forms)
+17. [Lifecycle and scope](#13-lifecycle-and-scope)
+18. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
+19. [SSR and hydration](#14-ssr-and-hydration)
+20. [DevTools](#15-devtools)
+21. [Compiler API](#16-compiler-api)
+22. [CLI](#17-cli)
+23. [Vite plugin](#18-vite-plugin)
+24. [Testing](#19-testing)
+25. [Runtime helpers index](#20-runtime-helpers-index)
 
-Jump to: [Tutorial](#tutorial--jacaré-lab) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
+Jump to: [Tutorial](#tutorial--jacaré-lab) · [Pulse bags](#3b-pulse-bags-shared-state) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
 
 ---
 
@@ -280,6 +281,76 @@ effect(() => {
   const ignored = untrack(() => otherSignal()) // not a dependency
 })
 ```
+
+---
+
+## 3b. Pulse bags (shared state)
+
+A **pulse bag** publishes a named group of pulses on a shared mesh. Any `.jcr` that imports the bag reads and writes the **same cells** — no props drilling, no provider tree.
+
+| API | Role |
+|-----|------|
+| `createBag(id, factory)` | Register a bag; factory runs on first access |
+| `ripple(fn)` | Coalesce writes into one notification wave (same engine as `batch`) |
+| `getBag(id)` | Look up a registered bag |
+| `bag.snap()` / `bag.hydrate(data)` | Persist / restore writable pulses |
+| `bag.reset()` | Drop cells; next access rebuilds the factory |
+
+### Define a bag
+
+```javascript
+import { createBag, pulse, derive, ripple } from '@jacare/core'
+
+export const cart = createBag('cart', () => {
+  const items = pulse([])
+  const count = derive(() => items().reduce((n, line) => n + line.qty, 0))
+  const total = derive(() =>
+    items().reduce((sum, line) => sum + line.price * line.qty, 0),
+  )
+
+  function add(product) {
+    ripple(() => {
+      items.update((list) => {
+        const i = list.findIndex((line) => line.id === product.id)
+        if (i === -1) return [...list, { ...product, qty: 1 }]
+        return list.map((line, idx) =>
+          idx === i ? { ...line, qty: line.qty + 1 } : line,
+        )
+      })
+    })
+  }
+
+  function remove(id) {
+    ripple(() => {
+      items.update((list) => list.filter((line) => line.id !== id))
+    })
+  }
+
+  return { items, count, total, add, remove }
+})
+```
+
+Published cells are named `@cart/items`, `@cart/count`, `@cart/total` for DevTools.
+
+### Use in any component
+
+```javascript
+import { cart } from '../bags/cart.js'
+
+export <view>
+  <span class="badge">${cart.count()}</span>
+  <button type="button" on-click=${() => cart.add(product)}>Add</button>
+
+  #for cart.items() as line (line.id)
+    <div>
+      ${line.name} × ${line.qty}
+      <button type="button" on-click=${() => cart.remove(line.id)}>Remove</button>
+    </div>
+  #end
+</view>
+```
+
+Prefer bare `${cart.count()}` when there is no loop local to capture. Live demos: **Lab → Pulse bags** and **Todo → Shop**.
 
 ---
 
@@ -1922,7 +1993,7 @@ declare module '*.jcr' {
 
 | Example | Path | Highlights |
 |---------|------|------------|
-| **Todo** | `examples/jacare-todo` | Nav, forms, tutorial, lifecycle, playground |
+| **Todo** | `examples/jacare-todo` | Nav, forms, Shop (`createBag`), tutorial, lifecycle |
 | **Showcase** | `examples/jacare-showcase` | CPW, `style---`, components, slots, cart |
 | **Scale BMI** | `examples/jacare-bmi` | Live gauge, metric/imperial, `derive` + range inputs |
 
@@ -1970,6 +2041,7 @@ All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless not
 | `computed` / `derive` | [§3](#3-reactivity) | Derived value |
 | `effect` / `watch` | [§3](#3-reactivity) | Side effect |
 | `batch` | [§3](#3-reactivity) | Coalesce updates |
+| `createBag` / `ripple` / `getBag` | [§3b](#3b-pulse-bags-shared-state) | Shared pulse mesh |
 | `bindText` / `bindPropText` | [§5](#5-dom-bindings) | Text node |
 | `bindAttribute` / `bindProperty` | [§5](#5-dom-bindings) | Attributes / props |
 | `bindModel` | [§5](#5-dom-bindings) | Two-way input |

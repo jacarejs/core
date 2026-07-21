@@ -20,6 +20,11 @@ export const LESSONS = [
     blurb: 'signal, computed, effect, batch, untrack, aliases',
   },
   {
+    path: '/bag',
+    title: 'Pulse bags',
+    blurb: 'createBag, ripple, shared cart across views',
+  },
+  {
     path: '/templates',
     title: 'Templates',
     blurb: 'Text, attributes, style--- CSS variables',

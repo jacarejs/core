@@ -1,0 +1,77 @@
+import { cart } from '../bags/cart.js'
+import { showCode } from '../code-viewer.js'
+import shopCode from './shop.jcr?raw'
+import cartBagCode from '../bags/cart.js?raw'
+
+const CATALOG = [
+  { id: 'mug', name: 'Forest mug', price: 18 },
+  { id: 'pin', name: 'Jacaré pin', price: 6 },
+  { id: 'tote', name: 'Canvas tote', price: 24 },
+  { id: 'sticker', name: 'Scale sticker pack', price: 4 },
+]
+
+function openCode() {
+  showCode('Shop · Pulse Bag', [
+    { name: 'bags/cart.js', code: cartBagCode },
+    { name: 'pages/shop.jcr', code: shopCode },
+  ])
+}
+
+export <view>
+  <section class="page page-shop">
+    <header class="page-hero">
+      <div class="page-hero-row">
+        <div>
+          <p class="eyebrow">Shared pulses</p>
+          <h1 class="page-title">Shop</h1>
+          <p class="page-lead">
+            One <code>createBag('cart')</code> powers the catalog and the cart panel.
+            Import the bag anywhere — same cells, fine-grained updates, no props drilling.
+          </p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>
+      </div>
+    </header>
+
+    <div class="shop-layout">
+      <section class="panel">
+        <h2 class="panel-title">Catalog</h2>
+        <ul class="shop-catalog">
+          #for CATALOG as product (product.id)
+            <li class="shop-card">
+              <div>
+                <strong>${product.name}</strong>
+                <p class="muted">$${product.price}</p>
+              </div>
+              <button type="button" class="btn btn-primary" on-click=${() => cart.add(product)}>
+                Add
+              </button>
+            </li>
+          #end
+        </ul>
+      </section>
+
+      <aside class="panel shop-cart">
+        <div class="shop-cart-head">
+          <h2 class="panel-title">Cart · ${cart.count}</h2>
+          <button type="button" class="btn btn-ghost" on-click=${cart.clear}>Clear</button>
+        </div>
+        <p class="shop-total">${cart.money}</p>
+        #if cart.count() === 0
+          <p class="muted">Empty — add something from the catalog.</p>
+        #else
+          <ul class="shop-lines">
+            #for cart.items() as line (line.id)
+              <li class="shop-line">
+                <span>${line.name} × ${line.qty}</span>
+                <button type="button" class="btn btn-outline" on-click=${() => cart.remove(line.id)}>
+                  Remove
+                </button>
+              </li>
+            #end
+          </ul>
+        #end
+      </aside>
+    </div>
+  </section>
+</view>

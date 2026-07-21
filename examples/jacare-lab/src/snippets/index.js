@@ -22,6 +22,12 @@ export {
   nestedComputedCode,
 } from './reactivity.js'
 
+export {
+  defineBagCode,
+  useBagCode,
+  snapHydrateCode,
+} from './bag.js'
+
 export { textBindingCode, attrCode, progressCode, multiAttrCode, trendCode } from './templates.js'
 
 export { mirrorCode, classCode, gaugeCode, numberBindCode, multiClassCode } from './bindings.js'
@@ -121,6 +127,11 @@ import {
   watchCode,
   nestedComputedCode,
 } from './reactivity.js'
+import {
+  defineBagCode,
+  useBagCode,
+  snapHydrateCode,
+} from './bag.js'
 import { textBindingCode, attrCode, progressCode, multiAttrCode, trendCode } from './templates.js'
 import { mirrorCode, classCode, gaugeCode, numberBindCode, multiClassCode } from './bindings.js'
 import {
@@ -212,6 +223,10 @@ export const SNIPPET_CATALOG = [
   { id: 'reactivity.range', title: 'derive: a category from a range', lesson: '/reactivity', code: rangeCode },
   { id: 'reactivity.watch', title: 'watch: an alias for effect', lesson: '/reactivity', code: watchCode },
   { id: 'reactivity.nested-computed', title: 'Nested computed: unit chain', lesson: '/reactivity', code: nestedComputedCode },
+
+  { id: 'bag.define', title: 'createBag + live cart', lesson: '/bag', code: defineBagCode },
+  { id: 'bag.use', title: 'Same bag, another view', lesson: '/bag', code: useBagCode },
+  { id: 'bag.snap', title: 'snap / hydrate / reset', lesson: '/bag', code: snapHydrateCode },
 
   { id: 'templates.text-binding', title: 'Bare vs mixed text', lesson: '/templates', code: textBindingCode },
   { id: 'templates.attr', title: 'Static attribute vs :src / bind-href', lesson: '/templates', code: attrCode },

@@ -114,7 +114,9 @@ Prefer the canonical form in new code.
 
 ## Template bindings
 
-Prefer **bare expressions** when there is no loop/local to capture — `${cart.count()}` and `${() => cart.count()}` are both reactive; the first is the Jacaré style.
+Prefer **bare expressions** when there is no loop/local to capture — `${cart.count()}` and `${() => cart.count()}` are both reactive; the first is the Jacaré style. Pulse bags use the same rule.
+
+See [API — Pulse bags](api.md#3b-pulse-bags-shared-state).
 
 Use an arrow when the expression must close over a `#for` item or an event argument:
 

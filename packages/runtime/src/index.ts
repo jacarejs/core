@@ -28,6 +28,14 @@ export {
 export type { ScopeEntry, ScopeSnapshot } from './scope.js'
 export { createForm } from './forms/index.js'
 export type { FieldDef, Form, FormField, FormFields, FormValidator, FormValues } from './forms/index.js'
+export {
+  createBag,
+  getBag,
+  listBags,
+  ripple,
+  resetBagRegistry,
+} from './bag.js'
+export type { BagApi, BagSnap } from './bag.js'
 export type {
   Nav,
   NavContext,

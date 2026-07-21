@@ -73,10 +73,37 @@
     ],
     "description": "Declare an export <style> scoped CSS block"
   },
+  "Pulse bag": {
+    "prefix": ["jcr-bag", "createBag"],
+    "body": [
+      "import { createBag, pulse, derive, ripple } from '@jacare/core'",
+      "",
+      "export const ${1:cart} = createBag('${1:cart}', () => {",
+      "  const ${2:items} = pulse(${3:[]})",
+      "  const ${4:count} = derive(() => ${2:items}().length)",
+      "",
+      "  function ${5:add}(item) {",
+      "    ripple(() => {",
+      "      ${2:items}.update((list) => [...list, item])",
+      "    })",
+      "  }",
+      "",
+      "  return { ${2:items}, ${4:count}, ${5:add} }",
+      "})"
+    ],
+    "description": "Shared pulse bag — createBag + ripple for multi-write waves"
+  },
+  "Bag read (prefer bare)": {
+    "prefix": ["jcr-bag-read"],
+    "body": [
+      "\\${${1:cart}.${2:count}()}"
+    ],
+    "description": "Read a bag cell in a template — prefer bare call, no redundant arrow"
+  },
   "Import core": {
     "prefix": ["jcr-import", "import-jacare"],
     "body": [
-      "import { ${1|pulse,signal,derive,computed,effect,batch,untrack,createForm,createNav|} } from '@jacare/core'"
+      "import { ${1|pulse,signal,derive,computed,effect,batch,untrack,createBag,ripple,createForm,createNav|} } from '@jacare/core'"
     ],
     "description": "Import helpers from @jacare/core"
   },

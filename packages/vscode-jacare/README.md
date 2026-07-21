@@ -81,6 +81,8 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 
 | Prefix | Aliases | Inserts |
 |--------|---------|---------|
+| `jcr-bag` | `createBag` | Shared pulse bag factory + `ripple` |
+| `jcr-bag-read` | — | `${cart.count()}` — bare bag read |
 | `jcr-import` | `import-jacare` | `import { … } from '@jacare/core'` |
 | `jcr-component` | `jacare-component` | Full scaffold: `export <contract>` + `<view>` + `<style>` |
 | `jcr-contract` | `export-contract` | Contract with `props`, `pulses`, `slots`, and `emits` |

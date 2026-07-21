@@ -18,6 +18,7 @@ export const nav = createNav({
     '/habits': { use: lazy(() => import('./pages/habits.jcr')), title: 'Jacaré · Habits' },
     '/seats': { use: lazy(() => import('./pages/seats.jcr')), title: 'Jacaré · Seats' },
     '/league': { use: lazy(() => import('./pages/league.jcr')), title: 'Jacaré · League' },
+    '/shop': { use: lazy(() => import('./pages/shop.jcr')), title: 'Jacaré · Shop' },
   },
   missing: NotFound,
 })

@@ -1,0 +1,95 @@
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import { demoCart } from '../bags/cart.js'
+import {
+  defineBagCode,
+  useBagCode,
+  snapHydrateCode,
+} from '../snippets/bag.js'
+
+const PRODUCTS = [
+  { id: 'tea', name: 'Mate tea', price: 9 },
+  { id: 'cap', name: 'Cap', price: 22 },
+  { id: 'zine', name: 'Zine', price: 12 },
+]
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API · Pulse bags</p>
+      <h1 class="page-title">Pulse bags</h1>
+      <p class="page-lead">
+        Shared pulses with a stable address. Define once with <code>createBag</code>,
+        import anywhere — catalog, badge, checkout all read the same cells.
+      </p>
+    </header>
+
+    <Tip :text=${'Prefer bare cart.count() in templates when there is no loop local. Use ripple() so several writes flush as one wave. snap() / hydrate() round-trip writable pulses.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'createBag + live cart'} :lead=${'Add from the catalog — count and total update through the same bag instance.'} :code=${defineBagCode}>
+        <div class="stack">
+          <div class="row">
+            #for PRODUCTS as product (product.id)
+              <button type="button" class="btn btn-outline" on-click=${() => demoCart.add(product)}>
+                ${product.name}
+              </button>
+            #end
+          </div>
+          <p class="metric">${demoCart.count} · ${demoCart.money}</p>
+          <div class="row">
+            <button type="button" class="btn btn-ghost" on-click=${demoCart.clear}>Clear bag</button>
+          </div>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Same bag, another view'} :lead=${'A second surface imports the identical bag — no props, no provider.'} :code=${useBagCode}>
+        <div class="stack">
+          #if demoCart.count() === 0
+            <p class="muted">Cart is empty.</p>
+          #else
+            <ul class="list">
+              #for demoCart.items() as line (line.id)
+                <li class="list-item">
+                  <span class="item-label">${line.name} × ${line.qty}</span>
+                  <button type="button" class="btn btn-outline" on-click=${() => demoCart.remove(line.id)}>
+                    Remove
+                  </button>
+                </li>
+              #end
+            </ul>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'snap / hydrate / reset'} :lead=${'Persist writable pulses, restore them, or rebuild the bag factory.'} :code=${snapHydrateCode}>
+        <div class="row">
+          <button
+            type="button"
+            class="btn"
+            on-click=${() => {
+              const snap = demoCart.snap()
+              sessionStorage.setItem('jacare-lab:cart', JSON.stringify(snap))
+            }}
+          >
+            Snap to session
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline"
+            on-click=${() => {
+              const raw = sessionStorage.getItem('jacare-lab:cart')
+              if (!raw) return
+              demoCart.hydrate(JSON.parse(raw))
+            }}
+          >
+            Hydrate
+          </button>
+          <button type="button" class="btn btn-ghost" on-click=${() => demoCart.reset()}>
+            Reset bag
+          </button>
+        </div>
+      </Demo>
+    </div>
+  </section>
+</view>

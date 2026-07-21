@@ -191,6 +191,7 @@ Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`]
 | 8 — CPW + CSS vars | ✓ |
 | Template contracts (`export <contract>`) | ✓ — props / pulses / slots / emits + `jacare check` |
 | Typed model props (`model` + `bind-*`) | ✓ — defaults, required, Vite + CLI validation |
+| Pulse bags (`createBag`) | ✓ — shared pulses · Lab `/bag` · Todo `/shop` |
 | Jacaré Lab (API tutorial) | ✓ — `examples/jacare-lab` · [live](https://jacarejs.github.io/core/lab/) |
 
 ## Packages

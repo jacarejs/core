@@ -1,10 +1,12 @@
 import { derive } from '@jacare/core'
 import { appHref, assetUrl } from './app-base.js'
 import { activeCode, hideCode } from './code-viewer.js'
+import { cart } from './bags/cart.js'
 import CodeModal from './components/CodeModal.jcr'
 
 const viewerTitle = derive(() => activeCode()?.title ?? '')
 const viewerFiles = derive(() => activeCode()?.files ?? [])
+const cartLabel = derive(() => `Shop · ${cart.count()}`)
 
 export <view>
   <div class="app">
@@ -29,6 +31,7 @@ export <view>
           <a class="nav-link" jacare-go="/habits" href=${appHref('/habits')}>Habits</a>
           <a class="nav-link" jacare-go="/seats" href=${appHref('/seats')}>Seats</a>
           <a class="nav-link" jacare-go="/league" href=${appHref('/league')}>League</a>
+          <a class="nav-link nav-link-cart" jacare-go="/shop" href=${appHref('/shop')}>${cartLabel}</a>
         </nav>
       </header>
 
