@@ -4,6 +4,10 @@ const SIGNAL_CALL_RE = /^([A-Za-z_$][\w$]*)\(\)$/
 const SIGNAL_REF_RE = /^([A-Za-z_$][\w$]*)$/
 /** `cart.count` or `cart.count()` — Mesh Port candidate. */
 const MESH_MEMBER_RE = /^([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)(?:\(\))?$/
+/** `@cart/total` or `@lab-cart/count()` — address Mesh Port sugar. */
+const MESH_ADDRESS_RE = /^@([A-Za-z_$][\w$-]*)\/([A-Za-z_$][\w$]*)(?:\(\))?$/
+/** `@bag/key` anywhere inside a larger expression. */
+const MESH_ADDRESS_IN_EXPR_RE = /@([A-Za-z_$][\w$-]*)\/([A-Za-z_$][\w$]*)/g
 const ARROW_RE = /=>/
 
 /**
@@ -12,7 +16,7 @@ const ARROW_RE = /=>/
  */
 export function lowerBindingSource(
   expr: string,
-  ctx: LowerSourceContext,
+  ctx: LowerSourceContext = {},
   options?: LowerSourceOptions,
 ): BindingSource {
   const trimmed = expr.trim()
@@ -22,6 +26,9 @@ export function lowerBindingSource(
     const prop = bareProp(trimmed, ctx)
     if (prop) return prop
   }
+
+  const address = matchMeshAddress(trimmed)
+  if (address) return address
 
   const local = matchLocalSignal(trimmed, ctx.signals)
   if (local) return { kind: 'signal', name: local, local: true }
@@ -37,11 +44,41 @@ export function lowerBindingSource(
     if (prop) return prop
   }
 
+  if (MESH_ADDRESS_IN_EXPR_RE.test(trimmed)) {
+    MESH_ADDRESS_IN_EXPR_RE.lastIndex = 0
+    const { code } = desugarMeshAddresses(expr)
+    return {
+      kind: 'expr',
+      code,
+      arrow: ARROW_RE.test(expr),
+    }
+  }
+
   return {
     kind: 'expr',
     code: expr,
     arrow: ARROW_RE.test(expr),
   }
+}
+
+/** `@cart/total` / `@cart/total()` — bag id Mesh Port (no import). */
+export function matchMeshAddress(expr: string): BindingSource | null {
+  const match = MESH_ADDRESS_RE.exec(expr.trim())
+  if (!match) return null
+  return { kind: 'mesh', bag: match[1]!, key: match[2]!, address: true }
+}
+
+/**
+ * Rewrite `@bag/key` / `@bag/key(...)` inside an expression to `getBag('bag')?.key`.
+ * Used for events, `#if`, and mixed exprs.
+ */
+export function desugarMeshAddresses(expr: string): { code: string; usesGetBag: boolean } {
+  let usesGetBag = false
+  const code = expr.replace(MESH_ADDRESS_IN_EXPR_RE, (_m, bag: string, key: string) => {
+    usesGetBag = true
+    return `getBag(${JSON.stringify(bag)})?.${key}`
+  })
+  return { code, usesGetBag }
 }
 
 /** Local signal name — same rules as resolveSignalExpr. */
@@ -117,8 +154,14 @@ export function bindingSignalName(source: BindingSource): string | null {
   return null
 }
 
-/** `cart.count` — cell capture expression for Mesh Port emit. */
+/**
+ * Cell capture expression for Mesh Port emit.
+ * Import form: `cart.count` — address sugar: `getBag("cart")?.count`.
+ */
 export function meshPortExpr(source: Extract<BindingSource, { kind: 'mesh' }>): string {
+  if (source.address) {
+    return `getBag(${JSON.stringify(source.bag)})?.${source.key}`
+  }
   return `${source.bag}.${source.key}`
 }
 

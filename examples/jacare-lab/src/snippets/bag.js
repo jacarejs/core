@@ -95,3 +95,12 @@ export const lazyBag = createBag('lab-lazy', () => {
 // /* jacare-mesh-ports: cart.count,cart.add */
 // so unused bag modules stay out of the chunk when never imported.`
 
+export const addressSugarCode = `export <view>
+  <p class="metric">@lab-cart · \${@lab-cart/count} · \${@lab-cart/money}</p>
+  <button type="button" on-click=\${@lab-cart/clear}>Clear</button>
+</view>
+
+// Same Mesh Ports as import { demoCart } — resolved by bag id:
+// bindText(node, getBag("lab-cart")?.count)
+// The bag must still be registered somewhere (this page imports demoCart).`
+

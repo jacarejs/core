@@ -153,7 +153,7 @@ function emitSSRIfPlan(ctx: CodegenContext, plan: IfFlowPlan): void {
   for (let i = 0; i < plan.branches.length; i++) {
     const branch = plan.branches[i]!
     const prefix = i === 0 ? 'if' : 'else if'
-    ctx.line(`${prefix} (${branch.test}) {`)
+    ctx.line(`${prefix} (${ctx.rewriteExprForEffect(branch.test)}) {`)
     ctx.indent()
     for (const child of lowerMountAst({ children: branch.children }, ctx.leafContext())) {
       emitSSRPlan(ctx, child)
@@ -177,7 +177,7 @@ function emitSSRCasePlan(ctx: CodegenContext, plan: CaseFlowPlan): void {
   const match = ctx.nextId('cv')
   ctx.line(`{`)
   ctx.indent()
-  ctx.line(`const ${match} = (${plan.scrutinee})`)
+  ctx.line(`const ${match} = (${ctx.rewriteExprForEffect(plan.scrutinee)})`)
 
   for (let i = 0; i < plan.branches.length; i++) {
     const branch = plan.branches[i]!
@@ -206,11 +206,12 @@ function emitSSRCasePlan(ctx: CodegenContext, plan: CaseFlowPlan): void {
 }
 
 function emitSSREachPlan(ctx: CodegenContext, plan: ListFlowPlan): void {
+  const source = ctx.rewriteExprForEffect(plan.sourceExpr)
   ctx.line(
-    `for (let ${plan.indexName} = 0; ${plan.indexName} < (${plan.sourceExpr}).length; ${plan.indexName}++) {`,
+    `for (let ${plan.indexName} = 0; ${plan.indexName} < (${source}).length; ${plan.indexName}++) {`,
   )
   ctx.indent()
-  ctx.line(`const ${plan.itemName} = (${plan.sourceExpr})[${plan.indexName}]`)
+  ctx.line(`const ${plan.itemName} = (${source})[${plan.indexName}]`)
   for (const child of lowerMountAst({ children: plan.children }, ctx.leafContext())) {
     emitSSRPlan(ctx, child)
   }

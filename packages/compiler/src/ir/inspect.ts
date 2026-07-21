@@ -167,9 +167,10 @@ function sourceLabel(source: {
   key?: string
   code?: string
   value?: string
+  address?: boolean
 }): string {
   if (source.kind === 'mesh' && source.bag && source.key) {
-    return `${source.bag}.${source.key}`
+    return source.address ? `@${source.bag}/${source.key}` : `${source.bag}.${source.key}`
   }
   if (source.kind === 'signal' || source.kind === 'prop') return source.name ?? source.kind
   if (source.kind === 'expr') return source.code ?? 'expr'

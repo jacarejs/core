@@ -415,6 +415,10 @@
       "contentName": "source.js",
       "patterns": [
         {
+          "match": "@[A-Za-z_$][\\w$-]*/[A-Za-z_$][\\w$]*",
+          "name": "variable.other.mesh-address.jacare constant.other.symbol"
+        },
+        {
           "include": "source.js"
         }
       ]

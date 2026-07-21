@@ -7,13 +7,18 @@ import {
   applyStyleVar,
   applyText,
 } from './emit-apply.js'
-import { meshPortExpr } from './source.js'
+import { desugarMeshAddresses, meshPortExpr } from './source.js'
 import type { BindingSource, LeafBindingOp, MixedTextPart } from './types.js'
 
 function cellExpr(source: BindingSource): string | null {
   if (source.kind === 'signal' || source.kind === 'prop') return source.name
   if (source.kind === 'mesh') return meshPortExpr(source)
   return null
+}
+
+function noteMeshRuntime(ctx: CodegenContext, source: BindingSource): void {
+  if (source.kind === 'mesh' && source.address) ctx.useRuntime('getBag')
+  if (source.kind === 'expr' && source.code.includes('getBag(')) ctx.useRuntime('getBag')
 }
 
 /** Emit a leaf binding op onto an element or text node. */
@@ -38,8 +43,10 @@ export function emitLeafOp(
       return
 
     case 'event': {
+      const { code, usesGetBag } = desugarMeshAddresses(op.handler)
+      if (usesGetBag) ctx.useRuntime('getBag')
       const handler = ctx.nextId('handler')
-      ctx.line(`const ${handler} = ${op.handler}`)
+      ctx.line(`const ${handler} = ${code}`)
       ctx.line(`${ctx.cleanupVar}.push((() => {`)
       ctx.indent()
       ctx.line(`${target}.addEventListener(${JSON.stringify(op.name)}, ${handler})`)
@@ -79,12 +86,16 @@ function emitTextOp(
   op: Extract<LeafBindingOp, { op: 'text' }>,
 ): void {
   if (op.mixed) {
+    for (const p of op.parts) {
+      if (p.type !== 'static') noteMeshRuntime(ctx, p.source)
+    }
     const template = op.parts.map((p) => mixedPartToTemplate(ctx, p)).join('')
     ctx.pushCleanup(`effect(() => { ${textNode}.data = \`${template}\` }).dispose`)
     return
   }
 
   const { source, mode } = op
+  noteMeshRuntime(ctx, source)
   if ((mode === 'cpw' || mode === 'bindText') && (source.kind === 'signal' || source.kind === 'mesh')) {
     applyText(ctx, textNode, cellExpr(source)!, mode === 'cpw' ? 'cpw' : 'bind')
     return
@@ -129,6 +140,7 @@ function emitAttrOp(
   op: Extract<LeafBindingOp, { op: 'attr' }>,
 ): void {
   const { source, mode, name } = op
+  noteMeshRuntime(ctx, source)
 
   if (mode === 'once' && source.kind === 'prop') {
     ctx.line(`${el}.setAttribute(${JSON.stringify(name)}, String(${source.name}))`)
@@ -163,6 +175,7 @@ function emitClassOp(
   op: Extract<LeafBindingOp, { op: 'classToggle' }>,
 ): void {
   const { source, mode, className } = op
+  noteMeshRuntime(ctx, source)
   if (
     (mode === 'cpw' || mode === 'bindClass') &&
     (source.kind === 'signal' || source.kind === 'mesh')
@@ -193,6 +206,7 @@ function emitStyleOp(
   op: Extract<LeafBindingOp, { op: 'styleVar' }>,
 ): void {
   const { source, mode, cssVar } = op
+  noteMeshRuntime(ctx, source)
   if (
     (mode === 'cpw' || mode === 'bindStyleVar') &&
     (source.kind === 'signal' || source.kind === 'mesh')
@@ -223,6 +237,7 @@ function emitModelOp(
   op: Extract<LeafBindingOp, { op: 'model' }>,
 ): void {
   const { source, mode, prop } = op
+  noteMeshRuntime(ctx, source)
   if (
     mode === 'bindModel' &&
     (source.kind === 'signal' || source.kind === 'prop' || source.kind === 'mesh')

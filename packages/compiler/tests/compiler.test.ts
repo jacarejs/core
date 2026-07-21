@@ -563,6 +563,27 @@ export <view>
     expect(server.code).toContain("kind: 'signal', read: cart.count")
   })
 
+  it('binds @bag/key address sugar via getBag (no bag import)', () => {
+    const source = `export <view>
+  <span>\${@lab-cart/count}</span>
+  <button type="button" on-click=\${@lab-cart/clear}>Clear</button>
+</view>`
+    const client = compile(source, { mode: 'client', debug: false, cpw: false })
+    expect(client.code).toContain('getBag')
+    expect(client.code).toMatch(/bindText\([^,]+, getBag\("lab-cart"\)\?\.count\)/)
+    expect(client.code).toContain('getBag("lab-cart")?.clear')
+    expect(client.meshPorts).toEqual(
+      expect.arrayContaining([
+        { bag: 'lab-cart', key: 'count', ref: '@lab-cart/count', source: 'address' },
+        { bag: 'lab-cart', key: 'clear', ref: '@lab-cart/clear', source: 'address' },
+      ]),
+    )
+    expect(client.code).toContain('/* jacare-mesh-ports: @lab-cart/clear,@lab-cart/count */')
+
+    const cpw = compile(source, { mode: 'client', debug: false, cpw: true })
+    expect(cpw.code).toMatch(/getBag\("lab-cart"\)\?\.count\.peek/)
+  })
+
   it('binds imported plain values with bindPropText (snippet strings)', () => {
     const source = `import { scaffoldCode } from './snippets.js'
 export <view>

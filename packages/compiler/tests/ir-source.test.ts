@@ -52,6 +52,33 @@ describe('lowerBindingSource', () => {
     expect(lowerBindingSource('other.total()', { importedNames: bags }).kind).toBe('expr')
   })
 
+  it('classifies @bag/key address sugar as Mesh Port', () => {
+    expect(lowerBindingSource('@cart/total')).toEqual({
+      kind: 'mesh',
+      bag: 'cart',
+      key: 'total',
+      address: true,
+    })
+    expect(lowerBindingSource('@lab-cart/count()')).toEqual({
+      kind: 'mesh',
+      bag: 'lab-cart',
+      key: 'count',
+      address: true,
+    })
+    expect(bindingSignalName(lowerBindingSource('@cart/total')!)).toBe(
+      'getBag("cart")?.total',
+    )
+  })
+
+  it('desugars @bag/key inside larger expressions', () => {
+    const src = lowerBindingSource('@cart/total() + 1')
+    expect(src).toEqual({
+      kind: 'expr',
+      code: 'getBag("cart")?.total() + 1',
+      arrow: false,
+    })
+  })
+
   it('does not treat local.signal as mesh', () => {
     expect(
       lowerBindingSource('count.nested()', {

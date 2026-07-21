@@ -391,7 +391,20 @@ Compiled `.jcr` modules that touch Mesh Ports emit a slice hint:
 
 Contract `links` appear as real mesh addresses (`@lab-cart/count`). With `inspect: true` on the Vite plugin, the same list is written under `.jacare/mesh-ports/`.
 
-Live demos: **Lab → Pulse bags** (including a four-level component tree, contract links, and lazy publish) and **Todo → Shop**.
+Live demos: **Lab → Pulse bags** (including a four-level component tree, contract links, lazy publish, and `@bag/key` sugar) and **Todo → Shop**.
+
+### Address sugar (`@bag/key`)
+
+When the bag id is known, skip the import and write the mesh address directly:
+
+```javascript
+export <view>
+  <span class="badge">${@cart/count}</span>
+  <button type="button" on-click=${@cart/add(product)}>+</button>
+</view>
+```
+
+Compiles to `getBag('cart')?.count` / `getBag('cart')?.add(product)` — the same Mesh Port hot path as an import. The bag module must still be loaded somewhere so `createBag` has registered the id.
 
 ---
 

@@ -258,7 +258,7 @@ function emitIfPlan(ctx: CodegenContext, plan: IfFlowPlan, target: EmitTarget): 
   for (let i = 0; i < plan.branches.length; i++) {
     const branch = plan.branches[i]!
     const prefix = i === 0 ? 'if' : 'else if'
-    ctx.line(`${prefix} (${branch.test}) {`)
+    ctx.line(`${prefix} (${ctx.rewriteExprForEffect(branch.test)}) {`)
     ctx.indent()
     emitNodesAsForest(ctx, branch.children, { kind: 'mount', fn: 'mount' })
     ctx.dedent()
@@ -290,7 +290,7 @@ function emitCasePlan(ctx: CodegenContext, plan: CaseFlowPlan, target: EmitTarge
   ctx.line(`${ctx.cleanupVar}.push(branch(${anchor}, (mount) => {`)
   ctx.indent()
   ctx.line(`const ${scope} = []`)
-  ctx.line(`const ${match} = (${plan.scrutinee})`)
+  ctx.line(`const ${match} = (${ctx.rewriteExprForEffect(plan.scrutinee)})`)
   ctx.pushCleanupScope(scope)
 
   for (let i = 0; i < plan.branches.length; i++) {
@@ -331,7 +331,7 @@ function emitEachPlan(ctx: CodegenContext, plan: ListFlowPlan, target: EmitTarge
   ctx.indent()
   ctx.line(`parent: ${parentExpr},`)
   ctx.line(`anchor: ${anchor},`)
-  ctx.line(`items: () => ${plan.sourceExpr},`)
+  ctx.line(`items: () => ${ctx.rewriteExprForEffect(plan.sourceExpr)},`)
   ctx.line(`getKey: ${plan.getKey},`)
   ctx.line(`render: (${plan.itemName}, ${plan.indexName}, mount) => {`)
   ctx.indent()

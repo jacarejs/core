@@ -10,9 +10,9 @@ import type { LowerSourceContext } from './types.js'
 export type MeshPortUsage = {
   bag: string
   key: string
-  /** `bag.key` for import Mesh Ports; `@id/key` for contract links. */
+  /** `bag.key` for import Mesh Ports; `@id/key` for address sugar / contract links. */
   ref: string
-  source: 'mesh' | 'link'
+  source: 'mesh' | 'link' | 'address'
 }
 
 /**
@@ -123,6 +123,14 @@ function scanExpr(
   ctx: LowerSourceContext,
   add: (usage: MeshPortUsage) => void,
 ): void {
+  for (const match of expr.matchAll(/@([A-Za-z_$][\w$-]*)\/([A-Za-z_$][\w$]*)/g)) {
+    add({
+      bag: match[1]!,
+      key: match[2]!,
+      ref: `@${match[1]}/${match[2]}`,
+      source: 'address',
+    })
+  }
   if (!ctx.importedNames || ctx.importedNames.size === 0) return
   const re = /\b([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)\b/g
   for (const match of expr.matchAll(re)) {
@@ -135,10 +143,19 @@ function scanExpr(
 }
 
 function noteSource(
-  source: { kind: string; bag?: string; key?: string },
+  source: { kind: string; bag?: string; key?: string; address?: boolean },
   add: (usage: MeshPortUsage) => void,
 ): void {
   if (source.kind !== 'mesh' || !source.bag || !source.key) return
+  if (source.address) {
+    add({
+      bag: source.bag,
+      key: source.key,
+      ref: `@${source.bag}/${source.key}`,
+      source: 'address',
+    })
+    return
+  }
   add({
     bag: source.bag,
     key: source.key,

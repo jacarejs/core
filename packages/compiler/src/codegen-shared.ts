@@ -1,12 +1,13 @@
 import {
   bindingSignalName,
+  desugarMeshAddresses,
   lowerBindingSource,
   matchLocalSignal,
 } from './ir/source.js'
 import type { BindingSource, LowerSourceOptions, LowerLeafContext } from './ir/types.js'
 
 export type { BindingSource, LowerSourceOptions, LowerLeafContext }
-export { lowerBindingSource, bindingSignalName, isLocalSignalSource, isDirectCellSource, meshPortExpr } from './ir/source.js'
+export { lowerBindingSource, bindingSignalName, isLocalSignalSource, isDirectCellSource, meshPortExpr, desugarMeshAddresses, matchMeshAddress } from './ir/source.js'
 export type { LowerSourceContext } from './ir/types.js'
 
 export function resolveSignalExpr(
@@ -157,7 +158,9 @@ export class CodegenContext {
   rewriteExprForEffect(expr: string): string {
     // Only rewrite known local signals. Imported names may be plain values
     // (snippet strings, helpers) — forcing `name()` would break those.
-    return rewriteSignalsInExpr(expr, this.signals)
+    const { code, usesGetBag } = desugarMeshAddresses(expr)
+    if (usesGetBag) this.useRuntime('getBag')
+    return rewriteSignalsInExpr(code, this.signals)
   }
 
   useRuntime(name: string): void {

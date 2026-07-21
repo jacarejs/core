@@ -3,6 +3,11 @@ import { escapeHtml } from '../codegen-shared.js'
 import { meshPortExpr } from './source.js'
 import type { BindingSource, LeafBindingOp, LoweredText } from './types.js'
 
+function noteMeshRuntime(ctx: CodegenContext, source: BindingSource): void {
+  if (source.kind === 'mesh' && source.address) ctx.useRuntime('getBag')
+  if (source.kind === 'expr' && source.code.includes('getBag(')) ctx.useRuntime('getBag')
+}
+
 /** Emit SSR text from lowered IR (same classification as client). */
 export function emitSSRLoweredText(ctx: CodegenContext, lowered: LoweredText): void {
   if (lowered.kind === 'skip') return
@@ -18,6 +23,7 @@ export function emitSSRLoweredText(ctx: CodegenContext, lowered: LoweredText): v
     const template = op.parts
       .map((p) => {
         if (p.type === 'static') return escapeHtml(p.value)
+        noteMeshRuntime(ctx, p.source)
         return `' + escapeHtml(String(${readExprFromSource(ctx, p.source, p.raw)})) + '`
       })
       .join('')
@@ -28,6 +34,7 @@ export function emitSSRLoweredText(ctx: CodegenContext, lowered: LoweredText): v
   const id = ctx.nextBinding()
   ctx.useRuntime('escapeHtml')
   const { source } = op
+  noteMeshRuntime(ctx, source)
   if (source.kind === 'signal' && source.local) {
     ctx.line(
       `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${source.name}())) + '</span>'`,

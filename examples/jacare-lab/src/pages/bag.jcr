@@ -11,6 +11,7 @@ import {
   deepTreeCode,
   contractLinksCode,
   lazyPublishCode,
+  addressSugarCode,
 } from '../snippets/bag.js'
 
 const PRODUCTS = [
@@ -30,7 +31,7 @@ export <view>
       </p>
     </header>
 
-      <Tip :text=${'Prefer bare cart.count() in templates when there is no loop local. Factory stays lazy until first property read — unused bag modules tree-shake out of the chunk. Compiled .jcr files emit /* jacare-mesh-ports: … */ for the ports this view actually uses.'} />
+      <Tip :text=${'Prefer bare cart.count() or ${@cart/count} when there is no loop local. Factory stays lazy until first property read — unused bag modules tree-shake out. Compiled views emit /* jacare-mesh-ports: … */ for ports they touch.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'createBag + live cart'} :lead=${'Add from the catalog — count and total update through the same bag instance.'} :code=${defineBagCode}>
@@ -99,6 +100,19 @@ export <view>
             </button>
           </div>
           <p class="muted">Mesh stays unpublished until the first property read. Open DevTools → Mesh for @lab-lazy/*.</p>
+        </div>
+      </Demo>
+
+      <Demo
+        :title=${'Address sugar @bag/key'}
+        :lead=${'No bag import — @lab-cart/count and @lab-cart/clear resolve via getBag at the mesh address.'}
+        :code=${addressSugarCode}
+      >
+        <div class="stack">
+          <p class="metric">@lab-cart · ${@lab-cart/count} · ${@lab-cart/money}</p>
+          <button type="button" class="btn btn-ghost" on-click=${@lab-cart/clear}>
+            Clear via @lab-cart/clear
+          </button>
         </div>
       </Demo>
 
