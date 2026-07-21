@@ -79,4 +79,22 @@ describe('lower leaf ops (Fatia 1)', () => {
     expect(result.code).toContain('bindStyleVar')
     expect(result.code).toContain('--hue')
   })
+
+  it('CPW on/off share apply helpers', () => {
+    const source = `
+      import { signal } from '@jacare/core'
+      const count = signal(0)
+      const on = signal(false)
+      export <view>
+        <span class-on=\${on}>\${count}</span>
+      </view>
+    `
+    const bind = compile(source, { mode: 'client', cpw: false })
+    const cpw = compile(source, { mode: 'client', cpw: true })
+    expect(bind.code).toContain('bindText')
+    expect(bind.code).toContain('bindClass')
+    expect(cpw.code).toContain('.peek')
+    expect(cpw.code).toContain('.subscribe')
+    expect(cpw.code).not.toContain('bindText')
+  })
 })

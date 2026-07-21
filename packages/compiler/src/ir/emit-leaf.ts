@@ -1,10 +1,12 @@
-import {
-  emitCpwAttribute,
-  emitCpwClass,
-  emitCpwStyleVar,
-  emitCpwText,
-} from '../codegen-cpw.js'
 import type { CodegenContext } from '../codegen-shared.js'
+import {
+  applyAttrEffect,
+  applyAttribute,
+  applyClass,
+  applyModel,
+  applyStyleVar,
+  applyText,
+} from './emit-apply.js'
 import type { LeafBindingOp, MixedTextPart } from './types.js'
 
 /** Emit a leaf binding op onto an element or text node. */
@@ -76,13 +78,8 @@ function emitTextOp(
   }
 
   const { source, mode } = op
-  if (mode === 'cpw' && source.kind === 'signal') {
-    emitCpwText(ctx, textNode, source.name)
-    return
-  }
-  if (mode === 'bindText' && source.kind === 'signal') {
-    ctx.pushCleanup(`bindText(${textNode}, ${source.name})`)
-    ctx.pushDevtoolsBind(source.name, textNode, 'text')
+  if ((mode === 'cpw' || mode === 'bindText') && source.kind === 'signal') {
+    applyText(ctx, textNode, source.name, mode === 'cpw' ? 'cpw' : 'bind')
     return
   }
   if (mode === 'bindPropText' && (source.kind === 'signal' || source.kind === 'prop')) {
@@ -92,7 +89,12 @@ function emitTextOp(
     }
     return
   }
-  const raw = source.kind === 'expr' ? source.code : source.kind === 'static' ? JSON.stringify(source.value) : source.name
+  const raw =
+    source.kind === 'expr'
+      ? source.code
+      : source.kind === 'static'
+        ? JSON.stringify(source.value)
+        : source.name
   ctx.pushCleanup(
     `effect(() => { const _v = (${ctx.rewriteExprForEffect(raw)}); ${textNode}.data = String(typeof _v === 'function' ? _v() : _v) }).dispose`,
   )
@@ -123,45 +125,26 @@ function emitAttrOp(
     return
   }
 
-  if (mode === 'bindAttribute' && (source.kind === 'signal' || source.kind === 'prop')) {
-    ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(name)}, ${source.name})`)
-    ctx.pushDevtoolsBind(source.name, el, 'attr')
+  if (
+    (mode === 'bindAttribute' || mode === 'cpw') &&
+    (source.kind === 'signal' || source.kind === 'prop')
+  ) {
+    applyAttribute(ctx, el, name, source.name, mode === 'cpw' ? 'cpw' : 'bind')
     return
   }
 
-  if (mode === 'cpw' && (source.kind === 'signal' || source.kind === 'prop')) {
-    emitCpwAttribute(ctx, el, name, source.name)
-    return
-  }
-
-  // effect
-  ctx.useRuntime('effect')
   if (source.kind === 'expr' && source.arrow) {
-    ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
-    ctx.indent()
-    ctx.line(`const _v = (${source.code})()`)
-    ctx.line(
-      `if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(name)})`,
-    )
-    ctx.line(`else if (_v === true) ${el}.setAttribute(${JSON.stringify(name)}, '')`)
-    ctx.line(`else ${el}.setAttribute(${JSON.stringify(name)}, String(_v))`)
-    ctx.dedent()
-    ctx.line('}).dispose)')
+    applyAttrEffect(ctx, el, name, source.code, true)
     return
   }
 
-  const raw = source.kind === 'expr' ? source.code : source.kind === 'static' ? JSON.stringify(source.value) : source.name
-  const rewritten = ctx.rewriteExprForEffect(raw)
-  ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
-  ctx.indent()
-  ctx.line(`const _v = ${rewritten}`)
-  ctx.line(
-    `if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(name)})`,
-  )
-  ctx.line(`else if (_v === true) ${el}.setAttribute(${JSON.stringify(name)}, '')`)
-  ctx.line(`else ${el}.setAttribute(${JSON.stringify(name)}, String(_v))`)
-  ctx.dedent()
-  ctx.line('}).dispose)')
+  const raw =
+    source.kind === 'expr'
+      ? source.code
+      : source.kind === 'static'
+        ? JSON.stringify(source.value)
+        : source.name
+  applyAttrEffect(ctx, el, name, ctx.rewriteExprForEffect(raw), false)
 }
 
 function emitClassOp(
@@ -170,13 +153,8 @@ function emitClassOp(
   op: Extract<LeafBindingOp, { op: 'classToggle' }>,
 ): void {
   const { source, mode, className } = op
-  if (mode === 'cpw' && source.kind === 'signal') {
-    emitCpwClass(ctx, el, className, source.name)
-    return
-  }
-  if (mode === 'bindClass' && source.kind === 'signal') {
-    ctx.pushCleanup(`bindClass(${el}, ${JSON.stringify(className)}, ${source.name})`)
-    ctx.pushDevtoolsBind(source.name, el, 'class')
+  if ((mode === 'cpw' || mode === 'bindClass') && source.kind === 'signal') {
+    applyClass(ctx, el, className, source.name, mode === 'cpw' ? 'cpw' : 'bind')
     return
   }
   if (source.kind === 'expr' && source.arrow) {
@@ -185,7 +163,12 @@ function emitClassOp(
     )
     return
   }
-  const raw = source.kind === 'expr' ? source.code : source.kind === 'static' ? JSON.stringify(source.value) : source.name
+  const raw =
+    source.kind === 'expr'
+      ? source.code
+      : source.kind === 'static'
+        ? JSON.stringify(source.value)
+        : source.name
   ctx.pushCleanup(
     `effect(() => { ${el}.classList.toggle(${JSON.stringify(className)}, !!(${raw})) }).dispose`,
   )
@@ -197,13 +180,8 @@ function emitStyleOp(
   op: Extract<LeafBindingOp, { op: 'styleVar' }>,
 ): void {
   const { source, mode, cssVar } = op
-  if (mode === 'cpw' && source.kind === 'signal') {
-    emitCpwStyleVar(ctx, el, cssVar, source.name)
-    return
-  }
-  if (mode === 'bindStyleVar' && source.kind === 'signal') {
-    ctx.pushCleanup(`bindStyleVar(${el}, ${JSON.stringify(cssVar)}, ${source.name})`)
-    ctx.pushDevtoolsBind(source.name, el, 'style')
+  if ((mode === 'cpw' || mode === 'bindStyleVar') && source.kind === 'signal') {
+    applyStyleVar(ctx, el, cssVar, source.name, mode === 'cpw' ? 'cpw' : 'bind')
     return
   }
   if (source.kind === 'expr' && source.arrow) {
@@ -212,7 +190,12 @@ function emitStyleOp(
     )
     return
   }
-  const raw = source.kind === 'expr' ? source.code : source.kind === 'static' ? JSON.stringify(source.value) : source.name
+  const raw =
+    source.kind === 'expr'
+      ? source.code
+      : source.kind === 'static'
+        ? JSON.stringify(source.value)
+        : source.name
   ctx.pushCleanup(
     `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String(${raw})) }).dispose`,
   )
@@ -225,11 +208,15 @@ function emitModelOp(
 ): void {
   const { source, mode, prop } = op
   if (mode === 'bindModel' && (source.kind === 'signal' || source.kind === 'prop')) {
-    ctx.pushCleanup(`bindModel(${el}, ${JSON.stringify(prop)}, ${source.name})`)
-    ctx.pushDevtoolsBind(source.name, el, 'model')
+    applyModel(ctx, el, prop, source.name)
     return
   }
-  const raw = source.kind === 'expr' ? source.code : source.kind === 'static' ? JSON.stringify(source.value) : source.name
+  const raw =
+    source.kind === 'expr'
+      ? source.code
+      : source.kind === 'static'
+        ? JSON.stringify(source.value)
+        : source.name
   ctx.pushCleanup(
     `effect(() => { ${el}[${JSON.stringify(prop)}] = (${ctx.rewriteExprForEffect(raw)}) }).dispose`,
   )
