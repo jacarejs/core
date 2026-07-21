@@ -224,6 +224,7 @@ jacare dev            # start dev server
 jacare build          # production build
 jacare compile file   # compile one .jcr file
 jacare check          # compile all .jcr files in project
+jacare check --bindings  # same + list Binding IR sites per file
 ```
 
 ### Vite templates
@@ -316,7 +317,7 @@ export <style>
 
 ### Template bindings
 
-Bindings are **compile-time**. The compiler picks the thinnest path for each pattern — runtime helpers in dev, **CPW** (inline `peek` + `subscribe`) in production builds.
+Bindings are **compile-time**. The compiler lowers each site once into a **Binding IR** shared by client and SSR, then picks the thinnest path — runtime helpers in dev, **CPW** (inline `peek` + `subscribe`) in production builds.
 
 | Syntax | What it does | Why use it |
 |--------|--------------|------------|

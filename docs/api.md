@@ -1787,8 +1787,32 @@ result.map           // source map
 .jcr source
   → parseModule()     script + view HTML + style CSS
   → parseTemplate()   TemplateAST
-  → generate()        mount / render / resume
+  → Binding IR        BindingSource → leaf / flow / component ops → MountPlan
+  → generate()        mount / render / resume (same MountPlan walk)
   → scopeCss()        [data-jacare-s] selectors
+```
+
+Client and SSR emit from the same lowered forest (`MountPlan`). Classification (`signal` / `prop` / `expr`, CPW eligibility, `#if` DCE) happens once in the IR — not re-decided per backend.
+
+### Binding IR helpers
+
+```typescript
+import {
+  compile,
+  inspectTemplateBindings,
+  lowerMountAst,
+  parseModule,
+  parseTemplate,
+} from '@jacare/compiler'
+
+const mod = parseModule(source, 'Card.jcr')
+const ast = parseTemplate(mod.viewHtml!, { filename: 'Card.jcr' })
+
+// Compact sites for tooling (kind · label · mode · sourceKind)
+inspectTemplateBindings(ast)
+
+// Structural plan shared by client + SSR emit
+lowerMountAst(ast, { signals: new Set(['count']), cpw: false })
 ```
 
 ### Standalone compile
@@ -1797,13 +1821,14 @@ result.map           // source map
 npx jacare-compile src/app.jcr dist/app.js
 jacare compile src/app.jcr --watch
 jacare check
+jacare check --bindings   # also print IR binding sites per file
 ```
 
-### Pulse analysis (planned)
+### Pulse analysis
 
-The compiler will warn when a template binding is suboptimal — for example `${count()}` where `${count}` is enough (bare signal → `bindText` instead of a full `effect`). Today the compiler silently picks the best binding; diagnostics will surface these cases at compile time.
+`jacare check --bindings` lists every lowered site (`text`, `attr`, `class`, `model`, `if`, `list`, …) with mode and source kind. Suboptimal-pattern warnings (e.g. `${count()}` where `${count}` is enough) remain planned; today the compiler silently picks the best binding and `--bindings` exposes the decision.
 
-See [Phase 2 — Compiler](phases/02-compiler.md#pulse-analysis).
+See [Phase 2 — Compiler](phases/02-compiler.md#binding-ir).
 
 ---
 
@@ -1821,7 +1846,8 @@ npm install -g @jacare/cli
 | `jacare dev [--port=N] [--open=false]` | Dev server |
 | `jacare build` | Production build → `dist/` |
 | `jacare compile <file> [out] [--watch]` | Compile one file |
-| `jacare check` | Compile-check all `.jcr` in CWD |
+| `jacare check` | Compile-check all `.jcr` in CWD (contracts included) |
+| `jacare check --bindings` | Same as `check`, plus IR binding sites per file |
 
 ### `jacare.config.js`
 

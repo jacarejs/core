@@ -6,6 +6,8 @@ import {
   cliCode,
   vitePluginCode,
   compileApiCode,
+  checkBindingsCode,
+  bindingIrCode,
   devtoolsCode,
   testingCode,
   scriptsCode,
@@ -27,10 +29,10 @@ export <view>
     <header class="page-hero">
       <p class="page-kicker">API §16 - §19</p>
       <h1 class="page-title">Tooling</h1>
-      <p class="page-lead">The CLI, Vite plugin, compiler, DevTools — and the VS Code extension for .jcr files.</p>
+      <p class="page-lead">The CLI, Vite plugin, Binding IR, compiler, DevTools — and the VS Code extension for .jcr files.</p>
     </header>
 
-    <Tip :text=${'connectJacareDevtools() is wired in boot.js (DEV only). Pulse Graph = every pulse/derive/effect. Scope = only what you registerScope(). Open ⚙ for position, clear highlight/selection, Clear Scope, or reset layout. Drag either header to move.'} />
+    <Tip :text=${'connectJacareDevtools() is wired in boot.js (DEV only). Pulse Graph = every pulse/derive/effect. Scope = only what you registerScope(). Open ⚙ for position, clear highlight/selection, Clear Scope, or reset layout. Drag either header to move. Use jacare check --bindings to dump the same Binding IR the compiler uses for mount and SSR.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'Named pulses + DOM highlight'} :lead=${'Compiler injects { name, file, line } in DEV. Hover the Pulse Graph node to outline this counter.'} :code=${namedPulsesCode}>
@@ -57,9 +59,21 @@ export <view>
         </div>
       </a>
 
-      <Demo :title=${'CLI commands'} :lead=${'jacare new / dev / build / compile / check wrap Vite and the compiler.'} :code=${cliCode}>
+      <Demo :title=${'CLI commands'} :lead=${'jacare new / dev / build / compile / check wrap Vite and the compiler. Pass --bindings to list IR sites.'} :code=${cliCode}>
         <pre class="log">${cliCode}</pre>
       </Demo>
+
+      <div class="ref-card">
+        <h3>jacare check --bindings</h3>
+        <p class="muted">Prints every lowered binding site from the Binding IR — the same classification used for client and SSR emit.</p>
+        <pre><code>${checkBindingsCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>Binding IR (compiler)</h3>
+        <p class="muted">Templates lower once into MountPlan; mount() and render() walk the same forest.</p>
+        <pre><code>${bindingIrCode}</code></pre>
+      </div>
 
       <div class="ref-card">
         <h3>Vite plugin options</h3>

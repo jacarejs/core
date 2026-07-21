@@ -78,9 +78,10 @@ view`
 ### Render pipeline
 
 ```
+AST → MountPlan (shared with client)
 render()
-  ├── evaluate template structure
-  ├── emit HTML string
+  ├── walk MountPlan
+  ├── emit HTML from leaf IR (text / class / attr / style)
   └── collect binding snapshot in state.bindings
 ```
 
@@ -99,6 +100,7 @@ Bindings use `data-jacare-bind` markers:
 }
 ```
 
+Dynamic `class-*`, `bind-*`, and text interpolations go through the same leaf IR as the client (`emit-ssr-leaf`) — SSR does not re-classify “is this a signal?”.
 ### Resume (resumability)
 
 `resume(target, state)` calls `resumeBindings()` — attaches fine-grained bindings to server HTML **without** running `mount()` again. Both `signal` and `expr` bindings hydrate through the `read` function.
@@ -133,10 +135,10 @@ Phase 4 streams one chunk per top-level HTML sibling. Nested incremental streami
 
 ```
 packages/compiler/src/
-├── flatten-literal.ts   — view`...` → HTML + expressions
-├── parse-module.ts      — JavaScript module parser
-├── codegen-client.ts    — mount() emission
-└── codegen-ssr.ts       — render() + resume() emission
+├── ir/mount-plan.ts     — MountPlan forest (shared)
+├── ir/emit-ssr-leaf.ts  — dynamic text/attrs → HTML + bindings
+├── codegen-client.ts    — mount() from MountPlan
+└── codegen-ssr.ts       — render() + resume() from MountPlan
 
 packages/runtime/src/
 ├── view.ts              — compile-time stub
@@ -151,7 +153,8 @@ yarn build && yarn test
 
 - Module parsing and `view` literal flattening
 - `#if`, `#for`, `on-click` parsing
-- `mount` / `render` / `resume` codegen
+- `mount` / `render` / `resume` codegen from MountPlan
+- SSR leaf IR for dynamic class/attr/text
 - `resumeBindings` hydration for signal and expr bindings
 - `escapeHtml` neutralizes markup in SSR output
 - `renderToString` and `renderToStream`

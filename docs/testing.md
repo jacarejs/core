@@ -166,6 +166,24 @@ expect(cpw.code).not.toContain('bindText(')
 
 Use for binding selection (`bindText` vs `bindModel` vs CPW vs `effect`), prop detection, and error positions.
 
+### 3b. Binding IR inspection
+
+```typescript
+import { inspectTemplateBindings, parseModule, parseTemplate } from '@jacare/compiler'
+
+const mod = parseModule(source, 'Card.jcr')
+const ast = parseTemplate(mod.viewHtml!, { filename: 'Card.jcr' })
+const sites = inspectTemplateBindings(ast)
+
+expect(sites.some((s) => s.kind === 'text' && s.sourceKind === 'signal')).toBe(true)
+```
+
+Or from the CLI:
+
+```bash
+jacare check --bindings
+```
+
 ### 4. DevTools registry
 
 ```typescript

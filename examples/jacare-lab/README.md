@@ -25,6 +25,7 @@ yarn workspace jacare-lab preview
 ```bash
 # from examples/jacare-lab
 yarn jacare-check
+# or: jacare check --bindings
 ```
 
 ## What’s inside
@@ -36,7 +37,7 @@ yarn jacare-check
 | `/module` | API §2 — `.jcr` layout, view/style syntax, compiled exports |
 | `/reactivity` | `signal` / `pulse`, `computed` / `derive`, `effect`, `batch`, `untrack` |
 | `/templates` | Text, attrs, `style---` |
-| `/bindings` | `bind-value`, `bind-checked`, `class-*`, CPW notes |
+| `/bindings` | `bind-value`, `bind-checked`, `class-*`, Binding IR + CPW |
 | `/events` | `on-*`, `@*`, keyboard, pointer, stopPropagation |
 | `/if` | Branches, nested conditions, empty states |
 | `/for` | Keyed lists, reorder, stable parents |
@@ -46,8 +47,8 @@ yarn jacare-check
 | `/forms` | `createForm`, Field, validate, submit, reset |
 | `/lifecycle` | `createLifecycle`, `registerScope` |
 | `/cookbook` | Tasks screen combining the pieces |
-| `/ssr` | `render` / `resume` reference cards |
-| `/tooling` | CLI, Vite plugin, compiler, DevTools, testing |
+| `/ssr` | `render` / `resume` via shared MountPlan |
+| `/tooling` | CLI (`check --bindings`), Vite, Binding IR, DevTools |
 | `/helpers` | Runtime helpers index |
 
 Each `Demo` card explains the idea, runs a live example, and opens the source in a modal.

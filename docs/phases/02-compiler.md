@@ -98,10 +98,36 @@ parseTemplate() ──► TemplateAST
 detectProps() + detectSignals() ──► mount props + reactive names
     │
     ▼
-generate() ──► mount / render / resume
+Binding IR (lower once)
+  · BindingSource          signal / prop / expr
+  · leaf / flow / component ops
+  · MountPlan forest
+    │
+    ▼
+generate() ──► mount / render / resume  (same MountPlan walk)
     │
     ▼
 mount(target) ──► DOM + bindings
+```
+
+### Binding IR
+
+After `parseTemplate()`, the compiler **lowers once** and emits three times:
+
+| Layer | Role |
+|-------|------|
+| `BindingSource` | Is this a local signal, prop, or free expression? |
+| Leaf / flow / component ops | `bindText`, `bindClass`, `branch`, `#for` keys, lazy component props |
+| `MountPlan` | Structural forest shared by client + SSR |
+
+CPW is a `mode` on leaf ops (`markCpwOps`), not a third AST walk. `jacare check --bindings` prints sites via `inspectTemplateBindings`.
+
+```bash
+jacare check --bindings
+# ok …/Field.jcr
+#   bindings (3):
+#     - text · label · bindText · prop
+#     - model · value · bindModel · signal
 ```
 
 ### Generated output (development)
@@ -259,6 +285,7 @@ The compiler also runs standalone via CLI:
 jacare compile src/app.jcr
 jacare compile src/app.jcr --watch
 jacare check
+jacare check --bindings
 ```
 
 ## Trade-offs
@@ -280,10 +307,16 @@ packages/compiler/src/
 ├── parse-module.ts    — JavaScript module parser
 ├── flatten-literal.ts — view`...` → HTML + expressions
 ├── parse-template.ts  — HTML template parser
-├── codegen-cpw.ts     — CPW inline emission
-├── codegen-client.ts  — mount() emission
-├── codegen-ssr.ts     — render() + resume() emission
-├── codegen-shared.ts  — resolveSignalExpr, CodegenContext
+├── ir/
+│   ├── source.ts      — BindingSource
+│   ├── lower-leaf.ts / emit-leaf.ts / emit-apply.ts / emit-ssr-leaf.ts
+│   ├── lower-flow.ts / lower-component.ts / optimize.ts
+│   ├── mount-plan.ts  — MountPlan forest (client + SSR)
+│   └── inspect.ts     — inspectTemplateBindings (check --bindings)
+├── codegen-cpw.ts     — thin aliases → emit-apply
+├── codegen-client.ts  — mount() from MountPlan
+├── codegen-ssr.ts     — render() + resume() from MountPlan
+├── codegen-shared.ts  — CodegenContext / leafContext
 ├── codegen.ts         — generate() + detectProps/detectSignals
 ├── errors.ts          — JacareCompileError
 ├── compile.ts         — Pipeline entry
@@ -317,17 +350,16 @@ packages/vite-plugin/src/
 | Pluggable directives | Custom attribute transforms via plugin API |
 | Branch tree-shaking | `#if import.meta.env.DEV` eliminated at build time |
 
-### Pulse analysis
+### Pulse analysis / Binding IR inspection
 
-Compile-time diagnostics when a binding could be more efficient:
-
-| Pattern | Today | Diagnostic (planned) |
-|---------|-------|----------------------|
+| Pattern | Today | Next |
+|---------|-------|------|
+| Any template binding | Lowered once; `jacare check --bindings` lists kind · mode · source | — |
 | `${count()}` with bare signal | Emits `bindText` when detected | Warn if written as call when bare reference works |
 | `${label()}` inside mixed text | Falls back to `effect` | Suggest splitting or using computed |
 | Signal read in event handler | Correct — not a binding | No warning |
 
-The compiler already uses `detectSignals()` and `resolveSignalExpr()` to choose `bindText`, `bindModel`, or `effect`. Pulse analysis will expose these decisions as warnings during `jacare compile` and `jacare check`.
+The compiler uses `detectSignals()` + Binding IR (`lowerBindingSource` / leaf ops) to choose `bindText`, `bindModel`, CPW, or `effect`. `inspectTemplateBindings` exposes those decisions for CLI/LSP; suboptimal-pattern warnings remain planned.
 
 ## Tests
 

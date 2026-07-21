@@ -27,7 +27,7 @@ export const LESSONS = [
   {
     path: '/bindings',
     title: 'Bindings',
-    blurb: 'bind-value, class-*, style vars, CPW notes',
+    blurb: 'bind-value, class-*, style vars, Binding IR + CPW',
   },
   {
     path: '/events',
@@ -97,7 +97,7 @@ export const LESSONS = [
   {
     path: '/tooling',
     title: 'Tooling',
-    blurb: 'CLI, Vite plugin, compiler, testing, DevTools',
+    blurb: 'CLI, check --bindings, Binding IR, DevTools',
   },
   {
     path: '/helpers',

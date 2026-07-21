@@ -507,6 +507,8 @@ Props are inferred from `:name=${expr}` attributes.
 
 Every `.jcr` file compiles to `mount()`, `render()`, and `resume()`. The compiler imports only the runtime helpers each file uses (`bindText`, `bindModel`, `branch`, etc.).
 
+Templates are lowered once into a **Binding IR** (`BindingSource` → leaf/flow/component ops → `MountPlan`). Client and SSR emit from that same plan, so `${count}`, `class-open=${open}`, and `#if` use one classification for browser DOM and server HTML.
+
 ### Compile-Time Pulse Wiring (CPW)
 
 In **production** client builds, the Vite plugin sets `cpw: true` by default. Static signal bindings compile to inline `peek` + `subscribe` instead of `bindText` / `bindAttribute` / `bindClass` / `bindStyleVar`.
@@ -547,9 +549,10 @@ Compile errors report `filename:line:column` with a source snippet. Source maps 
 jacare compile src/app.jcr
 jacare compile src/app.jcr --watch
 jacare check
+jacare check --bindings   # list IR sites: text · count · bindText · signal
 ```
 
-See [Phase 2 — Compiler](phases/02-compiler.md).
+See [Phase 2 — Compiler](phases/02-compiler.md#binding-ir).
 
 ## SSR
 
@@ -560,6 +563,8 @@ Every `.jcr` file exports three functions:
 | `mount(target)` | Client render |
 | `render()` | Server HTML + binding state |
 | `resume(target, state)` | Hydrate on the client |
+
+`render()` walks the same `MountPlan` as `mount()`. Dynamic text, `class-*`, and `bind-*` attrs emit escaped HTML plus `data-jacare-bind` markers from the leaf IR — not a second “is this a signal?” pass.
 
 ```javascript
 import { render, resume } from './app.jcr'

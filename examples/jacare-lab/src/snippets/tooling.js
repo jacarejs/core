@@ -2,7 +2,38 @@ export const cliCode = `jacare new my-app --template=nav
 jacare dev --port=4000
 jacare build
 jacare compile src/app.jcr dist/app.js --watch
-jacare check`
+jacare check
+jacare check --bindings`
+
+export const checkBindingsCode = `$ jacare check --bindings
+ok …/Card.jcr
+  bindings (4):
+    - text · title · bindText · prop
+    - class · open · bindClass · signal
+    - model · value · bindModel · signal
+    - if · open()
+ok …/Field.jcr
+  bindings (2):
+    - text · label · bindText · prop
+    - model · value · bindModel · signal
+
+102 file(s) ok`
+
+export const bindingIrCode = `import {
+  inspectTemplateBindings,
+  lowerMountAst,
+  parseModule,
+  parseTemplate,
+} from '@jacare/compiler'
+
+const mod = parseModule(source, 'Card.jcr')
+const ast = parseTemplate(mod.viewHtml, { filename: 'Card.jcr' })
+
+// Same sites as jacare check --bindings
+inspectTemplateBindings(ast)
+
+// Forest shared by mount() and render()
+lowerMountAst(ast, { signals: new Set(['open']), cpw: false })`
 
 export const vitePluginCode = `import jacare from '@jacare/vite-plugin'
 
@@ -66,7 +97,7 @@ export <view>
 //   doubled · tooling.jcr:N
 // Hover → outlines the <p> text nodes.`
 
-export const testingCode = `import { compile } from '@jacare/compiler'
+export const testingCode = `import { compile, inspectTemplateBindings, parseModule, parseTemplate } from '@jacare/compiler'
 import { it, expect } from 'vitest'
 
 it('mounts and reacts to clicks', () => {
@@ -76,6 +107,13 @@ it('mounts and reacts to clicks', () => {
   document.querySelector('button').click()
   expect(document.querySelector('.metric').textContent).toBe('1')
   dispose()
+})
+
+it('exposes Binding IR sites', () => {
+  const mod = parseModule(source, 'Counter.jcr')
+  const ast = parseTemplate(mod.viewHtml, { filename: 'Counter.jcr' })
+  const sites = inspectTemplateBindings(ast)
+  expect(sites.some((s) => s.kind === 'text')).toBe(true)
 })`
 
 export const scriptsCode = `{
@@ -83,6 +121,7 @@ export const scriptsCode = `{
     "dev": "jacare dev",
     "build": "jacare build",
     "check": "jacare check",
+    "check:bindings": "jacare check --bindings",
     "test": "vitest run"
   }
 }`

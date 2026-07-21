@@ -12,7 +12,7 @@ function bump() {
 // server
 // import { render } from './Counter.jcr'
 // const { html, state } = render({ count: 0 })
-// html  -> escaped markup
+// html  -> escaped markup from the same MountPlan as mount()
 // state -> bindings needed to resume on the client`,
   `  <div class="stack">
     <span class="metric">\${count}</span>

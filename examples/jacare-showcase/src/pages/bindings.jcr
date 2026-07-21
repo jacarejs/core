@@ -41,7 +41,8 @@ export <view>
       <p class="hero-lead">
         Three binding flavors in one page: <code>style---pct</code> sets a CSS custom property,
         <code>class-*</code> toggles individual classes without string concat, and
-        <code>bind-value</code> mirrors input text both ways.
+        <code>bind-value</code> mirrors input text both ways. The compiler lowers each site once
+        into Binding IR shared by client and SSR.
       </p>
       <div class="hero-actions">
         <button type="button" class="btn btn-ghost" on-click=${openCode}>View code</button>

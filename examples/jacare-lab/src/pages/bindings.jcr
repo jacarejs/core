@@ -42,10 +42,10 @@ export <view>
     <header class="page-hero">
       <p class="page-kicker">API §5</p>
       <h1 class="page-title">Bindings</h1>
-      <p class="page-lead">bind-value / bind-checked wire two-way inputs. class-* toggles a class. style---* binds a signal to a CSS custom property.</p>
+      <p class="page-lead">bind-value / bind-checked wire two-way inputs. class-* toggles a class. style---* binds a signal to a CSS custom property. Client and SSR share one Binding IR — the compiler classifies each site once.</p>
     </header>
 
-    <Tip :text=${'Compile-Time Pulse Wiring (CPW) inlines class-*, style---*, and one-way bind-* into peek + subscribe calls in production client builds. Two-way models and control flow always run through the normal runtime.'} />
+    <Tip :text=${'Compile-Time Pulse Wiring (CPW) inlines class-*, style---*, and one-way bind-* into peek + subscribe calls in production client builds. Two-way models and control flow always run through the normal runtime. Run jacare check --bindings to list every lowered site (text · attr · class · model · if · list).'} />
 
     <div class="lesson-grid">
       <Demo :title=${'bind-value / bind-checked mirrors'} :lead=${'Both inputs on each row are bound to the exact same pulse — type or toggle either one.'} :code=${mirrorCode}>

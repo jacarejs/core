@@ -89,7 +89,16 @@ export {
   renderToStreamCode,
 } from './ssr.js'
 
-export { cliCode, vitePluginCode, compileApiCode, devtoolsCode, testingCode, scriptsCode } from './tooling.js'
+export {
+  cliCode,
+  checkBindingsCode,
+  bindingIrCode,
+  vitePluginCode,
+  compileApiCode,
+  devtoolsCode,
+  testingCode,
+  scriptsCode,
+} from './tooling.js'
 
 import { quickStartCode, bootCode, greetingCode, highlightCode } from './start.js'
 import { scaffoldCode, appJcrCode, bootJsCode, htmlShellCode } from './quick-start.js'
@@ -164,7 +173,16 @@ import {
   renderToStringCode,
   renderToStreamCode,
 } from './ssr.js'
-import { cliCode, vitePluginCode, compileApiCode, devtoolsCode, testingCode, scriptsCode } from './tooling.js'
+import {
+  cliCode,
+  checkBindingsCode,
+  bindingIrCode,
+  vitePluginCode,
+  compileApiCode,
+  devtoolsCode,
+  testingCode,
+  scriptsCode,
+} from './tooling.js'
 
 export const SNIPPET_CATALOG = [
   { id: 'start.quick-start', title: 'Quick start', lesson: '/', code: quickStartCode },
@@ -276,6 +294,8 @@ export const SNIPPET_CATALOG = [
   { id: 'ssr.render-to-stream', title: 'renderToStream: chunked HTML', lesson: '/ssr', code: renderToStreamCode },
 
   { id: 'tooling.cli', title: 'CLI commands', lesson: '/tooling', code: cliCode },
+  { id: 'tooling.check-bindings', title: 'jacare check --bindings', lesson: '/tooling', code: checkBindingsCode },
+  { id: 'tooling.binding-ir', title: 'Binding IR (compiler)', lesson: '/tooling', code: bindingIrCode },
   { id: 'tooling.vite-plugin', title: 'Vite plugin options', lesson: '/tooling', code: vitePluginCode },
   { id: 'tooling.compile-api', title: 'Compiler API', lesson: '/tooling', code: compileApiCode },
   { id: 'tooling.devtools', title: 'DevTools', lesson: '/tooling', code: devtoolsCode },

@@ -108,7 +108,8 @@ yarn example:build  # build jacare-todo example
 yarn showcase:build # build jacare-showcase example
 yarn lab:dev        # interactive API tutorial (jacare-lab)
 yarn lab:build      # build jacare-lab
-jacare check        # compile all .jcr files (from app root)
+jacare check                # compile all .jcr files (from app root)
+jacare check --bindings     # same + print IR binding sites per file
 ```
 
 ## Testing

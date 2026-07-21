@@ -50,7 +50,7 @@ Aliases: `minimal`, `nav`, `todo`
 
 - `vite.config.js` with `@jacare/vite-plugin`
 - `.jcr` components and JavaScript entry
-- `jacare check` script for CI
+- `jacare check` / `jacare check --bindings` scripts for CI and IR inspection
 - HMR out of the box
 
 ## After scaffolding

@@ -38,7 +38,7 @@ export <view>
       <p class="page-lead">Every .jcr file compiles to three exports — mount, render, and resume — so the same source runs on the server and the client.</p>
     </header>
 
-    <Tip :text=${'This lab is served client-only, so the SSR cards below are reference demos with a live mental model — the View code always shows the full module including the view block.'} />
+    <Tip :text=${'This lab is served client-only, so the SSR cards below are reference demos with a live mental model — the View code always shows the full module including the view block. Under the hood, render() walks the same MountPlan as mount(), so dynamic class / attr / text stay in sync with the Binding IR.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'render(props): server HTML + state'} :lead=${'render() never touches the DOM — it returns escaped HTML plus a small state object describing each dynamic binding.'} :code=${renderCode}>

@@ -57,6 +57,7 @@ npm run dev       # vite
 npm run build     # vite build
 npm run preview   # vite preview
 npm run check     # jacare check — validate all .jcr files
+# jacare check --bindings  # also print Binding IR sites
 ```
 
 ## vs jacare CLI templates
