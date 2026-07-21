@@ -12,6 +12,7 @@ export const nav = createNav({
     '/': { use: screen(Home), title: 'Jacaré Lab' },
     '/quick-start': { use: lazy(() => import('./pages/quick-start.jcr')), title: 'Jacaré Lab · Quick start' },
     '/module': { use: lazy(() => import('./pages/module.jcr')), title: 'Jacaré Lab · Module' },
+    '/language': { use: lazy(() => import('./pages/language.jcr')), title: 'Jacaré Lab · Language' },
     '/reactivity': { use: lazy(() => import('./pages/reactivity.jcr')), title: 'Jacaré Lab · Reactivity' },
     '/bag': { use: lazy(() => import('./pages/bag.jcr')), title: 'Jacaré Lab · Pulse bags' },
     '/templates': { use: lazy(() => import('./pages/templates.jcr')), title: 'Jacaré Lab · Templates' },
@@ -53,6 +54,7 @@ export const route = createRoute(nav.where)
 for (const path of [
   '/quick-start',
   '/module',
+  '/language',
   '/reactivity',
   '/bag',
   '/templates',

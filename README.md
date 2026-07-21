@@ -43,7 +43,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | **Live** | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) |
 | **Local** | `yarn lab:dev` → [http://localhost:3003](http://localhost:3003) |
 | **Source** | [`examples/jacare-lab`](examples/jacare-lab) |
-| **Covers** | Reactivity, **Pulse bags / Mesh**, templates, bindings, events, `#if` / `#for`, components & contracts, CSS, nav, forms, lifecycle, cookbook, SSR, tooling |
+| **Covers** | Reactivity, **Pulse bags / Mesh**, templates, bindings, **language reference**, events, `#if` / `#for`, components & contracts, CSS, nav, forms, lifecycle, cookbook, SSR, tooling |
 
 [![Lab tutorial](https://img.shields.io/badge/Jacaré%20Lab-interactive%20API%20tutorial-78c018?style=for-the-badge)](https://jacarejs.github.io/core/lab/)
 
@@ -53,13 +53,14 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 |-------|------|
 | **Tutorial (Jacaré Lab)** | [Live](https://jacarejs.github.io/core/lab/) · [`examples/jacare-lab`](examples/jacare-lab) · `yarn lab:dev` |
 | **API reference (full)** | [docs/api.md](docs/api.md) |
+| **Language reference** | [docs/language-reference.md](docs/language-reference.md) — reserved words, all binds, view/style/contract, CLI |
 | Template contracts | [docs/api.md §9](docs/api.md#template-contracts-export-contract) |
 | Events `on-*` / `@*` | [docs/api.md §6](docs/api.md#6-events-on---) |
 | Conditionals `#if` | [docs/api.md §7](docs/api.md#7-control-flow--if) |
 | Lists `#for` | [docs/api.md §8](docs/api.md#8-control-flow--for) |
 | Reactivity | [docs/api.md §3](docs/api.md#3-reactivity) |
 | **Pulse bags (shared mesh)** | [docs/api.md §3b](docs/api.md#3b-pulse-bags-shared-state) · [Lab `/bag`](https://jacarejs.github.io/core/lab/#/bag) |
-| DOM bindings | [docs/api.md §5](docs/api.md#5-dom-bindings) |
+| DOM bindings | [docs/api.md §5](docs/api.md#5-dom-bindings) · [Lab `/language`](https://jacarejs.github.io/core/lab/#/language) |
 | Components & slots | [docs/api.md §9](docs/api.md#9-components-and-slots) |
 | Navigation | [docs/api.md §11](docs/api.md#11-navigation) |
 | Forms | [docs/api.md §12](docs/api.md#12-forms) |

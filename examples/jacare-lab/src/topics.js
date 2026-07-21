@@ -15,6 +15,11 @@ export const LESSONS = [
     blurb: 'API §2 — .jcr layout, view/style syntax, compiled exports',
   },
   {
+    path: '/language',
+    title: 'Language reference',
+    blurb: 'Reserved words, all binds, view/style/contract, CLI',
+  },
+  {
     path: '/reactivity',
     title: 'Reactivity',
     blurb: 'signal, computed, effect, batch, untrack, aliases',

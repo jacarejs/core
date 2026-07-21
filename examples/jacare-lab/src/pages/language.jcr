@@ -1,0 +1,186 @@
+import { pulse, derive } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import {
+  reservedBlocksCode,
+  reservedDirectivesCode,
+  allBindsCode,
+  bindsWithIfCode,
+  contractBindCode,
+  cliCreateRunBuildCode,
+} from '../snippets/language.js'
+
+const draft = pulse('')
+const on = pulse(false)
+const href = pulse('/about')
+const busy = pulse(false)
+const width = pulse(45)
+const pct = derive(() => width() + '%')
+const tab = pulse('a')
+
+const show = pulse(true)
+const email = pulse('')
+const err = pulse('')
+
+const blockRows = [
+  { token: 'export <' + 'view>', role: 'Markup + bindings (required)' },
+  { token: 'export <' + 'style>', role: 'Scoped CSS (optional, last)' },
+  { token: 'export <' + 'contract>', role: 'props · pulses · slots · emits · links' },
+]
+
+const directiveRows = [
+  { token: '#if / #elif / #else / #end', role: 'Conditional branches (@if alias)' },
+  { token: '#case / #when / #else', role: 'Match one value (Object.is)' },
+  { token: '#for list as item (key)', role: 'Keyed list (@each alias)' },
+]
+
+const prefixRows = [
+  { token: 'on-* / @*', role: 'DOM events' },
+  { token: 'bind-*', role: 'Attr / two-way model / model prop' },
+  { token: ':*', role: 'One-way attr or component prop' },
+  { token: 'class-* / class:*', role: 'Toggle class' },
+  { token: 'style---* / style:*', role: 'CSS var --*' },
+  { token: '${@bag/key}', role: 'Pulse Mesh address' },
+]
+
+const specialRows = [
+  { token: '<slot> / slot="name"', role: 'Content projection' },
+  { token: '<debug>', role: 'Dev JSON inspector (prod-stripped)' },
+  { token: 'jacare-frame / jacare-go', role: 'Nav mount + client links' },
+]
+
+const cliRows = [
+  { token: 'jacare new / create-jacare', role: 'Scaffold project' },
+  { token: 'jacare dev', role: 'Dev server + HMR' },
+  { token: 'jacare build', role: 'Production → dist/' },
+  { token: 'jacare check [--bindings]', role: 'Contracts + Mesh links + IR' },
+  { token: 'jacare compile', role: 'Single-file compile' },
+]
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">Language reference</p>
+      <h1 class="page-title">Reserved words & bindings</h1>
+      <p class="page-lead">
+        Complete map of Jacaré tokens — module blocks, directives, attribute prefixes, every bind form,
+        and CLI create / run / build. Written docs:
+        <code>docs/language-reference.md</code>
+        and
+        <code>docs/api.md</code>
+        §2b · §5 · §17.
+      </p>
+    </header>
+
+    <Tip :text=${'Jacaré files are plain JavaScript. Tokens below are reserved by the compiler or runtime in the positions shown — not all are JS keywords. Prefer bare ${count} over redundant ${() => count()} when there is no loop local to capture.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Module blocks'} :lead=${'view is required. style is scoped. contract declares the public surface for jacare check.'} :code=${reservedBlocksCode}>
+        <div class="nav-live">
+          #for blockRows as row (row.token)
+            <div class="nav-live-row">
+              <code>${row.token}</code>
+              <span>${row.role}</span>
+            </div>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Directives'} :lead=${'Must start on their own line. Work inside view and inside style.'} :code=${reservedDirectivesCode}>
+        <div class="nav-live">
+          #for directiveRows as row (row.token)
+            <div class="nav-live-row">
+              <code>${row.token}</code>
+              <span>${row.role}</span>
+            </div>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Attribute prefixes'} :lead=${'Parsed before HTML attributes. On PascalCase tags, : is a prop and bind- is a model prop.'} :code=${allBindsCode}>
+        <div class="nav-live">
+          #for prefixRows as row (row.token)
+            <div class="nav-live-row">
+              <code>${row.token}</code>
+              <span>${row.role}</span>
+            </div>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'All binds live'} :lead=${'bind-value, bind-checked, bind-href, :disabled, class-active, style---pct on one panel.'} :code=${allBindsCode}>
+        <div class="stack">
+          <input class="input" bind-value=${draft} placeholder="bind-value" />
+          <label class="row"><input type="checkbox" bind-checked=${on} /> bind-checked</label>
+          <a class="btn btn-outline" bind-href=${href}>bind-href → ${href}</a>
+          <button type="button" class="btn" :disabled=${busy} on-click=${() => busy.update((v) => !v)}>
+            :disabled (${busy})
+          </button>
+          <div class="row">
+            <button type="button" class="btn btn-outline" class-active=${tab() === 'a'} on-click=${() => tab.set('a')}>A</button>
+            <button type="button" class="btn btn-outline" class-active=${tab() === 'b'} on-click=${() => tab.set('b')}>B</button>
+          </div>
+          <div class="bar" style---pct=${pct}></div>
+          <input class="input" type="range" min="0" max="100" bind-value=${width} />
+          <p class="muted">draft=${draft} · on=${on} · pct=${pct}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Binds + #if'} :lead=${'Two-way inputs nest cleanly inside conditionals — inactive arms leave the DOM.'} :code=${bindsWithIfCode}>
+        <div class="stack">
+          <label class="row"><input type="checkbox" bind-checked=${show} /> Show form</label>
+          #if show()
+            <input class="input" bind-value=${email} placeholder="Email" />
+            #if err()
+              <p class="muted">${err}</p>
+            #else
+              <p class="muted">Looks good — ${email}</p>
+            #end
+          #else
+            <p class="muted">Form hidden</p>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Contract + model bind'} :lead=${'Parents must use bind-name for model: true props — :name fails jacare check.'} :code=${contractBindCode}>
+        <pre class="log">${contractBindCode}</pre>
+      </Demo>
+
+      <Demo :title=${'Special tags'} :lead=${'slot, debug, and nav attributes are Jacaré-reserved in templates.'} :code=${reservedBlocksCode}>
+        <div class="nav-live">
+          #for specialRows as row (row.token)
+            <div class="nav-live-row">
+              <code>${row.token}</code>
+              <span>${row.role}</span>
+            </div>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Create · run · build'} :lead=${'Scaffold with create-jacare or jacare new, then dev / build / check.'} :code=${cliCreateRunBuildCode}>
+        <div class="nav-live">
+          #for cliRows as row (row.token)
+            <div class="nav-live-row">
+              <code>${row.token}</code>
+              <span>${row.role}</span>
+            </div>
+          #end
+        </div>
+        <pre class="log">${cliCreateRunBuildCode}</pre>
+      </Demo>
+    </div>
+  </section>
+</view>
+
+export <style>
+.bar {
+  width: var(--pct);
+  height: 8px;
+  background: #189030;
+  border-radius: 4px;
+  transition: width 0.12s ease;
+}
+.btn-outline.active {
+  outline: 2px solid #189030;
+}
+</style>

@@ -11,6 +11,15 @@ export {
 } from './module.js'
 
 export {
+  reservedBlocksCode,
+  reservedDirectivesCode,
+  allBindsCode,
+  bindsWithIfCode,
+  contractBindCode,
+  cliCreateRunBuildCode,
+} from './language.js'
+
+export {
   signalCode,
   computedCode,
   effectCode,
@@ -118,6 +127,14 @@ import {
   liveModuleCode,
 } from './module.js'
 import {
+  reservedBlocksCode,
+  reservedDirectivesCode,
+  allBindsCode,
+  bindsWithIfCode,
+  contractBindCode,
+  cliCreateRunBuildCode,
+} from './language.js'
+import {
   signalCode,
   computedCode,
   effectCode,
@@ -215,6 +232,13 @@ export const SNIPPET_CATALOG = [
   { id: 'module.view-syntax', title: 'Supported view syntax', lesson: '/module', code: viewSyntaxCode },
   { id: 'module.style-syntax', title: 'Supported style syntax', lesson: '/module', code: styleSyntaxCode },
   { id: 'module.compiled', title: 'Compiled output', lesson: '/module', code: compiledExportsCode },
+
+  { id: 'language.blocks', title: 'Module blocks', lesson: '/language', code: reservedBlocksCode },
+  { id: 'language.directives', title: 'Directives', lesson: '/language', code: reservedDirectivesCode },
+  { id: 'language.binds', title: 'All binds live', lesson: '/language', code: allBindsCode },
+  { id: 'language.binds-if', title: 'Binds + #if', lesson: '/language', code: bindsWithIfCode },
+  { id: 'language.contract', title: 'Contract + model bind', lesson: '/language', code: contractBindCode },
+  { id: 'language.cli', title: 'Create · run · build', lesson: '/language', code: cliCreateRunBuildCode },
 
   { id: 'reactivity.signal', title: 'signal: set, update, peek', lesson: '/reactivity', code: signalCode },
   { id: 'reactivity.computed', title: 'computed: price × qty', lesson: '/reactivity', code: computedCode },

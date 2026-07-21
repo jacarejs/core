@@ -13,7 +13,7 @@
 
 Complete API guide for building applications with Jacaré. Each section explains **what** the API does, **when** to use it, and includes a **minimal working example**.
 
-For syntax details see [syntax.md](syntax.md). For architecture rationale see [phases/](phases/).
+For syntax details see [syntax.md](syntax.md). For the **full language reference** (reserved words, every bind, `<view>` / `<style>` / `<contract>`, CLI create/dev/build) see [language-reference.md](language-reference.md). Architecture rationale: [phases/](phases/).
 
 ---
 
@@ -26,9 +26,11 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 | **Live** | [https://jacarejs.github.io/core/lab/](https://jacarejs.github.io/core/lab/) |
 | **Local** | `yarn lab:dev` → http://localhost:3003 |
 | **Source** | [`examples/jacare-lab`](../examples/jacare-lab) |
-| **Matches this doc** | Reactivity → tooling (§3–§19), including contracts, forms, nav, and cookbook |
+| **Matches this doc** | Reactivity → tooling (§3–§19), including contracts, forms, nav, cookbook, and [language reference](language-reference.md) |
 
 [![Open Jacaré Lab](https://img.shields.io/badge/Open%20Jacaré%20Lab-interactive%20tutorial-78c018?style=for-the-badge)](https://jacarejs.github.io/core/lab/)
+
+**Language deep-dive:** [language-reference.md](language-reference.md) · Lab [`/language`](https://jacarejs.github.io/core/lab/#/language) (reserved words, all binds, view/style/contract, CLI).
 
 ---
 
@@ -37,30 +39,31 @@ For syntax details see [syntax.md](syntax.md). For architecture rationale see [p
 1. [Tutorial — Jacaré Lab](#tutorial--jacaré-lab)
 2. [Quick start](#1-quick-start)
 3. [Module format (.jcr)](#2-module-format-jcr)
-4. [Reactivity](#3-reactivity)
-5. [Pulse bags (shared state)](#3b-pulse-bags-shared-state)
-6. [Templates](#4-templates)
-7. [DOM bindings](#5-dom-bindings)
-8. [Events (`on-*` / `@*`)](#6-events-on---)
-9. [Control flow — `#if`](#7-control-flow--if)
-10. [Control flow — `#case`](#7b-control-flow--case)
-11. [Dev debug — `<debug>`](#7c-dev-debug-debug)
-12. [Control flow — `#for`](#8-control-flow--for)
-13. [Components, props, and slots](#9-components-and-slots)
-14. [Scoped CSS](#10-scoped-css)
-15. [Navigation](#11-navigation)
-16. [Forms](#12-forms)
-17. [Lifecycle and scope](#13-lifecycle-and-scope)
-18. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
-19. [SSR and hydration](#14-ssr-and-hydration)
-20. [DevTools](#15-devtools)
-21. [Compiler API](#16-compiler-api)
-22. [CLI](#17-cli)
-23. [Vite plugin](#18-vite-plugin)
-24. [Testing](#19-testing)
-25. [Runtime helpers index](#20-runtime-helpers-index)
+4. [Reserved words](#2b-reserved-words)
+5. [Reactivity](#3-reactivity)
+6. [Pulse bags (shared state)](#3b-pulse-bags-shared-state)
+7. [Templates](#4-templates)
+8. [DOM bindings](#5-dom-bindings)
+9. [Events (`on-*` / `@*`)](#6-events-on---)
+10. [Control flow — `#if`](#7-control-flow--if)
+11. [Control flow — `#case`](#7b-control-flow--case)
+12. [Dev debug — `<debug>`](#7c-dev-debug-debug)
+13. [Control flow — `#for`](#8-control-flow--for)
+14. [Components, props, and slots](#9-components-and-slots)
+15. [Scoped CSS](#10-scoped-css)
+16. [Navigation](#11-navigation)
+17. [Forms](#12-forms)
+18. [Lifecycle and scope](#13-lifecycle-and-scope)
+19. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
+20. [SSR and hydration](#14-ssr-and-hydration)
+21. [DevTools](#15-devtools)
+22. [Compiler API](#16-compiler-api)
+23. [CLI](#17-cli)
+24. [Vite plugin](#18-vite-plugin)
+25. [Testing](#19-testing)
+26. [Runtime helpers index](#20-runtime-helpers-index)
 
-Jump to: [Tutorial](#tutorial--jacaré-lab) · [Pulse bags](#3b-pulse-bags-shared-state) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Packages on npm](#packages-on-npm)
+Jump to: [Tutorial](#tutorial--jacaré-lab) · [Reserved words](#2b-reserved-words) · [Bindings](#5-dom-bindings) · [Pulse bags](#3b-pulse-bags-shared-state) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Language reference](language-reference.md) · [Packages on npm](#packages-on-npm)
 
 ---
 
@@ -201,6 +204,48 @@ Every `.jcr` file compiles to three exports:
 | `render(props?)` | Server HTML + binding state |
 | `resume(target, state, props?)` | Hydrate client from SSR state |
 | `default` | Alias for `mount` |
+
+---
+
+## 2b. Reserved words
+
+Jacaré modules are JavaScript. The tokens below are reserved by the **compiler** or **runtime** in the positions shown. Full tables, edge cases, and decision charts: **[language-reference.md](language-reference.md)** · Lab lesson **`/language`**.
+
+### Module blocks
+
+| Token | Role |
+|-------|------|
+| `export <view>…</view>` | Markup (required form) |
+| `export <style>…</style>` | Scoped CSS (optional, last) |
+| `export <contract>…</contract>` | Props / pulses / slots / emits / links |
+
+### Directives (own line, inside view or style)
+
+| Canonical | Alias |
+|-----------|-------|
+| `#if` / `#elif` / `#else` / `#end` | `@if` / `@elseif` / `@else` / `@end` |
+| `#case` / `#when` / `#else` / `#end` | — |
+| `#for … as … (key)` / `#end` | `@each …` / `@end` |
+
+### Attribute prefixes
+
+| Prefix | Meaning |
+|--------|---------|
+| `on-*` / `@*` | DOM events |
+| `bind-*` | Attr / two-way model / model prop |
+| `:*` | One-way attr or component prop |
+| `class-*` / `class:*` | Toggle class |
+| `style---*` / `style:*` | CSS custom property `--*` |
+
+### Special tags / attrs / sugar
+
+| Token | Role |
+|-------|------|
+| `<slot>` / `slot="name"` | Content projection |
+| `<debug>` | Dev JSON inspector (stripped in prod) |
+| `jacare-frame` / `jacare-go` / `jacare-here` | Navigation shell + links |
+| `${@bag/key}` | Pulse Mesh address |
+| Contract fields `props` · `pulses` · `slots` · `emits` · `forwards` · `links` | Only valid `<contract>` keys |
 
 ---
 
@@ -485,7 +530,25 @@ export <view>
 
 ## 5. DOM bindings
 
-Runtime helpers imported only when the compiler needs them.
+Runtime helpers imported only when the compiler needs them. **Complete catalog with every syntax form, conditionals, contracts, and decision tables:** [language-reference.md §3](language-reference.md#3-all-bindings-complete-catalog) · Lab **`/bindings`** and **`/language`**.
+
+### Template syntax → runtime
+
+| Template | Typical compile target | When to use |
+|----------|------------------------|-------------|
+| `${signal}` / `${pulse}` | `bindText` / CPW | Reactive text |
+| `${prop}` | `bindPropText` | Component prop (signal or string) |
+| `${@bag/key}` | Mesh Port (`getBag` + bind) | Shared bag without local import |
+| `bind-href=${url}` / `:href=${url}` | `bindAttribute` | One-way DOM attribute |
+| `:disabled=${busy}` | Attr bind (falsy removes attr) | Boolean attributes |
+| `bind-value=${draft}` | `bindModel(…, 'value')` | Two-way text / number / select |
+| `bind-checked=${on}` | `bindModel(…, 'checked')` | Two-way checkbox / radio |
+| `class-done=${flag}` / `class:done=${flag}` | `bindClass` | Toggle a class name |
+| `style---pct=${pct}` / `style:pct=${pct}` | `bindStyleVar` / CPW | CSS variable `--pct` |
+| `:title=${t}` on `<Card>` | Prop pass | One-way component prop |
+| `bind-value=${email}` on `<Field>` | Model prop | Two-way (`model: true` in contract) |
+
+### Runtime helpers
 
 | Helper | Use |
 |--------|-----|
@@ -500,6 +563,51 @@ Runtime helpers imported only when the compiler needs them.
 | `reconcileKeyedList(anchor, source, key, render)` | `#for` keyed lists |
 | `mountSlot(anchor, children, name?)` | Slot projection |
 | `ensureScopedStyle(scopeId, css)` | Inject scoped stylesheet |
+
+### Bindings + conditionals (worked example)
+
+```javascript
+import { signal, computed } from '@jacare/core'
+
+const loading = signal(true)
+const draft = signal('')
+const items = signal([
+  { id: 'a', label: 'Alpha', done: false },
+  { id: 'b', label: 'Beta', done: true },
+])
+const selected = signal('a')
+const progress = signal(40)
+const pct = computed(() => progress() + '%')
+
+export <view>
+#if loading()
+  <p class="muted">Loading…</p>
+#else
+  <input bind-value=${draft} placeholder="Filter" />
+
+  <ul>
+    #for items() as item (item.id)
+      <li
+        class-done=${item.done}
+        class-active=${() => selected() === item.id}
+        on-click=${() => selected.set(item.id)}
+      >
+        ${item.label}
+      </li>
+    #end
+  </ul>
+
+  <div class="bar" style---pct=${pct}></div>
+  <input type="range" min="0" max="100" bind-value=${progress} />
+#end
+</view>
+
+export <style>
+.bar { width: var(--pct); height: 6px; background: #189030; }
+.list-item.active { outline: 2px solid #189030; }
+.list-item.done { opacity: 0.55; text-decoration: line-through; }
+</style>
+```
 
 ### Compile-Time Pulse Wiring (CPW)
 
@@ -1985,22 +2093,54 @@ See [Phase 2 — Compiler](phases/02-compiler.md#binding-ir).
 
 ## 17. CLI
 
-Package: [`@jacare/cli`](https://www.npmjs.com/package/@jacare/cli)
+Package: [`@jacare/cli`](https://www.npmjs.com/package/@jacare/cli). Full create / run / build walkthrough: [language-reference.md §9](language-reference.md#9-create-run-and-build) · [CLI README](../packages/cli/README.md) · Lab **`/language`** and **`/tooling`**.
 
 ```bash
 npm install -g @jacare/cli
+# or: npm create jacare@latest my-app
 ```
+
+### Create
+
+```bash
+jacare new my-app
+jacare new my-shop --template=todo
+# templates: minimal | nav | todo | vite-minimal | vite-nav | vite-todo
+
+npm create jacare@latest my-app
+cd my-app && npm install
+```
+
+### Run (dev)
+
+```bash
+jacare dev
+jacare dev --port=4000 --open=false
+# vite templates: npm run dev
+```
+
+### Build
+
+```bash
+jacare build
+# → dist/
+# vite templates: npm run build && npm run preview
+```
+
+### Compile & check
 
 | Command | Description |
 |---------|-------------|
-| `jacare new <name> [--template=…]` | Scaffold project |
-| `jacare dev [--port=N] [--open=false]` | Dev server |
-| `jacare build` | Production build → `dist/` |
-| `jacare compile <file> [out] [--watch]` | Compile one file |
-| `jacare check` | Compile-check all `.jcr` in CWD (contracts + Mesh `links` vs published bags) |
-| `jacare check --bindings` | Same as `check`, plus IR binding sites per file |
+| `jacare compile <file> [out] [--watch]` | Compile one `.jcr` |
+| `jacare check` | Compile-check all `.jcr` (contracts + Mesh `links` vs published bags) |
+| `jacare check --bindings` | Same + IR binding sites per file |
 | `jacare check --no-style` | Skip soft style hints (redundant `${() => …}`) |
 | `jacare check --strict-style` | Fail when style warnings are present |
+
+```bash
+jacare compile src/app.jcr --watch
+jacare check --bindings
+```
 
 ### `jacare.config.js`
 
@@ -2008,7 +2148,19 @@ npm install -g @jacare/cli
 export default {
   title: 'My App',
   port: 3000,
-  base: '/',
+  base: '/',   // e.g. '/my-repo/' for GitHub Pages
+}
+```
+
+Typical scripts:
+
+```json
+{
+  "scripts": {
+    "dev": "jacare dev",
+    "build": "jacare build",
+    "check": "jacare check"
+  }
 }
 ```
 

@@ -6,7 +6,7 @@
 
 Jacaré files are plain JavaScript modules. Markup lives in an `export <view>` block (recommended) or a `view` tagged template.
 
-**Full API walkthrough:** [api.md](api.md) · [testing.md](testing.md)
+**Full API walkthrough:** [api.md](api.md) · **Complete language reference** (reserved words, all binds, `<view>` / `<style>` / `<contract>`, CLI): [language-reference.md](language-reference.md) · [testing.md](testing.md)
 
 ## File layout
 
