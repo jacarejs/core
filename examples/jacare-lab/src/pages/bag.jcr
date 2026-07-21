@@ -72,7 +72,7 @@ export <view>
         <BagTreeParent />
       </Demo>
 
-      <Demo :title=${'snap / hydrate / reset'} :lead=${'Persist writable pulses, restore them, or rebuild the bag factory.'} :code=${snapHydrateCode}>
+      <Demo :title=${'snap / hydrate / reset'} :lead=${'Persist writable pulses, restore them, or soft-reset to factory defaults (same cells — UI stays live).'} :code=${snapHydrateCode}>
         <div class="row">
           <button
             type="button"

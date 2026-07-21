@@ -44,7 +44,7 @@ export const snapHydrateCode = `const snap = cart.snap()
 // { items: [...] } — writable pulses only
 
 cart.hydrate(snap)
-cart.reset()  // next access re-runs the factory`
+cart.reset()  // restore factory defaults (bindings stay live)`
 
 export const deepTreeCode = `// BagTreeParent.jcr
 import { demoCart } from '../bags/cart.js'

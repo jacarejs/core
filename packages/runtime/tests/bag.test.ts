@@ -93,14 +93,32 @@ describe('createBag', () => {
     expect(bag.label()).toBe('theme:lime')
   })
 
-  it('reset rebuilds cells on next access', () => {
+  it('reset restores factory defaults without replacing cell identity', () => {
     const bag = createBag('session', () => {
       const user = pulse('guest')
       return { user }
     })
+    const cell = bag.user
     bag.user.set('heber')
     bag.reset()
+    expect(bag.user).toBe(cell)
     expect(bag.user()).toBe('guest')
+  })
+
+  it('reset keeps existing subscribers live', () => {
+    const bag = createBag('live', () => {
+      const n = pulse(0)
+      return { n }
+    })
+    const seen: number[] = []
+    effect(() => {
+      seen.push(bag.n())
+    })
+    bag.n.set(5)
+    bag.reset()
+    expect(seen).toEqual([0, 5, 0])
+    bag.n.set(2)
+    expect(seen).toEqual([0, 5, 0, 2])
   })
 })
 

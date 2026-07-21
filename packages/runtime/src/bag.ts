@@ -12,7 +12,7 @@ export type BagApi<T extends object> = T & {
   snap(): BagSnap
   /** Write snapshot values into published pulses (one ripple). */
   hydrate(data: BagSnap): void
-  /** Drop published cells and rebuild on next access. */
+  /** Restore writable pulses to a fresh factory snapshot (keeps cell identity). */
   reset(): void
 }
 
@@ -149,9 +149,22 @@ export function createBag<T extends object>(id: string, factory: () => T): BagAp
   }
 
   function reset(): void {
-    api = null
-    cellMap = new Map()
-    emitMesh()
+    // Soft reset: keep published cell identity so existing bindText / effects
+    // stay wired. Hard-replacing cells would orphan mounted UI until remount.
+    if (!api) {
+      emitMesh()
+      return
+    }
+    const fresh = factory()
+    ripple(() => {
+      for (const [key, cell] of cellMap) {
+        if (!isWritablePulse(cell)) continue
+        const next = (fresh as Record<string, unknown>)[key]
+        if (isPulseCell(next) && isWritablePulse(next)) {
+          cell.set(next.peek)
+        }
+      }
+    })
   }
 
   const handle = new Proxy({} as BagApi<T>, {

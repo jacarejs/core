@@ -294,7 +294,7 @@ A **pulse bag** publishes a named group of pulses on a shared mesh. Any `.jcr` t
 | `ripple(fn)` | Coalesce writes into one notification wave (same engine as `batch`) |
 | `getBag(id)` | Look up a registered bag |
 | `bag.snap()` / `bag.hydrate(data)` | Persist / restore writable pulses |
-| `bag.reset()` | Drop cells; next access rebuilds the factory |
+| `bag.reset()` | Restore writable pulses to factory defaults (same cell identity) |
 | `getMeshSnapshot()` / `subscribeMesh` | DevTools Mesh view (`@id/key`, last ripple) |
 
 ### Define a bag
