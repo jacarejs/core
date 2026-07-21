@@ -286,7 +286,27 @@ effect(() => {
 
 ## 3b. Pulse bags (shared state)
 
-A **pulse bag** publishes a named group of pulses on a shared mesh. Any `.jcr` that imports the bag reads and writes the **same cells** — no props drilling, no provider tree.
+Jacaré’s **own** shared-state model — not a port of another store library. The pulse / `DependencyCell` graph already existed; **Pulse Mesh** makes those cells addressable (`@cart/total`), and **Pulse Bag** is the DX that publishes a named group with `createBag`. Any `.jcr` plugs in via import, contract `links`, or address sugar — same cell, O(1) update. No provider tree, no store proxy, no dispatcher.
+
+| | |
+|--|--|
+| **Pulse Mesh** | Addressable fabric of the same cells Jacaré already uses |
+| **Pulse Bag** | `createBag('cart', factory)` — name and publish a group of ports |
+| **Mesh Port** | Compile wires `cart.count` / `@cart/count` to `bindText` / CPW on that cell |
+| **Why light** | Thin registry + lazy factory; hot path matches a local pulse; unused bag modules tree-shake |
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     PULSE MESH                          │
+│  @cart/items  @cart/total  @session/user  @prefs/locale │
+│              DependencyCell graph (Jacaré core)         │
+└─────────────────────────────────────────────────────────┘
+        ▲                ▲                 ▲
+   Catalog.jcr      MiniCart.jcr      Checkout.jcr
+   import | links | @bag/key  —  same cell, no Provider
+```
+
+Live walkthrough: **Lab → Pulse bags** (architecture panel + demos).
 
 | API | Role |
 |-----|------|

@@ -43,7 +43,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | **Live** | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) |
 | **Local** | `yarn lab:dev` → [http://localhost:3003](http://localhost:3003) |
 | **Source** | [`examples/jacare-lab`](examples/jacare-lab) |
-| **Covers** | Reactivity, templates, bindings, events, `#if` / `#for`, components & contracts, CSS, nav, forms, lifecycle, cookbook, SSR, tooling |
+| **Covers** | Reactivity, **Pulse bags / Mesh**, templates, bindings, events, `#if` / `#for`, components & contracts, CSS, nav, forms, lifecycle, cookbook, SSR, tooling |
 
 [![Lab tutorial](https://img.shields.io/badge/Jacaré%20Lab-interactive%20API%20tutorial-78c018?style=for-the-badge)](https://jacarejs.github.io/core/lab/)
 
@@ -58,6 +58,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | Conditionals `#if` | [docs/api.md §7](docs/api.md#7-control-flow--if) |
 | Lists `#for` | [docs/api.md §8](docs/api.md#8-control-flow--for) |
 | Reactivity | [docs/api.md §3](docs/api.md#3-reactivity) |
+| **Pulse bags (shared mesh)** | [docs/api.md §3b](docs/api.md#3b-pulse-bags-shared-state) · [Lab `/bag`](https://jacarejs.github.io/core/lab/#/bag) |
 | DOM bindings | [docs/api.md §5](docs/api.md#5-dom-bindings) |
 | Components & slots | [docs/api.md §9](docs/api.md#9-components-and-slots) |
 | Navigation | [docs/api.md §11](docs/api.md#11-navigation) |
@@ -147,6 +148,7 @@ Jacaré asks a different question: **why re-render anything when only one text n
 | List updates | Reconcile by key in virtual tree | `reconcileKeyedList` patches real DOM |
 | Templates | Runtime parser or JSX transform | Compile-time → static `createElement` calls |
 | Styles | Global CSS or CSS-in-JS runtime | Co-located `export <style>`, scoped at compile time |
+| Shared state | Context / store library | Pulse bags — same cells, Mesh Ports at compile time |
 | Bundle | Framework + reconciler | Small runtime; imports only what each file uses |
 
 ### When Jacaré is a good fit
@@ -155,6 +157,7 @@ Jacaré asks a different question: **why re-render anything when only one text n
 - **Forms and live data** — two-way `bind-value` on signals, field-level validation
 - **Lists and tables** — keyed `#for` reconciles rows by id, not by re-mounting the list
 - **Multi-page apps** — built-in `createNav` with lazy screens, no router library required
+- **Shared app state** — Pulse bags (`createBag`) share the same cells anywhere without props drilling
 - **Teams that want JavaScript first** — no new language, no JSX pragma, no SFC magic; just modules + templates
 
 ### When to consider something else
@@ -170,12 +173,47 @@ Jacaré asks a different question: **why re-render anything when only one text n
 | Runtime | `@jacare/core` | Signals, DOM bindings, nav, forms, SSR |
 | Compiler | `@jacare/compiler` | `.jcr` → `mount` / `render` / `resume` |
 | Tooling | `@jacare/cli`, `@jacare/vite-plugin` | `jacare dev`, `jacare build`, HMR |
-| DevTools | `@jacare/devtools` | Pulse Graph — visualize signal dependencies live |
+| DevTools | `@jacare/devtools` | Pulse Graph — signals, Mesh (`@bag/key`), Scope |
 | Scaffolding | `create-jacare` | `npm create jacare@latest` |
 
 Live demos: [**Lab (tutorial)**](https://jacarejs.github.io/core/lab/) · [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/)
 
-Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Cookbook](docs/api.md#13b-cookbook--if--for--events--props--lifecycle)
+Full docs: [API](docs/api.md) · [Pulse bags](docs/api.md#3b-pulse-bags-shared-state) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Cookbook](docs/api.md#13b-cookbook--if--for--events--props--lifecycle)
+
+## Pulse Mesh — shared state (native)
+
+Jacaré’s **own** shared-state model, built on the same `DependencyCell` graph as local pulses — not a second store system and not a port of another library.
+
+| | |
+|--|--|
+| **Pulse Mesh** | Addressable cells (`@cart/total`) for tooling and compile wiring |
+| **Pulse Bag** | `createBag('cart', factory)` publishes a named group of ports |
+| **Mesh Port** | Compiler binds `cart.count` / `${@cart/count}` straight to the cell |
+| **Light** | Lazy factory, tree-shake unused bags, thin registry in `@jacare/core` |
+
+```javascript
+import { createBag, pulse, derive, ripple } from '@jacare/core'
+
+export const cart = createBag('cart', () => {
+  const count = pulse(0)
+  return {
+    count,
+    bump: () => ripple(() => count.update((n) => n + 1)),
+  }
+})
+```
+
+```javascript
+import { cart } from '../bags/cart.js'
+
+export <view>
+  <span>${cart.count}</span>
+  <!-- or address sugar: ${@cart/count} -->
+  <button type="button" on-click=${() => cart.bump()}>+</button>
+</view>
+```
+
+No provider. No props drilling. Open **Lab → Pulse bags** for the architecture panel and live demos · full reference [docs/api.md §3b](docs/api.md#3b-pulse-bags-shared-state).
 
 ## Status
 
@@ -191,7 +229,7 @@ Full docs: [API](docs/api.md) · [Events](docs/api.md#6-events-on---) · [`#if`]
 | 8 — CPW + CSS vars | ✓ |
 | Template contracts (`export <contract>`) | ✓ — props / pulses / slots / emits + `jacare check` |
 | Typed model props (`model` + `bind-*`) | ✓ — defaults, required, Vite + CLI validation |
-| Pulse bags (`createBag`) | ✓ — shared pulses · Lab `/bag` · Todo `/shop` |
+| Pulse bags / Mesh | ✓ — native shared cells · Mesh Ports · Lab `/bag` · [§3b](docs/api.md#3b-pulse-bags-shared-state) |
 | Jacaré Lab (API tutorial) | ✓ — `examples/jacare-lab` · [live](https://jacarejs.github.io/core/lab/) |
 
 ## Packages
@@ -200,7 +238,7 @@ Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) sco
 
 | Package | Badges | Description |
 |---------|--------|-------------|
-| `@jacare/core` | [![npm](https://img.shields.io/npm/v/@jacare/core.svg?color=189030)](https://www.npmjs.com/package/@jacare/core) [![dm](https://img.shields.io/npm/dm/@jacare/core.svg)](https://www.npmjs.com/package/@jacare/core) | Pulse graph, DOM bindings, SSR |
+| `@jacare/core` | [![npm](https://img.shields.io/npm/v/@jacare/core.svg?color=189030)](https://www.npmjs.com/package/@jacare/core) [![dm](https://img.shields.io/npm/dm/@jacare/core.svg)](https://www.npmjs.com/package/@jacare/core) | Pulse graph, bags / mesh, DOM bindings, SSR |
 | `@jacare/compiler` | [![npm](https://img.shields.io/npm/v/@jacare/compiler.svg?color=189030)](https://www.npmjs.com/package/@jacare/compiler) [![dm](https://img.shields.io/npm/dm/@jacare/compiler.svg)](https://www.npmjs.com/package/@jacare/compiler) | Compiles `export <view>` / `<style>` / `<contract>` |
 | `@jacare/vite-plugin` | [![npm](https://img.shields.io/npm/v/@jacare/vite-plugin.svg?color=189030)](https://www.npmjs.com/package/@jacare/vite-plugin) [![dm](https://img.shields.io/npm/dm/@jacare/vite-plugin.svg)](https://www.npmjs.com/package/@jacare/vite-plugin) | Vite integration + contract checks |
 | `@jacare/cli` | [![npm](https://img.shields.io/npm/v/@jacare/cli.svg?color=189030)](https://www.npmjs.com/package/@jacare/cli) [![dm](https://img.shields.io/npm/dm/@jacare/cli.svg)](https://www.npmjs.com/package/@jacare/cli) | `jacare` — create, dev, build, check |
