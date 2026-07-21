@@ -29,6 +29,7 @@ export type { ContractUsageIssue, ProvidedProp } from './validate-contract.js'
 export { scopeCss, scopeIdFromFilename } from './scope-css.js'
 export { lowerBindingSource, bindingSignalName, isLocalSignalSource } from './ir/source.js'
 export { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
+export { lowerIf, lowerCase, lowerEach } from './ir/lower-flow.js'
 export type {
   BindingSource,
   LowerSourceContext,
@@ -38,6 +39,12 @@ export type {
   ClientMode,
   LoweredText,
 } from './ir/types.js'
+export type {
+  FlowPlan,
+  IfFlowPlan,
+  CaseFlowPlan,
+  ListFlowPlan,
+} from './ir/lower-flow.js'
 export type {
   CompileOptions,
   CompileResult,

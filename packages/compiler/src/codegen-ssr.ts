@@ -9,6 +9,14 @@ import type {
 import { CodegenContext, escapeHtml } from './codegen-shared.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
+import {
+  lowerCase,
+  lowerEach,
+  lowerIf,
+  type CaseFlowPlan,
+  type IfFlowPlan,
+  type ListFlowPlan,
+} from './ir/lower-flow.js'
 
 export function emitSSR(
   ast: TemplateAST,
@@ -141,10 +149,14 @@ function emitSSRElement(
 }
 
 function emitSSRIf(ctx: CodegenContext, node: TemplateIfNode): void {
-  for (let i = 0; i < node.branches.length; i++) {
-    const branch = node.branches[i]!
+  emitSSRIfPlan(ctx, lowerIf(node))
+}
+
+function emitSSRIfPlan(ctx: CodegenContext, plan: IfFlowPlan): void {
+  for (let i = 0; i < plan.branches.length; i++) {
+    const branch = plan.branches[i]!
     const prefix = i === 0 ? 'if' : 'else if'
-    ctx.line(`${prefix} (${branch.condition}) {`)
+    ctx.line(`${prefix} (${branch.test}) {`)
     ctx.indent()
     for (const child of branch.children) {
       emitSSRNode(ctx, child)
@@ -153,10 +165,10 @@ function emitSSRIf(ctx: CodegenContext, node: TemplateIfNode): void {
     ctx.line('}')
   }
 
-  if (node.elseChildren.length > 0) {
+  if (plan.elseChildren.length > 0) {
     ctx.line('else {')
     ctx.indent()
-    for (const child of node.elseChildren) {
+    for (const child of plan.elseChildren) {
       emitSSRNode(ctx, child)
     }
     ctx.dedent()
@@ -165,13 +177,17 @@ function emitSSRIf(ctx: CodegenContext, node: TemplateIfNode): void {
 }
 
 function emitSSRCase(ctx: CodegenContext, node: TemplateCaseNode): void {
+  emitSSRCasePlan(ctx, lowerCase(node))
+}
+
+function emitSSRCasePlan(ctx: CodegenContext, plan: CaseFlowPlan): void {
   const match = ctx.nextId('cv')
   ctx.line(`{`)
   ctx.indent()
-  ctx.line(`const ${match} = (${node.scrutinee})`)
+  ctx.line(`const ${match} = (${plan.scrutinee})`)
 
-  for (let i = 0; i < node.branches.length; i++) {
-    const branch = node.branches[i]!
+  for (let i = 0; i < plan.branches.length; i++) {
+    const branch = plan.branches[i]!
     const prefix = i === 0 ? 'if' : 'else if'
     ctx.line(`${prefix} (Object.is(${match}, (${branch.value}))) {`)
     ctx.indent()
@@ -182,10 +198,10 @@ function emitSSRCase(ctx: CodegenContext, node: TemplateCaseNode): void {
     ctx.line('}')
   }
 
-  if (node.elseChildren.length > 0) {
+  if (plan.elseChildren.length > 0) {
     ctx.line('else {')
     ctx.indent()
-    for (const child of node.elseChildren) {
+    for (const child of plan.elseChildren) {
       emitSSRNode(ctx, child)
     }
     ctx.dedent()
@@ -197,11 +213,16 @@ function emitSSRCase(ctx: CodegenContext, node: TemplateCaseNode): void {
 }
 
 function emitSSREach(ctx: CodegenContext, node: TemplateEachNode): void {
-  const index = node.indexName ?? '_index'
-  ctx.line(`for (let ${index} = 0; ${index} < (${node.source}).length; ${index}++) {`)
+  emitSSREachPlan(ctx, lowerEach(node, ctx.leafContext()))
+}
+
+function emitSSREachPlan(ctx: CodegenContext, plan: ListFlowPlan): void {
+  ctx.line(
+    `for (let ${plan.indexName} = 0; ${plan.indexName} < (${plan.sourceExpr}).length; ${plan.indexName}++) {`,
+  )
   ctx.indent()
-  ctx.line(`const ${node.itemName} = (${node.source})[${index}]`)
-  for (const child of node.children) {
+  ctx.line(`const ${plan.itemName} = (${plan.sourceExpr})[${plan.indexName}]`)
+  for (const child of plan.children) {
     emitSSRNode(ctx, child)
   }
   ctx.dedent()

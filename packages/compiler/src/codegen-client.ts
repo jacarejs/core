@@ -11,6 +11,14 @@ import type { TemplateContract } from './parse-contract.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
 import { emitLeafOp } from './ir/emit-leaf.js'
+import {
+  lowerCase,
+  lowerEach,
+  lowerIf,
+  type CaseFlowPlan,
+  type IfFlowPlan,
+  type ListFlowPlan,
+} from './ir/lower-flow.js'
 import { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
 
 export function emitClient(
@@ -225,8 +233,12 @@ function emitComponent(
 }
 
 function emitIf(ctx: CodegenContext, node: TemplateIfNode, target: EmitTarget): void {
+  emitIfPlan(ctx, lowerIf(node), target)
+}
+
+function emitIfPlan(ctx: CodegenContext, plan: IfFlowPlan, target: EmitTarget): void {
   const anchor = ctx.nextId('if')
-  ctx.line(`const ${anchor} = document.createComment('if')`, node.sourceLine)
+  ctx.line(`const ${anchor} = document.createComment('if')`, plan.sourceLine)
   append(ctx, target, anchor)
 
   const scope = ctx.nextId('bc')
@@ -236,10 +248,10 @@ function emitIf(ctx: CodegenContext, node: TemplateIfNode, target: EmitTarget): 
   ctx.line(`const ${scope} = []`)
   ctx.pushCleanupScope(scope)
 
-  for (let i = 0; i < node.branches.length; i++) {
-    const branch = node.branches[i]!
+  for (let i = 0; i < plan.branches.length; i++) {
+    const branch = plan.branches[i]!
     const prefix = i === 0 ? 'if' : 'else if'
-    ctx.line(`${prefix} (${branch.condition}) {`)
+    ctx.line(`${prefix} (${branch.test}) {`)
     ctx.indent()
     for (const child of branch.children) {
       emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
@@ -248,10 +260,10 @@ function emitIf(ctx: CodegenContext, node: TemplateIfNode, target: EmitTarget): 
     ctx.line('}')
   }
 
-  if (node.elseChildren.length > 0) {
+  if (plan.elseChildren.length > 0) {
     ctx.line('else {')
     ctx.indent()
-    for (const child of node.elseChildren) {
+    for (const child of plan.elseChildren) {
       emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
     }
     ctx.dedent()
@@ -265,8 +277,12 @@ function emitIf(ctx: CodegenContext, node: TemplateIfNode, target: EmitTarget): 
 }
 
 function emitCase(ctx: CodegenContext, node: TemplateCaseNode, target: EmitTarget): void {
+  emitCasePlan(ctx, lowerCase(node), target)
+}
+
+function emitCasePlan(ctx: CodegenContext, plan: CaseFlowPlan, target: EmitTarget): void {
   const anchor = ctx.nextId('case')
-  ctx.line(`const ${anchor} = document.createComment('case')`, node.sourceLine)
+  ctx.line(`const ${anchor} = document.createComment('case')`, plan.sourceLine)
   append(ctx, target, anchor)
 
   const scope = ctx.nextId('bc')
@@ -275,11 +291,11 @@ function emitCase(ctx: CodegenContext, node: TemplateCaseNode, target: EmitTarge
   ctx.line(`${ctx.cleanupVar}.push(branch(${anchor}, (mount) => {`)
   ctx.indent()
   ctx.line(`const ${scope} = []`)
-  ctx.line(`const ${match} = (${node.scrutinee})`)
+  ctx.line(`const ${match} = (${plan.scrutinee})`)
   ctx.pushCleanupScope(scope)
 
-  for (let i = 0; i < node.branches.length; i++) {
-    const branch = node.branches[i]!
+  for (let i = 0; i < plan.branches.length; i++) {
+    const branch = plan.branches[i]!
     const prefix = i === 0 ? 'if' : 'else if'
     ctx.line(`${prefix} (Object.is(${match}, (${branch.value}))) {`)
     ctx.indent()
@@ -290,10 +306,10 @@ function emitCase(ctx: CodegenContext, node: TemplateCaseNode, target: EmitTarge
     ctx.line('}')
   }
 
-  if (node.elseChildren.length > 0) {
+  if (plan.elseChildren.length > 0) {
     ctx.line('else {')
     ctx.indent()
-    for (const child of node.elseChildren) {
+    for (const child of plan.elseChildren) {
       emitNode(ctx, child, { kind: 'mount', fn: 'mount' })
     }
     ctx.dedent()
@@ -307,28 +323,26 @@ function emitCase(ctx: CodegenContext, node: TemplateCaseNode, target: EmitTarge
 }
 
 function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarget): void {
-  const anchor = ctx.nextId('each')
-  ctx.line(`const ${anchor} = document.createComment('each')`, node.sourceLine)
-  append(ctx, target, anchor)
+  emitEachPlan(ctx, lowerEach(node, ctx.leafContext()), target)
+}
 
-  const index = node.indexName ?? '_index'
-  const keyExpr = node.keyExpr
-    ? `(${node.itemName}, ${index}) => ${node.keyExpr}`
-    : `(${node.itemName}, ${index}) => ${index}`
+function emitEachPlan(ctx: CodegenContext, plan: ListFlowPlan, target: EmitTarget): void {
+  const anchor = ctx.nextId('each')
+  ctx.line(`const ${anchor} = document.createComment('each')`, plan.sourceLine)
+  append(ctx, target, anchor)
 
   const parentExpr = target.kind === 'parent' ? target.name : `${anchor}.parentNode`
   ctx.useRuntime('reconcileKeyedList')
-  const listSource = ctx.resolveBindingSignal(node.source)
-  if (listSource && target.kind === 'parent') {
-    ctx.pushDevtoolsBind(listSource, target.name, 'list', node.sourceLine)
+  if (plan.sourceBinding && target.kind === 'parent') {
+    ctx.pushDevtoolsBind(plan.sourceBinding.name, target.name, 'list', plan.sourceLine)
   }
   ctx.line(`${ctx.cleanupVar}.push(reconcileKeyedList({`)
   ctx.indent()
   ctx.line(`parent: ${parentExpr},`)
   ctx.line(`anchor: ${anchor},`)
-  ctx.line(`items: () => ${node.source},`)
-  ctx.line(`getKey: ${keyExpr},`)
-  ctx.line(`render: (${node.itemName}, ${index}, mount) => {`)
+  ctx.line(`items: () => ${plan.sourceExpr},`)
+  ctx.line(`getKey: ${plan.getKey},`)
+  ctx.line(`render: (${plan.itemName}, ${plan.indexName}, mount) => {`)
   ctx.indent()
 
   const itemScope = ctx.nextId('ic')
@@ -336,7 +350,7 @@ function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarge
   ctx.pushCleanupScope(itemScope)
 
   const root = ctx.nextId('item')
-  const singleChild = node.children.length === 1 ? node.children[0]! : null
+  const singleChild = plan.children.length === 1 ? plan.children[0]! : null
   const hasSingleElement = singleChild?.type === 'element'
   const hasSingleComponent = singleChild?.type === 'component'
 
@@ -354,7 +368,7 @@ function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarge
     emitNode(ctx, singleChild, { kind: 'mount', fn: 'mount' })
   } else {
     ctx.line(`const ${root} = document.createDocumentFragment()`)
-    for (const child of node.children) {
+    for (const child of plan.children) {
       emitNode(ctx, child, { kind: 'parent', name: root })
     }
     ctx.line(`mount(${root})`)
