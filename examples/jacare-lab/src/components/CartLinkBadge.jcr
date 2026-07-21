@@ -1,0 +1,10 @@
+export <contract>
+  links: {
+    count: { from: 'lab-cart.count', mode: 'read' }
+    money: { from: 'lab-cart.money', mode: 'read' }
+  }
+</contract>
+
+export <view>
+  <p class="metric">linked · ${count} · ${money}</p>
+</view>

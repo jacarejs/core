@@ -2,11 +2,18 @@ import { JacareCompileError } from './errors.js'
 
 export type ContractTypeName = 'string' | 'number' | 'boolean' | 'object' | 'any'
 
+export type ContractLinkMode = 'read' | 'write' | 'mirror'
+
 export interface ContractPropDef {
   type: ContractTypeName
   required?: boolean
   default?: unknown
   model?: boolean
+}
+
+export interface ContractLinkDef {
+  from: string
+  mode: ContractLinkMode
 }
 
 export interface TemplateContract {
@@ -15,7 +22,10 @@ export interface TemplateContract {
   slots: string[]
   emits: Record<string, Record<string, ContractTypeName>>
   forwards: string[]
+  links: Record<string, ContractLinkDef>
 }
+
+const LINK_MODES = new Set<ContractLinkMode>(['read', 'write', 'mirror'])
 
 const TYPE_NAMES = new Set<ContractTypeName>(['string', 'number', 'boolean', 'object', 'any'])
 
@@ -26,7 +36,29 @@ export function emptyContract(): TemplateContract {
     slots: [],
     emits: {},
     forwards: [],
+    links: {},
   }
+}
+
+/** `cart.count` / `lab-cart.count` → bag id + published key. */
+export function parseLinkFrom(from: string): { bag: string; key: string } {
+  const match = from.match(/^([A-Za-z_$][\w$-]*)\.([A-Za-z_$][\w$]*)$/)
+  if (!match) {
+    throw new JacareCompileError(
+      `Jacaré contract: link from must be "bag.key" (got ${JSON.stringify(from)})`,
+    )
+  }
+  return { bag: match[1]!, key: match[2]! }
+}
+
+/** Stable mesh address `@cart/count`. */
+export function linkAddress(from: string): string {
+  const { bag, key } = parseLinkFrom(from)
+  return `@${bag}/${key}`
+}
+
+export function contractLinkNames(contract: TemplateContract): string[] {
+  return Object.keys(contract.links).sort()
 }
 
 export function parseContractBody(
@@ -88,12 +120,32 @@ export function parseContractBody(
       const parsed = readStringArray(text, pos, details, body)
       pos = parsed.end
       contract.forwards = parsed.value
+    } else if (key.value === 'links') {
+      const parsed = readObject(text, pos, details, body)
+      pos = parsed.end
+      for (const [name, raw] of Object.entries(parsed.value)) {
+        if (contract.props[name] || contract.pulses[name]) {
+          throw contractError(
+            `link "${name}" clashes with props/pulses`,
+            details,
+            key.start,
+            body,
+          )
+        }
+        contract.links[name] = normalizeLinkDef(raw, name, details)
+      }
     } else {
       throw contractError(`unknown contract field "${key.value}"`, details, key.start, body)
     }
 
     pos = skipWsAndComments(text, pos)
     if (text[pos] === ',' || text[pos] === ';') pos++
+  }
+
+  for (const name of Object.keys(contract.links)) {
+    if (contract.props[name] || contract.pulses[name]) {
+      throw contractError(`link "${name}" clashes with props/pulses`, details)
+    }
   }
 
   return contract
@@ -119,8 +171,37 @@ export function hasContractSurface(contract: TemplateContract): boolean {
     Object.keys(contract.pulses).length > 0 ||
     contract.slots.length > 0 ||
     Object.keys(contract.emits).length > 0 ||
-    contract.forwards.length > 0
+    contract.forwards.length > 0 ||
+    Object.keys(contract.links).length > 0
   )
+}
+
+function normalizeLinkDef(
+  raw: unknown,
+  name: string,
+  details: { filename?: string; line?: number; source?: string },
+): ContractLinkDef {
+  if (typeof raw === 'string') {
+    parseLinkFrom(raw)
+    return { from: raw, mode: 'read' }
+  }
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    const obj = raw as Record<string, unknown>
+    const from = obj['from']
+    if (typeof from !== 'string') {
+      throw contractError(`link "${name}" requires from: 'bag.key'`, details)
+    }
+    parseLinkFrom(from)
+    const modeRaw = obj['mode'] ?? 'read'
+    if (typeof modeRaw !== 'string' || !LINK_MODES.has(modeRaw as ContractLinkMode)) {
+      throw contractError(
+        `link "${name}" mode must be read|write|mirror`,
+        details,
+      )
+    }
+    return { from, mode: modeRaw as ContractLinkMode }
+  }
+  throw contractError(`invalid link definition for "${name}"`, details)
 }
 
 function normalizePropDef(

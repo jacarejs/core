@@ -64,3 +64,17 @@ export <view>
 
 // Mesh shows @lab-cart/* (catalog) and @lab-tree/* (nesting) apart`
 
+export const contractLinksCode = `export <contract>
+  links: {
+    count: { from: 'lab-cart.count', mode: 'read' }
+    money: { from: 'lab-cart.money', mode: 'read' }
+  }
+</contract>
+
+export <view>
+  <p class="metric">linked · \${count} · \${money}</p>
+</view>
+
+// No import of the bag — getBag('lab-cart') at mount.
+// jacare check fails if @lab-cart/count is not published.`
+

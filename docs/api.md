@@ -353,7 +353,33 @@ export <view>
 
 Prefer bare `${cart.count()}` when there is no loop local to capture. The compiler treats imported bag members as **Mesh Ports**: `${cart.count()}` / `${cart.count}` emit `bindText(node, cart.count)` (or CPW peek/subscribe in production) — the cell is captured once at mount.
 
-Live demos: **Lab → Pulse bags** (including a four-level component tree) and **Todo → Shop**.
+### Contract links (reusable leaves)
+
+Library components can declare Mesh ports without importing a concrete bag:
+
+```javascript
+export <contract>
+  links: {
+    count: { from: 'cart.count', mode: 'read' }
+    add: { from: 'cart.add', mode: 'write' }
+  }
+</contract>
+
+export <view>
+  <span class="badge">${count}</span>
+  <button type="button" on-click=${() => add(product)}>+</button>
+</view>
+```
+
+| Mode | Meaning |
+|------|---------|
+| `read` | Bind / derive only (default; string shorthand `'cart.count'` is read) |
+| `write` | Intent function (`add`) |
+| `mirror` | Two-way if the published key is a writable pulse |
+
+Compile injects `const count = getBag('cart')?.count`. The app must still register the bag somewhere (`import '../bags/cart.js'` or use it on a page). `jacare check` fails if `@cart/count` is not published by any `createBag`.
+
+Live demos: **Lab → Pulse bags** (including a four-level component tree and contract links) and **Todo → Shop**.
 
 ---
 
@@ -1117,6 +1143,7 @@ export <view>
 | `slots` | Slot names (`default` → `children`) |
 | `emits` | Events the child may `emit('name')` — parent listens with `on-name` |
 | `forwards` | Parsed for future emit bridging (not validated yet) |
+| `links` | Mesh aliases `{ alias: { from: 'bag.key', mode: 'read'\|'write'\|'mirror' } }` — no bag import required |
 
 `compile()` returns `contract` + `props`. Rich defaults become `props["open"] ?? false` in `mount`.
 
@@ -1925,7 +1952,7 @@ npm install -g @jacare/cli
 | `jacare dev [--port=N] [--open=false]` | Dev server |
 | `jacare build` | Production build → `dist/` |
 | `jacare compile <file> [out] [--watch]` | Compile one file |
-| `jacare check` | Compile-check all `.jcr` in CWD (contracts included) |
+| `jacare check` | Compile-check all `.jcr` in CWD (contracts + Mesh `links` vs published bags) |
 | `jacare check --bindings` | Same as `check`, plus IR binding sites per file |
 | `jacare check --no-style` | Skip soft style hints (redundant `${() => …}`) |
 | `jacare check --strict-style` | Fail when style warnings are present |

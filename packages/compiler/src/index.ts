@@ -17,8 +17,13 @@ export {
   parseContractBody,
   emptyContract,
   contractPropNames,
+  contractLinkNames,
   hasContractSurface,
+  parseLinkFrom,
+  linkAddress,
 } from './parse-contract.js'
+export { scanPublishedBags, mergePublishedBags } from './scan-bags.js'
+export type { PublishedBags } from './scan-bags.js'
 export {
   collectComponents,
   collectProvidedProps,
@@ -82,4 +87,6 @@ export type {
   TemplateContract,
   ContractPropDef,
   ContractTypeName,
+  ContractLinkDef,
+  ContractLinkMode,
 } from './parse-contract.js'

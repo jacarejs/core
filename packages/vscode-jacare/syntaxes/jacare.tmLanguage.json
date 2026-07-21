@@ -80,7 +80,7 @@
       ]
     },
     "contract-fields": {
-      "match": "\\b(props|pulses|slots|emits|forwards)\\b(?=\\s*:)",
+      "match": "\\b(props|pulses|slots|emits|forwards|links)\\b(?=\\s*:)",
       "name": "keyword.other.contract.jacare support.type.property-name.json"
     },
     "style-blocks": {

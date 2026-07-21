@@ -1,12 +1,14 @@
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import BagTreeParent from '../components/BagTreeParent.jcr'
+import CartLinkBadge from '../components/CartLinkBadge.jcr'
 import { demoCart } from '../bags/cart.js'
 import {
   defineBagCode,
   useBagCode,
   snapHydrateCode,
   deepTreeCode,
+  contractLinksCode,
 } from '../snippets/bag.js'
 
 const PRODUCTS = [
@@ -62,6 +64,14 @@ export <view>
             </ul>
           #end
         </div>
+      </Demo>
+
+      <Demo
+        :title=${'Contract links (no bag import)'}
+        :lead=${'Reusable leaf declares links in the contract — getBag resolves @lab-cart/* at mount. jacare check verifies the port is published.'}
+        :code=${contractLinksCode}
+      >
+        <CartLinkBadge />
       </Demo>
 
       <Demo

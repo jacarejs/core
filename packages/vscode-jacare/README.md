@@ -33,7 +33,7 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 |---------|-------------|
 | **Syntax highlighting** | JavaScript module body, `view` / `style` / `contract` blocks, directives, HTML, and bindings |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) |
-| **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` fields |
+| **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` fields |
 | **Snippets** | Prefixes for component scaffold, contract, view, style, signals, expression style, and control flow |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
 | **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `class-active`, `${expr}` — prefer bare calls over `${() => …}` when no local is captured |
@@ -316,7 +316,7 @@ export <style>
 | `keyword.control.jacare` | `#if`, `#for`, `#end`, `@each`, etc. |
 | `entity.name.tag.jacare` | `view`, `style`, and `contract` block tags |
 | `entity.name.tag.jacare.contract` | `<contract>` / `</contract>` specifically |
-| `keyword.other.contract.jacare` | Contract fields: `props`, `pulses`, `slots`, `emits`, `forwards` |
+| `keyword.other.contract.jacare` | Contract fields: `props`, `pulses`, `slots`, `emits`, `forwards`, `links` |
 | `entity.name.type.tag.jacare` | PascalCase components |
 | `entity.name.tag` | HTML elements (`div`, `slot`, `button`, `view`, `style`, …) |
 | `entity.other.attribute-name` | `bind-*`, `on-*`, `class-*`, `:prop` |

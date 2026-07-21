@@ -1,5 +1,6 @@
 import type { TemplateAST } from './types.js'
 import { append, CodegenContext, type EmitTarget } from './codegen-shared.js'
+import { emitContractLinks } from './codegen-links.js'
 import type { TemplateContract } from './parse-contract.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
@@ -51,6 +52,8 @@ export function emitClient(
     ctx.line('export function mount(target) {')
     ctx.indent()
   }
+
+  emitContractLinks(ctx, contract)
 
   if (scopeId || styleAst) {
     if (styleAst) {

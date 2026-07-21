@@ -12,6 +12,7 @@ import { injectDevtoolsMeta } from './devtools-meta.js'
 const RUNTIME_IMPORT_ORDER = [
   'effect',
   'runUntracked',
+  'getBag',
   'bindText',
   'bindPropText',
   'bindAttribute',
@@ -48,13 +49,15 @@ export function resolveMountProps(
   const inferred = detectProps(moduleCode, ast)
   if (!contract) return inferred
 
+  const linkNames = new Set(Object.keys(contract.links))
   const names = new Set(contractPropNames(contract))
   if (templateHasSlot(ast) && !names.has('children')) {
     names.add('children')
   }
   for (const name of inferred) {
-    if (name !== 'emit') names.add(name)
+    if (name !== 'emit' && !linkNames.has(name)) names.add(name)
   }
+  for (const name of linkNames) names.delete(name)
   return [...names].sort()
 }
 
@@ -105,6 +108,9 @@ export function generate(
   const debug = options.debug !== false
   const props = resolveMountProps(moduleCode, ast, options.contract)
   const signals = detectSignals(moduleCode)
+  for (const name of Object.keys(options.contract?.links ?? {})) {
+    signals.add(name)
+  }
   const importedNames = detectImportedNames(moduleCode)
   const runtimeImports = new Set<string>()
   const cleaned = cleanupModule(moduleCode)
@@ -134,6 +140,7 @@ export function generate(
         options.scopedStyle,
         options.styleAst,
         importedNames,
+        options.contract,
       ),
     )
     lines.push('')

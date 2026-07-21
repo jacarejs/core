@@ -54,6 +54,63 @@ emits: {
     expect(contract.emits.done).toEqual({})
   })
 
+  it('parses contract links and injects getBag locals', () => {
+    const body = `
+links: {
+  count: { from: 'cart.count', mode: 'read' }
+  add: { from: 'cart.add', mode: 'write' }
+  money: 'cart.money'
+}
+`
+    const contract = parseContractBody(body)
+    expect(contract.links.count).toEqual({ from: 'cart.count', mode: 'read' })
+    expect(contract.links.add).toEqual({ from: 'cart.add', mode: 'write' })
+    expect(contract.links.money).toEqual({ from: 'cart.money', mode: 'read' })
+
+    const source = `export <contract>
+  links: {
+    count: { from: 'cart.count', mode: 'read' }
+  }
+</contract>
+
+export <view>
+  <span>\${count}</span>
+</view>`
+    const client = compile(source, { mode: 'client', debug: false, cpw: false })
+    expect(client.contract?.links.count).toEqual({ from: 'cart.count', mode: 'read' })
+    expect(client.props).not.toContain('count')
+    expect(client.code).toContain('getBag')
+    expect(client.code).toContain('bindText')
+    expect(client.code).toContain('const count = getBag("cart")?.count')
+    expect(client.code).toMatch(/bindText\([^,]+, count\)/)
+
+    const cpw = compile(source, { mode: 'client', debug: false, cpw: true })
+    expect(cpw.code).toContain('count.peek')
+    expect(cpw.code).toContain('count.subscribe')
+
+    const server = compile(source, { mode: 'server', debug: false })
+    expect(server.code).toContain('const count = getBag("cart")?.count')
+    expect(server.code).toContain("kind: 'signal', read: count")
+  })
+
+  it('parses hyphenated bag ids in links', () => {
+    const contract = parseContractBody(`
+links: {
+  count: { from: 'lab-cart.count', mode: 'read' }
+}
+`)
+    expect(contract.links.count).toEqual({ from: 'lab-cart.count', mode: 'read' })
+  })
+
+  it('rejects link names that clash with props', () => {
+    expect(() =>
+      parseContractBody(`
+props: { count: 'number' }
+links: { count: { from: 'cart.count', mode: 'read' } }
+`),
+    ).toThrow(/clashes with props/)
+  })
+
   it('compiles emit helper and prop defaults from contract', () => {
     const source = `export <contract>
   props: {

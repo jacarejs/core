@@ -1,5 +1,6 @@
 import type { TemplateAST } from './types.js'
 import { CodegenContext } from './codegen-shared.js'
+import { emitContractLinks } from './codegen-links.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
 import { emitComponentPropEntrySSR } from './ir/lower-component.js'
@@ -10,6 +11,7 @@ import {
   type MountPlan,
 } from './ir/mount-plan.js'
 import type { OptimizedIf } from './ir/optimize.js'
+import type { TemplateContract } from './parse-contract.js'
 
 export function emitSSR(
   ast: TemplateAST,
@@ -20,6 +22,7 @@ export function emitSSR(
   scopedStyle?: string,
   styleAst?: StyleAST,
   importedNames?: ReadonlySet<string>,
+  contract?: TemplateContract,
 ): string[] {
   const ctx = new CodegenContext(
     0,
@@ -44,6 +47,8 @@ export function emitSSR(
     ctx.line('export function render() {')
     ctx.indent()
   }
+
+  emitContractLinks(ctx, contract)
 
   ctx.line('let _html = ""')
   ctx.line('const _bindings = []')

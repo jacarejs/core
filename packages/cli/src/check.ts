@@ -7,8 +7,12 @@ import {
   inspectTemplateBindings,
   lintRedundantArrows,
   JacareCompileError,
+  linkAddress,
+  mergePublishedBags,
+  parseLinkFrom,
   parseModule,
   parseTemplate,
+  scanPublishedBags,
   validateContractUsage,
   type TemplateStyleWarning,
 } from '@jacare/compiler'
@@ -81,6 +85,12 @@ export function runCheck(cwd: string, options: CheckOptions = {}): number {
         console.error(`${file}: contract check failed`)
       }
     }
+  }
+
+  const linkErrors = checkMeshLinks(compiled, root)
+  for (const message of linkErrors) {
+    errors++
+    console.error(message)
   }
 
   if (errors > 0) {
@@ -188,6 +198,55 @@ function checkContracts(
   return messages
 }
 
+function checkMeshLinks(
+  compiled: Map<string, ReturnType<typeof compile>>,
+  root: string,
+): string[] {
+  const required: Array<{ file: string; name: string; bag: string; key: string }> = []
+  for (const [file, result] of compiled) {
+    const links = result.contract?.links
+    if (!links) continue
+    for (const [name, link] of Object.entries(links)) {
+      try {
+        const { bag, key } = parseLinkFrom(link.from)
+        required.push({ file, name, bag, key })
+      } catch (error) {
+        return [
+          `${file}: Mesh link "${name}" — ${error instanceof Error ? error.message : 'invalid from'}`,
+        ]
+      }
+    }
+  }
+  if (required.length === 0) return []
+
+  const published = collectPublishedBags(root)
+  const messages: string[] = []
+  for (const req of required) {
+    const keys = published.get(req.bag)
+    const address = linkAddress(`${req.bag}.${req.key}`)
+    if (!keys) {
+      messages.push(
+        `${req.file}: Mesh link "${req.name}" requires bag "${req.bag}" (createBag) but it was not found`,
+      )
+      continue
+    }
+    if (keys.size > 0 && !keys.has(req.key)) {
+      messages.push(
+        `${req.file}: Mesh link "${req.name}" requires ${address} but it is not published`,
+      )
+    }
+  }
+  return messages
+}
+
+function collectPublishedBags(root: string) {
+  const maps = []
+  for (const file of findSourceFiles(root)) {
+    maps.push(scanPublishedBags(readFileSync(file, 'utf-8')))
+  }
+  return mergePublishedBags(...maps)
+}
+
 function collectJacareImports(source: string, file: string): Map<string, string> {
   const map = new Map<string, string>()
   const script = parseModule(source, file).code
@@ -225,6 +284,22 @@ function findJacareFiles(dir: string, results: string[] = []): string[] {
       continue
     }
     if (entry.endsWith('.jcr')) {
+      results.push(path)
+    }
+  }
+  return results
+}
+
+function findSourceFiles(dir: string, results: string[] = []): string[] {
+  for (const entry of readdirSync(dir)) {
+    if (entry === 'node_modules' || entry === 'dist' || entry === '.git') continue
+    const path = join(dir, entry)
+    const stat = statSync(path)
+    if (stat.isDirectory()) {
+      findSourceFiles(path, results)
+      continue
+    }
+    if (/\.(jcr|js|mjs|cjs|ts|mts|cts)$/.test(entry) && !entry.endsWith('.d.ts')) {
       results.push(path)
     }
   }
