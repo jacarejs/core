@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { lowerElementBindings, lowerTextParts } from '../src/ir/lower-leaf.js'
+import { markCpwText } from '../src/ir/optimize.js'
 import { compile } from '../src/compile.js'
 
 describe('lower leaf ops', () => {
@@ -19,10 +20,10 @@ describe('lower leaf ops', () => {
   })
 
   it('marks local text as cpw when enabled', () => {
-    const lowered = lowerTextParts([{ type: 'expr', value: 'count' }], {
-      ...ctx,
-      cpw: true,
-    })
+    const lowered = markCpwText(
+      lowerTextParts([{ type: 'expr', value: 'count' }], ctx),
+      true,
+    )
     expect(lowered.kind).toBe('binding')
     if (lowered.kind === 'binding') {
       expect(lowered.op.mode).toBe('cpw')

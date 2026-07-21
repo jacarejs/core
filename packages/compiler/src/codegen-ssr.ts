@@ -21,6 +21,7 @@ import {
   emitComponentPropEntrySSR,
   lowerComponent,
 } from './ir/lower-component.js'
+import { optimizeIfPlan } from './ir/optimize.js'
 
 export function emitSSR(
   ast: TemplateAST,
@@ -161,7 +162,14 @@ function emitSSRElement(
 }
 
 function emitSSRIf(ctx: CodegenContext, node: TemplateIfNode): void {
-  emitSSRIfPlan(ctx, lowerIf(node))
+  const optimized = optimizeIfPlan(lowerIf(node))
+  if (optimized.kind === 'static') {
+    for (const child of optimized.children) {
+      emitSSRNode(ctx, child)
+    }
+    return
+  }
+  emitSSRIfPlan(ctx, optimized.plan)
 }
 
 function emitSSRIfPlan(ctx: CodegenContext, plan: IfFlowPlan): void {

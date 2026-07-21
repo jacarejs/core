@@ -1,4 +1,5 @@
 import type { TemplateAttr, TextPart } from '../types.js'
+import { mergeStaticTextParts } from './optimize.js'
 import { lowerBindingSource } from './source.js'
 import type {
   LeafBindingOp,
@@ -59,13 +60,12 @@ function lowerAttr(attr: TemplateAttr, ctx: LowerLeafContext): LeafBindingOp[] {
   if (attr.kind === 'class') {
     const source = lowerBindingSource(attr.value, ctx)
     if (source.kind === 'signal') {
-      const classMode = ctx.cpw ? 'cpw' : 'bindClass'
       return [
         {
           op: 'classToggle',
           className: attr.name,
           source,
-          mode: classMode,
+          mode: 'bindClass',
         },
       ]
     }
@@ -83,8 +83,7 @@ function lowerAttr(attr: TemplateAttr, ctx: LowerLeafContext): LeafBindingOp[] {
     const source = lowerBindingSource(attr.value, ctx)
     const cssVar = `--${attr.name}`
     if (source.kind === 'signal') {
-      const styleMode = ctx.cpw ? 'cpw' : 'bindStyleVar'
-      return [{ op: 'styleVar', cssVar, source, mode: styleMode }]
+      return [{ op: 'styleVar', cssVar, source, mode: 'bindStyleVar' }]
     }
     return [{ op: 'styleVar', cssVar, source, mode: 'effect' }]
   }
@@ -103,8 +102,7 @@ function lowerAttr(attr: TemplateAttr, ctx: LowerLeafContext): LeafBindingOp[] {
           },
         ]
       }
-      const attrMode = ctx.cpw ? 'cpw' : 'bindAttribute'
-      return [{ op: 'attr', name: attr.name, source, mode: attrMode }]
+      return [{ op: 'attr', name: attr.name, source, mode: 'bindAttribute' }]
     }
     if (useProperty) {
       return [
@@ -124,21 +122,22 @@ function lowerAttr(attr: TemplateAttr, ctx: LowerLeafContext): LeafBindingOp[] {
 
 /** Lower text parts to static node or a single text binding op. */
 export function lowerTextParts(parts: TextPart[], ctx: LowerLeafContext): LoweredText {
-  const hasExpr = parts.some((p) => p.type === 'expr')
-  const onlyStatic = parts.length === 1 && parts[0]!.type === 'static'
+  const merged = mergeStaticTextParts(parts)
+  const hasExpr = merged.some((p) => p.type === 'expr')
+  const onlyStatic = merged.length === 1 && merged[0]!.type === 'static'
 
   if (onlyStatic) {
-    const value = parts[0]!.value
+    const value = merged[0]!.value
     return value ? { kind: 'static', value } : { kind: 'skip' }
   }
 
   if (!hasExpr) {
-    const value = parts.map((p) => p.value).join('')
+    const value = merged.map((p) => p.value).join('')
     return value ? { kind: 'static', value } : { kind: 'skip' }
   }
 
-  if (parts.length === 1 && parts[0]!.type === 'expr') {
-    const raw = parts[0]!.value
+  if (merged.length === 1 && merged[0]!.type === 'expr') {
+    const raw = merged[0]!.value
     const source = lowerBindingSource(raw, ctx, { preferProp: true })
     if (source.kind === 'prop') {
       return {
@@ -147,9 +146,6 @@ export function lowerTextParts(parts: TextPart[], ctx: LowerLeafContext): Lowere
       }
     }
     if (source.kind === 'signal') {
-      if (source.local && ctx.cpw) {
-        return { kind: 'binding', op: { op: 'text', source, mode: 'cpw' } }
-      }
       if (source.local) {
         return { kind: 'binding', op: { op: 'text', source, mode: 'bindText' } }
       }
@@ -164,7 +160,7 @@ export function lowerTextParts(parts: TextPart[], ctx: LowerLeafContext): Lowere
     }
   }
 
-  const mixed: MixedTextPart[] = parts.map((p) => {
+  const mixed: MixedTextPart[] = merged.map((p) => {
     if (p.type === 'static') return { type: 'static', value: p.value }
     return {
       type: 'expr',

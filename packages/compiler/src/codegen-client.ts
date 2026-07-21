@@ -25,6 +25,7 @@ import {
   type ComponentPlan,
 } from './ir/lower-component.js'
 import { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
+import { markCpwOps, markCpwText, optimizeIfPlan } from './ir/optimize.js'
 
 export function emitClient(
   ast: TemplateAST,
@@ -164,7 +165,7 @@ function emitElement(
   const el = ctx.nextId('el')
   ctx.line(`const ${el} = document.createElement('${node.tag}')`, node.sourceLine)
 
-  for (const op of lowerElementBindings(node.attrs, ctx.leafContext())) {
+  for (const op of markCpwOps(lowerElementBindings(node.attrs, ctx.leafContext()), ctx.cpw)) {
     emitLeafOp(ctx, el, op)
   }
 
@@ -239,7 +240,14 @@ function emitComponentPlan(
 }
 
 function emitIf(ctx: CodegenContext, node: TemplateIfNode, target: EmitTarget): void {
-  emitIfPlan(ctx, lowerIf(node), target)
+  const optimized = optimizeIfPlan(lowerIf(node))
+  if (optimized.kind === 'static') {
+    for (const child of optimized.children) {
+      emitNode(ctx, child, target)
+    }
+    return
+  }
+  emitIfPlan(ctx, optimized.plan, target)
 }
 
 function emitIfPlan(ctx: CodegenContext, plan: IfFlowPlan, target: EmitTarget): void {
@@ -363,7 +371,7 @@ function emitEachPlan(ctx: CodegenContext, plan: ListFlowPlan, target: EmitTarge
   if (hasSingleElement) {
     const child = singleChild as Extract<TemplateNode, { type: 'element' }>
     ctx.line(`const ${root} = document.createElement('${child.tag}')`)
-    for (const op of lowerElementBindings(child.attrs, ctx.leafContext())) {
+    for (const op of markCpwOps(lowerElementBindings(child.attrs, ctx.leafContext()), ctx.cpw)) {
       emitLeafOp(ctx, root, op)
     }
     for (const grandchild of child.children) {
@@ -389,7 +397,7 @@ function emitEachPlan(ctx: CodegenContext, plan: ListFlowPlan, target: EmitTarge
 }
 
 function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): void {
-  const lowered = lowerTextParts(parts, ctx.leafContext())
+  const lowered = markCpwText(lowerTextParts(parts, ctx.leafContext()), ctx.cpw)
   if (lowered.kind === 'skip') return
 
   if (lowered.kind === 'static') {
