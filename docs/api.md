@@ -351,7 +351,9 @@ export <view>
 </view>
 ```
 
-Prefer bare `${cart.count()}` when there is no loop local to capture. Live demos: **Lab → Pulse bags** (including a four-level component tree) and **Todo → Shop**.
+Prefer bare `${cart.count()}` when there is no loop local to capture. The compiler treats imported bag members as **Mesh Ports**: `${cart.count()}` / `${cart.count}` emit `bindText(node, cart.count)` (or CPW peek/subscribe in production) — the cell is captured once at mount.
+
+Live demos: **Lab → Pulse bags** (including a four-level component tree) and **Todo → Shop**.
 
 ---
 

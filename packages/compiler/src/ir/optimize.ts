@@ -1,5 +1,6 @@
 import type { TemplateNode, TextPart } from '../types.js'
 import type { IfFlowPlan } from './lower-flow.js'
+import { isDirectCellSource } from './source.js'
 import type { LeafBindingOp, LoweredText } from './types.js'
 
 /** Upgrade bind* modes to cpw when production CPW is enabled. */
@@ -14,16 +15,28 @@ export function markCpwText(lowered: LoweredText, cpw: boolean): LoweredText {
 }
 
 function markCpwOp(op: LeafBindingOp): LeafBindingOp {
-  if (op.op === 'text' && !op.mixed && op.mode === 'bindText' && op.source.kind === 'signal' && op.source.local) {
+  if (op.op === 'text' && !op.mixed && op.mode === 'bindText' && isDirectCellSource(op.source)) {
     return { ...op, mode: 'cpw' }
   }
-  if (op.op === 'classToggle' && op.mode === 'bindClass' && op.source.kind === 'signal') {
+  if (
+    op.op === 'classToggle' &&
+    op.mode === 'bindClass' &&
+    (op.source.kind === 'signal' || op.source.kind === 'mesh')
+  ) {
     return { ...op, mode: 'cpw' }
   }
-  if (op.op === 'styleVar' && op.mode === 'bindStyleVar' && op.source.kind === 'signal') {
+  if (
+    op.op === 'styleVar' &&
+    op.mode === 'bindStyleVar' &&
+    (op.source.kind === 'signal' || op.source.kind === 'mesh')
+  ) {
     return { ...op, mode: 'cpw' }
   }
-  if (op.op === 'attr' && op.mode === 'bindAttribute' && (op.source.kind === 'signal' || op.source.kind === 'prop')) {
+  if (
+    op.op === 'attr' &&
+    op.mode === 'bindAttribute' &&
+    (op.source.kind === 'signal' || op.source.kind === 'prop' || op.source.kind === 'mesh')
+  ) {
     return { ...op, mode: 'cpw' }
   }
   return op

@@ -2,6 +2,8 @@ import type { BindingSource, LowerSourceContext, LowerSourceOptions } from './ty
 
 const SIGNAL_CALL_RE = /^([A-Za-z_$][\w$]*)\(\)$/
 const SIGNAL_REF_RE = /^([A-Za-z_$][\w$]*)$/
+/** `cart.count` or `cart.count()` — Mesh Port candidate. */
+const MESH_MEMBER_RE = /^([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)(?:\(\))?$/
 const ARROW_RE = /=>/
 
 /**
@@ -26,6 +28,9 @@ export function lowerBindingSource(
 
   const imported = matchImportedSignal(trimmed, ctx.signals, ctx.importedNames)
   if (imported) return { kind: 'signal', name: imported, local: false }
+
+  const mesh = matchMeshMember(trimmed, ctx.signals, ctx.importedNames)
+  if (mesh) return mesh
 
   if (!preferProp) {
     const prop = bareProp(trimmed, ctx)
@@ -77,6 +82,26 @@ export function matchImportedSignal(
   return null
 }
 
+/**
+ * Imported bag member — Mesh Port.
+ * `cart.count` / `cart.count()` when `cart` is an import (not a local signal).
+ */
+export function matchMeshMember(
+  expr: string,
+  signals?: ReadonlySet<string> | undefined,
+  importedNames?: ReadonlySet<string> | undefined,
+): BindingSource | null {
+  if (!importedNames || importedNames.size === 0) return null
+  const trimmed = expr.trim()
+  const match = MESH_MEMBER_RE.exec(trimmed)
+  if (!match) return null
+  const bag = match[1]!
+  const key = match[2]!
+  if (!importedNames.has(bag)) return null
+  if (signals?.has(bag)) return null
+  return { kind: 'mesh', bag, key }
+}
+
 function bareProp(trimmed: string, ctx: LowerSourceContext): BindingSource | null {
   const ref = SIGNAL_REF_RE.exec(trimmed)
   if (ref && ctx.componentProps?.has(ref[1]!)) {
@@ -85,12 +110,24 @@ function bareProp(trimmed: string, ctx: LowerSourceContext): BindingSource | nul
   return null
 }
 
-/** Signal / import name if source is a signal; otherwise null. */
+/** Signal / import / mesh port expression used at emit sites. */
 export function bindingSignalName(source: BindingSource): string | null {
-  return source.kind === 'signal' ? source.name : null
+  if (source.kind === 'signal') return source.name
+  if (source.kind === 'mesh') return meshPortExpr(source)
+  return null
+}
+
+/** `cart.count` — cell capture expression for Mesh Port emit. */
+export function meshPortExpr(source: Extract<BindingSource, { kind: 'mesh' }>): string {
+  return `${source.bag}.${source.key}`
 }
 
 /** True when source is a locally declared signal (CPW-eligible path). */
 export function isLocalSignalSource(source: BindingSource): boolean {
   return source.kind === 'signal' && source.local
+}
+
+/** True when hot path can capture a DependencyCell once (local pulse or Mesh Port). */
+export function isDirectCellSource(source: BindingSource): boolean {
+  return isLocalSignalSource(source) || source.kind === 'mesh'
 }

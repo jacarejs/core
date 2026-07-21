@@ -27,7 +27,7 @@ export {
 } from './validate-contract.js'
 export type { ContractUsageIssue, ProvidedProp } from './validate-contract.js'
 export { scopeCss, scopeIdFromFilename } from './scope-css.js'
-export { lowerBindingSource, bindingSignalName, isLocalSignalSource } from './ir/source.js'
+export { lowerBindingSource, bindingSignalName, isLocalSignalSource, isDirectCellSource, meshPortExpr } from './ir/source.js'
 export { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
 export { markCpwOps, markCpwText, optimizeIfPlan, mergeStaticTextParts } from './ir/optimize.js'
 export { lowerIf, lowerCase, lowerEach } from './ir/lower-flow.js'

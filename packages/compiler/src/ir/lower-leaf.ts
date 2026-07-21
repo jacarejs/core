@@ -34,7 +34,7 @@ function lowerAttr(attr: TemplateAttr, ctx: LowerLeafContext): LeafBindingOp[] {
       return [{ op: 'setClassName', code: attr.value }]
     }
     const source = lowerBindingSource(attr.value, ctx)
-    if (source.kind === 'signal') {
+    if (source.kind === 'signal' || source.kind === 'mesh') {
       return [
         {
           op: 'attr',
@@ -59,7 +59,7 @@ function lowerAttr(attr: TemplateAttr, ctx: LowerLeafContext): LeafBindingOp[] {
 
   if (attr.kind === 'class') {
     const source = lowerBindingSource(attr.value, ctx)
-    if (source.kind === 'signal') {
+    if (source.kind === 'signal' || source.kind === 'mesh') {
       return [
         {
           op: 'classToggle',
@@ -82,7 +82,7 @@ function lowerAttr(attr: TemplateAttr, ctx: LowerLeafContext): LeafBindingOp[] {
   if (attr.kind === 'style') {
     const source = lowerBindingSource(attr.value, ctx)
     const cssVar = `--${attr.name}`
-    if (source.kind === 'signal') {
+    if (source.kind === 'signal' || source.kind === 'mesh') {
       return [{ op: 'styleVar', cssVar, source, mode: 'bindStyleVar' }]
     }
     return [{ op: 'styleVar', cssVar, source, mode: 'effect' }]
@@ -91,7 +91,7 @@ function lowerAttr(attr: TemplateAttr, ctx: LowerLeafContext): LeafBindingOp[] {
   if (attr.kind === 'bind') {
     const useProperty = PROPERTY_BINDINGS.has(attr.name)
     const source = lowerBindingSource(attr.value, ctx)
-    if (source.kind === 'signal' || source.kind === 'prop') {
+    if (source.kind === 'signal' || source.kind === 'prop' || source.kind === 'mesh') {
       if (useProperty) {
         return [
           {
@@ -144,6 +144,9 @@ export function lowerTextParts(parts: TextPart[], ctx: LowerLeafContext): Lowere
         kind: 'binding',
         op: { op: 'text', source, mode: 'bindPropText' },
       }
+    }
+    if (source.kind === 'mesh') {
+      return { kind: 'binding', op: { op: 'text', source, mode: 'bindText' } }
     }
     if (source.kind === 'signal') {
       if (source.local) {

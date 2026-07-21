@@ -32,6 +32,35 @@ describe('lowerBindingSource', () => {
     })
   })
 
+  it('classifies imported bag members as Mesh Port', () => {
+    const bags = new Set(['cart', 'demoCart'])
+    expect(lowerBindingSource('cart.count()', { importedNames: bags })).toEqual({
+      kind: 'mesh',
+      bag: 'cart',
+      key: 'count',
+    })
+    expect(lowerBindingSource('cart.count', { importedNames: bags })).toEqual({
+      kind: 'mesh',
+      bag: 'cart',
+      key: 'count',
+    })
+    expect(lowerBindingSource('demoCart.money()', { importedNames: bags })).toEqual({
+      kind: 'mesh',
+      bag: 'demoCart',
+      key: 'money',
+    })
+    expect(lowerBindingSource('other.total()', { importedNames: bags }).kind).toBe('expr')
+  })
+
+  it('does not treat local.signal as mesh', () => {
+    expect(
+      lowerBindingSource('count.nested()', {
+        signals: new Set(['count']),
+        importedNames: new Set(['count']),
+      }).kind,
+    ).toBe('expr')
+  })
+
   it('classifies component prop when preferProp', () => {
     expect(
       lowerBindingSource('title', { signals, componentProps }, { preferProp: true }),
@@ -65,6 +94,9 @@ describe('lowerBindingSource', () => {
     const local = lowerBindingSource('open()', { signals })
     expect(bindingSignalName(local)).toBe('open')
     expect(isLocalSignalSource(local)).toBe(true)
+    const mesh = lowerBindingSource('cart.total()', { importedNames: new Set(['cart']) })
+    expect(bindingSignalName(mesh)).toBe('cart.total')
+    expect(isLocalSignalSource(mesh)).toBe(false)
     const expr = lowerBindingSource('a + b', { signals })
     expect(bindingSignalName(expr)).toBeNull()
     expect(isLocalSignalSource(expr)).toBe(false)

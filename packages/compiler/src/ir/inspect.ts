@@ -163,9 +163,14 @@ function inspectAttrs(attrs: TemplateAttr[], ctx: LowerSourceContext): BindingSi
 function sourceLabel(source: {
   kind: string
   name?: string
+  bag?: string
+  key?: string
   code?: string
   value?: string
 }): string {
+  if (source.kind === 'mesh' && source.bag && source.key) {
+    return `${source.bag}.${source.key}`
+  }
   if (source.kind === 'signal' || source.kind === 'prop') return source.name ?? source.kind
   if (source.kind === 'expr') return source.code ?? 'expr'
   if (source.kind === 'static') return JSON.stringify(source.value)

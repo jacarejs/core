@@ -3,6 +3,8 @@
 /** Where a reactive value comes from — classified once in lower. */
 export type BindingSource =
   | { kind: 'signal'; name: string; local: boolean }
+  /** Imported bag member — Mesh Port (`cart.count` / `cart.count()`). */
+  | { kind: 'mesh'; bag: string; key: string }
   | { kind: 'prop'; name: string }
   | { kind: 'expr'; code: string; arrow: boolean }
   | { kind: 'static'; value: string }

@@ -6,7 +6,7 @@ import {
 import type { BindingSource, LowerSourceOptions, LowerLeafContext } from './ir/types.js'
 
 export type { BindingSource, LowerSourceOptions, LowerLeafContext }
-export { lowerBindingSource, bindingSignalName, isLocalSignalSource } from './ir/source.js'
+export { lowerBindingSource, bindingSignalName, isLocalSignalSource, isDirectCellSource, meshPortExpr } from './ir/source.js'
 export type { LowerSourceContext } from './ir/types.js'
 
 export function resolveSignalExpr(

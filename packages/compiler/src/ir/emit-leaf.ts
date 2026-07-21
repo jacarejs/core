@@ -7,7 +7,14 @@ import {
   applyStyleVar,
   applyText,
 } from './emit-apply.js'
-import type { LeafBindingOp, MixedTextPart } from './types.js'
+import { meshPortExpr } from './source.js'
+import type { BindingSource, LeafBindingOp, MixedTextPart } from './types.js'
+
+function cellExpr(source: BindingSource): string | null {
+  if (source.kind === 'signal' || source.kind === 'prop') return source.name
+  if (source.kind === 'mesh') return meshPortExpr(source)
+  return null
+}
 
 /** Emit a leaf binding op onto an element or text node. */
 export function emitLeafOp(
@@ -78,8 +85,8 @@ function emitTextOp(
   }
 
   const { source, mode } = op
-  if ((mode === 'cpw' || mode === 'bindText') && source.kind === 'signal') {
-    applyText(ctx, textNode, source.name, mode === 'cpw' ? 'cpw' : 'bind')
+  if ((mode === 'cpw' || mode === 'bindText') && (source.kind === 'signal' || source.kind === 'mesh')) {
+    applyText(ctx, textNode, cellExpr(source)!, mode === 'cpw' ? 'cpw' : 'bind')
     return
   }
   if (mode === 'bindPropText' && (source.kind === 'signal' || source.kind === 'prop')) {
@@ -94,7 +101,7 @@ function emitTextOp(
       ? source.code
       : source.kind === 'static'
         ? JSON.stringify(source.value)
-        : source.name
+        : cellExpr(source) ?? 'undefined'
   ctx.pushCleanup(
     `effect(() => { const _v = (${ctx.rewriteExprForEffect(raw)}); ${textNode}.data = String(typeof _v === 'function' ? _v() : _v) }).dispose`,
   )
@@ -105,6 +112,9 @@ function mixedPartToTemplate(ctx: CodegenContext, p: MixedTextPart): string {
   const { source } = p
   if (source.kind === 'prop') {
     return `\${typeof ${source.name} === 'function' ? ${source.name}() : ${source.name} ?? ''}`
+  }
+  if (source.kind === 'mesh') {
+    return `\${${meshPortExpr(source)}()}`
   }
   if (source.kind === 'signal') {
     if (source.local) return `\${${source.name}()}`
@@ -127,9 +137,9 @@ function emitAttrOp(
 
   if (
     (mode === 'bindAttribute' || mode === 'cpw') &&
-    (source.kind === 'signal' || source.kind === 'prop')
+    (source.kind === 'signal' || source.kind === 'prop' || source.kind === 'mesh')
   ) {
-    applyAttribute(ctx, el, name, source.name, mode === 'cpw' ? 'cpw' : 'bind')
+    applyAttribute(ctx, el, name, cellExpr(source)!, mode === 'cpw' ? 'cpw' : 'bind')
     return
   }
 
@@ -143,7 +153,7 @@ function emitAttrOp(
       ? source.code
       : source.kind === 'static'
         ? JSON.stringify(source.value)
-        : source.name
+        : cellExpr(source) ?? 'undefined'
   applyAttrEffect(ctx, el, name, ctx.rewriteExprForEffect(raw), false)
 }
 
@@ -153,8 +163,11 @@ function emitClassOp(
   op: Extract<LeafBindingOp, { op: 'classToggle' }>,
 ): void {
   const { source, mode, className } = op
-  if ((mode === 'cpw' || mode === 'bindClass') && source.kind === 'signal') {
-    applyClass(ctx, el, className, source.name, mode === 'cpw' ? 'cpw' : 'bind')
+  if (
+    (mode === 'cpw' || mode === 'bindClass') &&
+    (source.kind === 'signal' || source.kind === 'mesh')
+  ) {
+    applyClass(ctx, el, className, cellExpr(source)!, mode === 'cpw' ? 'cpw' : 'bind')
     return
   }
   if (source.kind === 'expr' && source.arrow) {
@@ -168,7 +181,7 @@ function emitClassOp(
       ? source.code
       : source.kind === 'static'
         ? JSON.stringify(source.value)
-        : source.name
+        : cellExpr(source) ?? 'undefined'
   ctx.pushCleanup(
     `effect(() => { ${el}.classList.toggle(${JSON.stringify(className)}, !!(${raw})) }).dispose`,
   )
@@ -180,8 +193,11 @@ function emitStyleOp(
   op: Extract<LeafBindingOp, { op: 'styleVar' }>,
 ): void {
   const { source, mode, cssVar } = op
-  if ((mode === 'cpw' || mode === 'bindStyleVar') && source.kind === 'signal') {
-    applyStyleVar(ctx, el, cssVar, source.name, mode === 'cpw' ? 'cpw' : 'bind')
+  if (
+    (mode === 'cpw' || mode === 'bindStyleVar') &&
+    (source.kind === 'signal' || source.kind === 'mesh')
+  ) {
+    applyStyleVar(ctx, el, cssVar, cellExpr(source)!, mode === 'cpw' ? 'cpw' : 'bind')
     return
   }
   if (source.kind === 'expr' && source.arrow) {
@@ -195,7 +211,7 @@ function emitStyleOp(
       ? source.code
       : source.kind === 'static'
         ? JSON.stringify(source.value)
-        : source.name
+        : cellExpr(source) ?? 'undefined'
   ctx.pushCleanup(
     `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String(${raw})) }).dispose`,
   )
@@ -207,8 +223,11 @@ function emitModelOp(
   op: Extract<LeafBindingOp, { op: 'model' }>,
 ): void {
   const { source, mode, prop } = op
-  if (mode === 'bindModel' && (source.kind === 'signal' || source.kind === 'prop')) {
-    applyModel(ctx, el, prop, source.name)
+  if (
+    mode === 'bindModel' &&
+    (source.kind === 'signal' || source.kind === 'prop' || source.kind === 'mesh')
+  ) {
+    applyModel(ctx, el, prop, cellExpr(source)!)
     return
   }
   const raw =
@@ -216,7 +235,7 @@ function emitModelOp(
       ? source.code
       : source.kind === 'static'
         ? JSON.stringify(source.value)
-        : source.name
+        : cellExpr(source) ?? 'undefined'
   ctx.pushCleanup(
     `effect(() => { ${el}[${JSON.stringify(prop)}] = (${ctx.rewriteExprForEffect(raw)}) }).dispose`,
   )

@@ -1,5 +1,6 @@
 import type { CodegenContext } from '../codegen-shared.js'
 import { escapeHtml } from '../codegen-shared.js'
+import { meshPortExpr } from './source.js'
 import type { BindingSource, LeafBindingOp, LoweredText } from './types.js'
 
 /** Emit SSR text from lowered IR (same classification as client). */
@@ -34,6 +35,14 @@ export function emitSSRLoweredText(ctx: CodegenContext, lowered: LoweredText): v
     ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${source.name} })`)
     return
   }
+  if (source.kind === 'mesh') {
+    const port = meshPortExpr(source)
+    ctx.line(
+      `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${port}())) + '</span>'`,
+    )
+    ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${port} })`)
+    return
+  }
   if (source.kind === 'signal' || source.kind === 'prop') {
     const readExpr = `typeof ${source.name} === 'function' ? ${source.name}() : ${source.name}`
     ctx.line(
@@ -59,6 +68,7 @@ function readExprFromSource(
   raw: string,
 ): string {
   if (source.kind === 'signal') return `${source.name}()`
+  if (source.kind === 'mesh') return `${meshPortExpr(source)}()`
   if (source.kind === 'prop') {
     return `typeof ${source.name} === 'function' ? ${source.name}() : ${source.name}`
   }
@@ -96,37 +106,54 @@ export function emitSSRElementOpen(
 
     if (
       op.op === 'attr' &&
-      (op.source.kind === 'signal' || op.source.kind === 'prop')
+      (op.source.kind === 'signal' || op.source.kind === 'prop' || op.source.kind === 'mesh')
     ) {
       ctx.useRuntime('escapeHtml')
       const read =
-        op.source.kind === 'signal'
-          ? `${op.source.name}()`
-          : `typeof ${op.source.name} === 'function' ? ${op.source.name}() : ${op.source.name}`
+        op.source.kind === 'mesh'
+          ? `${meshPortExpr(op.source)}()`
+          : op.source.kind === 'signal'
+            ? `${op.source.name}()`
+            : `typeof ${op.source.name} === 'function' ? ${op.source.name}() : ${op.source.name}`
       dynamicChunks.push(
         `(() => { const _v = (${read}); return (_v === null || _v === undefined || _v === false) ? '' : (_v === true ? ${JSON.stringify(' ' + op.name)} : ' ${op.name}="' + escapeHtml(String(_v)) + '"') })()`,
       )
       continue
     }
 
-    if (op.op === 'classToggle' && op.source.kind === 'signal') {
-      dynamicChunks.push(
-        `(${op.source.name}() ? ${JSON.stringify(' class="' + op.className + '"')} : '')`,
-      )
-      continue
-    }
-
-    if (op.op === 'styleVar' && op.source.kind === 'signal') {
-      ctx.useRuntime('escapeHtml')
-      dynamicChunks.push(
-        `' style="${op.cssVar}:' + escapeHtml(String(${op.source.name}())) + '"'`,
-      )
-      continue
-    }
-
-    if (op.op === 'model' && (op.source.kind === 'signal' || op.source.kind === 'prop')) {
+    if (
+      op.op === 'classToggle' &&
+      (op.source.kind === 'signal' || op.source.kind === 'mesh')
+    ) {
       const read =
-        op.source.kind === 'signal' ? `${op.source.name}()` : op.source.name
+        op.source.kind === 'mesh' ? `${meshPortExpr(op.source)}()` : `${op.source.name}()`
+      dynamicChunks.push(`(${read} ? ${JSON.stringify(' class="' + op.className + '"')} : '')`)
+      continue
+    }
+
+    if (
+      op.op === 'styleVar' &&
+      (op.source.kind === 'signal' || op.source.kind === 'mesh')
+    ) {
+      ctx.useRuntime('escapeHtml')
+      const read =
+        op.source.kind === 'mesh' ? `${meshPortExpr(op.source)}()` : `${op.source.name}()`
+      dynamicChunks.push(
+        `' style="${op.cssVar}:' + escapeHtml(String(${read})) + '"'`,
+      )
+      continue
+    }
+
+    if (
+      op.op === 'model' &&
+      (op.source.kind === 'signal' || op.source.kind === 'prop' || op.source.kind === 'mesh')
+    ) {
+      const read =
+        op.source.kind === 'mesh'
+          ? `${meshPortExpr(op.source)}()`
+          : op.source.kind === 'signal'
+            ? `${op.source.name}()`
+            : op.source.name
       if (op.prop === 'checked') {
         dynamicChunks.push(`(${read} ? ' checked' : '')`)
       } else {

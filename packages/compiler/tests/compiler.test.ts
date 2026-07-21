@@ -540,6 +540,29 @@ export <view>
     expect(server.code).not.toContain('String(active)')
   })
 
+  it('binds imported bag members as Mesh Ports (bindText / CPW)', () => {
+    const source = `import { cart } from '../bags/cart.js'
+export <view>
+  <span>\${cart.count()}</span>
+  <span>\${cart.money}</span>
+</view>`
+    const client = compile(source, { mode: 'client', debug: false, cpw: false })
+    expect(client.code).toMatch(/bindText\([^,]+, cart\.count\)/)
+    expect(client.code).toMatch(/bindText\([^,]+, cart\.money\)/)
+    expect(client.code).not.toMatch(/effect\(\(\) => \{ const _v = \(cart\.count/)
+    expect(client.code).not.toMatch(/effect\(\(\) => \{ const _v = \(cart\.money/)
+
+    const cpw = compile(source, { mode: 'client', debug: false, cpw: true })
+    expect(cpw.code).toMatch(/cart\.count\.peek/)
+    expect(cpw.code).toMatch(/cart\.count\.subscribe/)
+    expect(cpw.code).toMatch(/cart\.money\.peek/)
+
+    const server = compile(source, { mode: 'server', debug: false })
+    expect(server.code).toContain('cart.count()')
+    expect(server.code).toContain('cart.money()')
+    expect(server.code).toContain("kind: 'signal', read: cart.count")
+  })
+
   it('binds imported plain values with bindPropText (snippet strings)', () => {
     const source = `import { scaffoldCode } from './snippets.js'
 export <view>
