@@ -73,7 +73,8 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
   let unsubscribeScope: (() => void) | null = null
 
   function syncMeshWindow(): void {
-    const detached = meshEnabled && readUiConfig().meshDetached
+    const hasBags = getMeshSnapshot().bags.length > 0
+    const detached = meshEnabled && hasBags && readUiConfig().meshDetached
     if (detached && !disposeMeshWindow) {
       disposeMeshWindow = connectJacareMesh({ target: host, pulseMs: false })
     } else if (!detached && disposeMeshWindow) {
@@ -83,7 +84,8 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
   }
 
   function syncScopeWindow(): void {
-    const detached = scopeEnabled && readUiConfig().scopeDetached
+    const hasEntries = getScopeSnapshot().entries.length > 0
+    const detached = scopeEnabled && hasEntries && readUiConfig().scopeDetached
     if (detached && !disposeScopeWindow) {
       disposeScopeWindow = connectJacareScope({ target: host, pulseMs: false })
     } else if (!detached && disposeScopeWindow) {
@@ -96,6 +98,7 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
     stopMeshPulse = startMeshPulse(120)
     unsubscribeMesh = subscribeMesh(() => {
       panel.renderMesh(getMeshSnapshot())
+      syncMeshWindow()
     })
     panel.renderMesh(getMeshSnapshot())
     syncMeshWindow()
@@ -105,6 +108,7 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
     stopScopePulse = startScopePulse(120)
     unsubscribeScope = subscribeScope(() => {
       panel.renderScope(getScopeSnapshot())
+      syncScopeWindow()
     })
     panel.renderScope(getScopeSnapshot())
     syncScopeWindow()

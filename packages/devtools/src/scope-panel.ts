@@ -117,7 +117,7 @@ export function createScopePanel(host: HTMLElement): ScopePanelHandle {
       </div>
       <div class="jacare-scope__actions">
         <button class="jacare-scope__toggle" type="button" data-dock title="Dock into Pulse Graph" aria-label="Dock Scope into Pulse Graph">↙</button>
-        <button class="jacare-scope__toggle" type="button" data-clear title="Clear Scope entries" aria-label="Clear Scope">⌫</button>
+        <button class="jacare-scope__toggle" type="button" data-clear title="Clear Scope entries" aria-label="Reset Scope">Reset</button>
         <button class="jacare-scope__toggle" type="button" data-minimize title="Minimize" aria-label="Minimize Scope">−</button>
       </div>
     </header>

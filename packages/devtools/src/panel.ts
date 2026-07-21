@@ -2,9 +2,11 @@ import type { MeshSnapshot, PulseGraphSnapshot, PulseNode, PulseNodeKind, ScopeS
 import {
   clearHighlight,
   clearScope,
+  getBag,
   getBindingsForPulse,
   getPulsesForElement,
   highlightBinding,
+  listBags,
   pickElement,
 } from '@jacare/core'
 import {
@@ -129,6 +131,14 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
 
       .jacare-devtools__tab-spacer {
         flex: 1;
+      }
+
+      .jacare-devtools__tabs[hidden] {
+        display: none !important;
+      }
+
+      .jacare-devtools__tab[hidden] {
+        display: none !important;
       }
 
       .jacare-devtools__mesh-pane,
@@ -559,7 +569,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         <button type="button" data-reset-layout>Reset layout</button>
       </div>
       <p class="jacare-devtools__config-note">
-        Mesh and Scope are tabs here by default — use ↗ to pop either into a separate window (↙ docks back).
+        Mesh / Scope tabs appear only when there is data. Use ↗ to pop out (↙ docks back). Reset clears Scope or soft-resets all bags.
       </p>
     </div>
     <p class="jacare-devtools__hint" data-graph-hint>Hover a node to outline DOM · ⚙ config · ◎ pick · drag header to move</p>
@@ -572,7 +582,10 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         ? `<div class="jacare-devtools__mesh-pane" data-mesh-pane>
       <div class="jacare-devtools__mesh-toolbar">
         <span class="jacare-devtools__mesh-toolbar-meta" data-mesh-meta></span>
-        <button type="button" class="jacare-devtools__toggle" data-pop-mesh-inline title="Open Mesh in a separate window" aria-label="Pop out Mesh">↗ Pop out</button>
+        <div class="jacare-devtools__actions">
+          <button type="button" class="jacare-devtools__toggle" data-reset-mesh title="Reset all bags to factory defaults" aria-label="Reset Mesh">Reset</button>
+          <button type="button" class="jacare-devtools__toggle" data-pop-mesh-inline title="Open Mesh in a separate window" aria-label="Pop out Mesh">↗ Pop out</button>
+        </div>
       </div>
       <div class="jacare-mesh-view" data-mesh-body></div>
     </div>`
@@ -583,7 +596,10 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         ? `<div class="jacare-devtools__scope-pane" data-scope-pane>
       <div class="jacare-devtools__scope-toolbar">
         <span class="jacare-devtools__scope-toolbar-meta" data-scope-meta></span>
-        <button type="button" class="jacare-devtools__toggle" data-pop-scope-inline title="Open Scope in a separate window" aria-label="Pop out Scope">↗ Pop out</button>
+        <div class="jacare-devtools__actions">
+          <button type="button" class="jacare-devtools__toggle" data-reset-scope title="Clear Scope entries" aria-label="Reset Scope">Reset</button>
+          <button type="button" class="jacare-devtools__toggle" data-pop-scope-inline title="Open Scope in a separate window" aria-label="Pop out Scope">↗ Pop out</button>
+        </div>
       </div>
       <div class="jacare-scope-view" data-scope-body></div>
     </div>`
@@ -616,6 +632,9 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   const scopePane = root.querySelector('[data-scope-pane]') as HTMLElement | null
   const scopeBody = root.querySelector('[data-scope-body]') as HTMLElement | null
   const scopeMeta = root.querySelector('[data-scope-meta]') as HTMLElement | null
+  const tabsNav = root.querySelector('[data-tabs]') as HTMLElement | null
+  const meshTabBtn = root.querySelector<HTMLButtonElement>('[data-tab="mesh"]')
+  const scopeTabBtn = root.querySelector<HTMLButtonElement>('[data-tab="scope"]')
   const tabButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')]
   const popMeshBtns = [
     ...root.querySelectorAll<HTMLButtonElement>('[data-pop-mesh], [data-pop-mesh-inline]'),
@@ -647,6 +666,14 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   notifyScopePosition(ui.scopePosition)
   notifyMeshPosition(ui.meshPosition)
 
+  function meshHasData(): boolean {
+    return meshEnabled && latestMesh.bags.length > 0
+  }
+
+  function scopeHasData(): boolean {
+    return scopeEnabled && latestScope.entries.length > 0
+  }
+
   function applyMode(): void {
     root.classList.toggle('jacare-devtools--minimized', mode === 'minimized')
     root.classList.toggle('jacare-devtools--hidden', mode === 'hidden')
@@ -671,8 +698,22 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   }
 
   function applyTabUi(): void {
-    const onMesh = meshEnabled && activeTab === 'mesh'
-    const onScope = scopeEnabled && activeTab === 'scope'
+    const showMesh = meshHasData()
+    const showScope = scopeHasData()
+    if (meshTabBtn) meshTabBtn.hidden = !showMesh
+    if (scopeTabBtn) scopeTabBtn.hidden = !showScope
+    if (tabsNav) tabsNav.hidden = !showMesh && !showScope
+
+    if (activeTab === 'mesh' && !showMesh) {
+      activeTab = 'graph'
+      ui = writeUiConfig({ activeTab: 'graph' })
+    } else if (activeTab === 'scope' && !showScope) {
+      activeTab = 'graph'
+      ui = writeUiConfig({ activeTab: 'graph' })
+    }
+
+    const onMesh = showMesh && activeTab === 'mesh'
+    const onScope = showScope && activeTab === 'scope'
     const onAlt = onMesh || onScope
     for (const btn of tabButtons) {
       btn.classList.toggle('is-active', btn.dataset['tab'] === activeTab)
@@ -681,19 +722,19 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     graphHint.classList.toggle('is-alt-tab', onAlt)
     meshPane?.classList.toggle('is-active', onMesh)
     scopePane?.classList.toggle('is-active', onScope)
-    meshCornerRow?.classList.toggle('is-visible', meshDetached)
-    scopeCornerRow?.classList.toggle('is-visible', scopeDetached)
+    meshCornerRow?.classList.toggle('is-visible', meshDetached && showMesh)
+    scopeCornerRow?.classList.toggle('is-visible', scopeDetached && showScope)
     for (const btn of popMeshBtns) {
-      btn.hidden = !meshEnabled || meshDetached || !onMesh
+      btn.hidden = !showMesh || meshDetached || !onMesh
     }
     for (const btn of popScopeBtns) {
-      btn.hidden = !scopeEnabled || scopeDetached || !onScope
+      btn.hidden = !showScope || scopeDetached || !onScope
     }
   }
 
   function setActiveTab(next: DevtoolsTab): void {
-    if (next === 'mesh' && !meshEnabled) return
-    if (next === 'scope' && !scopeEnabled) return
+    if (next === 'mesh' && !meshHasData()) return
+    if (next === 'scope' && !scopeHasData()) return
     activeTab = next
     ui = writeUiConfig({ activeTab: next })
     applyTabUi()
@@ -703,7 +744,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   }
 
   function setMeshDetached(detached: boolean): void {
-    if (!meshEnabled) return
+    if (!meshHasData()) return
     meshDetached = detached
     ui = writeUiConfig({
       meshDetached: detached,
@@ -718,7 +759,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   }
 
   function setScopeDetached(detached: boolean): void {
-    if (!scopeEnabled) return
+    if (!scopeHasData()) return
     scopeDetached = detached
     ui = writeUiConfig({
       scopeDetached: detached,
@@ -760,6 +801,12 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     renderScopeView(scopeBody, latestScope)
   }
 
+  function resetAllBags(): void {
+    for (const id of listBags()) {
+      getBag(id)?.reset()
+    }
+  }
+
   applyMode()
   applyTabUi()
 
@@ -786,6 +833,16 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       setScopeDetached(true)
     })
   }
+
+  root.querySelector('[data-reset-mesh]')?.addEventListener('click', (event) => {
+    event.stopPropagation()
+    resetAllBags()
+  })
+
+  root.querySelector('[data-reset-scope]')?.addEventListener('click', (event) => {
+    event.stopPropagation()
+    clearScope()
+  })
 
   const onMeshDetached = (event: Event): void => {
     const detail = (event as CustomEvent<{ detached: boolean }>).detail
@@ -1171,11 +1228,13 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     render,
     renderMesh(snapshot: MeshSnapshot) {
       latestMesh = snapshot
+      applyTabUi()
       if (activeTab === 'mesh') renderMeshIntoTab()
       else if (meshMeta) meshMeta.textContent = meshSummary(snapshot)
     },
     renderScope(snapshot: ScopeSnapshot) {
       latestScope = snapshot
+      applyTabUi()
       if (activeTab === 'scope') renderScopeIntoTab()
       else if (scopeMeta) scopeMeta.textContent = scopeSummary(snapshot)
     },

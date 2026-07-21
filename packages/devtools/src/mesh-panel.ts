@@ -1,4 +1,5 @@
 import type { MeshSnapshot } from '@jacare/core'
+import { getBag, listBags } from '@jacare/core'
 import {
   applyCorner,
   readUiConfig,
@@ -121,6 +122,7 @@ export function createMeshPanel(host: HTMLElement): MeshPanelHandle {
       </div>
       <div class="jacare-mesh__actions">
         <button class="jacare-mesh__toggle" type="button" data-dock title="Dock into Pulse Graph" aria-label="Dock Mesh into Pulse Graph">↙</button>
+        <button class="jacare-mesh__toggle" type="button" data-reset title="Reset all bags to factory defaults" aria-label="Reset Mesh">Reset</button>
         <button class="jacare-mesh__toggle" type="button" data-minimize title="Minimize" aria-label="Minimize Mesh">−</button>
       </div>
     </header>
@@ -133,6 +135,7 @@ export function createMeshPanel(host: HTMLElement): MeshPanelHandle {
   const meta = root.querySelector('[data-meta]') as HTMLElement
   const body = root.querySelector('[data-body]') as HTMLElement
   const dockBtn = root.querySelector('[data-dock]') as HTMLButtonElement
+  const resetBtn = root.querySelector('[data-reset]') as HTMLButtonElement
   const minimizeBtn = root.querySelector('[data-minimize]') as HTMLButtonElement
   const viewState = createMeshViewState()
 
@@ -183,6 +186,13 @@ export function createMeshPanel(host: HTMLElement): MeshPanelHandle {
     event.stopPropagation()
     writeUiConfig({ meshDetached: false, activeTab: 'mesh' })
     window.dispatchEvent(new CustomEvent('jacare:devtools:mesh-detached', { detail: { detached: false } }))
+  })
+
+  resetBtn.addEventListener('click', (event) => {
+    event.stopPropagation()
+    for (const id of listBags()) {
+      getBag(id)?.reset()
+    }
   })
 
   minimizeBtn.addEventListener('click', (event) => {

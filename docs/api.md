@@ -1746,8 +1746,8 @@ connectJacareDevtools()
 Panels (dev only — only when you call `connectJacareDevtools()`):
 
 - **Pulse Graph** — signal dependency graph, **live values**, **source names** (`count` · `Counter.jcr:4`), **DOM highlight** on hover
-- **Mesh** (tab) — `createBag` cells as `@cart/total`; **↗ Pop out** opens a separate window
-- **Scope** (tab) — `registerScope()` watch list; same **↗ / ↙** pop-out / dock
+- **Mesh** (tab) — `createBag` cells as `@cart/total`; shown only when bags exist; **↗ Pop out** / **Reset**
+- **Scope** (tab) — `registerScope()` watch list; shown only when entries exist; **↗ Pop out** / **Reset**
 
 Controls: `⚙` config · `◎` pick element · `−` minimize · `×` hide · **drag header** to move. Config lets you pick corners, clear highlight/selection, clear Scope, or reset layout. Preferences persist in `sessionStorage`.
 
