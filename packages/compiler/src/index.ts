@@ -28,7 +28,16 @@ export {
 export type { ContractUsageIssue, ProvidedProp } from './validate-contract.js'
 export { scopeCss, scopeIdFromFilename } from './scope-css.js'
 export { lowerBindingSource, bindingSignalName, isLocalSignalSource } from './ir/source.js'
-export type { BindingSource, LowerSourceContext, LowerSourceOptions } from './ir/types.js'
+export { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
+export type {
+  BindingSource,
+  LowerSourceContext,
+  LowerSourceOptions,
+  LowerLeafContext,
+  LeafBindingOp,
+  ClientMode,
+  LoweredText,
+} from './ir/types.js'
 export type {
   CompileOptions,
   CompileResult,

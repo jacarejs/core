@@ -1,4 +1,4 @@
-/** Binding IR — source classification (Fatia 0+). */
+/** Binding IR — source + leaf ops (Fatia 0–1). */
 
 /** Where a reactive value comes from — classified once in lower. */
 export type BindingSource =
@@ -21,3 +21,79 @@ export type LowerSourceOptions = {
    */
   preferProp?: boolean
 }
+
+export type LowerLeafContext = LowerSourceContext & { cpw: boolean }
+
+/** Client apply strategy — CPW is a mode; backend activates when options.cpw. */
+export type ClientMode =
+  | 'bindText'
+  | 'bindPropText'
+  | 'bindAttribute'
+  | 'bindClass'
+  | 'bindStyleVar'
+  | 'bindModel'
+  | 'effect'
+  | 'cpw'
+  | 'once'
+
+export type MixedTextPart =
+  | { type: 'static'; value: string }
+  | { type: 'expr'; source: BindingSource; raw: string }
+
+/** Leaf binding ops (Fatia 1) — no control flow / components yet. */
+export type LeafBindingOp =
+  | {
+      op: 'staticAttr'
+      name: string
+      value: string
+    }
+  | {
+      op: 'setClassName'
+      code: string
+    }
+  | {
+      op: 'text'
+      source: BindingSource
+      mode: Extract<ClientMode, 'bindText' | 'bindPropText' | 'effect' | 'cpw'>
+      mixed?: false
+    }
+  | {
+      op: 'text'
+      mode: 'effect'
+      mixed: true
+      parts: MixedTextPart[]
+    }
+  | {
+      op: 'attr'
+      name: string
+      source: BindingSource
+      mode: Extract<ClientMode, 'bindAttribute' | 'effect' | 'cpw' | 'once'>
+    }
+  | {
+      op: 'classToggle'
+      className: string
+      source: BindingSource
+      mode: Extract<ClientMode, 'bindClass' | 'effect' | 'cpw'>
+    }
+  | {
+      op: 'styleVar'
+      cssVar: string
+      source: BindingSource
+      mode: Extract<ClientMode, 'bindStyleVar' | 'effect' | 'cpw'>
+    }
+  | {
+      op: 'model'
+      prop: 'value' | 'checked'
+      source: BindingSource
+      mode: Extract<ClientMode, 'bindModel' | 'effect'>
+    }
+  | {
+      op: 'event'
+      name: string
+      handler: string
+    }
+
+export type LoweredText =
+  | { kind: 'skip' }
+  | { kind: 'static'; value: string }
+  | { kind: 'binding'; op: Extract<LeafBindingOp, { op: 'text' }> }

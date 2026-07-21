@@ -1,5 +1,4 @@
 import type {
-  TemplateAttr,
   TemplateAST,
   TemplateCaseNode,
   TemplateEachNode,
@@ -7,16 +6,12 @@ import type {
   TemplateNode,
   TextPart,
 } from './types.js'
-import {
-  emitCpwAttribute,
-  emitCpwClass,
-  emitCpwStyleVar,
-  emitCpwText,
-} from './codegen-cpw.js'
 import { append, CodegenContext, type EmitTarget } from './codegen-shared.js'
 import type { TemplateContract } from './parse-contract.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
+import { emitLeafOp } from './ir/emit-leaf.js'
+import { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
 
 export function emitClient(
   ast: TemplateAST,
@@ -156,8 +151,8 @@ function emitElement(
   const el = ctx.nextId('el')
   ctx.line(`const ${el} = document.createElement('${node.tag}')`, node.sourceLine)
 
-  for (const attr of node.attrs) {
-    emitAttr(ctx, el, attr)
+  for (const op of lowerElementBindings(node.attrs, ctx.leafContext())) {
+    emitLeafOp(ctx, el, op)
   }
 
   for (const child of node.children) {
@@ -348,8 +343,8 @@ function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarge
   if (hasSingleElement) {
     const child = singleChild as Extract<TemplateNode, { type: 'element' }>
     ctx.line(`const ${root} = document.createElement('${child.tag}')`)
-    for (const attr of child.attrs) {
-      emitAttr(ctx, root, attr)
+    for (const op of lowerElementBindings(child.attrs, ctx.leafContext())) {
+      emitLeafOp(ctx, root, op)
     }
     for (const grandchild of child.children) {
       emitNode(ctx, grandchild, { kind: 'parent', name: root })
@@ -373,216 +368,21 @@ function emitEach(ctx: CodegenContext, node: TemplateEachNode, target: EmitTarge
   ctx.line('}))')
 }
 
-const PROPERTY_BINDINGS = new Set(['value', 'checked'])
-
-function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
-  if (attr.kind === 'static') {
-    if (attr.name === 'class') {
-      ctx.line(`${el}.className = ${JSON.stringify(attr.value)}`)
-    } else {
-      ctx.line(`${el}.setAttribute(${JSON.stringify(attr.name)}, ${JSON.stringify(attr.value)})`)
-    }
-    return
-  }
-
-  if (attr.kind === 'expr') {
-    if (attr.name === 'class') {
-      ctx.line(`${el}.className = String(${attr.value})`)
-    } else {
-      const source = ctx.lowerSource(attr.value)
-      if (source.kind === 'signal') {
-        ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${source.name})`)
-        ctx.pushDevtoolsBind(source.name, el, 'attr')
-      } else if (source.kind === 'expr' && source.arrow) {
-        ctx.useRuntime('effect')
-        ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
-        ctx.indent()
-        ctx.line(`const _v = (${attr.value})()`)
-        ctx.line(`if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(attr.name)})`)
-        ctx.line(`else if (_v === true) ${el}.setAttribute(${JSON.stringify(attr.name)}, '')`)
-        ctx.line(`else ${el}.setAttribute(${JSON.stringify(attr.name)}, String(_v))`)
-        ctx.dedent()
-        ctx.line('}).dispose)')
-      } else if (source.kind === 'prop') {
-        ctx.line(`${el}.setAttribute(${JSON.stringify(attr.name)}, String(${source.name}))`)
-      } else {
-        ctx.useRuntime('effect')
-        const rewritten = ctx.rewriteExprForEffect(attr.value)
-        ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
-        ctx.indent()
-        ctx.line(`const _v = ${rewritten}`)
-        ctx.line(`if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(attr.name)})`)
-        ctx.line(`else if (_v === true) ${el}.setAttribute(${JSON.stringify(attr.name)}, '')`)
-        ctx.line(`else ${el}.setAttribute(${JSON.stringify(attr.name)}, String(_v))`)
-        ctx.dedent()
-        ctx.line('}).dispose)')
-      }
-    }
-    return
-  }
-
-  if (attr.kind === 'event') {
-    const handler = ctx.nextId('handler')
-    ctx.line(`const ${handler} = ${attr.value}`)
-    ctx.line(`${ctx.cleanupVar}.push((() => {`)
-    ctx.indent()
-    ctx.line(`${el}.addEventListener(${JSON.stringify(attr.name)}, ${handler})`)
-    ctx.line(`return () => ${el}.removeEventListener(${JSON.stringify(attr.name)}, ${handler})`)
-    ctx.dedent()
-    ctx.line('})())')
-    return
-  }
-
-  if (attr.kind === 'class') {
-    const source = ctx.lowerSource(attr.value)
-    if (source.kind === 'signal') {
-      if (ctx.cpw) {
-        emitCpwClass(ctx, el, attr.name, source.name)
-      } else {
-        ctx.pushCleanup(`bindClass(${el}, ${JSON.stringify(attr.name)}, ${source.name})`)
-        ctx.pushDevtoolsBind(source.name, el, 'class')
-      }
-    } else if (source.kind === 'expr' && source.arrow) {
-      ctx.pushCleanup(
-        `effect(() => { ${el}.classList.toggle(${JSON.stringify(attr.name)}, !!(${attr.value})()) }).dispose`,
-      )
-    } else {
-      ctx.pushCleanup(`effect(() => { ${el}.classList.toggle(${JSON.stringify(attr.name)}, !!(${attr.value})) }).dispose`)
-    }
-    return
-  }
-
-  if (attr.kind === 'style') {
-    const cssVar = `--${attr.name}`
-    const source = ctx.lowerSource(attr.value)
-    if (source.kind === 'signal') {
-      if (ctx.cpw) {
-        emitCpwStyleVar(ctx, el, cssVar, source.name)
-      } else {
-        ctx.pushCleanup(`bindStyleVar(${el}, ${JSON.stringify(cssVar)}, ${source.name})`)
-        ctx.pushDevtoolsBind(source.name, el, 'style')
-      }
-    } else if (source.kind === 'expr' && source.arrow) {
-      ctx.pushCleanup(
-        `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String((${attr.value})())) }).dispose`,
-      )
-    } else {
-      ctx.pushCleanup(
-        `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String(${attr.value})) }).dispose`,
-      )
-    }
-    return
-  }
-
-  if (attr.kind === 'bind') {
-    const useProperty = PROPERTY_BINDINGS.has(attr.name)
-    const source = ctx.lowerSource(attr.value)
-    if (source.kind === 'signal' || source.kind === 'prop') {
-      const name = source.name
-      if (useProperty) {
-        ctx.pushCleanup(`bindModel(${el}, ${JSON.stringify(attr.name)}, ${name})`)
-        ctx.pushDevtoolsBind(name, el, 'model')
-      } else if (ctx.cpw) {
-        emitCpwAttribute(ctx, el, attr.name, name)
-      } else {
-        ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${name})`)
-        ctx.pushDevtoolsBind(name, el, 'attr')
-      }
-    } else if (useProperty) {
-      ctx.pushCleanup(
-        `effect(() => { ${el}[${JSON.stringify(attr.name)}] = (${ctx.rewriteExprForEffect(attr.value)}) }).dispose`,
-      )
-    } else {
-      ctx.useRuntime('effect')
-      ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
-      ctx.indent()
-      ctx.line(`const _v = ${ctx.rewriteExprForEffect(attr.value)}`)
-      ctx.line(`if (_v === null || _v === undefined || _v === false) ${el}.removeAttribute(${JSON.stringify(attr.name)})`)
-      ctx.line(`else if (_v === true) ${el}.setAttribute(${JSON.stringify(attr.name)}, '')`)
-      ctx.line(`else ${el}.setAttribute(${JSON.stringify(attr.name)}, String(_v))`)
-      ctx.dedent()
-      ctx.line('}).dispose)')
-    }
-  }
-}
-
 function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): void {
-  const hasExpr = parts.some((p) => p.type === 'expr')
-  const onlyStatic = parts.length === 1 && parts[0]!.type === 'static'
+  const lowered = lowerTextParts(parts, ctx.leafContext())
+  if (lowered.kind === 'skip') return
 
-  if (onlyStatic) {
-    if (parts[0]!.value) {
-      const text = ctx.nextId('text')
-      ctx.line(`const ${text} = document.createTextNode(${JSON.stringify(parts[0]!.value)})`)
-      append(ctx, target, text)
-    }
+  if (lowered.kind === 'static') {
+    const text = ctx.nextId('text')
+    ctx.line(`const ${text} = document.createTextNode(${JSON.stringify(lowered.value)})`)
+    append(ctx, target, text)
     return
-  }
-
-  if (!hasExpr) {
-    const text = parts.map((p) => p.value).join('')
-    if (text) {
-      const node = ctx.nextId('text')
-      ctx.line(`const ${node} = document.createTextNode(${JSON.stringify(text)})`)
-      append(ctx, target, node)
-    }
-    return
-  }
-
-  if (parts.length === 1 && parts[0]!.type === 'expr') {
-    const expr = parts[0]!.value
-    const source = ctx.lowerSource(expr, { preferProp: true })
-    if (source.kind === 'prop') {
-      const text = ctx.nextId('text')
-      ctx.line(`const ${text} = document.createTextNode('')`)
-      append(ctx, target, text)
-      ctx.pushCleanup(`bindPropText(${text}, ${source.name})`)
-      return
-    }
   }
 
   const textNode = ctx.nextId('text')
   ctx.line(`const ${textNode} = document.createTextNode('')`)
   append(ctx, target, textNode)
-
-  if (parts.length === 1 && parts[0]!.type === 'expr') {
-    const expr = parts[0]!.value
-    const source = ctx.lowerSource(expr, { preferProp: true })
-    if (source.kind === 'signal') {
-      if (source.local && ctx.cpw) {
-        emitCpwText(ctx, textNode, source.name)
-      } else if (source.local) {
-        ctx.pushCleanup(`bindText(${textNode}, ${source.name})`)
-        ctx.pushDevtoolsBind(source.name, textNode, 'text')
-      } else {
-        // Imported binding — may be a pulse or a plain value (snippet strings, etc.)
-        ctx.pushCleanup(`bindPropText(${textNode}, ${source.name})`)
-        ctx.pushDevtoolsBind(source.name, textNode, 'text')
-      }
-      return
-    }
-    ctx.pushCleanup(
-      `effect(() => { const _v = (${ctx.rewriteExprForEffect(expr)}); ${textNode}.data = String(typeof _v === 'function' ? _v() : _v) }).dispose`,
-    )
-    return
-  }
-
-  const template = parts
-    .map((p) => {
-      if (p.type === 'static') return p.value
-      const source = ctx.lowerSource(p.value, { preferProp: true })
-      if (source.kind === 'prop') {
-        return `\${typeof ${source.name} === 'function' ? ${source.name}() : ${source.name} ?? ''}`
-      }
-      if (source.kind === 'signal') {
-        if (source.local) return `\${${source.name}()}`
-        return `\${typeof ${source.name} === 'function' ? ${source.name}() : ${source.name} ?? ''}`
-      }
-      return `\${(() => { const _v = (${ctx.rewriteExprForEffect(p.value)}); return typeof _v === 'function' ? _v() : _v })()}`
-    })
-    .join('')
-
-  ctx.pushCleanup(`effect(() => { ${textNode}.data = \`${template}\` }).dispose`)
+  emitLeafOp(ctx, textNode, lowered.op)
 }
 
 function literalJs(value: unknown): string {

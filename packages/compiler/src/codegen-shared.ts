@@ -3,9 +3,9 @@ import {
   lowerBindingSource,
   matchLocalSignal,
 } from './ir/source.js'
-import type { BindingSource, LowerSourceOptions } from './ir/types.js'
+import type { BindingSource, LowerSourceOptions, LowerLeafContext } from './ir/types.js'
 
-export type { BindingSource, LowerSourceOptions }
+export type { BindingSource, LowerSourceOptions, LowerLeafContext }
 export { lowerBindingSource, bindingSignalName, isLocalSignalSource } from './ir/source.js'
 export type { LowerSourceContext } from './ir/types.js'
 
@@ -142,6 +142,16 @@ export class CodegenContext {
       },
       options,
     )
+  }
+
+  /** Fatia 1 — context for leaf lowering (attrs / text). */
+  leafContext(): LowerLeafContext {
+    return {
+      signals: this.signals,
+      importedNames: this.importedNames,
+      componentProps: this.componentProps,
+      cpw: this.cpw,
+    }
   }
 
   rewriteExprForEffect(expr: string): string {
