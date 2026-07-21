@@ -129,10 +129,6 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         padding-bottom: calc(0.35rem + 1px);
       }
 
-      .jacare-devtools__tab-spacer {
-        flex: 1;
-      }
-
       .jacare-devtools__tabs[hidden] {
         display: none !important;
       }
@@ -537,9 +533,6 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       <button type="button" class="jacare-devtools__tab" data-tab="graph">Graph</button>
       ${meshEnabled ? `<button type="button" class="jacare-devtools__tab" data-tab="mesh">Mesh</button>` : ''}
       ${scopeEnabled ? `<button type="button" class="jacare-devtools__tab" data-tab="scope">Scope</button>` : ''}
-      <span class="jacare-devtools__tab-spacer"></span>
-      ${meshEnabled ? `<button type="button" class="jacare-devtools__toggle" data-pop-mesh title="Open Mesh in a separate window" aria-label="Pop out Mesh" hidden>↗</button>` : ''}
-      ${scopeEnabled ? `<button type="button" class="jacare-devtools__toggle" data-pop-scope title="Open Scope in a separate window" aria-label="Pop out Scope" hidden>↗</button>` : ''}
     </nav>`
         : ''
     }
@@ -636,12 +629,8 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   const meshTabBtn = root.querySelector<HTMLButtonElement>('[data-tab="mesh"]')
   const scopeTabBtn = root.querySelector<HTMLButtonElement>('[data-tab="scope"]')
   const tabButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')]
-  const popMeshBtns = [
-    ...root.querySelectorAll<HTMLButtonElement>('[data-pop-mesh], [data-pop-mesh-inline]'),
-  ]
-  const popScopeBtns = [
-    ...root.querySelectorAll<HTMLButtonElement>('[data-pop-scope], [data-pop-scope-inline]'),
-  ]
+  const popMeshBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-pop-mesh-inline]')]
+  const popScopeBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-pop-scope-inline]')]
   const meshViewState = createMeshViewState()
 
   let ui = readUiConfig()
