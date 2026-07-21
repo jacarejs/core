@@ -73,6 +73,21 @@ function writeInspectOutput(root: string, id: string, code: string): void {
   writeFileSync(join(outDir, safeName), code, 'utf-8')
 }
 
+function writeInspectMeshPorts(
+  root: string,
+  id: string,
+  ports: Array<{ ref: string; source: string; bag: string; key: string }>,
+): void {
+  const outDir = join(root, '.jacare', 'mesh-ports')
+  mkdirSync(outDir, { recursive: true })
+  const safeName = basename(id).replace(/\.jcr$/, '.json')
+  writeFileSync(
+    join(outDir, safeName),
+    JSON.stringify({ file: id, ports }, null, 2),
+    'utf-8',
+  )
+}
+
 export function jacare(options: JacarePluginOptions = {}): Plugin {
   let jacareConfig: JacareConfig = {}
   let projectRoot = process.cwd()
@@ -134,6 +149,9 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
 
         if (options.inspect) {
           writeInspectOutput(projectRoot, id, result.code)
+          if (result.meshPorts && result.meshPorts.length > 0) {
+            writeInspectMeshPorts(projectRoot, id, result.meshPorts)
+          }
         }
 
         return {

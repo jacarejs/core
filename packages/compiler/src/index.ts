@@ -12,7 +12,7 @@ export type {
   StyleCaseNode,
   StyleForNode,
 } from './parse-style.js'
-export { generate, detectProps, resolveMountProps } from './codegen.js'
+export { generate, detectProps, resolveMountProps, detectSignals, detectImportedNames } from './codegen.js'
 export {
   parseContractBody,
   emptyContract,
@@ -37,6 +37,8 @@ export { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
 export { markCpwOps, markCpwText, optimizeIfPlan, mergeStaticTextParts } from './ir/optimize.js'
 export { lowerIf, lowerCase, lowerEach } from './ir/lower-flow.js'
 export { lowerComponent, emitComponentPropEntry } from './ir/lower-component.js'
+export { collectMeshPorts } from './ir/mesh-ports.js'
+export type { MeshPortUsage } from './ir/mesh-ports.js'
 export { inspectTemplateBindings } from './ir/inspect.js'
 export { lowerMountAst, lowerMountForest } from './ir/mount-plan.js'
 export {

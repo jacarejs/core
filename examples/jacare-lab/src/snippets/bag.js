@@ -78,3 +78,20 @@ export <view>
 // No import of the bag — getBag('lab-cart') at mount.
 // jacare check fails if @lab-cart/count is not published.`
 
+export const lazyPublishCode = `import { createBag, pulse } from '@jacare/core'
+
+export const lazyFactoryRuns = pulse(0)
+
+export const lazyBag = createBag('lab-lazy', () => {
+  lazyFactoryRuns.update((n) => n + 1)
+  const label = pulse('published')
+  return { label }
+})
+
+// Import registers the id only — factory still idle.
+// First lazyBag.label (or getBag('lab-lazy').label) publishes @lab-lazy/*.
+
+// Compiled views that use Mesh Ports emit:
+// /* jacare-mesh-ports: cart.count,cart.add */
+// so unused bag modules stay out of the chunk when never imported.`
+

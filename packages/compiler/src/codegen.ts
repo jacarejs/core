@@ -101,6 +101,7 @@ export function generate(
     debug?: boolean
     filename?: string
     lineMap?: number[]
+    meshPorts?: import('./ir/mesh-ports.js').MeshPortUsage[]
   } = {},
 ): { code: string; mappings: CodegenMapping[] } {
   const mode = options.mode ?? 'full'
@@ -178,6 +179,11 @@ export function generate(
   const orderedImports = orderRuntimeImports(runtimeImports)
   const importLine = buildRuntimeImport(runtime, userRuntimeSymbols, orderedImports)
   lines.unshift(importLine, '')
+
+  if (options.meshPorts && options.meshPorts.length > 0) {
+    const refs = options.meshPorts.map((p) => p.ref).join(',')
+    lines.unshift(`/* jacare-mesh-ports: ${refs} */`)
+  }
 
   if (mode === 'server') {
     lines.push('export default render')

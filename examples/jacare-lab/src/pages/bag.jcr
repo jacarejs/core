@@ -3,12 +3,14 @@ import Demo from '../components/Demo.jcr'
 import BagTreeParent from '../components/BagTreeParent.jcr'
 import CartLinkBadge from '../components/CartLinkBadge.jcr'
 import { demoCart } from '../bags/cart.js'
+import { lazyBag, lazyFactoryRuns } from '../bags/lazy.js'
 import {
   defineBagCode,
   useBagCode,
   snapHydrateCode,
   deepTreeCode,
   contractLinksCode,
+  lazyPublishCode,
 } from '../snippets/bag.js'
 
 const PRODUCTS = [
@@ -28,7 +30,7 @@ export <view>
       </p>
     </header>
 
-    <Tip :text=${'Prefer bare cart.count() in templates when there is no loop local. Use ripple() so several writes flush as one wave. snap() / hydrate() round-trip writable pulses.'} />
+      <Tip :text=${'Prefer bare cart.count() in templates when there is no loop local. Factory stays lazy until first property read — unused bag modules tree-shake out of the chunk. Compiled .jcr files emit /* jacare-mesh-ports: … */ for the ports this view actually uses.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'createBag + live cart'} :lead=${'Add from the catalog — count and total update through the same bag instance.'} :code=${defineBagCode}>
@@ -72,6 +74,32 @@ export <view>
         :code=${contractLinksCode}
       >
         <CartLinkBadge />
+      </Demo>
+
+      <Demo
+        :title=${'Lazy publish'}
+        :lead=${'Importing the bag module only registers the id. The factory runs on the first property read — factory runs stay at 0 until you touch the bag.'}
+        :code=${lazyPublishCode}
+      >
+        <div class="stack">
+          <p class="metric">factory runs · ${lazyFactoryRuns}</p>
+          <div class="row">
+            <button
+              type="button"
+              class="btn"
+              on-click=${() => {
+                void lazyBag.label
+                void lazyBag.ticks
+              }}
+            >
+              Touch bag
+            </button>
+            <button type="button" class="btn btn-outline" on-click=${() => lazyBag.bump()}>
+              Bump (also publishes)
+            </button>
+          </div>
+          <p class="muted">Mesh stays unpublished until the first property read. Open DevTools → Mesh for @lab-lazy/*.</p>
+        </div>
       </Demo>
 
       <Demo

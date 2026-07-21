@@ -290,9 +290,9 @@ A **pulse bag** publishes a named group of pulses on a shared mesh. Any `.jcr` t
 
 | API | Role |
 |-----|------|
-| `createBag(id, factory)` | Register a bag; factory runs on first access |
+| `createBag(id, factory)` | Register a bag; factory runs on first **property** access |
 | `ripple(fn)` | Coalesce writes into one notification wave (same engine as `batch`) |
-| `getBag(id)` | Look up a registered bag |
+| `getBag(id)` | Look up a registered bag (does **not** run the factory by itself) |
 | `bag.snap()` / `bag.hydrate(data)` | Persist / restore writable pulses |
 | `bag.reset()` | Restore writable pulses to factory defaults (same cell identity) |
 | `getMeshSnapshot()` / `subscribeMesh` | DevTools Mesh view (`@id/key`, last ripple) |
@@ -379,7 +379,19 @@ export <view>
 
 Compile injects `const count = getBag('cart')?.count`. The app must still register the bag somewhere (`import '../bags/cart.js'` or use it on a page). `jacare check` fails if `@cart/count` is not published by any `createBag`.
 
-Live demos: **Lab → Pulse bags** (including a four-level component tree and contract links) and **Todo → Shop**.
+### Lazy publish + mesh port slice hints
+
+`createBag` only puts the bag id in the registry. The factory runs on the first property read (`cart.count`, `getBag('cart')?.count`, …). Routes that never import a bag module never load it — standard ESM tree-shaking.
+
+Compiled `.jcr` modules that touch Mesh Ports emit a slice hint:
+
+```js
+/* jacare-mesh-ports: cart.add,cart.count */
+```
+
+Contract `links` appear as real mesh addresses (`@lab-cart/count`). With `inspect: true` on the Vite plugin, the same list is written under `.jacare/mesh-ports/`.
+
+Live demos: **Lab → Pulse bags** (including a four-level component tree, contract links, and lazy publish) and **Todo → Shop**.
 
 ---
 

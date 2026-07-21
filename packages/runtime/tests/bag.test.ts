@@ -52,6 +52,21 @@ describe('createBag', () => {
     expect(factory).toHaveBeenCalledTimes(1)
   })
 
+  it('getBag does not publish until a property is read', () => {
+    const factory = vi.fn(() => {
+      const n = pulse(1)
+      return { n }
+    })
+    createBag('defer', factory)
+    const handle = getBag<{ n: () => number }>('defer')
+    expect(handle).toBeTruthy()
+    expect(factory).not.toHaveBeenCalled()
+    expect(getMeshSnapshot().bags[0]?.published).toBe(false)
+    expect(handle!.n()).toBe(1)
+    expect(factory).toHaveBeenCalledTimes(1)
+    expect(getMeshSnapshot().bags[0]?.published).toBe(true)
+  })
+
   it('rejects duplicate bag ids', () => {
     createBag('dup', () => ({ x: pulse(0) }))
     expect(() => createBag('dup', () => ({ x: pulse(1) }))).toThrow(/already registered/)

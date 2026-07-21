@@ -14,6 +14,8 @@ export interface CompileResult {
   template: string
   props: string[]
   contract?: import('./parse-contract.js').TemplateContract
+  /** Mesh ports referenced by this module (slice hint for bundlers). */
+  meshPorts?: import('./ir/mesh-ports.js').MeshPortUsage[]
   scopeId?: string
   scopedStyle?: string
   styleLang?: string | null

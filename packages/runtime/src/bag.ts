@@ -86,11 +86,10 @@ export function ripple<T>(fn: () => T): T {
   return result
 }
 
-/** Look up a published bag by id (runs the factory on first use). */
+/** Look up a registered bag by id (factory stays lazy until a property is read). */
 export function getBag<T extends object = object>(id: string): BagApi<T> | undefined {
   const record = bags.get(id)
   if (!record) return undefined
-  record.ensure()
   return record.handle as BagApi<T>
 }
 

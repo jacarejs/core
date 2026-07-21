@@ -1,13 +1,14 @@
 import type { RawSourceMap } from 'source-map-js'
 import { SourceMapGenerator } from 'source-map-js'
 import { basename } from 'node:path'
-import { generate, resolveMountProps } from './codegen.js'
+import { generate, resolveMountProps, detectSignals, detectImportedNames } from './codegen.js'
 import type { CodegenMapping } from './codegen-shared.js'
 import { parseModule } from './parse-module.js'
 import { parseTemplate } from './parse-template.js'
 import { hasContractSurface } from './parse-contract.js'
 import { isReactiveStyle, parseStyle } from './parse-style.js'
 import { scopeCss, scopeIdFromFilename } from './scope-css.js'
+import { collectMeshPorts } from './ir/mesh-ports.js'
 import type { CompileOptions, CompileResult } from './types.js'
 
 export function compile(source: string, options: CompileOptions = {}): CompileResult {
@@ -27,6 +28,9 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     parsed.styleCss && scopeId && !reactiveStyle ? scopeCss(parsed.styleCss, scopeId) : undefined
   const contract =
     parsed.contract && hasContractSurface(parsed.contract) ? parsed.contract : undefined
+  const signals = detectSignals(parsed.code)
+  const importedNames = detectImportedNames(parsed.code)
+  const meshPorts = collectMeshPorts(ast, { signals, importedNames }, contract)
   const generated = generate(ast, parsed.code, {
     ...(options.runtimeImport ? { runtimeImport: options.runtimeImport } : {}),
     viewStartLine: parsed.viewStartLine,
@@ -39,6 +43,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     ...(options.debug === false ? { debug: false } : {}),
     ...(filename ? { filename } : {}),
     ...(parsed.moduleLineMap.length > 0 ? { lineMap: parsed.moduleLineMap } : {}),
+    ...(meshPorts.length > 0 ? { meshPorts } : {}),
   })
 
   const map = filename
@@ -53,6 +58,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     template: parsed.viewHtml!,
     props,
     ...(contract ? { contract } : {}),
+    ...(meshPorts.length > 0 ? { meshPorts } : {}),
     ...(scopeId ? { scopeId } : {}),
     ...(scopedStyle ? { scopedStyle } : {}),
     ...(parsed.styleLang ? { styleLang: parsed.styleLang } : {}),
