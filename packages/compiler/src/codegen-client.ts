@@ -19,6 +19,11 @@ import {
   type IfFlowPlan,
   type ListFlowPlan,
 } from './ir/lower-flow.js'
+import {
+  emitComponentPropEntry,
+  lowerComponent,
+  type ComponentPlan,
+} from './ir/lower-component.js'
 import { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
 
 export function emitClient(
@@ -194,27 +199,28 @@ function emitComponent(
   node: Extract<TemplateNode, { type: 'component' }>,
   target: EmitTarget,
 ): void {
+  emitComponentPlan(ctx, lowerComponent(node, ctx.leafContext()), target)
+}
+
+function emitComponentPlan(
+  ctx: CodegenContext,
+  plan: ComponentPlan,
+  target: EmitTarget,
+): void {
   const host = ctx.nextId('cmp')
   ctx.line(`const ${host} = document.createElement('div')`)
   append(ctx, target, host)
 
-  const propsList: string[] = []
-  for (const attr of node.attrs) {
-    if (attr.kind === 'prop' || attr.kind === 'event' || attr.kind === 'bind') {
-      propsList.push(`${attr.name}: ${attr.value}`)
-    } else if (attr.kind === 'static') {
-      propsList.push(`${attr.name}: ${JSON.stringify(attr.value)}`)
-    }
-  }
+  const propsList: string[] = plan.props.map(emitComponentPropEntry)
 
-  if (node.children.length > 0) {
+  if (plan.hasSlots) {
     const slotFn = ctx.nextId('slotFn')
     const slotScope = ctx.nextId('slotCleanups')
     ctx.line(`const ${slotFn} = (slotTarget) => {`)
     ctx.indent()
     ctx.line(`const ${slotScope} = []`)
     ctx.pushCleanupScope(slotScope)
-    for (const child of node.children) {
+    for (const child of plan.children) {
       emitNode(ctx, child, { kind: 'parent', name: 'slotTarget' })
     }
     ctx.popCleanupScope()
@@ -228,7 +234,7 @@ function emitComponent(
   const dispose = ctx.nextId('cmpDispose')
   ctx.useRuntime('runUntracked')
   ctx.line(`let ${dispose}`)
-  ctx.line(`runUntracked(() => { ${dispose} = ${node.name}(${host}, ${propsArg}) })`)
+  ctx.line(`runUntracked(() => { ${dispose} = ${plan.name}(${host}, ${propsArg}) })`)
   ctx.pushCleanup(dispose)
 }
 

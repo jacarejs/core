@@ -3,7 +3,7 @@ import { compile } from '../src/compile.js'
 import { lowerCase, lowerEach, lowerIf } from '../src/ir/lower-flow.js'
 import { parseTemplate } from '../src/parse-template.js'
 
-describe('lower flow (Fatia 3)', () => {
+describe('lower flow', () => {
   it('lowers #if tests once for client and SSR', () => {
     const ast = parseTemplate(`#if loading()\n  <p>…</p>\n#elif error\n  <p>err</p>\n#else\n  <ok/>\n#end`)
     const ifNode = ast.children[0]!

@@ -1,4 +1,4 @@
-/** Binding IR — source + leaf ops (Fatia 0–1). */
+/** Binding IR — source + leaf ops. */
 
 /** Where a reactive value comes from — classified once in lower. */
 export type BindingSource =
@@ -40,7 +40,7 @@ export type MixedTextPart =
   | { type: 'static'; value: string }
   | { type: 'expr'; source: BindingSource; raw: string }
 
-/** Leaf binding ops (Fatia 1) — no control flow / components yet. */
+/** Leaf binding ops — no control flow / components yet. */
 export type LeafBindingOp =
   | {
       op: 'staticAttr'

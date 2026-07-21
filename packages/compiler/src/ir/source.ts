@@ -6,7 +6,7 @@ const ARROW_RE = /=>/
 
 /**
  * Classify a template expression into a BindingSource.
- * Fatia 0 — single place for “signal / prop / expr?” (no MountPlan yet).
+ * single place for “signal / prop / expr?” (no MountPlan yet).
  */
 export function lowerBindingSource(
   expr: string,

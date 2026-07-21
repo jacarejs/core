@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { lowerElementBindings, lowerTextParts } from '../src/ir/lower-leaf.js'
 import { compile } from '../src/compile.js'
 
-describe('lower leaf ops (Fatia 1)', () => {
+describe('lower leaf ops', () => {
   const signals = new Set(['count', 'open', 'hue'])
   const ctx = { signals, cpw: false }
 

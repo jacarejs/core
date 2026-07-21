@@ -131,7 +131,7 @@ export class CodegenContext {
     return resolveSignalBinding(expr, this.signals, this.importedNames)
   }
 
-  /** Fatia 0 — classify expr once (signal / prop / expr). */
+  /** classify expr once (signal / prop / expr). */
   lowerSource(expr: string, options?: LowerSourceOptions): BindingSource {
     return lowerBindingSource(
       expr,
@@ -144,7 +144,7 @@ export class CodegenContext {
     )
   }
 
-  /** Fatia 1 — context for leaf lowering (attrs / text). */
+  /** context for leaf lowering (attrs / text). */
   leafContext(): LowerLeafContext {
     return {
       signals: this.signals,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { lowerBindingSource, bindingSignalName, isLocalSignalSource } from '../src/ir/source.js'
 
-describe('lowerBindingSource (Fatia 0)', () => {
+describe('lowerBindingSource', () => {
   const signals = new Set(['count', 'open'])
   const importedNames = new Set(['locale', 't'])
   const componentProps = new Set(['title', 'label'])

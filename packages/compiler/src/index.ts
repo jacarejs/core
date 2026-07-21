@@ -30,6 +30,7 @@ export { scopeCss, scopeIdFromFilename } from './scope-css.js'
 export { lowerBindingSource, bindingSignalName, isLocalSignalSource } from './ir/source.js'
 export { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
 export { lowerIf, lowerCase, lowerEach } from './ir/lower-flow.js'
+export { lowerComponent, emitComponentPropEntry } from './ir/lower-component.js'
 export type {
   BindingSource,
   LowerSourceContext,
@@ -45,6 +46,11 @@ export type {
   CaseFlowPlan,
   ListFlowPlan,
 } from './ir/lower-flow.js'
+export type {
+  ComponentPlan,
+  ComponentPropBinding,
+  ComponentPropMode,
+} from './ir/lower-component.js'
 export type {
   CompileOptions,
   CompileResult,

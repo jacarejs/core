@@ -17,6 +17,10 @@ import {
   type IfFlowPlan,
   type ListFlowPlan,
 } from './ir/lower-flow.js'
+import {
+  emitComponentPropEntrySSR,
+  lowerComponent,
+} from './ir/lower-component.js'
 
 export function emitSSR(
   ast: TemplateAST,
@@ -109,9 +113,17 @@ function emitSSRNode(ctx: CodegenContext, node: TemplateNode): void {
     case 'element':
       emitSSRElement(ctx, node)
       break
-    case 'component':
-      ctx.line(`_html += ${node.name}.render ? ${node.name}.render().html : ""`)
+    case 'component': {
+      const plan = lowerComponent(node, ctx.leafContext())
+      const propsArg =
+        plan.props.length > 0
+          ? `{ ${plan.props.map(emitComponentPropEntrySSR).join(', ')} }`
+          : '{}'
+      ctx.line(
+        `_html += ${plan.name}.render ? ${plan.name}.render(${propsArg}).html : ""`,
+      )
       break
+    }
     case 'slot':
       ctx.line(`_html += '<span data-jacare-slot="default"></span>'`)
       break
