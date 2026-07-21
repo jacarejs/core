@@ -89,21 +89,18 @@ if (import.meta.env.DEV) {
   connectJacareDevtools({
     position: 'bottom-right',
     scopePosition: 'bottom-left',
-    meshPosition: 'top-left',
   })
 }
 
-// Pulse Graph ⚙ Config:
-//   - move Pulse / Scope / Mesh panels to any corner
-//   - Clear highlight / selection / Scope
-//   - Reset layout
-// Drag panel headers to move freely.
+// Pulse Graph tabs: Graph | Mesh
+// Mesh ↗ Pop out → separate window (↙ docks back)
+// ⚙ Config: corners, clear highlight / selection / Scope, reset layout
 
 // Scope (manual watch list):
 import { registerScope, clearScope } from '@jacare/core'
 registerScope('cart.total', 'Cart total', () => total())
 
-// Mesh (createBag) appears automatically — open /bag and watch @lab-cart/*`
+// Mesh tab shows createBag as @lab-cart/* — open /bag`
 
 export const namedPulsesCode = `import { pulse, derive } from '@jacare/core'
 

@@ -1,4 +1,5 @@
 export type PanelCorner = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
+export type DevtoolsTab = 'graph' | 'mesh'
 
 export interface DevtoolsUiConfig {
   pulsePosition: PanelCorner
@@ -7,6 +8,9 @@ export interface DevtoolsUiConfig {
   pulseMode: 'open' | 'minimized' | 'hidden'
   scopeMode: 'open' | 'minimized'
   meshMode: 'open' | 'minimized'
+  /** When true, Mesh is a separate floating window; otherwise a tab inside Pulse Graph. */
+  meshDetached: boolean
+  activeTab: DevtoolsTab
 }
 
 const CONFIG_KEY = 'jacare:devtools:config'
@@ -18,6 +22,8 @@ const DEFAULT_CONFIG: DevtoolsUiConfig = {
   pulseMode: 'open',
   scopeMode: 'open',
   meshMode: 'open',
+  meshDetached: false,
+  activeTab: 'graph',
 }
 
 export function readUiConfig(): DevtoolsUiConfig {
@@ -43,6 +49,8 @@ export function readUiConfig(): DevtoolsUiConfig {
         parsed.meshMode === 'open' || parsed.meshMode === 'minimized'
           ? parsed.meshMode
           : DEFAULT_CONFIG.meshMode,
+      meshDetached: parsed.meshDetached === true,
+      activeTab: parsed.activeTab === 'mesh' ? 'mesh' : 'graph',
     }
   } catch {
     return { ...DEFAULT_CONFIG }
