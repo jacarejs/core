@@ -22,7 +22,7 @@ export const LESSONS = [
   {
     path: '/bag',
     title: 'Pulse bags',
-    blurb: 'createBag, ripple, deep nesting without props',
+    blurb: 'Shared mesh, Mesh Ports, lazy publish — native & light',
   },
   {
     path: '/templates',

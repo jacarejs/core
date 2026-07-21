@@ -104,3 +104,18 @@ export const addressSugarCode = `export <view>
 // bindText(node, getBag("lab-cart")?.count)
 // The bag must still be registered somewhere (this page imports demoCart).`
 
+export const meshArchDiagram = `┌─────────────────────────────────────────────────────────┐
+│                     PULSE MESH                          │
+│  @cart/items  @cart/total  @session/user  @prefs/locale │
+│              DependencyCell graph (Jacaré core)         │
+└─────────────────────────────────────────────────────────┘
+        ▲                ▲                 ▲
+   Catalog.jcr      MiniCart.jcr      Checkout.jcr
+   import | links | @bag/key  —  same cell, no Provider
+
+┌─ DX ────────────────────────────────────────────────────┐
+│  createBag('cart', factory)  →  publish ports          │
+│  ripple(fn)  →  one flush wave                          │
+│  Mesh Port compile  →  bindText / CPW on the cell       │
+└─────────────────────────────────────────────────────────┘`
+

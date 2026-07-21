@@ -12,6 +12,7 @@ import {
   contractLinksCode,
   lazyPublishCode,
   addressSugarCode,
+  meshArchDiagram,
 } from '../snippets/bag.js'
 
 const PRODUCTS = [
@@ -26,12 +27,84 @@ export <view>
       <p class="page-kicker">API · Pulse bags</p>
       <h1 class="page-title">Pulse bags</h1>
       <p class="page-lead">
-        Shared pulses with a stable address. Define once with <code>createBag</code>,
-        import anywhere — catalog, badge, checkout, or a leaf four levels deep.
+        Jacaré’s own shared-state model: named pulses on an addressable mesh, wired at compile time —
+        light, native, and built on the same cells as local reactivity.
       </p>
     </header>
 
-      <Tip :text=${'Prefer bare cart.count() or ${@cart/count} when there is no loop local. Factory stays lazy until first property read — unused bag modules tree-shake out. Compiled views emit /* jacare-mesh-ports: … */ for ports they touch.'} />
+    <Tip :text=${'Prefer bare cart.count() or ${@cart/count} when there is no loop local. Factory stays lazy until first property read — unused bag modules tree-shake out. Compiled views emit /* jacare-mesh-ports: … */ for ports they touch.'} />
+
+    <div class="arch-panel">
+      <div class="arch-panel__intro">
+        <h2 class="arch-panel__title">Architecture · Pulse Mesh + Pulse Bag</h2>
+        <p class="arch-panel__lead">
+          This is a <strong>Jacaré-native</strong> design — not a port of another store library.
+          The pulse / <code>DependencyCell</code> graph already existed; <strong>Pulse Mesh</strong> makes those cells
+          addressable (<code>@cart/total</code>), and <strong>Pulse Bag</strong> is the DX that publishes a named group
+          with <code>createBag</code>. Any <code>.jcr</code> plugs in via import, contract <code>links</code>, or address sugar — same cell, O(1) update.
+        </p>
+      </div>
+
+      <pre class="arch-diagram" aria-label="Pulse Mesh layers">${meshArchDiagram}</pre>
+
+      <div class="arch-grid">
+        <article class="ref-card">
+          <h3>The idea</h3>
+          <p class="muted">
+            Share state across any component without props drilling and without a second reactivity system.
+            A write goes into a pulse; only DOM (and derives) that actually read that cell update —
+            the mesh is the existing graph, with stable addresses for tooling and compile wiring.
+          </p>
+          <ul class="arch-list">
+            <li>No provider / context wrapper around the tree</li>
+            <li>No store proxy or parallel <code>state</code> object</li>
+            <li>Mutations use <code>ripple()</code> (one flush wave), not a dispatcher</li>
+          </ul>
+        </article>
+
+        <article class="ref-card">
+          <h3>How it works</h3>
+          <p class="muted">
+            <code>createBag</code> registers an id. The factory runs on the first property read (lazy publish).
+            Cells get stable addresses for DevTools and SSR snap. Templates that read
+            <code>cart.count</code> or <code>@cart/count</code> lower to <strong>Mesh Ports</strong> —
+            <code>bindText(node, cell)</code> / CPW peek+subscribe — the cell pointer is fixed at mount.
+          </p>
+          <ul class="arch-list">
+            <li><code>ripple</code> = batch + mesh meta (one flush wave)</li>
+            <li><code>snap</code> / <code>hydrate</code> / soft <code>reset</code> keep cell identity</li>
+            <li>Mesh tab in DevTools lists <code>@id/key</code> and last ripple</li>
+          </ul>
+        </article>
+
+        <article class="ref-card">
+          <h3>Why it’s light &amp; native</h3>
+          <p class="muted">
+            Bags are not a second reactivity system. They name and group the pulses you already know.
+            Runtime is a thin registry + lazy ensure. Hot path matches a local pulse once the Mesh Port is wired.
+          </p>
+          <ul class="arch-list">
+            <li>Ships in <code>@jacare/core</code> — no extra store package</li>
+            <li>Unused bag modules tree-shake (never imported → not in the chunk)</li>
+            <li>Compiler emits <code>/* jacare-mesh-ports: … */</code> slice hints</li>
+            <li>Caps via contract <code>links</code> (read / write / mirror) without Inject</li>
+          </ul>
+        </article>
+
+        <article class="ref-card">
+          <h3>What shipped</h3>
+          <p class="muted">Capabilities you can exercise in the demos below.</p>
+          <ul class="arch-list">
+            <li><code>createBag</code>, <code>ripple</code>, snap / hydrate / soft reset</li>
+            <li>DevTools Mesh (<code>@lab-cart/*</code>, pop-out)</li>
+            <li>Mesh Port IR — <code>cart.count</code> binds the cell directly</li>
+            <li>Contract <code>links</code> + <code>jacare check</code> for published ports</li>
+            <li>Lazy factory + <code>/* jacare-mesh-ports */</code> slice hints</li>
+            <li>Address sugar <code>@bag/key</code> via <code>getBag</code></li>
+          </ul>
+        </article>
+      </div>
+    </div>
 
     <div class="lesson-grid">
       <Demo :title=${'createBag + live cart'} :lead=${'Add from the catalog — count and total update through the same bag instance.'} :code=${defineBagCode}>
