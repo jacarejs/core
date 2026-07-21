@@ -220,16 +220,16 @@ function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
   if (parts.length === 1 && parts[0]!.type === 'expr') {
     const expr = parts[0]!.value
     const id = ctx.nextBinding()
-    const local = ctx.resolveSignal(expr)
-    const src = local ?? ctx.resolveBindingSignal(expr)
+    // No preferProp: bare props fall through to expr read (parity with pre-IR SSR).
+    const source = ctx.lowerSource(expr)
     ctx.useRuntime('escapeHtml')
-    if (local) {
+    if (source.kind === 'signal' && source.local) {
       ctx.line(
-        `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${local}())) + '</span>'`,
+        `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${source.name}())) + '</span>'`,
       )
-      ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${local} })`)
-    } else if (src) {
-      const readExpr = `typeof ${src} === 'function' ? ${src}() : ${src}`
+      ctx.line(`_bindings.push({ id: '${id}', kind: 'signal', read: ${source.name} })`)
+    } else if (source.kind === 'signal') {
+      const readExpr = `typeof ${source.name} === 'function' ? ${source.name}() : ${source.name}`
       ctx.line(
         `_html += '<span data-jacare-bind="${id}">' + escapeHtml(String(${readExpr})) + '</span>'`,
       )
@@ -256,8 +256,8 @@ function emitSSRText(ctx: CodegenContext, parts: TextPart[]): void {
   const template = parts
     .map((p) => {
       if (p.type === 'static') return escapeHtml(p.value)
-      const src = ctx.resolveBindingSignal(p.value)
-      if (src) return `' + escapeHtml(String(${src}())) + '`
+      const source = ctx.lowerSource(p.value)
+      if (source.kind === 'signal') return `' + escapeHtml(String(${source.name}())) + '`
       return `' + escapeHtml(String(${ctx.rewriteExprForEffect(p.value)})) + '`
     })
     .join('')

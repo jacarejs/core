@@ -1,24 +1,19 @@
-const SIGNAL_CALL_RE = /^([A-Za-z_$][\w$]*)\(\)$/
-const SIGNAL_REF_RE = /^([A-Za-z_$][\w$]*)$/
+import {
+  bindingSignalName,
+  lowerBindingSource,
+  matchLocalSignal,
+} from './ir/source.js'
+import type { BindingSource, LowerSourceOptions } from './ir/types.js'
+
+export type { BindingSource, LowerSourceOptions }
+export { lowerBindingSource, bindingSignalName, isLocalSignalSource } from './ir/source.js'
+export type { LowerSourceContext } from './ir/types.js'
 
 export function resolveSignalExpr(
   expr: string,
   signals?: ReadonlySet<string>,
 ): string | null {
-  const trimmed = expr.trim()
-  const call = SIGNAL_CALL_RE.exec(trimmed)
-  if (call) {
-    const name = call[1]!
-    if (!signals || signals.has(name)) return name
-    return null
-  }
-  const ref = SIGNAL_REF_RE.exec(trimmed)
-  if (ref) {
-    const name = ref[1]!
-    if (signals?.has(name)) return name
-    return null
-  }
-  return null
+  return matchLocalSignal(expr, signals)
 }
 
 /** Like resolveSignalExpr, but also accepts imported pulse/derive names. */
@@ -27,16 +22,7 @@ export function resolveSignalBinding(
   signals?: ReadonlySet<string>,
   importedNames?: ReadonlySet<string>,
 ): string | null {
-  const known = resolveSignalExpr(expr, signals)
-  if (known) return known
-  const trimmed = expr.trim()
-  const call = SIGNAL_CALL_RE.exec(trimmed)
-  if (call && importedNames?.has(call[1]!)) return call[1]!
-  const ref = SIGNAL_REF_RE.exec(trimmed)
-  if (ref && importedNames?.has(ref[1]!) && !signals?.has(ref[1]!)) {
-    return ref[1]!
-  }
-  return null
+  return bindingSignalName(lowerBindingSource(expr, { signals, importedNames }))
 }
 
 export function rewriteSignalsInExpr(
@@ -143,6 +129,19 @@ export class CodegenContext {
 
   resolveBindingSignal(expr: string): string | null {
     return resolveSignalBinding(expr, this.signals, this.importedNames)
+  }
+
+  /** Fatia 0 — classify expr once (signal / prop / expr). */
+  lowerSource(expr: string, options?: LowerSourceOptions): BindingSource {
+    return lowerBindingSource(
+      expr,
+      {
+        signals: this.signals,
+        importedNames: this.importedNames,
+        componentProps: this.componentProps,
+      },
+      options,
+    )
   }
 
   rewriteExprForEffect(expr: string): string {

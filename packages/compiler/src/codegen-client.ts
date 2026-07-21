@@ -13,12 +13,10 @@ import {
   emitCpwStyleVar,
   emitCpwText,
 } from './codegen-cpw.js'
-import { append, CodegenContext, resolveSignalExpr, type EmitTarget } from './codegen-shared.js'
+import { append, CodegenContext, type EmitTarget } from './codegen-shared.js'
 import type { TemplateContract } from './parse-contract.js'
 import type { StyleAST } from './parse-style.js'
 import { emitStyleBuild } from './codegen-style.js'
-
-const SIGNAL_REF_RE = /^([A-Za-z_$][\w$]*)$/
 
 export function emitClient(
   ast: TemplateAST,
@@ -391,11 +389,11 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
     if (attr.name === 'class') {
       ctx.line(`${el}.className = String(${attr.value})`)
     } else {
-      const src = ctx.resolveBindingSignal(attr.value)
-      if (src) {
-        ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${src})`)
-        ctx.pushDevtoolsBind(src, el, 'attr')
-      } else if (/=>/.test(attr.value)) {
+      const source = ctx.lowerSource(attr.value)
+      if (source.kind === 'signal') {
+        ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${source.name})`)
+        ctx.pushDevtoolsBind(source.name, el, 'attr')
+      } else if (source.kind === 'expr' && source.arrow) {
         ctx.useRuntime('effect')
         ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
         ctx.indent()
@@ -405,8 +403,8 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
         ctx.line(`else ${el}.setAttribute(${JSON.stringify(attr.name)}, String(_v))`)
         ctx.dedent()
         ctx.line('}).dispose)')
-      } else if (ctx.isComponentProp(attr.value.trim())) {
-        ctx.line(`${el}.setAttribute(${JSON.stringify(attr.name)}, String(${attr.value}))`)
+      } else if (source.kind === 'prop') {
+        ctx.line(`${el}.setAttribute(${JSON.stringify(attr.name)}, String(${source.name}))`)
       } else {
         ctx.useRuntime('effect')
         const rewritten = ctx.rewriteExprForEffect(attr.value)
@@ -436,15 +434,15 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
   }
 
   if (attr.kind === 'class') {
-    const src = ctx.resolveBindingSignal(attr.value)
-    if (src) {
+    const source = ctx.lowerSource(attr.value)
+    if (source.kind === 'signal') {
       if (ctx.cpw) {
-        emitCpwClass(ctx, el, attr.name, src)
+        emitCpwClass(ctx, el, attr.name, source.name)
       } else {
-        ctx.pushCleanup(`bindClass(${el}, ${JSON.stringify(attr.name)}, ${src})`)
-        ctx.pushDevtoolsBind(src, el, 'class')
+        ctx.pushCleanup(`bindClass(${el}, ${JSON.stringify(attr.name)}, ${source.name})`)
+        ctx.pushDevtoolsBind(source.name, el, 'class')
       }
-    } else if (/=>/.test(attr.value)) {
+    } else if (source.kind === 'expr' && source.arrow) {
       ctx.pushCleanup(
         `effect(() => { ${el}.classList.toggle(${JSON.stringify(attr.name)}, !!(${attr.value})()) }).dispose`,
       )
@@ -456,15 +454,15 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
 
   if (attr.kind === 'style') {
     const cssVar = `--${attr.name}`
-    const src = ctx.resolveBindingSignal(attr.value)
-    if (src) {
+    const source = ctx.lowerSource(attr.value)
+    if (source.kind === 'signal') {
       if (ctx.cpw) {
-        emitCpwStyleVar(ctx, el, cssVar, src)
+        emitCpwStyleVar(ctx, el, cssVar, source.name)
       } else {
-        ctx.pushCleanup(`bindStyleVar(${el}, ${JSON.stringify(cssVar)}, ${src})`)
-        ctx.pushDevtoolsBind(src, el, 'style')
+        ctx.pushCleanup(`bindStyleVar(${el}, ${JSON.stringify(cssVar)}, ${source.name})`)
+        ctx.pushDevtoolsBind(source.name, el, 'style')
       }
-    } else if (/=>/.test(attr.value)) {
+    } else if (source.kind === 'expr' && source.arrow) {
       ctx.pushCleanup(
         `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String((${attr.value})())) }).dispose`,
       )
@@ -478,20 +476,17 @@ function emitAttr(ctx: CodegenContext, el: string, attr: TemplateAttr): void {
 
   if (attr.kind === 'bind') {
     const useProperty = PROPERTY_BINDINGS.has(attr.name)
-    const trimmed = attr.value.trim()
-    const src = ctx.resolveBindingSignal(attr.value)
-    const propSource =
-      SIGNAL_REF_RE.test(trimmed) && ctx.isComponentProp(trimmed) ? trimmed : null
-    const source = src ?? propSource
-    if (source) {
+    const source = ctx.lowerSource(attr.value)
+    if (source.kind === 'signal' || source.kind === 'prop') {
+      const name = source.name
       if (useProperty) {
-        ctx.pushCleanup(`bindModel(${el}, ${JSON.stringify(attr.name)}, ${source})`)
-        ctx.pushDevtoolsBind(source, el, 'model')
+        ctx.pushCleanup(`bindModel(${el}, ${JSON.stringify(attr.name)}, ${name})`)
+        ctx.pushDevtoolsBind(name, el, 'model')
       } else if (ctx.cpw) {
-        emitCpwAttribute(ctx, el, attr.name, source)
+        emitCpwAttribute(ctx, el, attr.name, name)
       } else {
-        ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${source})`)
-        ctx.pushDevtoolsBind(source, el, 'attr')
+        ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(attr.name)}, ${name})`)
+        ctx.pushDevtoolsBind(name, el, 'attr')
       }
     } else if (useProperty) {
       ctx.pushCleanup(
@@ -536,12 +531,12 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
 
   if (parts.length === 1 && parts[0]!.type === 'expr') {
     const expr = parts[0]!.value
-    const trimmed = expr.trim()
-    if (ctx.isComponentProp(trimmed)) {
+    const source = ctx.lowerSource(expr, { preferProp: true })
+    if (source.kind === 'prop') {
       const text = ctx.nextId('text')
       ctx.line(`const ${text} = document.createTextNode('')`)
       append(ctx, target, text)
-      ctx.pushCleanup(`bindPropText(${text}, ${trimmed})`)
+      ctx.pushCleanup(`bindPropText(${text}, ${source.name})`)
       return
     }
   }
@@ -552,18 +547,17 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
 
   if (parts.length === 1 && parts[0]!.type === 'expr') {
     const expr = parts[0]!.value
-    const src = ctx.resolveBindingSignal(expr)
-    if (src) {
-      const localSignal = ctx.resolveSignal(expr)
-      if (localSignal && ctx.cpw) {
-        emitCpwText(ctx, textNode, localSignal)
-      } else if (localSignal) {
-        ctx.pushCleanup(`bindText(${textNode}, ${localSignal})`)
-        ctx.pushDevtoolsBind(localSignal, textNode, 'text')
+    const source = ctx.lowerSource(expr, { preferProp: true })
+    if (source.kind === 'signal') {
+      if (source.local && ctx.cpw) {
+        emitCpwText(ctx, textNode, source.name)
+      } else if (source.local) {
+        ctx.pushCleanup(`bindText(${textNode}, ${source.name})`)
+        ctx.pushDevtoolsBind(source.name, textNode, 'text')
       } else {
         // Imported binding — may be a pulse or a plain value (snippet strings, etc.)
-        ctx.pushCleanup(`bindPropText(${textNode}, ${src})`)
-        ctx.pushDevtoolsBind(src, textNode, 'text')
+        ctx.pushCleanup(`bindPropText(${textNode}, ${source.name})`)
+        ctx.pushDevtoolsBind(source.name, textNode, 'text')
       }
       return
     }
@@ -576,14 +570,13 @@ function emitText(ctx: CodegenContext, parts: TextPart[], target: EmitTarget): v
   const template = parts
     .map((p) => {
       if (p.type === 'static') return p.value
-      const trimmed = p.value.trim()
-      if (SIGNAL_REF_RE.test(trimmed) && ctx.isComponentProp(trimmed)) {
-        return `\${typeof ${trimmed} === 'function' ? ${trimmed}() : ${trimmed} ?? ''}`
+      const source = ctx.lowerSource(p.value, { preferProp: true })
+      if (source.kind === 'prop') {
+        return `\${typeof ${source.name} === 'function' ? ${source.name}() : ${source.name} ?? ''}`
       }
-      const src = ctx.resolveBindingSignal(p.value)
-      if (src) {
-        if (ctx.resolveSignal(p.value)) return `\${${src}()}`
-        return `\${typeof ${src} === 'function' ? ${src}() : ${src} ?? ''}`
+      if (source.kind === 'signal') {
+        if (source.local) return `\${${source.name}()}`
+        return `\${typeof ${source.name} === 'function' ? ${source.name}() : ${source.name} ?? ''}`
       }
       return `\${(() => { const _v = (${ctx.rewriteExprForEffect(p.value)}); return typeof _v === 'function' ? _v() : _v })()}`
     })

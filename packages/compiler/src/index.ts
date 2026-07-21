@@ -27,6 +27,8 @@ export {
 } from './validate-contract.js'
 export type { ContractUsageIssue, ProvidedProp } from './validate-contract.js'
 export { scopeCss, scopeIdFromFilename } from './scope-css.js'
+export { lowerBindingSource, bindingSignalName, isLocalSignalSource } from './ir/source.js'
+export type { BindingSource, LowerSourceContext, LowerSourceOptions } from './ir/types.js'
 export type {
   CompileOptions,
   CompileResult,
