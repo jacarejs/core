@@ -32,6 +32,8 @@ export { lowerElementBindings, lowerTextParts } from './ir/lower-leaf.js'
 export { markCpwOps, markCpwText, optimizeIfPlan, mergeStaticTextParts } from './ir/optimize.js'
 export { lowerIf, lowerCase, lowerEach } from './ir/lower-flow.js'
 export { lowerComponent, emitComponentPropEntry } from './ir/lower-component.js'
+export { inspectTemplateBindings } from './ir/inspect.js'
+export type { BindingSiteInfo } from './ir/inspect.js'
 export type {
   BindingSource,
   LowerSourceContext,

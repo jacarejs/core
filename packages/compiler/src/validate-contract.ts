@@ -1,5 +1,10 @@
-import type { TemplateComponentNode, TemplateNode, TemplateAST } from './types.js'
-import type { ContractPropDef, TemplateContract } from './parse-contract.js'
+import type {
+  TemplateAST,
+  TemplateComponentNode,
+  TemplateNode,
+} from './types.js'
+import { lowerComponent } from './ir/lower-component.js'
+import type { TemplateContract, ContractPropDef } from './parse-contract.js'
 
 export interface ContractUsageIssue {
   message: string
@@ -11,22 +16,20 @@ export interface ProvidedProp {
   name: string
   mode: 'one-way' | 'model' | 'static' | 'event'
   value: string
+  /** From IR — true when client wraps the prop as a thunk. */
+  lazy?: boolean
 }
 
+/** Collect parent-provided props from the component IR plan. */
 export function collectProvidedProps(node: TemplateComponentNode): ProvidedProp[] {
-  const provided: ProvidedProp[] = []
-  for (const attr of node.attrs) {
-    if (attr.kind === 'bind') {
-      provided.push({ name: attr.name, mode: 'model', value: attr.value })
-    } else if (attr.kind === 'prop') {
-      provided.push({ name: attr.name, mode: 'one-way', value: attr.value })
-    } else if (attr.kind === 'static') {
-      provided.push({ name: attr.name, mode: 'static', value: attr.value })
-    } else if (attr.kind === 'event') {
-      provided.push({ name: attr.name, mode: 'event', value: attr.value })
-    }
-  }
-  if (node.children.length > 0) {
+  const plan = lowerComponent(node, {})
+  const provided: ProvidedProp[] = plan.props.map((prop) => ({
+    name: prop.name,
+    mode: prop.mode,
+    value: prop.raw,
+    ...(prop.lazy ? { lazy: true } : {}),
+  }))
+  if (plan.hasSlots) {
     provided.push({ name: 'children', mode: 'one-way', value: '' })
   }
   return provided
