@@ -1,4 +1,4 @@
-import { demoCart } from '../bags/cart.js'
+import { treeCart } from '../bags/cart.js'
 import BagDepth from './BagDepth.jcr'
 
 const SAMPLE = { id: 'depth', name: 'Depth kit', price: 15 }
@@ -7,10 +7,10 @@ export <view>
   <BagDepth :label=${'Great-grandchild · writes cart.add'}>
     <p class="muted">Deep leaf imports the same bag — no props from ancestors.</p>
     <div class="row">
-      <button type="button" class="btn" on-click=${() => demoCart.add(SAMPLE)}>
+      <button type="button" class="btn" on-click=${() => treeCart.add(SAMPLE)}>
         Add from leaf
       </button>
-      <span class="muted">count ${demoCart.count}</span>
+      <span class="muted">count ${treeCart.count}</span>
     </div>
   </BagDepth>
 </view>

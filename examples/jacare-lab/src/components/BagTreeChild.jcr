@@ -1,10 +1,10 @@
-import { demoCart } from '../bags/cart.js'
+import { treeCart } from '../bags/cart.js'
 import BagDepth from './BagDepth.jcr'
 import BagTreeGrand from './BagTreeGrand.jcr'
 
 export <view>
   <BagDepth :label=${'Child · reads cart.money'}>
-    <p class="muted">Total: <strong>${demoCart.money}</strong></p>
+    <p class="muted">Total: <strong>${treeCart.money}</strong></p>
     <BagTreeGrand />
   </BagDepth>
 </view>

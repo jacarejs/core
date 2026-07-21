@@ -32,3 +32,27 @@ export const demoCart = createBag('lab-cart', () => {
 
   return { items, count, total, money, add, remove, clear }
 })
+
+/** Separate bag for the deep-nest demo — keeps Mesh / live cart independent. */
+export const treeCart = createBag('lab-tree', () => {
+  const items = pulse([])
+  const count = derive(() => items().reduce((n, line) => n + line.qty, 0))
+  const total = derive(() =>
+    items().reduce((sum, line) => sum + line.price * line.qty, 0),
+  )
+  const money = derive(() => `$${total().toFixed(2)}`)
+
+  function add(product) {
+    ripple(() => {
+      items.update((list) => {
+        const i = list.findIndex((line) => line.id === product.id)
+        if (i === -1) return [...list, { ...product, qty: 1 }]
+        return list.map((line, idx) =>
+          idx === i ? { ...line, qty: line.qty + 1 } : line,
+        )
+      })
+    })
+  }
+
+  return { items, count, total, money, add }
+})

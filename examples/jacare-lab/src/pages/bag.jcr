@@ -66,7 +66,7 @@ export <view>
 
       <Demo
         :title=${'Parent → child → grandchild → leaf'}
-        :lead=${'Four nested components. Parent and child read the bag; grandchild is a pass-through; the leaf writes. Zero cart props.'}
+        :lead=${'Four nested components on a separate bag (lab-tree). Parent/child read; leaf writes. Live cart above stays on lab-cart.'}
         :code=${deepTreeCode}
       >
         <BagTreeParent />

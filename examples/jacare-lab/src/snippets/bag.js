@@ -46,19 +46,21 @@ export const snapHydrateCode = `const snap = cart.snap()
 cart.hydrate(snap)
 cart.reset()  // restore factory defaults (bindings stay live)`
 
-export const deepTreeCode = `// BagTreeParent.jcr
-import { demoCart } from '../bags/cart.js'
+export const deepTreeCode = `// bags/cart.js — second bag for the depth demo
+export const treeCart = createBag('lab-tree', () => { … })
+
+// BagTreeParent.jcr
+import { treeCart } from '../bags/cart.js'
 import BagTreeChild from './BagTreeChild.jcr'
 
 export <view>
-  <p>Parent count: \${demoCart.count()}</p>
+  <p>Parent count: \${treeCart.count()}</p>
   <BagTreeChild />
 </view>
 
-// BagTreeChild.jcr — imports demoCart again
+// BagTreeChild.jcr — imports treeCart again
 // BagTreeGrand.jcr — no bag import (pass-through)
-// BagTreeLeaf.jcr — imports demoCart and calls add()
+// BagTreeLeaf.jcr — imports treeCart and calls add()
 
-// Parent · Child · Grandchild · Great-grandchild
-// Same @lab-cart/* cells — no cart props at any level`
+// Mesh shows @lab-cart/* (catalog) and @lab-tree/* (nesting) apart`
 
