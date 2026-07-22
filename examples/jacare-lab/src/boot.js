@@ -8,9 +8,14 @@ if (!root) throw new Error('Missing #app')
 
 restoreSpaPath()
 
-await syncDevtools()
+let dispose = null
 
-let dispose = nav.attach(root)
+async function boot() {
+  await syncDevtools()
+  dispose = nav.attach(root)
+}
+
+void boot()
 
 if (import.meta.hot) {
   import.meta.hot.accept()
