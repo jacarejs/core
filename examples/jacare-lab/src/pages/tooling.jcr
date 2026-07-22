@@ -1,7 +1,7 @@
 import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
-import { assetUrl } from '../app-base.js'
+import { assetUrl, appHref } from '../app-base.js'
 import {
   cliCode,
   vitePluginCode,
@@ -33,7 +33,7 @@ export <view>
       <p class="page-lead">The CLI, Vite plugin, Binding IR, compiler, DevTools — and the VS Code extension for .jcr files.</p>
     </header>
 
-    <Tip :text=${'connectJacareDevtools() is wired in boot.js (DEV only). Pulse Graph tabs: Graph | Mesh | Scope (↗ pops either into its own window). Try /bag for Mesh and Lifecycle for Scope. Open ⚙ for corners and reset layout.'} />
+    <Tip :text=${'DevTools: use the top-bar toggle (DevTools on/off). Pulse Graph tabs: Graph | Mesh | Scope (↗ pops out). Try /bag for Mesh, Lifecycle for Scope, and /binding-ir for the compiler forest.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'Named pulses + DOM highlight'} :lead=${'Compiler injects { name, file, line } in DEV. Hover the Pulse Graph node to outline this counter.'} :code=${namedPulsesCode}>
@@ -78,7 +78,11 @@ export <view>
 
       <div class="ref-card">
         <h3>Binding IR (compiler)</h3>
-        <p class="muted">Templates lower once into MountPlan; mount() and render() walk the same forest.</p>
+        <p class="muted">
+          Templates lower once into MountPlan; mount() and render() walk the same forest.
+          Full lesson:
+          <a class="text-link" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>/binding-ir</a>.
+        </p>
         <pre><code>${bindingIrCode}</code></pre>
       </div>
 

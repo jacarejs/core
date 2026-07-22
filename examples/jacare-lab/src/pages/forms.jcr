@@ -54,13 +54,27 @@ export <view>
       <p class="page-lead">createForm builds signal-backed fields with validation, dirty tracking, and a ready-to-wire submit handler.</p>
     </header>
 
-    <Tip :text=${"Field.jcr binds bind-value internally through a bare component prop, so it works great with form.fields.*. Native checkboxes need bind-checked on a real top-level pulse -- that is why newsletter lives beside the form instead of inside its schema."} />
+    <Tip :text=${"Field uses bind-value (model prop) plus :error={field.error()} so the child receives the message string. Native checkboxes still need bind-checked on a top-level pulse — that is why newsletter lives beside the form schema."} />
 
     <div class="lesson-grid">
       <Demo :title=${'Schema + validation'} :lead=${'Each field tracks its own value, error, touched, and dirty state.'} :code=${formCode}>
         <form class="stack" on-submit=${onSubmit}>
-          <Field :label=${'Name'} :field=${form.fields.name} :type=${'text'} :placeholder=${'Ada Lovelace'} />
-          <Field :label=${'Email'} :field=${form.fields.email} :type=${'email'} :placeholder=${'you@jacare.dev'} />
+          <Field
+            :label=${'Name'}
+            bind-value=${form.fields.name}
+            :error=${form.fields.name.error()}
+            :type=${'text'}
+            :placeholder=${'Ada Lovelace'}
+            on-blur=${() => form.fields.name.blur()}
+          />
+          <Field
+            :label=${'Email'}
+            bind-value=${form.fields.email}
+            :error=${form.fields.email.error()}
+            :type=${'email'}
+            :placeholder=${'you@jacare.dev'}
+            on-blur=${() => form.fields.email.blur()}
+          />
           <label class="row"><input type="checkbox" bind-checked=${newsletter} /> Subscribe to the newsletter</label>
           <div class="row">
             <button type="submit" class="btn">Submit</button>
@@ -73,7 +87,7 @@ export <view>
         <div class="stack">
           <p class="muted">valid: ${form.valid() ? 'yes' : 'no'} · dirty: ${form.dirty() ? 'yes' : 'no'}</p>
           #if submittedValues()
-            <p class="muted">Submitted: ${JSON.stringify(submittedValues())}</p>
+            <p class="muted">Submitted: ${() => JSON.stringify(submittedValues())}</p>
           #else
             <p class="muted">Nothing submitted yet.</p>
           #end
@@ -97,12 +111,26 @@ export <view>
             <span class="field-label">Password</span>
             <input class="input" type="password" bind-value=${password} />
           </label>
-          <Field :label=${'Confirm password'} :field=${confirmForm.fields.confirm} :type=${'password'} :placeholder=${'Repeat password'} />
+          <Field
+            :label=${'Confirm password'}
+            bind-value=${confirmForm.fields.confirm}
+            :error=${confirmForm.fields.confirm.error()}
+            :type=${'password'}
+            :placeholder=${'Repeat password'}
+            on-blur=${() => confirmForm.fields.confirm.blur()}
+          />
         </div>
       </Demo>
 
       <Demo :title=${'Multiple validators on one field'} :lead=${'validate accepts an array — the first validator to return a message wins.'} :code=${multiValidatorCode}>
-        <Field :label=${'Username'} :field=${signupForm.fields.username} :type=${'text'} :placeholder=${'jacare_dev'} />
+        <Field
+          :label=${'Username'}
+          bind-value=${signupForm.fields.username}
+          :error=${signupForm.fields.username.error()}
+          :type=${'text'}
+          :placeholder=${'jacare_dev'}
+          on-blur=${() => signupForm.fields.username.blur()}
+        />
       </Demo>
     </div>
   </section>

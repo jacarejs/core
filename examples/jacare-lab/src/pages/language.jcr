@@ -1,6 +1,7 @@
 import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { appHref } from '../app-base.js'
 import {
   reservedBlocksCode,
   reservedDirectivesCode,
@@ -57,24 +58,58 @@ const cliRows = [
   { token: 'jacare compile', role: 'Single-file compile' },
 ]
 
+const runtimeRows = [
+  { area: 'State', mechanism: 'signal / pulse · computed / derive' },
+  { area: 'Effects', mechanism: 'effect / watch · batch · untrack' },
+  { area: 'Shared', mechanism: 'createBag / getBag · ripple · snap / hydrate' },
+  { area: 'Text / attrs', mechanism: 'bindText · bindAttribute · bindClass · bindStyleVar' },
+  { area: 'Model', mechanism: 'bindModel (bind-value / bind-checked)' },
+  { area: 'Conditional', mechanism: 'branch / showIf (#if / #elif / #else / #case)' },
+  { area: 'List', mechanism: 'reconcileKeyedList (#for … (key))' },
+  { area: 'App', mechanism: 'createNav · createForm · createLifecycle' },
+  { area: 'SSR', mechanism: 'renderToString · renderToStream · resumeBindings' },
+  { area: 'DevTools', mechanism: 'devtoolsBind · registerScope · Pulse / Mesh / Scope' },
+  { area: 'Compiler', mechanism: 'Binding IR · MountPlan · CPW · jacare check' },
+]
+
 export <view>
   <section class="page">
     <header class="page-hero">
       <p class="page-kicker">Language reference</p>
       <h1 class="page-title">Reserved words & bindings</h1>
       <p class="page-lead">
-        Complete map of Jacaré tokens — module blocks, directives, attribute prefixes, every bind form,
-        and CLI create / run / build. Written docs:
+        Complete map of Jacaré — runtime mechanisms, module blocks, directives, attribute prefixes,
+        every bind form, and CLI create / run / build. Written docs:
         <code>docs/language-reference.md</code>
         and
         <code>docs/api.md</code>
-        §2b · §5 · §17.
+        §2b · §5 · §17. Featured compiler lesson:
+        <a class="text-link" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>Binding IR</a>.
       </p>
     </header>
 
-    <Tip :text=${'Jacaré files are plain JavaScript. Tokens below are reserved by the compiler or runtime in the positions shown — not all are JS keywords. Prefer bare ${count} over redundant ${() => count()} when there is no loop local to capture.'} />
+    <Tip :text=${'Jacaré files are plain JavaScript. Tokens below are reserved by the compiler or runtime in the positions shown — not all are JS keywords. Prefer bare ${count} over redundant ${() => count()} when there is no loop local to capture. Toggle DevTools from the top bar anytime.'} />
 
     <div class="lesson-grid">
+      <Demo :title=${'Runtime map'} :lead=${'What powers templates under the hood — the same surface as the private architecture notes.'} :code=${reservedBlocksCode}>
+        <div class="nav-live">
+          #for runtimeRows as row (row.area)
+            <div class="nav-live-row">
+              <code>${row.area}</code>
+              <span>${row.mechanism}</span>
+            </div>
+          #end
+        </div>
+        <div class="row" style="margin-top:0.75rem;flex-wrap:wrap;gap:0.5rem">
+          <a class="btn btn-outline" jacare-go="/reactivity" href=${appHref('/reactivity')}>Reactivity</a>
+          <a class="btn btn-outline" jacare-go="/bag" href=${appHref('/bag')}>Pulse bags</a>
+          <a class="btn btn-outline" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>Binding IR</a>
+          <a class="btn btn-outline" jacare-go="/nav" href=${appHref('/nav')}>Navigation</a>
+          <a class="btn btn-outline" jacare-go="/forms" href=${appHref('/forms')}>Forms</a>
+          <a class="btn btn-outline" jacare-go="/ssr" href=${appHref('/ssr')}>SSR</a>
+        </div>
+      </Demo>
+
       <Demo :title=${'Module blocks'} :lead=${'view is required. style is scoped. contract declares the public surface for jacare check.'} :code=${reservedBlocksCode}>
         <div class="nav-live">
           #for blockRows as row (row.token)
@@ -158,7 +193,7 @@ export <view>
       </Demo>
 
       <Demo :title=${'Create · run · build'} :lead=${'Scaffold with create-jacare or jacare new, then dev / build / check.'} :code=${cliCreateRunBuildCode}>
-        <div class="nav-live">
+        <div class="nav-live nav-live-cli">
           #for cliRows as row (row.token)
             <div class="nav-live-row">
               <code>${row.token}</code>

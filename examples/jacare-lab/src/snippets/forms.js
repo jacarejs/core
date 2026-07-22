@@ -29,8 +29,22 @@ function resetForm() {
   submittedValues.set(null)
 }`,
     `  <form class="stack" on-submit=\${onSubmit}>
-    <Field :label=\${'Name'} :field=\${form.fields.name} :type=\${'text'} :placeholder=\${'Ada Lovelace'} />
-    <Field :label=\${'Email'} :field=\${form.fields.email} :type=\${'email'} :placeholder=\${'you@jacare.dev'} />
+    <Field
+      :label=\${'Name'}
+      bind-value=\${form.fields.name}
+      :error=\${form.fields.name.error()}
+      :type=\${'text'}
+      :placeholder=\${'Ada Lovelace'}
+      on-blur=\${() => form.fields.name.blur()}
+    />
+    <Field
+      :label=\${'Email'}
+      bind-value=\${form.fields.email}
+      :error=\${form.fields.email.error()}
+      :type=\${'email'}
+      :placeholder=\${'you@jacare.dev'}
+      on-blur=\${() => form.fields.email.blur()}
+    />
     <label class="row"><input type="checkbox" bind-checked=\${newsletter} /> Subscribe to the newsletter</label>
     <div class="row">
       <button type="submit" class="btn">Submit</button>
@@ -73,7 +87,14 @@ const confirmForm = createForm({
       <span class="field-label">Password</span>
       <input class="input" type="password" bind-value=\${password} />
     </label>
-    <Field :label=\${'Confirm password'} :field=\${confirmForm.fields.confirm} :type=\${'password'} :placeholder=\${'Repeat password'} />
+    <Field
+      :label=\${'Confirm password'}
+      bind-value=\${confirmForm.fields.confirm}
+      :error=\${confirmForm.fields.confirm.error()}
+      :type=\${'password'}
+      :placeholder=\${'Repeat password'}
+      on-blur=\${() => confirmForm.fields.confirm.blur()}
+    />
   </div>`,
   ),
   fieldChild,
@@ -90,7 +111,14 @@ export const multiValidatorCode = codeFiles(
     ],
   },
 })`,
-    `  <Field :label=\${'Username'} :field=\${signupForm.fields.username} :type=\${'text'} :placeholder=\${'jacare_dev'} />`,
+    `  <Field
+    :label=\${'Username'}
+    bind-value=\${signupForm.fields.username}
+    :error=\${signupForm.fields.username.error()}
+    :type=\${'text'}
+    :placeholder=\${'jacare_dev'}
+    on-blur=\${() => signupForm.fields.username.blur()}
+  />`,
   ),
   fieldChild,
 )

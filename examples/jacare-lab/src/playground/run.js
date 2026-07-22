@@ -1,6 +1,7 @@
 import { compile } from '@jacare/compiler'
 import * as runtime from '@jacare/core'
 
+/** Keep in sync with compiler RUNTIME_IMPORT_ORDER + common user APIs. */
 const RUNTIME_BINDINGS = [
   'signal',
   'computed',
@@ -10,6 +11,11 @@ const RUNTIME_BINDINGS = [
   'watch',
   'batch',
   'untrack',
+  'runUntracked',
+  'getBag',
+  'createBag',
+  'ripple',
+  'listBags',
   'bindText',
   'bindPropText',
   'bindAttribute',
@@ -17,16 +23,23 @@ const RUNTIME_BINDINGS = [
   'bindClass',
   'bindStyleVar',
   'bindModel',
+  'bindDebug',
+  'devtoolsBind',
   'branch',
   'reconcileKeyedList',
   'showIf',
   'resumeBindings',
-  'runUntracked',
+  'escapeHtml',
   'mountSlot',
   'ensureScopedStyle',
+  'bindStyleSheet',
+  'scopeCss',
   'createForm',
   'createLifecycle',
   'registerScope',
+  'createNav',
+  'lazy',
+  'screen',
 ].join(', ')
 
 function stripModuleExports(code) {

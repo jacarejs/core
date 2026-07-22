@@ -2,12 +2,14 @@ import { computed, derive, pulse } from '@jacare/core'
 import { appHref, assetUrl } from './app-base.js'
 import { LESSONS } from './topics.js'
 import { activeCode, hideCode } from './code-viewer.js'
+import { devtoolsEnabled, toggleDevtools } from './lab-devtools.js'
 import CodeModal from './components/CodeModal.jcr'
 
 const menuOpen = pulse(false)
 const menuLabel = computed(() => (menuOpen() ? 'Close' : 'Lessons'))
 const viewerTitle = derive(() => activeCode()?.title ?? '')
 const viewerFiles = derive(() => activeCode()?.files ?? [])
+const devtoolsLabel = derive(() => (devtoolsEnabled() ? 'DevTools on' : 'DevTools off'))
 
 function toggleMenu() {
   menuOpen.update((open) => !open)
@@ -50,6 +52,16 @@ export <view>
             ${menuLabel}
           </button>
           <p class="topbar-hint">Live demos · View code opens the source for each example</p>
+          <button
+            type="button"
+            class="btn btn-outline topbar-devtools"
+            class-devtools-on=${devtoolsEnabled}
+            aria-pressed=${devtoolsEnabled}
+            title="Toggle Jacaré DevTools overlay"
+            on-click=${() => void toggleDevtools()}
+          >
+            ${devtoolsLabel}
+          </button>
         </header>
         <main class="main" jacare-frame></main>
         <footer class="site-footer">

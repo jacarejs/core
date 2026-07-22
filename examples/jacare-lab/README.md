@@ -85,7 +85,8 @@ Complete catalog: [language-reference.md §3](../../docs/language-reference.md#3
 | `/` | Lab overview, install notes, lesson index |
 | `/quick-start` | API §1 — scaffold, `app.jcr`, `boot.js`, HTML shell |
 | `/module` | API §2 — `.jcr` layout, view/style syntax, compiled exports |
-| `/language` | Reserved words, all binds, contract, CLI create/run/build |
+| `/language` | Reserved words, runtime map, all binds, contract, CLI |
+| `/binding-ir` | Binding IR · MountPlan · `check --bindings` · CPW |
 | `/reactivity` | `signal` / `pulse`, `computed` / `derive`, `effect`, `batch`, `untrack` |
 | `/bag` | `createBag`, `ripple`, shared cart across views |
 | `/templates` | Text, attrs, `style---` |

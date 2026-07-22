@@ -66,10 +66,12 @@ export <view>
 export const FIELD_SOURCE = `export <contract>
   props: {
     label: { type: 'string', required: true }
-    field: { type: 'any', required: true }
+    value: { type: 'string', model: true }
+    error: { type: 'any', required: true }
     type: { type: 'string', default: 'text' }
     placeholder: { type: 'string', default: '' }
   }
+  emits: ['blur']
 </contract>
 
 export <view>
@@ -77,14 +79,14 @@ export <view>
     <span class="field-label">\${label}</span>
     <input
       class="input field-input"
-      class-invalid=\${!!field.error()}
+      class-invalid=\${() => Boolean(error())}
       type=\${type}
       placeholder=\${placeholder}
-      bind-value=\${field}
-      on-blur=\${() => field.blur()}
+      bind-value=\${value}
+      on-blur=\${() => emit('blur')}
     />
-    #if field.error()
-      <span class="field-error">\${field.error()}</span>
+    #if error()
+      <span class="field-error">\${error()}</span>
     #end
   </label>
 </view>`

@@ -1,0 +1,102 @@
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import { appHref } from '../app-base.js'
+import {
+  bindingIrCode,
+  checkBindingsCode,
+  compileApiCode,
+  expressionStyleCode,
+  testingCode,
+} from '../snippets/tooling.js'
+
+const pipelineRows = [
+  { step: '1', title: 'Parse', detail: 'parseModule + parseTemplate → AST' },
+  { step: '2', title: 'Lower', detail: 'Binding IR sites + MountPlan forest' },
+  { step: '3', title: 'Emit', detail: 'mount() · render() · CPW · jacare check' },
+]
+
+const siteRows = [
+  { kind: 'text', helper: 'bindText', note: '${expr} in text nodes' },
+  { kind: 'attr', helper: 'bindAttribute', note: 'bind-* / :* attributes' },
+  { kind: 'class', helper: 'bindClass', note: 'class-* toggles' },
+  { kind: 'styleVar', helper: 'bindStyleVar', note: 'style---* / style:*' },
+  { kind: 'model', helper: 'bindModel', note: 'bind-value / bind-checked' },
+  { kind: 'if', helper: 'branch', note: '#if / #elif / #else' },
+  { kind: 'list', helper: 'reconcileKeyedList', note: '#for … (key)' },
+  { kind: 'mesh', helper: 'Mesh Port', note: 'stable bag.key → direct bind' },
+]
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">Compiler · Binding IR</p>
+      <h1 class="page-title">One forest. Every emitter.</h1>
+      <p class="page-lead">
+        Templates lower once into a Binding IR / MountPlan. Client mount, SSR render/resume,
+        CPW, and <code>jacare check --bindings</code> all walk the same classification —
+        no triple-maintained codegen heuristics.
+      </p>
+      <div class="row" style="margin-top:0.75rem;flex-wrap:wrap;gap:0.5rem">
+        <a class="btn btn-primary" jacare-go="/bindings" href=${appHref('/bindings')}>Bindings lesson</a>
+        <a class="btn btn-outline" jacare-go="/tooling" href=${appHref('/tooling')}>Tooling</a>
+        <a class="btn btn-outline" jacare-go="/playground" href=${appHref('/playground')}>Playground</a>
+      </div>
+    </header>
+
+    <Tip :text=${'Binding IR is delivered (compiler fatias 0–6). When something looks wrong in SSR vs client, inspect the same sites with jacare check --bindings or inspectTemplateBindings().'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'Pipeline'} :lead=${'AST → IR → MountPlan → emit. Client and SSR share the forest.'} :code=${bindingIrCode}>
+        <div class="nav-live">
+          #for pipelineRows as row (row.step)
+            <div class="nav-live-row">
+              <code>${row.step}. ${row.title}</code>
+              <span>${row.detail}</span>
+            </div>
+          #end
+        </div>
+      </Demo>
+
+      <Demo :title=${'Site kinds'} :lead=${'Every binding site gets a kind + helper. Mesh Ports are IR-level specializations.'} :code=${checkBindingsCode}>
+        <div class="nav-live">
+          #for siteRows as row (row.kind)
+            <div class="nav-live-row">
+              <code>${row.kind} → ${row.helper}</code>
+              <span>${row.note}</span>
+            </div>
+          #end
+        </div>
+      </Demo>
+
+      <div class="ref-card">
+        <h3>jacare check --bindings</h3>
+        <p class="muted">Prints every lowered site — the same list the emitters consume.</p>
+        <pre><code>${checkBindingsCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>Inspect from @jacare/compiler</h3>
+        <p class="muted">parseModule → parseTemplate → inspectTemplateBindings / lowerMountAst.</p>
+        <pre><code>${bindingIrCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>Expression style</h3>
+        <p class="muted">Prefer bare ${count} when there is no loop local. Redundant nullary arrows are a soft warn.</p>
+        <pre><code>${expressionStyleCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>compile() API</h3>
+        <p class="muted">mode client | server | full · cpw for production wiring.</p>
+        <pre><code>${compileApiCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>Test the IR</h3>
+        <p class="muted">Assert site kinds in Vitest without mounting the whole app.</p>
+        <pre><code>${testingCode}</code></pre>
+      </div>
+    </div>
+  </section>
+</view>

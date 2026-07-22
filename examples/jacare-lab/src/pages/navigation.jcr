@@ -153,10 +153,10 @@ export <view>
       </header>
 
       <ol class="nav-flow">
-        <li><strong>1. createNav</strong> — register layout, screen map, optional base / missing / beforeGo</li>
-        <li><strong>2. createRoute(nav.where)</strong> — reactive helpers for path, param(), search()</li>
-        <li><strong>3. nav.attach(#app)</strong> — mount shell, match the current URL, load the screen</li>
-        <li><strong>4. Navigate</strong> — jacare-go links or nav.go / swap / undo update history and remount the frame</li>
+        <li><strong>createNav</strong> — register layout, screen map, optional base / missing / beforeGo</li>
+        <li><strong>createRoute(nav.where)</strong> — reactive helpers for path, param(), search()</li>
+        <li><strong>nav.attach(#app)</strong> — mount shell, match the current URL, load the screen</li>
+        <li><strong>Navigate</strong> — jacare-go links or nav.go / swap / undo update history and remount the frame</li>
       </ol>
 
       <div class="nav-options-grid">

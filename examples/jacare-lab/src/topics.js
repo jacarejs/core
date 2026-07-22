@@ -17,7 +17,12 @@ export const LESSONS = [
   {
     path: '/language',
     title: 'Language reference',
-    blurb: 'Reserved words, all binds, view/style/contract, CLI',
+    blurb: 'Reserved words, runtime map, all binds, CLI',
+  },
+  {
+    path: '/binding-ir',
+    title: 'Binding IR',
+    blurb: 'MountPlan · check --bindings · one forest for client/SSR/CPW',
   },
   {
     path: '/reactivity',

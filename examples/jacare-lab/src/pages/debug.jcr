@@ -82,9 +82,9 @@ export <view>
       <pre><code>${syntaxCard}</code></pre>
       <p class="muted">
         Also used live in
-        <a jacare-go="/components" href=${appHref('/components')}>Components</a>
+        <a class="text-link" jacare-go="/components" href=${appHref('/components')}>Components</a>
         and
-        <a jacare-go="/events" href=${appHref('/events')}>Events</a>.
+        <a class="text-link" jacare-go="/events" href=${appHref('/events')}>Events</a>.
       </p>
     </div>
 
