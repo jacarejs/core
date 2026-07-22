@@ -1,6 +1,6 @@
 {
   "name": "@jacare/cli",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Jacaré CLI — create and run Jacaré apps",
   "license": "MIT",
   "repository": {
@@ -26,9 +26,9 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@jacare/compiler": "0.1.9",
-    "@jacare/vite-plugin": "0.1.9",
-    "create-jacare": "0.1.9",
+    "@jacare/compiler": "0.1.10",
+    "@jacare/vite-plugin": "0.1.10",
+    "create-jacare": "0.1.10",
     "vite": "^6.0.3"
   }
 }
