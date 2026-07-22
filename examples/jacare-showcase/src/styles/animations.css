@@ -1,0 +1,106 @@
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(0.35rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes soft-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes reveal-in {
+  from { opacity: 0.85; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reveal-in-left {
+  from { opacity: 0.85; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reveal-in-right {
+  from { opacity: 0.85; transform: translateX(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reveal-in-scale {
+  from { opacity: 0.85; transform: scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+
+.rise-in { animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.rise-in-delay-1 { animation-delay: 0.05s; }
+.rise-in-delay-2 { animation-delay: 0.1s; }
+.rise-in-delay-3 { animation-delay: 0.15s; }
+.hero-orb { opacity: 0.45; }
+
+.hero-enter {
+  animation: hero-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-enter-delay {
+  animation: hero-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+}
+
+@keyframes hero-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+[data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal].is-revealed {
+  animation: reveal-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+[data-reveal].reveal-left.is-revealed {
+  animation-name: reveal-in-left;
+}
+
+[data-reveal].reveal-right.is-revealed {
+  animation-name: reveal-in-right;
+}
+
+[data-reveal].reveal-scale.is-revealed {
+  animation-name: reveal-in-scale;
+}
+
+[data-reveal].reveal-fade.is-revealed,
+[data-reveal].reveal-mask.is-revealed,
+[data-reveal].reveal-clip.is-revealed {
+  animation-name: reveal-in;
+}
+
+.cascade > *:nth-child(1) { animation-delay: 0ms; }
+.cascade > *:nth-child(2) { animation-delay: 40ms; }
+.cascade > *:nth-child(3) { animation-delay: 80ms; }
+.cascade > *:nth-child(4) { animation-delay: 120ms; }
+.cascade > *:nth-child(5) { animation-delay: 160ms; }
+
+.cascade > * {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal].is-revealed.cascade > *,
+.is-revealed .cascade > * {
+  animation: reveal-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in,
+  .rise-in-delay-1,
+  .rise-in-delay-2,
+  .rise-in-delay-3,
+  .hero-orb,
+  .hero-enter,
+  .hero-enter-delay,
+  [data-reveal].is-revealed,
+  [data-reveal].is-revealed.cascade > *,
+  .is-revealed .cascade > * {
+    animation: none !important;
+  }
+}

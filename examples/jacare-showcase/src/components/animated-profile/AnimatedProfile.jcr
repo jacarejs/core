@@ -1,0 +1,400 @@
+import { derive, pulse } from '@jacare/core'
+import ProfileCard from '../profile-card/ProfileCard.jcr'
+import VariantSelector from '../variant-selector/VariantSelector.jcr'
+import AnimationControls from '../animation-controls/AnimationControls.jcr'
+
+export <contract>
+  props: {
+    compact: { type: 'boolean', default: false }
+  }
+</contract>
+
+const VARIANTS = [
+  { id: 'default', label: 'Default' },
+  { id: 'glass', label: 'Glass' },
+  { id: 'neon', label: 'Neon' },
+  { id: 'nature', label: 'Nature' },
+]
+
+const ANIMATIONS = [
+  { id: 'fade', label: 'Fade' },
+  { id: 'slide', label: 'Slide' },
+  { id: 'scale', label: 'Scale' },
+  { id: 'bounce', label: 'Bounce' },
+  { id: 'rotate', label: 'Rotate' },
+  { id: 'pulse', label: 'Pulse' },
+]
+
+const name = pulse('Jacaré Dev')
+const description = pulse('Living components with reactive state and fluid motion.')
+const avatar = pulse('JD')
+const status = pulse('online')
+const variant = pulse('default')
+const animation = pulse('fade')
+const active = pulse(false)
+const playToken = pulse(1)
+const lastEvent = pulse('Waiting for interaction…')
+const eventLog = pulse([])
+
+const statusOnline = derive(() => status() === 'online')
+const lastEventLabel = derive(() => lastEvent())
+const stateSummary = derive(() => {
+  return `${variant()} · ${animation()} · ${active() ? 'highlighted' : 'normal'}`
+})
+
+function pushEvent(type, detail) {
+  const stamp = new Date().toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+  const message = `ProfileCard emitted the event: ${type}`
+  lastEvent.set(message)
+  eventLog.update((rows) => {
+    const next = [{ id: `${Date.now()}-${type}`, stamp, type, detail: JSON.stringify(detail) }, ...rows]
+    return next.slice(0, 6)
+  })
+}
+
+function onVariantChange(next) {
+  variant.set(next)
+  playToken.update((n) => n + 1)
+}
+
+function onAnimationChange(next) {
+  animation.set(next)
+  playToken.update((n) => n + 1)
+}
+
+function onReplay() {
+  playToken.update((n) => n + 1)
+}
+
+function onProfileSelected(detail) {
+  pushEvent('profileSelected', detail)
+}
+
+function onAction(detail) {
+  active.update((value) => !value)
+  pushEvent('action', detail)
+}
+
+function onAnimationDone(detail) {
+  pushEvent('animationDone', detail)
+}
+
+function onHighlightChange(detail) {
+  if (typeof detail?.active === 'boolean') active.set(detail.active)
+  pushEvent('highlightChange', detail)
+}
+
+function toggleStatus() {
+  status.set(status() === 'online' ? 'away' : 'online')
+}
+
+function resetDemo() {
+  name.set('Jacaré Dev')
+  description.set('Living components with reactive state and fluid motion.')
+  avatar.set('JD')
+  status.set('online')
+  variant.set('default')
+  animation.set('fade')
+  active.set(false)
+  playToken.update((n) => n + 1)
+  lastEvent.set('Example reset')
+  eventLog.set([])
+}
+
+export <view>
+  <section class="animated-profile" class-is-compact=${compact}>
+    <div class="ap-controls">
+      <div class="ap-controls-head">
+        <div>
+          <p class="ap-kicker">Inspector</p>
+          <h2 class="ap-heading">Tune the living card</h2>
+        </div>
+        <p class="ap-state-pill">State: ${stateSummary}</p>
+      </div>
+
+      <div class="ap-field">
+        <label class="ap-label" for="ap-name">Name</label>
+        <input id="ap-name" class="input" bind-value=${name} autocomplete="off" />
+      </div>
+      <div class="ap-field">
+        <label class="ap-label" for="ap-desc">Description</label>
+        <input id="ap-desc" class="input" bind-value=${description} autocomplete="off" />
+      </div>
+      <div class="ap-field">
+        <span class="ap-label">Variant</span>
+        <VariantSelector :value=${variant} :options=${VARIANTS} on-change=${onVariantChange} />
+      </div>
+      <div class="ap-field">
+        <span class="ap-label">Animation</span>
+        <AnimationControls
+          :value=${animation}
+          :options=${ANIMATIONS}
+          on-change=${onAnimationChange}
+          on-replay=${onReplay}
+        />
+      </div>
+      <div class="ap-actions">
+        <button type="button" class="btn btn-outline" on-click=${toggleStatus}>
+          Status: ${status}
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline"
+          class-is-on=${statusOnline}
+          on-click=${() => status.set(statusOnline() ? 'offline' : 'online')}
+        >
+          ${() => (statusOnline() ? 'Go offline' : 'Go online')}
+        </button>
+        <button type="button" class="btn btn-primary" on-click=${resetDemo}>Reset example</button>
+      </div>
+      <div class="ap-log" aria-label="Event log">
+        <div class="ap-log-title">Recent events</div>
+        #if eventLog().length === 0
+          <p class="ap-log-empty">Click the card or controls to see child → parent flow.</p>
+        #else
+          <ul class="ap-log-list">
+            #for eventLog() as row (row.id)
+              <li class="ap-log-item">
+                <span class="ap-log-time">${row.stamp}</span>
+                <strong>${row.type}</strong>
+                <code>${row.detail}</code>
+              </li>
+            #end
+          </ul>
+        #end
+      </div>
+    </div>
+
+    <div class="ap-stage">
+      <div class="ap-stage-glow" aria-hidden="true"></div>
+      <div class="ap-preview-label">Canvas</div>
+      <ProfileCard
+        :name=${name}
+        :description=${description}
+        :avatar=${avatar}
+        :status=${status}
+        :variant=${variant}
+        :animation=${animation}
+        :active=${active}
+        :playToken=${playToken}
+        on-profileSelected=${onProfileSelected}
+        on-action=${onAction}
+        on-animationDone=${onAnimationDone}
+        on-highlightChange=${onHighlightChange}
+      />
+      <p class="ap-event" aria-live="polite">${lastEventLabel}</p>
+    </div>
+  </section>
+</view>
+
+export <style>
+.animated-profile {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+  align-items: stretch;
+}
+
+.animated-profile.is-compact {
+  grid-template-columns: 1fr;
+}
+
+.ap-stage,
+.ap-controls {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid #b8e0c4;
+  box-shadow: 0 14px 36px rgba(0, 48, 48, 0.08);
+}
+
+.ap-controls {
+  align-content: start;
+  background:
+    linear-gradient(180deg, #ffffff, #f4fbf6);
+}
+
+.ap-controls-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(184, 224, 196, 0.8);
+}
+
+.ap-kicker {
+  margin: 0 0 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #189030;
+}
+
+.ap-heading {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #003030;
+  letter-spacing: -0.02em;
+}
+
+.ap-state-pill {
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(216, 243, 220, 0.8);
+  border: 1px solid #b8e0c4;
+  color: #004830;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.ap-stage {
+  position: relative;
+  overflow: hidden;
+  place-items: center;
+  align-content: center;
+  min-height: 22rem;
+  border-color: rgba(120, 192, 24, 0.28);
+  background:
+    radial-gradient(circle at 50% 20%, rgba(120, 192, 24, 0.22), transparent 42%),
+    linear-gradient(160deg, #001818 0%, #003030 48%, #004830 100%);
+  color: #f0fff4;
+}
+
+.ap-stage-glow {
+  position: absolute;
+  inset: auto 10% -20% 10%;
+  height: 55%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120, 192, 24, 0.35), transparent 70%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.ap-preview-label {
+  position: relative;
+  z-index: 1;
+  justify-self: start;
+  width: 100%;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b7e38a;
+}
+
+.ap-event {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  max-width: 28rem;
+  text-align: center;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: #d8f3dc;
+}
+
+.ap-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.ap-label {
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #004830;
+}
+
+.ap-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ap-actions .btn.is-on {
+  border-color: #78c018;
+  background: #d8f3dc;
+}
+
+.ap-log {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  background: #001818;
+  color: #d8f3dc;
+}
+
+.ap-log-title {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #78c018;
+}
+
+.ap-log-empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(216, 243, 220, 0.7);
+}
+
+.ap-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ap-log-item {
+  display: grid;
+  gap: 0.15rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(120, 192, 24, 0.16);
+  font-size: 0.78rem;
+}
+
+.ap-log-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.ap-log-time {
+  color: rgba(216, 243, 220, 0.55);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+}
+
+.ap-log-item code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  color: #90c018;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .animated-profile {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-stage {
+    min-height: 18rem;
+    order: -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-stage,
+  .ap-controls {
+    transition: none;
+  }
+}
+</style>

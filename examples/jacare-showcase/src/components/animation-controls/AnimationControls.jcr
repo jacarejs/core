@@ -1,0 +1,99 @@
+export <contract>
+  props: {
+    value: { type: 'string', required: true }
+    options: { type: 'any', required: true }
+  }
+  emits: ['change', 'replay']
+</contract>
+
+export <view>
+  <div class="anim-controls">
+    <div class="anim-grid" role="group" aria-label="Animações">
+      #for options as option (option.id)
+        <button
+          type="button"
+          class="anim-btn"
+          class-is-selected=${() => (typeof value === 'function' ? value() : value) === option.id}
+          aria-pressed=${() => (typeof value === 'function' ? value() : value) === option.id}
+          on-click=${() => emit('change', option.id)}
+        >${option.label}</button>
+      #end
+    </div>
+    <button type="button" class="anim-replay" on-click=${() => emit('replay')}>
+      Replay animation
+    </button>
+  </div>
+</view>
+
+export <style>
+.anim-controls {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.anim-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.anim-btn {
+  min-height: 2.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.75rem;
+  border: 1px solid #b8e0c4;
+  background: #ffffff;
+  color: #003030;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+
+.anim-btn:hover {
+  background: #f4fbf6;
+  transform: translateY(-1px);
+}
+
+.anim-btn:focus-visible {
+  outline: 2px solid #78c018;
+  outline-offset: 2px;
+}
+
+.anim-btn.is-selected {
+  background: linear-gradient(135deg, #189030, #60a818);
+  color: #f0fff4;
+  border-color: transparent;
+}
+
+.anim-replay {
+  justify-self: start;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #78c018, #90c018);
+  color: #001818;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(120, 192, 24, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.anim-replay:hover { transform: translateY(-1px); }
+
+.anim-replay:focus-visible {
+  outline: 2px solid #003030;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-btn,
+  .anim-replay { transition: none; }
+  .anim-btn:hover,
+  .anim-replay:hover { transform: none; }
+}
+</style>

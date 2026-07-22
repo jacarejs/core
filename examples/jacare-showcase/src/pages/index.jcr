@@ -1,113 +1,292 @@
 import { pulse } from '@jacare/core'
-import { appHref } from '../app-base.js'
-import Card from '../components/Card.jcr'
-import Badge from '../components/Badge.jcr'
+import { appHref, assetUrl } from '../app-base.js'
+import ProfileCard from '../components/profile-card/ProfileCard.jcr'
+import FlowDiagram from '../components/ui/FlowDiagram.jcr'
+import CodeWatermark from '../components/ui/CodeWatermark.jcr'
+import { panelCodeWm } from '../snippets/watermarks.js'
 
-const mounts = pulse(0)
-mounts.update((n) => n + 1)
+const heroName = pulse('Jacaré Dev')
+const heroDesc = pulse('Learn props, events, and motion in a few steps.')
+const heroVariant = pulse('nature')
+const heroAnimation = pulse('fade')
+const heroActive = pulse(false)
+const heroPlay = pulse(1)
+const heroEvent = pulse('Click the card to see an event')
 
-const demos = [
+function onHeroSelect(detail) {
+  heroActive.update((value) => !value)
+  heroEvent.set('ProfileCard emitted the event: profileSelected')
+  heroVariant.set(detail?.variant === 'nature' ? 'neon' : 'nature')
+  heroPlay.update((n) => n + 1)
+}
+
+const tracks = [
+  { id: 'profile', title: 'AnimatedProfile', text: 'Parent state, variants, and motion tokens.' },
+  { id: 'counter', title: 'Counter + emits', text: 'Tiny contract with on-inc.' },
+  { id: 'lists', title: 'Keyed lists', text: '#for with stable ids.' },
+  { id: 'game', title: 'River Run', text: 'Move the Jacaré and solve trade-offs.' },
+]
+
+const pillars = [
   {
-    slug: 'reactivity',
-    title: 'Reactivity',
-    summary: 'pulse() writes, derive() reads — only bound DOM nodes update when state changes.',
+    id: 'direct',
+    title: 'Direct DOM updates',
+    text: 'No virtual DOM diff. Signals write only where values change.',
   },
   {
-    slug: 'lists',
-    title: 'Keyed lists',
-    summary: 'Add, filter, toggle, and remove items while #for reconciles by stable keys.',
+    id: 'contracts',
+    title: 'Contracts first',
+    text: 'props and emits are checked early so components stay honest.',
   },
   {
-    slug: 'bindings',
-    title: 'Bindings',
-    summary: 'style---pct CSS variables, class-* toggles, and bind-value mirrors without string rebuilds.',
+    id: 'motion',
+    title: 'Motion without remount',
+    text: 'playToken restarts animation while keeping the same living node.',
   },
   {
-    slug: 'forms',
-    title: 'Forms',
-    summary: 'createForm + Field: two-way binding, blur validation, and handled submit.',
-  },
-  {
-    slug: 'components',
-    title: 'Components',
-    summary: 'Compose Card, Badge, and Stat with default slots and scoped co-located CSS.',
-  },
-  {
-    slug: 'poll',
-    title: 'Live poll',
-    summary: 'Vote tallies with derive percentages and animated style---pct bars.',
-  },
-  {
-    slug: 'cart',
-    title: 'Shopping cart',
-    summary: 'Catalog, quantities, coupons, and live totals recomputed through derive().',
-  },
-  {
-    slug: 'timers',
-    title: 'Timers',
-    summary: 'Countdown owned by effect() — interval starts and cleans up with dispose.',
-  },
-  {
-    slug: 'performance',
-    title: 'Performance & CPW',
-    summary: 'Compile-Time Pulse Wiring and reactive CSS variables for GPU-friendly updates.',
+    id: 'scoped',
+    title: 'Scoped .jcr CSS',
+    text: 'Styles travel with the component file, not a separate stylesheet hunt.',
   },
 ]
 
-function demoHref(slug) {
-  return '/' + slug
-}
+const loopSteps = [
+  {
+    id: 'own',
+    step: '01',
+    title: 'Own state in the parent',
+    text: 'AnimatedProfile keeps variant, animation, and playToken as pulse().',
+  },
+  {
+    id: 'pass',
+    step: '02',
+    title: 'Pass props down',
+    text: 'ProfileCard receives the surface it needs — nothing more.',
+  },
+  {
+    id: 'emit',
+    step: '03',
+    title: 'Emit events up',
+    text: 'Clicks bubble as profileSelected / action for the parent to handle.',
+  },
+  {
+    id: 'replay',
+    step: '04',
+    title: 'Replay motion',
+    text: 'Bump playToken and the card animates again without remounting.',
+  },
+]
+
+const recipes = [
+  {
+    id: 'variant',
+    title: 'Swap a variant',
+    code: `variant.set('neon')
+playToken.update(n => n + 1)`,
+  },
+  {
+    id: 'listen',
+    title: 'Listen to the child',
+    code: `on-profileSelected=\${(detail) => {
+  lastEvent.set(detail.name)
+}}`,
+  },
+  {
+    id: 'contract',
+    title: 'Declare the contract',
+    code: `export contract
+  props: { name: 'string' }
+  emits: ['action']
+</contract>`,
+  },
+]
 
 export <view>
   <section class="page">
-    <div class="hero">
-      <p class="hero-eyebrow">Jacaré Showcase</p>
-      <h1 class="hero-title">Fine-grained UI without a virtual DOM</h1>
-      <p class="hero-lead">
-        Nine interactive demos of Jacaré — compile-time templates, pulse/derive reactivity,
-        keyed lists, forms, components, and CPW bindings.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" jacare-go="/reactivity" href=${appHref('/reactivity')}>Start with reactivity</a>
-        <a class="btn btn-ghost" jacare-go="/lists" href=${appHref('/lists')}>Try keyed lists</a>
-      </div>
-      <div class="stats-row">
-        <div class="stat">
-          <span class="stat-value">${mounts}</span>
-          <span class="stat-label">Home mounts</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value">9</span>
-          <span class="stat-label">Live demos</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value">0</span>
-          <span class="stat-label">VDOM layers</span>
-        </div>
-      </div>
-    </div>
+    <section class="hero-bleed hero-enter">
+      <div class="hero">
+        <div class="hero-pattern" aria-hidden="true"></div>
+        <div class="hero-orb hero-orb-a" aria-hidden="true"></div>
+        <div class="hero-orb hero-orb-b" aria-hidden="true"></div>
+        <img class="hero-mark" src=${assetUrl('jacare-logo.webp')} alt="" aria-hidden="true" width="152" height="160" decoding="async" />
 
-    <div>
-      <h2 class="section-title">Explore the demos</h2>
-      <p class="section-lead">
-        Each page isolates one Jacaré capability with a working demo and a View code button that
-        opens the exact <code>.jcr</code> source.
-      </p>
-    </div>
+        <div class="hero-inner">
+          <div class="hero-body">
+            <div class="hero-copy">
+              <p class="hero-eyebrow">Jacaré Framework</p>
+              <h1 class="hero-title hero-words">Build living components with Jacaré</h1>
+              <p class="hero-lead">
+                Learn how to connect components, share state, and ship fluid animations in a few clear steps.
+              </p>
+              <div class="hero-actions">
+                <a class="btn btn-primary" jacare-go="/tutorial" href=${appHref('/tutorial')}>Start tutorial</a>
+                <a class="btn btn-ghost" jacare-go="/playground" href=${appHref('/playground')}>See example</a>
+                <a class="btn btn-ghost" jacare-go="/game" href=${appHref('/game')}>Play River Run</a>
+              </div>
+              <div class="hero-signals">
+                <span class="hero-signal">pulse()</span>
+                <span class="hero-signal">derive()</span>
+                <span class="hero-signal">contracts</span>
+                <span class="hero-signal">playToken</span>
+              </div>
+            </div>
 
-    <div class="feature-grid">
-      #for demos as item (item.slug)
-        <Card :title=${item.title} :subtitle=${item.summary}>
-          <div class="demo-row">
-            <Badge :text=${item.slug} />
-            <a
-              class="btn btn-primary"
-              jacare-go=${demoHref(item.slug)}
-              href=${appHref(demoHref(item.slug))}
-            >Explore</a>
+            <div class="hero-demo hero-enter-delay">
+              <div class="hero-demo-head">
+                <span>Live preview</span>
+                <code>ProfileCard</code>
+              </div>
+              <ProfileCard
+                :name=${heroName}
+                :description=${heroDesc}
+                :avatar=${'JD'}
+                :status=${'online'}
+                :variant=${heroVariant}
+                :animation=${heroAnimation}
+                :active=${heroActive}
+                :playToken=${heroPlay}
+                on-profileSelected=${onHeroSelect}
+                on-action=${onHeroSelect}
+              />
+              <p class="hero-code-chip">${heroEvent}</p>
+            </div>
           </div>
-        </Card>
-      #end
+        </div>
+      </div>
+    </section>
+
+    <div class="wave-divider" aria-hidden="true">
+      <svg viewBox="0 0 1440 64" preserveAspectRatio="none">
+        <path d="M0,32 C240,64 480,0 720,24 C960,48 1200,64 1440,16 L1440,64 L0,64 Z" fill="rgba(216,243,220,0.65)"></path>
+      </svg>
     </div>
+
+    <section class="section overview-section reveal-fade" data-reveal>
+      <div class="overview-head">
+        <div>
+          <p class="kicker">Overview</p>
+          <h2 class="section-title">What you will build</h2>
+          <p class="section-lead">
+            A small connected set: <strong>AnimatedProfile</strong> owns state,
+            <strong>ProfileCard</strong> renders UI, and selectors swap variants and animations live.
+          </p>
+        </div>
+        <div class="overview-stats">
+          <div class="overview-stat">
+            <strong>3</strong>
+            <span>components in play</span>
+          </div>
+          <div class="overview-stat">
+            <strong>2</strong>
+            <span>directions of data</span>
+          </div>
+          <div class="overview-stat">
+            <strong>1</strong>
+            <span>living card</span>
+          </div>
+        </div>
+      </div>
+      <FlowDiagram :pulseProps=${true} :pulseEvents=${true} />
+    </section>
+
+    <section class="section reveal-left" data-reveal>
+      <p class="kicker">Why Jacaré</p>
+      <h2 class="section-title">Ideas that stay useful after the demo</h2>
+      <p class="section-lead">
+        The showcase is small on purpose — but the same rules scale to real screens.
+      </p>
+      <div class="pillar-grid cascade">
+        #for pillars as item (item.id)
+          <article class="pillar-card">
+            <strong>${item.title}</strong>
+            <span>${item.text}</span>
+          </article>
+        #end
+      </div>
+    </section>
+
+    <section class="section reveal-right" data-reveal>
+      <p class="kicker">Mental model</p>
+      <h2 class="section-title">The parent ↔ child loop</h2>
+      <p class="section-lead">
+        Keep ownership clear: state goes down, signals come up, motion replays in place.
+      </p>
+      <div class="loop-grid">
+        #for loopSteps as item (item.id)
+          <article class="loop-card">
+            <span class="loop-step">${item.step}</span>
+            <strong>${item.title}</strong>
+            <p>${item.text}</p>
+          </article>
+        #end
+      </div>
+    </section>
+
+    <section class="section reveal-fade" data-reveal>
+      <p class="kicker">Recipes</p>
+      <h2 class="section-title">Tiny patterns you will reuse</h2>
+      <div class="recipe-grid">
+        #for recipes as item (item.id)
+          <article class="recipe-card">
+            <strong>${item.title}</strong>
+            <pre class="recipe-code"><code>${item.code}</code></pre>
+          </article>
+        #end
+      </div>
+    </section>
+
+    <section class="section reveal-left" data-reveal>
+      <p class="kicker">Learning tracks</p>
+      <h2 class="section-title">Multiple components, one story</h2>
+      <div class="next-grid cascade">
+        #for tracks as item (item.id)
+          <div class="next-card">
+            <strong>${item.title}</strong>
+            <span>${item.text}</span>
+          </div>
+        #end
+      </div>
+    </section>
+
+    <section class="section panel reveal-right has-code-wm" data-reveal>
+      <CodeWatermark :code=${panelCodeWm} :tone=${'soft'} />
+      <div class="panel-foreground">
+        <p class="kicker">Start here</p>
+        <h2 class="section-title">Practical tutorial + playful practice</h2>
+        <p class="section-lead">
+          Follow the step-by-step track, then reinforce the ideas by steering the Jacaré through River Run.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" jacare-go="/tutorial" href=${appHref('/tutorial')}>Open tutorial</a>
+          <a class="btn btn-outline" jacare-go="/components" href=${appHref('/components')}>Browse components</a>
+          <a class="btn btn-soft" href="https://jacarejs.github.io/core/lab/" target="_blank" rel="noopener noreferrer">
+            <img src=${assetUrl('jacare-logo.webp')} alt="" width="18" height="18" />
+            Lab docs
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal-fade" data-reveal>
+      <h2 class="section-title">Next steps</h2>
+      <div class="next-grid">
+        <a class="next-card" jacare-go="/tutorial" href=${appHref('/tutorial')}>
+          <strong>Follow the tutorial</strong>
+          <span>Props, events, variants, animations, and more.</span>
+        </a>
+        <a class="next-card" jacare-go="/playground" href=${appHref('/playground')}>
+          <strong>Open the playground</strong>
+          <span>Change state and watch the card respond live.</span>
+        </a>
+        <a class="next-card" jacare-go="/game" href=${appHref('/game')}>
+          <strong>Play River Run</strong>
+          <span>Learn by choosing different solutions on the map.</span>
+        </a>
+        <a class="next-card" href="https://jacarejs.github.io/core/lab/" target="_blank" rel="noopener noreferrer">
+          <strong>Read the Lab</strong>
+          <span>API walkthrough with live snippets.</span>
+        </a>
+      </div>
+    </section>
   </section>
 </view>

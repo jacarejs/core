@@ -1,0 +1,149 @@
+import { effect } from '@jacare/core'
+import CopyCode from '../CopyCode.jcr'
+import { highlightJacare } from '../../utils/highlight.js'
+
+export <contract>
+  props: {
+    title: { type: 'string', default: 'Code' }
+    code: { type: 'any', required: true }
+    highlight: { type: 'string', default: '' }
+  }
+</contract>
+
+function read(value) {
+  return typeof value === 'function' ? value() : value
+}
+
+function paintHighlighted(el, source, mark) {
+  const raw = String(read(source) ?? '')
+  const needle = String(read(mark) ?? '')
+  const highlighted = highlightJacare(raw)
+  if (!needle) {
+    el.innerHTML = highlighted
+    return
+  }
+  const lines = raw.split('\n')
+  const htmlLines = highlighted.split('\n')
+  el.innerHTML = htmlLines
+    .map((line, index) => {
+      const hot = lines[index]?.includes(needle)
+      return hot ? `<span class="code-line is-hot">${line || ' '}</span>` : `<span class="code-line">${line || ' '}</span>`
+    })
+    .join('\n')
+}
+
+function ensureWired(el, source, mark) {
+  if (!el || el.dataset.hlWired === '1') return
+  el.dataset.hlWired = '1'
+  effect(() => {
+    paintHighlighted(el, source, mark)
+  })
+}
+
+export <view>
+  <div class="code-block">
+    <div class="code-block-head">
+      <span class="code-block-title">${title}</span>
+      <CopyCode :code=${code} />
+    </div>
+    <pre class="code-block-pre" tabindex="0">
+      <code
+        class="code-hl"
+        on-animationstart=${(event) => ensureWired(event.currentTarget, code, highlight)}
+      >${code}</code>
+    </pre>
+    #if highlight
+      <p class="code-block-hint">Highlight: <code>${highlight}</code></p>
+    #end
+  </div>
+</view>
+
+export <style>
+.code-block {
+  display: grid;
+  gap: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(120, 192, 24, 0.22);
+  background: #001818;
+  color: #d8f3dc;
+  box-shadow: 0 12px 32px rgba(0, 24, 24, 0.18);
+}
+
+.code-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(120, 192, 24, 0.1);
+  border-bottom: 1px solid rgba(120, 192, 24, 0.16);
+}
+
+.code-block-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #90c018;
+}
+
+.code-block-pre {
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  max-height: 22rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  -webkit-overflow-scrolling: touch;
+}
+
+.code-block-pre:focus-visible {
+  outline: 2px solid #78c018;
+  outline-offset: -2px;
+}
+
+.code-hl {
+  display: block;
+  white-space: pre;
+  animation: code-hl-boot 1ms linear both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-hl {
+    animation: code-hl-boot 1ms linear both !important;
+  }
+}
+
+.code-line {
+  display: block;
+  min-height: 1.2em;
+  border-radius: 0.25rem;
+  padding: 0 0.25rem;
+  margin: 0 -0.25rem;
+  transition: background 0.25s ease;
+}
+
+.code-line.is-hot {
+  background: rgba(120, 192, 24, 0.18);
+  box-shadow: inset 3px 0 0 #78c018;
+}
+
+.code-block-hint {
+  margin: 0;
+  padding: 0.55rem 0.85rem 0.75rem;
+  font-size: 0.75rem;
+  color: rgba(216, 243, 220, 0.75);
+  border-top: 1px solid rgba(120, 192, 24, 0.14);
+}
+
+.code-block-hint code {
+  color: #90c018;
+}
+
+@keyframes code-hl-boot {
+  from { opacity: 0.99; }
+  to { opacity: 1; }
+}
+</style>

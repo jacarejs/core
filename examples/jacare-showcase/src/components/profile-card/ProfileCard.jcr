@@ -1,0 +1,380 @@
+export <contract>
+  props: {
+    name: { type: 'string', required: true }
+    description: { type: 'string', default: '' }
+    avatar: { type: 'string', default: 'J' }
+    status: { type: 'string', default: 'online' }
+    variant: { type: 'string', default: 'default' }
+    animation: { type: 'string', default: 'fade' }
+    active: { type: 'boolean', default: false }
+    playToken: { type: 'number', default: 0 }
+  }
+  emits: ['profileSelected', 'action', 'animationDone', 'highlightChange']
+</contract>
+
+function read(value) {
+  return typeof value === 'function' ? value() : value
+}
+
+export <view>
+  <article
+    class="profile-card"
+    class-variant-default=${read(variant) === 'default'}
+    class-variant-glass=${read(variant) === 'glass'}
+    class-variant-neon=${read(variant) === 'neon'}
+    class-variant-nature=${read(variant) === 'nature'}
+    class-variant-ocean=${read(variant) === 'ocean'}
+    class-is-active=${!!read(active)}
+    class-anim-fade=${read(animation) === 'fade'}
+    class-anim-slide=${read(animation) === 'slide'}
+    class-anim-scale=${read(animation) === 'scale'}
+    class-anim-bounce=${read(animation) === 'bounce'}
+    class-anim-rotate=${read(animation) === 'rotate'}
+    class-anim-pulse=${read(animation) === 'pulse'}
+    data-play=${playToken}
+    role="button"
+    tabindex="0"
+    aria-label=${`Profile card for ${read(name)}`}
+    on-click=${() => {
+      emit('profileSelected', {
+        name: read(name),
+        variant: read(variant),
+        animation: read(animation),
+      })
+      emit('highlightChange', { active: !read(active) })
+    }}
+    on-keydown=${(event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        emit('profileSelected', {
+          name: read(name),
+          variant: read(variant),
+          animation: read(animation),
+        })
+        emit('highlightChange', { active: !read(active) })
+      }
+    }}
+    on-animationend=${(event) => {
+      if (event.target !== event.currentTarget) return
+      emit('animationDone', {
+        animation: read(animation),
+        playToken: read(playToken),
+      })
+    }}
+  >
+    <div class="profile-card-glow" aria-hidden="true"></div>
+    <div class="profile-card-body">
+      <div class="profile-avatar" aria-hidden="true">${avatar}</div>
+      <div class="profile-copy">
+        <div class="profile-top">
+          <h3 class="profile-name">${name}</h3>
+          <span
+            class="profile-status"
+            class-status-online=${read(status) === 'online'}
+            class-status-away=${read(status) === 'away'}
+            class-status-offline=${read(status) === 'offline'}
+          >${status}</span>
+        </div>
+        <p class="profile-desc">${description}</p>
+        <div class="profile-meta">
+          <span class="profile-chip">${variant}</span>
+          <span class="profile-chip">${animation}</span>
+        </div>
+        <button
+          type="button"
+          class="profile-action"
+          on-click=${(event) => {
+            event.stopPropagation()
+            emit('action', { name: read(name), action: 'highlight' })
+          }}
+        >
+          Highlight profile
+        </button>
+      </div>
+    </div>
+  </article>
+</view>
+
+export <style>
+.profile-card {
+  position: relative;
+  display: grid;
+  gap: 0;
+  width: min(100%, 22rem);
+  padding: 1.15rem;
+  border-radius: 1.1rem;
+  border: 1px solid #b8e0c4;
+  background: #ffffff;
+  color: #001818;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 48, 48, 0.1);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease, color 0.35s ease;
+  outline: none;
+}
+
+.profile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(0, 48, 48, 0.14);
+}
+
+.profile-card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(120, 192, 24, 0.45), 0 16px 40px rgba(0, 48, 48, 0.14);
+}
+
+.profile-card.is-active {
+  border-color: #78c018;
+  box-shadow: 0 0 0 2px rgba(120, 192, 24, 0.35), 0 16px 40px rgba(0, 48, 48, 0.14);
+}
+
+.profile-card-glow {
+  position: absolute;
+  inset: -40% -20% auto;
+  height: 70%;
+  background: radial-gradient(circle, rgba(120, 192, 24, 0.22), transparent 70%);
+  pointer-events: none;
+}
+
+.profile-card-body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.95rem;
+  align-items: start;
+}
+
+.profile-avatar {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 1rem;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #001818;
+  background: linear-gradient(135deg, #78c018, #90c018);
+  box-shadow: 0 8px 20px rgba(120, 192, 24, 0.35);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.35s ease;
+}
+
+.profile-copy {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.profile-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: #003030;
+  transition: color 0.3s ease;
+}
+
+.profile-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #d8f3dc;
+  color: #004830;
+}
+
+.profile-status::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.profile-status.status-online { color: #189030; background: #d8f3dc; }
+.profile-status.status-away { color: #8a6a10; background: #f5efd0; }
+.profile-status.status-offline { color: #5a6b62; background: #e8eee9; }
+
+.profile-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #3d6b52;
+  transition: color 0.3s ease;
+}
+
+.profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.profile-chip {
+  display: inline-flex;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: rgba(24, 144, 48, 0.1);
+  color: #004830;
+  border: 1px solid rgba(184, 224, 196, 0.9);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.profile-action {
+  justify-self: start;
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #b8e0c4;
+  background: #f4fbf6;
+  color: #003030;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.profile-action:hover {
+  background: #d8f3dc;
+  transform: translateY(-1px);
+}
+
+.profile-action:focus-visible {
+  outline: 2px solid #78c018;
+  outline-offset: 2px;
+}
+
+.profile-card.variant-glass {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 36px rgba(0, 48, 48, 0.12);
+}
+
+.profile-card.variant-neon {
+  background: #001818;
+  color: #d8f3dc;
+  border-color: rgba(120, 192, 24, 0.55);
+  box-shadow: 0 0 0 1px rgba(120, 192, 24, 0.25), 0 0 28px rgba(120, 192, 24, 0.28);
+}
+
+.profile-card.variant-neon .profile-name,
+.profile-card.variant-neon .profile-chip {
+  color: #d8f3dc;
+}
+
+.profile-card.variant-neon .profile-desc { color: rgba(216, 243, 220, 0.78); }
+
+.profile-card.variant-neon .profile-chip {
+  background: rgba(120, 192, 24, 0.14);
+  border-color: rgba(120, 192, 24, 0.35);
+}
+
+.profile-card.variant-neon .profile-action {
+  background: rgba(120, 192, 24, 0.14);
+  border-color: rgba(120, 192, 24, 0.4);
+  color: #d8f3dc;
+}
+
+.profile-card.variant-nature {
+  background:
+    linear-gradient(160deg, rgba(216, 243, 220, 0.95), rgba(244, 251, 246, 0.98)),
+    #f4fbf6;
+  border-color: #78c018;
+  box-shadow: 0 14px 36px rgba(0, 72, 48, 0.14);
+}
+
+.profile-card.variant-nature .profile-avatar {
+  background: linear-gradient(135deg, #189030, #60a818);
+  color: #f0fff4;
+}
+
+.profile-card.variant-ocean {
+  background: linear-gradient(145deg, #e8f7f4, #f4fbf6 55%, #dff3ff);
+  border-color: #7ec8c0;
+  box-shadow: 0 14px 36px rgba(16, 80, 90, 0.12);
+}
+
+.profile-card.variant-ocean .profile-avatar {
+  background: linear-gradient(135deg, #189030, #2a9d8f);
+  color: #f0fff4;
+}
+
+.profile-card.variant-ocean .profile-chip {
+  background: rgba(42, 157, 143, 0.12);
+  border-color: rgba(126, 200, 192, 0.8);
+  color: #0f4c4a;
+}
+
+.profile-card.anim-fade[data-play] {
+  animation: pc-fade 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.profile-card.anim-slide[data-play] {
+  animation: pc-slide 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.profile-card.anim-scale[data-play] {
+  animation: pc-scale 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+.profile-card.anim-bounce[data-play] {
+  animation: pc-bounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.profile-card.anim-rotate[data-play] {
+  animation: pc-rotate 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.profile-card.anim-pulse[data-play] {
+  animation: pc-pulse 0.7s ease both;
+}
+
+@keyframes pc-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pc-slide {
+  from { opacity: 0; transform: translateX(-1.25rem); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pc-scale {
+  from { opacity: 0; transform: scale(0.86); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pc-bounce {
+  0% { opacity: 0; transform: translateY(1.1rem) scale(0.96); }
+  60% { opacity: 1; transform: translateY(-0.35rem) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes pc-rotate {
+  from { opacity: 0; transform: rotate(-6deg) scale(0.94); }
+  to { opacity: 1; transform: rotate(0) scale(1); }
+}
+@keyframes pc-pulse {
+  0% { opacity: 0.55; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-card,
+  .profile-card:hover,
+  .profile-action,
+  .profile-avatar {
+    transition: none;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+</style>

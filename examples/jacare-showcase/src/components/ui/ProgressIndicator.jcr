@@ -1,0 +1,88 @@
+export <contract>
+  props: {
+    current: { type: 'number', required: true }
+    total: { type: 'number', required: true }
+    label: { type: 'string', default: 'Progresso' }
+    tone: { type: 'string', default: 'soft' }
+  }
+</contract>
+
+function read(value) {
+  return typeof value === 'function' ? value() : value
+}
+
+export <view>
+  <div
+    class="progress-indicator"
+    class-tone-hero=${read(tone) === 'hero'}
+    aria-label=${label}
+  >
+    <div class="progress-top">
+      <span>${label}</span>
+      <strong>${`Step ${read(current)} of ${read(total)}`}</strong>
+    </div>
+    <div
+      class="progress-track"
+      role="progressbar"
+      aria-valuemin="1"
+      aria-valuemax=${total}
+      aria-valuenow=${current}
+    >
+      <div
+        class="progress-fill"
+        style---pct=${`${Math.round((read(current) / read(total)) * 100)}%`}
+      ></div>
+    </div>
+  </div>
+</view>
+
+export <style>
+.progress-indicator {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+  color: #3d6b52;
+}
+
+.progress-top strong {
+  color: #003030;
+}
+
+.progress-track {
+  height: 0.65rem;
+  border-radius: 999px;
+  background: #d8f3dc;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: var(--pct, 0%);
+  border-radius: inherit;
+  background: linear-gradient(90deg, #189030, #78c018);
+  transition: width 0.25s ease;
+}
+
+.tone-hero .progress-top,
+.tone-hero .progress-top strong {
+  color: #d8f3dc;
+}
+
+.tone-hero .progress-track {
+  background: rgba(216, 243, 220, 0.18);
+}
+
+.tone-hero .progress-fill {
+  background: linear-gradient(90deg, #78c018, #b7e38a);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-fill { transition: none; }
+}
+</style>

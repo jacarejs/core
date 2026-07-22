@@ -1,0 +1,157 @@
+import { derive } from '@jacare/core'
+import { studio } from '../../bags/studio.js'
+
+const empty = derive(() => studio.items().length === 0)
+
+export <view>
+  <aside class="kit-dock">
+    <div class="kit-dock-head">
+      <div>
+        <p class="kit-dock-kicker">Live bag</p>
+        <h3>Studio bag</h3>
+      </div>
+      <span class="kit-dock-badge">${studio.count}</span>
+    </div>
+
+    <p class="kit-dock-summary">${studio.summary}</p>
+
+    #if empty()
+      <p class="kit-dock-empty">Add kits from the catalog. This panel reads the same createBag cells.</p>
+    #else
+      <ul class="kit-dock-list">
+        #for studio.items() as line (line.id)
+          <li>
+            <div>
+              <strong>${line.name}</strong>
+              <span>× ${line.qty}</span>
+            </div>
+            <button type="button" class="kit-dock-remove" on-click=${() => studio.remove(line.id)}>
+              Remove
+            </button>
+          </li>
+        #end
+      </ul>
+    #end
+
+    <div class="kit-dock-actions">
+      <strong>${studio.money}</strong>
+      <button type="button" class="btn btn-outline" on-click=${() => studio.clear()} disabled=${empty}>
+        Clear bag
+      </button>
+    </div>
+  </aside>
+</view>
+
+export <style>
+.kit-dock {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.2rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #f5f5f7;
+}
+
+.kit-dock-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.kit-dock-kicker {
+  margin: 0 0 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6e6e73;
+}
+
+.kit-dock h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1d1d1f;
+  letter-spacing: -0.02em;
+}
+
+.kit-dock-badge {
+  min-width: 1.85rem;
+  height: 1.85rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.kit-dock-summary {
+  margin: 0;
+  color: #6e6e73;
+  font-size: 0.86rem;
+}
+
+.kit-dock-empty {
+  margin: 0;
+  padding: 0.85rem;
+  border-radius: 0.85rem;
+  background: #ffffff;
+  color: #6e6e73;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.kit-dock-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.kit-dock-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.85rem;
+  background: #ffffff;
+}
+
+.kit-dock-list strong {
+  display: block;
+  color: #1d1d1f;
+  font-size: 0.9rem;
+}
+
+.kit-dock-list span {
+  color: #6e6e73;
+  font-size: 0.78rem;
+}
+
+.kit-dock-remove {
+  border: none;
+  background: transparent;
+  color: #189030;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.kit-dock-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.kit-dock-actions strong {
+  font-size: 1.1rem;
+  color: #1d1d1f;
+  font-variant-numeric: tabular-nums;
+}
+</style>

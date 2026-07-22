@@ -1,0 +1,358 @@
+import { derive, pulse } from '@jacare/core'
+
+const PROMPTS = [
+  {
+    id: 'pulse',
+    ask: 'A counter changed. Catch the fine-grained update.',
+    good: 'pulse',
+  },
+  {
+    id: 'emit',
+    ask: 'Child was clicked. Catch the upward signal.',
+    good: 'emit',
+  },
+  {
+    id: 'token',
+    ask: 'Replay motion without remounting. Catch the lever.',
+    good: 'token',
+  },
+  {
+    id: 'keyed',
+    ask: 'List items shuffle. Catch the stable approach.',
+    good: 'keyed',
+  },
+]
+
+const LABELS = {
+  pulse: 'pulse()',
+  emit: 'emit()',
+  token: 'playToken',
+  keyed: 'keyed loop',
+  remount: 'full remount',
+  html: 'innerHTML dump',
+  global: 'window hack',
+}
+
+const decoys = {
+  pulse: ['remount', 'html'],
+  emit: ['global', 'remount'],
+  token: ['remount', 'html'],
+  keyed: ['html', 'global'],
+}
+
+const running = pulse(false)
+const score = pulse(0)
+const lives = pulse(3)
+const streak = pulse(0)
+const best = pulse(0)
+const prompt = pulse(PROMPTS[0])
+const orbs = pulse([])
+const status = pulse('Hit Start, then tap only the matching signal.')
+const round = pulse(0)
+
+const livesLabel = derive(() => `${lives()} lives`)
+const scoreLabel = derive(() => `Score ${score()}`)
+const streakLabel = derive(() => `Streak ${streak()}`)
+const bestLabel = derive(() => `Best ${best()}`)
+const isRunning = derive(() => running())
+const isOver = derive(() => !running() && lives() <= 0 && round() > 0)
+
+let spawnTimer = null
+let roundTimer = null
+
+function clearTimers() {
+  if (spawnTimer) window.clearTimeout(spawnTimer)
+  if (roundTimer) window.clearTimeout(roundTimer)
+  spawnTimer = null
+  roundTimer = null
+}
+
+function shuffle(list) {
+  const next = list.slice()
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = next[i]
+    next[i] = next[j]
+    next[j] = tmp
+  }
+  return next
+}
+
+function spawnOrbs(target) {
+  const kinds = shuffle([target.good, ...decoys[target.good]]).slice(0, 3)
+  orbs.set(
+    kinds.map((kind, index) => ({
+      id: `${Date.now()}-${kind}-${index}`,
+      kind,
+      label: LABELS[kind],
+      good: kind === target.good,
+      left: Math.min(82, Math.max(18, 18 + index * 28 + Math.random() * 6)),
+      top: Math.min(78, Math.max(22, 24 + Math.random() * 42)),
+      delay: index * 0.08,
+    })),
+  )
+}
+
+function nextRound() {
+  if (!running()) return
+  const pick = PROMPTS[Math.floor(Math.random() * PROMPTS.length)]
+  prompt.set(pick)
+  round.update((n) => n + 1)
+  status.set(pick.ask)
+  spawnOrbs(pick)
+  if (roundTimer) window.clearTimeout(roundTimer)
+  roundTimer = window.setTimeout(() => {
+    if (!running()) return
+    miss('Too slow — the signal drifted away.')
+  }, 3200)
+}
+
+function miss(text) {
+  streak.set(0)
+  lives.update((n) => Math.max(0, n - 1))
+  status.set(text)
+  orbs.set([])
+  if (lives() <= 0) {
+    running.set(false)
+    clearTimers()
+    status.set('Sprint over. Fine-grained updates win races.')
+    return
+  }
+  spawnTimer = window.setTimeout(nextRound, 700)
+}
+
+function hit(orb) {
+  if (!running()) return
+  if (roundTimer) window.clearTimeout(roundTimer)
+  if (!orb.good) {
+    miss('Wrong catch — that path wastes work.')
+    return
+  }
+  const nextScore = score() + 10 + streak() * 2
+  score.set(nextScore)
+  streak.update((n) => n + 1)
+  if (nextScore > best()) best.set(nextScore)
+  status.set('Clean catch — only the bound nodes moved.')
+  orbs.set([])
+  spawnTimer = window.setTimeout(nextRound, 550)
+}
+
+function start() {
+  clearTimers()
+  running.set(true)
+  score.set(0)
+  lives.set(3)
+  streak.set(0)
+  round.set(0)
+  status.set('Listen for the prompt. Tap the matching signal.')
+  nextRound()
+}
+
+function stop() {
+  clearTimers()
+  running.set(false)
+  orbs.set([])
+  status.set('Paused. Hit Start to sprint again.')
+}
+
+export <view>
+  <section class="signal-sprint">
+    <div class="sprint-top">
+      <div>
+        <p class="sprint-kicker">Reaction arcade</p>
+        <h2 class="sprint-title">Signal Sprint</h2>
+        <p class="sprint-lead">Tap the matching Jacaré idea before time runs out. Decoys are tempting — and wrong.</p>
+      </div>
+      <div class="sprint-metrics">
+        <span>${scoreLabel}</span>
+        <span>${streakLabel}</span>
+        <span>${livesLabel}</span>
+        <span>${bestLabel}</span>
+      </div>
+    </div>
+
+    <div class="sprint-arena">
+      <p class="sprint-prompt" aria-live="polite">${status}</p>
+      <div class="sprint-field">
+        #for orbs() as orb (orb.id)
+          <button
+            type="button"
+            class="sprint-orb"
+            class-is-good=${() => orb.good}
+            style---left=${() => orb.left + '%'}
+            style---top=${() => orb.top + '%'}
+            style---delay=${() => orb.delay + 's'}
+            on-click=${() => hit(orb)}
+          >${orb.label}</button>
+        #end
+      </div>
+    </div>
+
+    <div class="sprint-actions">
+      #if isRunning()
+        <button type="button" class="btn btn-outline" on-click=${stop}>Pause</button>
+      #else
+        <button type="button" class="btn btn-primary" on-click=${start}>
+          ${() => (isOver() ? 'Play again' : 'Start sprint')}
+        </button>
+      #end
+    </div>
+  </section>
+</view>
+
+export <style>
+.signal-sprint {
+  display: grid;
+  gap: 1rem;
+}
+
+.sprint-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.sprint-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b7e38a;
+}
+
+.sprint-title {
+  margin: 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+  color: #f0fff4;
+}
+
+.sprint-lead {
+  margin: 0.35rem 0 0;
+  max-width: 46ch;
+  color: rgba(240, 255, 244, 0.78);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.sprint-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.sprint-metrics span {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(120, 192, 24, 0.16);
+  border: 1px solid rgba(184, 224, 100, 0.28);
+  color: #d8f3dc;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.sprint-arena {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(120, 192, 24, 0.28);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(120, 192, 24, 0.18), transparent 40%),
+    linear-gradient(160deg, rgba(0, 24, 24, 0.55), rgba(0, 72, 48, 0.35));
+}
+
+.sprint-prompt {
+  margin: 0;
+  min-height: 2.6rem;
+  color: #f0fff4;
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.sprint-field {
+  position: relative;
+  min-height: min(16rem, 52dvh);
+  border-radius: 1rem;
+  border: 1px dashed rgba(184, 224, 196, 0.28);
+  background: rgba(0, 24, 24, 0.28);
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+.sprint-orb {
+  position: absolute;
+  left: var(--left);
+  top: var(--top);
+  transform: translate(-50%, -50%) scale(0.92);
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(216, 243, 220, 0.28);
+  background: rgba(255, 255, 255, 0.1);
+  color: #f0fff4;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 750;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  animation: sprint-pop 0.35s ease both;
+  animation-delay: var(--delay);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.sprint-orb.is-good {
+  border-color: rgba(120, 192, 24, 0.7);
+  box-shadow: 0 0 0 4px rgba(120, 192, 24, 0.12);
+}
+
+.sprint-orb:hover {
+  transform: translate(-50%, -50%) scale(1.04);
+  background: rgba(120, 192, 24, 0.28);
+}
+
+.sprint-actions {
+  display: flex;
+  gap: 0.55rem;
+}
+
+@keyframes sprint-pop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(0.92); }
+}
+
+@media (max-width: 800px) {
+  .sprint-top {
+    grid-template-columns: 1fr;
+  }
+
+  .sprint-metrics {
+    justify-content: flex-start;
+  }
+
+  .sprint-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .sprint-actions .btn {
+    width: 100%;
+  }
+
+  .sprint-orb {
+    font-size: 0.8rem;
+    padding: 0.75rem 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprint-orb {
+    animation: none;
+  }
+}
+</style>

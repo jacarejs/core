@@ -1,0 +1,282 @@
+export <contract>
+  props: {
+    layer: { type: 'string', default: 'bag' }
+  }
+</contract>
+
+function read(value) {
+  return typeof value === 'function' ? value() : value
+}
+
+export <view>
+  <figure
+    class="mesh-graph"
+    class-layer-mesh=${read(layer) === 'mesh'}
+    class-layer-bag=${read(layer) === 'bag'}
+    class-layer-port=${read(layer) === 'port'}
+    aria-label="Pulse Mesh architecture"
+  >
+    <div class="mesh-graph-glow" aria-hidden="true"></div>
+
+    <div class="mesh-hub">
+      <p class="mesh-hub-kicker">Pulse Mesh</p>
+      <div class="mesh-ports">
+        <span class="mesh-port"><code>@studio/items</code></span>
+        <span class="mesh-port"><code>@studio/count</code></span>
+        <span class="mesh-port"><code>@studio/total</code></span>
+      </div>
+      <p class="mesh-hub-note">DependencyCell graph · core</p>
+    </div>
+
+    <svg class="mesh-links" viewBox="0 0 360 72" preserveAspectRatio="none" aria-hidden="true">
+      <path class="mesh-link mesh-link-a" d="M60 4 C60 36 60 36 60 68"></path>
+      <path class="mesh-link mesh-link-b" d="M180 4 C180 36 180 36 180 68"></path>
+      <path class="mesh-link mesh-link-c" d="M300 4 C300 36 300 36 300 68"></path>
+      <circle class="mesh-dot" cx="60" cy="4" r="3.5"></circle>
+      <circle class="mesh-dot" cx="180" cy="4" r="3.5"></circle>
+      <circle class="mesh-dot" cx="300" cy="4" r="3.5"></circle>
+      <circle class="mesh-dot" cx="60" cy="68" r="3.5"></circle>
+      <circle class="mesh-dot" cx="180" cy="68" r="3.5"></circle>
+      <circle class="mesh-dot" cx="300" cy="68" r="3.5"></circle>
+    </svg>
+
+    <div class="mesh-leaves">
+      <article class="mesh-leaf">
+        <strong>Catalog.jcr</strong>
+        <span>writes items</span>
+      </article>
+      <article class="mesh-leaf">
+        <strong>Dock.jcr</strong>
+        <span>reads count</span>
+      </article>
+      <article class="mesh-leaf">
+        <strong>Theme.jcr</strong>
+        <span>shared port</span>
+      </article>
+    </div>
+
+    <p class="mesh-footer">
+      <code>import</code>
+      <em>·</em>
+      <code>links</code>
+      <em>·</em>
+      <code>@studio/key</code>
+      <span>— same cell</span>
+    </p>
+  </figure>
+</view>
+
+export <style>
+.mesh-graph {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  display: grid;
+  gap: 0.15rem;
+  padding: 1.25rem 1.15rem 1.1rem;
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(120, 192, 24, 0.22), transparent 55%),
+    linear-gradient(165deg, #141416 0%, #1d1d1f 48%, #111113 100%);
+  color: #e8f8dc;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 40px rgba(0, 0, 0, 0.18);
+}
+
+.mesh-graph-glow {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  width: 14rem;
+  height: 14rem;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120, 192, 24, 0.18), transparent 68%);
+  pointer-events: none;
+  filter: blur(8px);
+}
+
+.mesh-hub {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.95rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(184, 224, 100, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.mesh-hub-kicker {
+  margin: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #b7e38a;
+}
+
+.mesh-ports {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.mesh-port {
+  display: grid;
+  place-items: center;
+  min-height: 2.4rem;
+  padding: 0.45rem 0.35rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(120, 192, 24, 0.22);
+  background: rgba(0, 24, 24, 0.35);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.mesh-port code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(0.58rem, 1.7vw, 0.7rem);
+  color: #d8f3dc;
+  word-break: break-all;
+  text-align: center;
+}
+
+.mesh-hub-note {
+  margin: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(216, 243, 220, 0.58);
+}
+
+.mesh-links {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 3.25rem;
+  overflow: visible;
+}
+
+.mesh-link {
+  fill: none;
+  stroke: rgba(120, 192, 24, 0.55);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: stroke 0.25s ease, stroke-width 0.25s ease;
+}
+
+.mesh-dot {
+  fill: #78c018;
+  transition: fill 0.25s ease, r 0.25s ease;
+}
+
+.mesh-leaves {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.mesh-leaf {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: center;
+  padding: 0.8rem 0.45rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  text-align: center;
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.mesh-leaf strong {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #f0fff4;
+}
+
+.mesh-leaf span {
+  font-size: 0.68rem;
+  color: rgba(216, 243, 220, 0.62);
+}
+
+.mesh-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.55rem 0 0;
+  color: rgba(216, 243, 220, 0.7);
+  font-size: 0.72rem;
+}
+
+.mesh-footer code {
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.4rem;
+  background: rgba(120, 192, 24, 0.14);
+  color: #d8f3dc;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+}
+
+.mesh-footer em {
+  font-style: normal;
+  opacity: 0.45;
+}
+
+.mesh-graph.layer-mesh .mesh-hub {
+  border-color: rgba(144, 192, 24, 0.65);
+  box-shadow: 0 0 0 4px rgba(120, 192, 24, 0.12), 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+.mesh-graph.layer-bag .mesh-ports .mesh-port {
+  border-color: rgba(144, 192, 24, 0.55);
+  background: rgba(120, 192, 24, 0.16);
+  transform: translateY(-1px);
+}
+
+.mesh-graph.layer-port .mesh-leaf {
+  border-color: rgba(144, 192, 24, 0.45);
+  background: rgba(120, 192, 24, 0.12);
+  transform: translateY(-1px);
+}
+
+.mesh-graph.layer-port .mesh-link {
+  stroke: rgba(144, 192, 24, 0.9);
+  stroke-width: 2.5;
+}
+
+@media (max-width: 720px) {
+  .mesh-ports,
+  .mesh-leaves {
+    grid-template-columns: 1fr;
+  }
+
+  .mesh-links {
+    display: none;
+  }
+
+  .mesh-leaf {
+    justify-items: start;
+    text-align: left;
+    padding: 0.75rem 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mesh-hub,
+  .mesh-port,
+  .mesh-leaf,
+  .mesh-link {
+    transition: none;
+  }
+}
+</style>

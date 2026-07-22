@@ -1,0 +1,110 @@
+import { derive, pulse } from '@jacare/core'
+import { appHref, assetUrl } from '../app-base.js'
+import RiverRun from '../components/games/RiverRun.jcr'
+import SignalSprint from '../components/games/SignalSprint.jcr'
+import ContractMatch from '../components/games/ContractMatch.jcr'
+
+const GAMES = [
+  {
+    id: 'river',
+    title: 'River Run',
+    blurb: 'Steer the Jacaré and solve pad puzzles about real trade-offs.',
+    tag: 'Explore',
+  },
+  {
+    id: 'sprint',
+    title: 'Signal Sprint',
+    blurb: 'Reaction arcade — catch the right update before decoys win.',
+    tag: 'Reflex',
+  },
+  {
+    id: 'match',
+    title: 'Contract Match',
+    blurb: 'Memory lab pairing APIs with the ideas they protect.',
+    tag: 'Memory',
+  },
+]
+
+const active = pulse('river')
+const isRiver = derive(() => active() === 'river')
+const isSprint = derive(() => active() === 'sprint')
+const isMatch = derive(() => active() === 'match')
+const activeMeta = derive(() => GAMES.find((game) => game.id === active()) || GAMES[0])
+
+function play(id) {
+  active.set(id)
+}
+
+export <view>
+  <section class="page arcade-page">
+    <header class="arcade-hero reveal-fade" data-reveal>
+      <div class="arcade-hero-art" aria-hidden="true">
+        <img class="arcade-logo arcade-logo-a" src=${assetUrl('jacare-logo.webp')} alt="" width="152" height="160" decoding="async" loading="lazy" />
+        <img class="arcade-logo arcade-logo-b" src=${assetUrl('jacare-logo.webp')} alt="" width="152" height="160" decoding="async" loading="lazy" />
+        <div class="arcade-orbit"></div>
+      </div>
+
+      <div class="arcade-hero-copy">
+        <p class="arcade-eyebrow">Jacaré Arcade</p>
+        <h1 class="arcade-title">Learn by playing weird little games</h1>
+        <p class="arcade-lead">
+          Three modes. Same framework ideas. River exploration, reflex training, and contract memory —
+          pick a cabinet and jump in.
+        </p>
+        <div class="arcade-hero-actions">
+          <a class="btn btn-primary" jacare-go="/tutorial" href=${appHref('/tutorial')}>Tutorial path</a>
+          <a class="btn btn-ghost" jacare-go="/playground" href=${appHref('/playground')}>Free playground</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="arcade-cabinet reveal-scale" data-reveal>
+      <div class="arcade-picker" role="tablist" aria-label="Games">
+        #for GAMES as game (game.id)
+          <button
+            type="button"
+            class="arcade-pick"
+            class-is-active=${() => active() === game.id}
+            on-click=${() => play(game.id)}
+          >
+            <em>${game.tag}</em>
+            <strong>${game.title}</strong>
+            <span>${game.blurb}</span>
+          </button>
+        #end
+      </div>
+
+      <div class="arcade-screen">
+        <div class="arcade-screen-bar">
+          <span>Now playing</span>
+          <strong>${activeMeta().title}</strong>
+        </div>
+
+        #if isRiver()
+          <RiverRun />
+        #end
+        #if isSprint()
+          <SignalSprint />
+        #end
+        #if isMatch()
+          <ContractMatch />
+        #end
+      </div>
+    </section>
+
+    <section class="arcade-notes reveal-left" data-reveal>
+      <article class="arcade-note">
+        <strong>Why games?</strong>
+        <p>Trade-offs stick better when you feel the wrong path cost something.</p>
+      </article>
+      <article class="arcade-note">
+        <strong>Same primitives</strong>
+        <p>pulse, emit, props, keyed loops, playToken — just wearing arcade jackets.</p>
+      </article>
+      <article class="arcade-note">
+        <strong>Then ship</strong>
+        <p>Jump back to the playground and rebuild the ideas without the scoreboard.</p>
+      </article>
+    </section>
+  </section>
+</view>

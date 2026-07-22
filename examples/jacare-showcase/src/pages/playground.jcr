@@ -1,0 +1,70 @@
+import { appHref } from '../app-base.js'
+import AnimatedProfile from '../components/animated-profile/AnimatedProfile.jcr'
+import CodeBlock from '../components/ui/CodeBlock.jcr'
+import { step8Code } from '../snippets/tutorial.js'
+
+const tips = [
+  { id: 'props', title: 'Props down', text: 'Parent state lands on ProfileCard through :name, :variant, :animation.' },
+  { id: 'events', title: 'Events up', text: 'Clicks emit typed events. The log is the parent listening.' },
+  { id: 'motion', title: 'Motion token', text: 'playToken restarts animation without remounting the card.' },
+]
+
+export <view>
+  <section class="page playground-page">
+    <header class="playground-masthead reveal-fade" data-reveal>
+      <div class="playground-masthead-copy">
+        <p class="playground-eyebrow">Live lab</p>
+        <h1 class="playground-title">Playground workbench</h1>
+        <p class="playground-lead">
+          Twist props, replay motion, and watch events climb back to the parent.
+          This is the same AnimatedProfile stack — just freer than the tutorial steps.
+        </p>
+      </div>
+      <div class="playground-masthead-actions">
+        <a class="btn btn-outline" jacare-go="/tutorial" href=${appHref('/tutorial')}>Back to tutorial</a>
+        <a class="btn btn-primary" jacare-go="/game" href=${appHref('/game')}>Try River Run</a>
+      </div>
+    </header>
+
+    <section class="playground-bench reveal-scale" data-reveal>
+      <div class="playground-bench-bar">
+        <div>
+          <strong>Workbench</strong>
+          <span>Edit left → see right. Or poke the card itself.</span>
+        </div>
+        <div class="playground-bench-tags">
+          <span>pulse()</span>
+          <span>emit()</span>
+          <span>playToken</span>
+        </div>
+      </div>
+      <AnimatedProfile />
+    </section>
+
+    <section class="playground-readout reveal-left" data-reveal>
+      #for tips as tip (tip.id)
+        <article class="playground-tip">
+          <strong>${tip.title}</strong>
+          <p>${tip.text}</p>
+        </article>
+      #end
+    </section>
+
+    <section class="playground-source reveal-right" data-reveal>
+      <div class="playground-source-copy">
+        <p class="kicker">Source lens</p>
+        <h2 class="section-title">What the parent is really doing</h2>
+        <p class="section-lead">
+          The highlighted line is the prop most people tweak first.
+          Keep the contract edges clean and the playground stays honest.
+        </p>
+        <ul class="playground-checklist">
+          <li>Props flow from the parent into <code>ProfileCard</code>.</li>
+          <li>Clicks and animations bubble up as typed events.</li>
+          <li>Variants and animations are just state + scoped CSS.</li>
+        </ul>
+      </div>
+      <CodeBlock :title=${'Example core'} :code=${step8Code} :highlight=${':variant'} />
+    </section>
+  </section>
+</view>

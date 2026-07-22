@@ -1,12 +1,51 @@
 import { derive, pulse } from '@jacare/core'
 import { appHref, assetUrl } from './app-base.js'
 import { activeCode, hideCode } from './code-viewer.js'
+import { pageLoading, pageLoadingLabel } from './page-loading.js'
 import CodeModal from './components/CodeModal.jcr'
 
+const JACARE_VERSION = '0.1.9'
+
 const menuOpen = pulse(false)
+const scrolled = pulse(false)
+const showTopBtn = pulse(false)
 const menuLabel = derive(() => (menuOpen() ? 'Close' : 'Menu'))
 const viewerTitle = derive(() => activeCode()?.title ?? '')
 const viewerFiles = derive(() => activeCode()?.files ?? [])
+
+const footerTips = [
+  'Zero VDOM — bindings talk to the DOM directly.',
+  'Contracts catch prop mistakes before you ship.',
+  'playToken restarts motion without remounting.',
+  'Same goal, many valid architectures.',
+  'Scoped CSS stays in its .jcr lane.',
+]
+
+const tipIndex = pulse(0)
+const tipText = derive(() => footerTips[tipIndex() % footerTips.length])
+const nextMove = pulse('Start the tutorial and ship your first living component.')
+const signalBeat = pulse('idle')
+const year = new Date().getFullYear()
+
+function refreshNextMove() {
+  const path = (typeof window !== 'undefined' ? window.location.pathname : '/') || '/'
+  if (path.includes('tutorial')) {
+    nextMove.set('You are learning — open the playground and stress-test props live.')
+    signalBeat.set('learning')
+  } else if (path.includes('playground')) {
+    nextMove.set('Nice experiments — play River Run and choose different solutions.')
+    signalBeat.set('building')
+  } else if (path.includes('game')) {
+    nextMove.set('Trade-offs clicked — browse Components and steal the file tree.')
+    signalBeat.set('playing')
+  } else if (path.includes('components')) {
+    nextMove.set('Structure mapped — jump back to Tutorial step 1 with clearer eyes.')
+    signalBeat.set('shipping')
+  } else {
+    nextMove.set('Fresh landing — begin the tutorial or take the scenic River Run.')
+    signalBeat.set('ready')
+  }
+}
 
 function toggleMenu() {
   menuOpen.update((open) => !open)
@@ -14,50 +53,227 @@ function toggleMenu() {
 
 function closeMenu() {
   menuOpen.set(false)
+  queueMicrotask(refreshNextMove)
+}
+
+function onDocKey(event) {
+  if (event.key === 'Escape') closeMenu()
+}
+
+function onScroll() {
+  const y = window.scrollY || document.documentElement.scrollTop || 0
+  const compact = scrolled()
+  if (!compact && y > 40) scrolled.set(true)
+  else if (compact && y < 12) scrolled.set(false)
+
+  const topVisible = showTopBtn()
+  if (!topVisible && y > 420) showTopBtn.set(true)
+  else if (topVisible && y < 320) showTopBtn.set(false)
+}
+
+let scrollFrame = 0
+function onScrollRaf() {
+  if (scrollFrame) return
+  scrollFrame = window.requestAnimationFrame(() => {
+    scrollFrame = 0
+    onScroll()
+  })
+}
+
+function scrollTop() {
+  if (typeof window === 'undefined') return
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+if (typeof window !== 'undefined') {
+  onScroll()
+  refreshNextMove()
+  window.addEventListener('scroll', onScrollRaf, { passive: true })
+  window.addEventListener('popstate', refreshNextMove)
+  window.addEventListener('keydown', onDocKey)
+  setInterval(() => {
+    tipIndex.update((n) => n + 1)
+    refreshNextMove()
+  }, 4800)
 }
 
 export <view>
   <div class="app">
+    <div class="scroll-timeline" data-page-progress>
+      <div class="scroll-timeline-top">
+        <div class="scroll-timeline-top-track"></div>
+        <div class="scroll-timeline-top-fill" data-progress-fill-top></div>
+        <div class="scroll-timeline-top-glow" data-progress-glow-top></div>
+      </div>
+
+      <div class="scroll-timeline-rail">
+        <div class="scroll-timeline-rail-glow"></div>
+        <div class="scroll-timeline-spine">
+          <div class="scroll-timeline-track"></div>
+          <div class="scroll-timeline-fill" data-progress-fill-rail></div>
+          <div class="scroll-timeline-orb" data-progress-orb>
+            <span class="scroll-timeline-orb-core"></span>
+            <span class="scroll-timeline-orb-ring"></span>
+          </div>
+          <div class="scroll-timeline-dots">
+            <button type="button" class="scroll-timeline-dot" data-progress-dot="0" aria-label="Start"></button>
+            <button type="button" class="scroll-timeline-dot" data-progress-dot="25" aria-label="25 percent"></button>
+            <button type="button" class="scroll-timeline-dot" data-progress-dot="50" aria-label="50 percent"></button>
+            <button type="button" class="scroll-timeline-dot" data-progress-dot="75" aria-label="75 percent"></button>
+            <button type="button" class="scroll-timeline-dot" data-progress-dot="100" aria-label="End"></button>
+          </div>
+        </div>
+        <div class="scroll-timeline-pct" data-progress-label>0%</div>
+      </div>
+    </div>
     <div class="layout">
-      <header class="header">
+      <header class="header" class-is-scrolled=${scrolled}>
         <div class="header-top">
           <a class="brand" jacare-go="/" href=${appHref('/')} on-click=${closeMenu}>
-            <img class="logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
+            <img class="logo" src=${assetUrl('jacare-logo.webp')} alt="Jacaré" width="152" height="160" decoding="async" fetchpriority="high" />
             <span class="brand-text">
-              <span class="brand-title">Jacaré Showcase</span>
-              <span class="brand-tag">Fine-grained reactivity · zero VDOM</span>
+              <span class="brand-title">Jacaré</span>
+              <span class="brand-tag">Animated components · interactive tutorial</span>
             </span>
           </a>
-          <button type="button" class="nav-toggle btn btn-outline" on-click=${toggleMenu}>
+          <span class="version-badge" title="Latest @jacare/core">v${JACARE_VERSION}</span>
+          <button
+            type="button"
+            class="nav-toggle btn btn-outline"
+            aria-expanded=${menuOpen}
+            aria-controls="primary-nav"
+            on-click=${toggleMenu}
+          >
             ${menuLabel}
           </button>
         </div>
-        <nav class="nav" class-nav-open=${menuOpen}>
+        <nav id="primary-nav" class="nav" class-nav-open=${menuOpen} aria-label="Primary">
           <a class="nav-link" jacare-go="/" href=${appHref('/')} on-click=${closeMenu}>Home</a>
-          <a class="nav-link" jacare-go="/reactivity" href=${appHref('/reactivity')} on-click=${closeMenu}>Reactivity</a>
-          <a class="nav-link" jacare-go="/lists" href=${appHref('/lists')} on-click=${closeMenu}>Lists</a>
-          <a class="nav-link" jacare-go="/bindings" href=${appHref('/bindings')} on-click=${closeMenu}>Bindings</a>
-          <a class="nav-link" jacare-go="/forms" href=${appHref('/forms')} on-click=${closeMenu}>Forms</a>
+          <a class="nav-link" jacare-go="/tutorial" href=${appHref('/tutorial')} on-click=${closeMenu}>Tutorial</a>
+          <a class="nav-link" jacare-go="/playground" href=${appHref('/playground')} on-click=${closeMenu}>Playground</a>
+          <a class="nav-link" jacare-go="/game" href=${appHref('/game')} on-click=${closeMenu}>Game</a>
           <a class="nav-link" jacare-go="/components" href=${appHref('/components')} on-click=${closeMenu}>Components</a>
-          <a class="nav-link" jacare-go="/poll" href=${appHref('/poll')} on-click=${closeMenu}>Poll</a>
-          <a class="nav-link" jacare-go="/cart" href=${appHref('/cart')} on-click=${closeMenu}>Cart</a>
-          <a class="nav-link" jacare-go="/timers" href=${appHref('/timers')} on-click=${closeMenu}>Timers</a>
-          <a class="nav-link" jacare-go="/performance" href=${appHref('/performance')} on-click=${closeMenu}>Performance</a>
+          <a
+            class="nav-link nav-external"
+            href="https://jacarejs.github.io/core/lab/"
+            target="_blank"
+            rel="noopener noreferrer"
+            on-click=${closeMenu}
+          >Docs</a>
+          <a
+            class="nav-link nav-external"
+            href="https://github.com/jacarejs/core"
+            target="_blank"
+            rel="noopener noreferrer"
+            on-click=${closeMenu}
+          >GitHub</a>
         </nav>
       </header>
 
-      <main class="main" jacare-frame></main>
-
-      <footer class="footer">
-        <span>Built with Jacaré — by Heber Almeida · MIT License</span>
-        <a
-          class="footer-repo"
-          href="https://github.com/jacarejs/core"
-          target="_blank"
-          rel="noopener noreferrer"
-        >github.com/jacarejs/core</a>
-      </footer>
+      <div class="main-stage">
+        <div
+          class="page-loader"
+          class-is-on=${pageLoading}
+          aria-live="polite"
+          aria-busy=${pageLoading}
+          aria-hidden=${!pageLoading()}
+        >
+          <div class="page-loader-card">
+            <span class="page-loader-orb" aria-hidden="true"></span>
+            <p class="page-loader-kicker">Jacaré</p>
+            <strong class="page-loader-title">${pageLoadingLabel}</strong>
+            <p class="page-loader-hint">Fine-grained chunks · almost there</p>
+          </div>
+        </div>
+        <main class="main" jacare-frame></main>
+      </div>
     </div>
+
+    <footer class="footer-dock">
+      <div class="footer-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+          <path d="M0,40 C180,80 360,0 540,28 C720,56 900,72 1080,36 C1260,8 1350,20 1440,44 L1440,80 L0,80 Z"></path>
+        </svg>
+      </div>
+
+      <div class="footer-panel">
+        <div class="footer-inner">
+          <div class="footer-grid">
+            <div class="footer-brand-block">
+              <div class="footer-brand-row">
+                <div class="footer-logo-wrap">
+                  <img class="footer-logo" src=${assetUrl('footer-jacare.webp')} alt="Jacaré" width="288" height="288" decoding="async" loading="lazy" />
+                  <span class="footer-steam footer-steam-a" aria-hidden="true"></span>
+                  <span class="footer-steam footer-steam-b" aria-hidden="true"></span>
+                  <span class="footer-steam footer-steam-c" aria-hidden="true"></span>
+                </div>
+                <div>
+                  <p class="footer-kicker">End of frame</p>
+                  <h2 class="footer-title">Still reactive.</h2>
+                </div>
+              </div>
+              <p class="footer-status">
+                <span class="footer-pulse" class-beat-ready=${signalBeat() === 'ready'} class-beat-learning=${signalBeat() === 'learning'} class-beat-building=${signalBeat() === 'building'} class-beat-playing=${signalBeat() === 'playing'} class-beat-shipping=${signalBeat() === 'shipping'}></span>
+                signal: ${signalBeat} · runtime v${JACARE_VERSION}
+              </p>
+            </div>
+
+            <div class="footer-smart">
+              <p class="footer-kicker">Smart next move</p>
+              <p class="footer-next">${nextMove}</p>
+              <p class="footer-tip" aria-live="polite">${tipText}</p>
+              <div class="footer-actions">
+                <a class="btn btn-primary" jacare-go="/tutorial" href=${appHref('/tutorial')} on-click=${closeMenu}>Tutorial</a>
+                <a class="btn btn-soft" jacare-go="/playground" href=${appHref('/playground')} on-click=${closeMenu}>Playground</a>
+                <a class="btn btn-outline footer-btn-dark" jacare-go="/game" href=${appHref('/game')} on-click=${closeMenu}>River Run</a>
+              </div>
+            </div>
+
+            <div class="footer-terminal" aria-label="Status console">
+              <div class="footer-term-head">
+                <span></span><span></span><span></span>
+                <code>jacare · footer</code>
+              </div>
+              <pre class="footer-term-body"><code>$ jacare check
+✓  contracts valid
+$ jacare dev
+✓  fine-grained updates online
+$ echo "built by Heber Almeida"
+built by Heber Almeida</code></pre>
+              <button type="button" class="footer-top" on-click=${scrollTop}>Back to top ↑</button>
+            </div>
+          </div>
+
+          <div class="footer-meta">
+            <span>© ${year} Jacaré · MIT License</span>
+            <a
+              class="footer-repo"
+              href="https://github.com/jacarejs/core"
+              target="_blank"
+              rel="noopener noreferrer"
+            >github.com/jacarejs/core</a>
+            <a
+              class="footer-repo"
+              href="https://jacarejs.github.io/core/lab/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Lab docs</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <button
+      type="button"
+      class="back-to-top"
+      class-is-visible=${showTopBtn}
+      aria-label="Back to top"
+      title="Back to top"
+      on-click=${scrollTop}
+    >
+      <span class="back-to-top-arrow" aria-hidden="true">↑</span>
+      <span class="back-to-top-label">Top</span>
+    </button>
 
     #if activeCode()
       <CodeModal :title=${viewerTitle} :files=${viewerFiles} on-close=${hideCode} />

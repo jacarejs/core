@@ -1,0 +1,291 @@
+import { derive, pulse } from '@jacare/core'
+
+const PAIRS = [
+  { id: 'pulse', a: 'pulse()', b: 'reactive state' },
+  { id: 'emit', a: 'emit()', b: 'events up' },
+  { id: 'prop', a: ':name', b: 'props down' },
+  { id: 'token', a: 'playToken', b: 'replay motion' },
+  { id: 'loop', a: 'keyed loop', b: 'stable lists' },
+  { id: 'css', a: 'scoped style', b: 'no CSS leaks' },
+]
+
+function buildDeck() {
+  const cards = []
+  PAIRS.forEach((pair) => {
+    cards.push({ id: `${pair.id}-a`, pair: pair.id, label: pair.a })
+    cards.push({ id: `${pair.id}-b`, pair: pair.id, label: pair.b })
+  })
+  for (let i = cards.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = cards[i]
+    cards[i] = cards[j]
+    cards[j] = tmp
+  }
+  return cards
+}
+
+const deck = pulse(buildDeck())
+const flipped = pulse([])
+const matched = pulse({})
+const locked = pulse(false)
+const moves = pulse(0)
+const status = pulse('Flip two cards. Match Jacaré ideas that belong together.')
+
+const matchedCount = derive(() => Object.keys(matched()).length)
+const progress = derive(() => `${matchedCount()} / ${PAIRS.length} pairs`)
+const movesLabel = derive(() => `Moves ${moves()}`)
+const done = derive(() => matchedCount() === PAIRS.length)
+const cards = derive(() =>
+  deck().map((card) => ({
+    ...card,
+    open: flipped().includes(card.id) || !!matched()[card.pair],
+    won: !!matched()[card.pair],
+  })),
+)
+
+function reset() {
+  deck.set(buildDeck())
+  flipped.set([])
+  matched.set({})
+  locked.set(false)
+  moves.set(0)
+  status.set('Fresh shuffle. Match contracts to meanings.')
+}
+
+function flip(card) {
+  if (locked()) return
+  if (matched()[card.pair]) return
+  if (flipped().includes(card.id)) return
+  const next = [...flipped(), card.id]
+  flipped.set(next)
+  if (next.length < 2) {
+    status.set('Pick a partner for ' + card.label)
+    return
+  }
+  moves.update((n) => n + 1)
+  locked.set(true)
+  const [firstId, secondId] = next
+  const first = deck().find((item) => item.id === firstId)
+  const second = deck().find((item) => item.id === secondId)
+  if (first && second && first.pair === second.pair) {
+    matched.update((map) => ({ ...map, [first.pair]: true }))
+    status.set('Match! ' + first.label + ' ↔ ' + second.label)
+    flipped.set([])
+    locked.set(false)
+    if (Object.keys(matched()).length === PAIRS.length) {
+      status.set('Board cleared — contracts and meanings stick together.')
+    }
+    return
+  }
+  status.set('Not a pair. Remember the positions.')
+  window.setTimeout(() => {
+    flipped.set([])
+    locked.set(false)
+  }, 700)
+}
+
+export <view>
+  <section class="contract-match">
+    <div class="match-top">
+      <div>
+        <p class="match-kicker">Memory lab</p>
+        <h2 class="match-title">Contract Match</h2>
+        <p class="match-lead">Pair APIs with what they mean in a living Jacaré app.</p>
+      </div>
+      <div class="match-metrics">
+        <span>${progress}</span>
+        <span>${movesLabel}</span>
+      </div>
+    </div>
+
+    <p class="match-status" aria-live="polite">${status}</p>
+
+    <div class="match-grid">
+      #for cards() as card (card.id)
+        <button
+          type="button"
+          class="match-card"
+          class-is-open=${() => card.open}
+          class-is-won=${() => card.won}
+          on-click=${() => flip(card)}
+        >
+          <span class="match-face match-back">?</span>
+          <span class="match-face match-front">${card.label}</span>
+        </button>
+      #end
+    </div>
+
+    <div class="match-actions">
+      <button type="button" class="btn btn-outline" on-click=${reset}>Shuffle again</button>
+      #if done()
+        <span class="match-win">Perfect — those edges stay honest in real components.</span>
+      #end
+    </div>
+  </section>
+</view>
+
+export <style>
+.contract-match {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.match-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.match-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b7e38a;
+}
+
+.match-title {
+  margin: 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+  color: #f0fff4;
+}
+
+.match-lead {
+  margin: 0.35rem 0 0;
+  color: rgba(240, 255, 244, 0.78);
+  font-size: 0.92rem;
+}
+
+.match-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.match-metrics span {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(120, 192, 24, 0.16);
+  border: 1px solid rgba(184, 224, 100, 0.28);
+  color: #d8f3dc;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.match-status {
+  margin: 0;
+  min-height: 1.5rem;
+  color: #d8f3dc;
+  font-weight: 650;
+}
+
+.match-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.match-card {
+  position: relative;
+  aspect-ratio: 1.15;
+  min-height: 2.75rem;
+  border: none;
+  padding: 0;
+  border-radius: 1rem;
+  background: transparent;
+  cursor: pointer;
+  perspective: 700px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.match-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0.55rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(184, 224, 196, 0.28);
+  backface-visibility: hidden;
+  transition: transform 0.35s ease;
+  font-weight: 750;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.match-back {
+  background: linear-gradient(145deg, #003030, #189030);
+  color: #b7e38a;
+  font-size: 1.4rem;
+}
+
+.match-front {
+  background: #f4fbf6;
+  color: #003030;
+  font-size: clamp(0.7rem, 2.8vw, 0.82rem);
+  transform: rotateY(180deg);
+}
+
+.match-card.is-open .match-back,
+.match-card.is-won .match-back {
+  transform: rotateY(180deg);
+}
+
+.match-card.is-open .match-front,
+.match-card.is-won .match-front {
+  transform: rotateY(0deg);
+}
+
+.match-card.is-won .match-front {
+  border-color: #78c018;
+  box-shadow: 0 0 0 3px rgba(120, 192, 24, 0.2);
+}
+
+.match-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.match-win {
+  color: #b7e38a;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  .match-top {
+    grid-template-columns: 1fr;
+  }
+
+  .match-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .match-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .match-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .match-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .match-face {
+    transition: none;
+  }
+}
+</style>

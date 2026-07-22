@@ -1,9 +1,40 @@
-import { appHref } from '../app-base.js'
+import { appHref, assetUrl } from '../app-base.js'
 
 export <view>
-  <section class="page">
-    <h1 class="section-title">Page not found</h1>
-    <p class="section-lead">The route you requested was not found in this showcase.</p>
-    <a class="btn btn-primary" jacare-go="/" href=${appHref('/')}>Back home</a>
+  <section class="page lost-page">
+    <div class="lost-bleed">
+      <div class="lost-scene">
+        <div class="lost-glow" aria-hidden="true"></div>
+        <div class="lost-grid" aria-hidden="true"></div>
+
+        <div class="lost-stage">
+          <figure class="lost-badge">
+            <img
+              class="lost-art"
+              src=${assetUrl('404-jacare.webp')}
+              alt="404 — Jacaré knocked out"
+              width="640"
+              height="640"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </figure>
+
+          <div class="lost-copy">
+            <p class="lost-eyebrow">Signal lost</p>
+            <h1 class="lost-title">This route went off the map</h1>
+            <p class="lost-lead">
+              The Jacaré took a wrong turn in the swamp. That path is not part of the showcase —
+              head back to solid ground.
+            </p>
+            <div class="lost-actions">
+              <a class="btn btn-primary" jacare-go="/" href=${appHref('/')}>Back home</a>
+              <a class="btn btn-ghost" jacare-go="/tutorial" href=${appHref('/tutorial')}>Open tutorial</a>
+              <a class="btn btn-ghost" jacare-go="/game" href=${appHref('/game')}>Play arcade</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </view>

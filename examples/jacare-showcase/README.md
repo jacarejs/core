@@ -1,155 +1,48 @@
 # Jacaré Showcase
 
 [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/showcase/)
-[![Pages](https://github.com/jacarejs/core/actions/workflows/pages.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/pages.yml)
-[![CI](https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg)](https://github.com/jacarejs/core/actions/workflows/ci.yml)
 [![core](https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030)](https://www.npmjs.com/package/@jacare/core)
 [![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
 
-A polished demo app showcasing the full potential of [Jacaré](https://github.com/jacarejs/core) — fine-grained reactivity, scoped CSS, slots, CPW, reactive CSS variables, forms, file-based routing, and incremental DOM updates.
+Interactive tutorial for [Jacaré](https://github.com/jacarejs/core): build animated components with props, events, variants, motion — plus **River Run**, a mini-game that teaches trade-offs by letting you choose different solutions.
 
 Live demo: [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/)
 
-Also see: [Todo](https://jacarejs.github.io/core/todo/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [Lab (API tutorial)](https://jacarejs.github.io/core/lab/)
+Docs: [Jacaré Lab](https://jacarejs.github.io/core/lab/)
 
-**Designed as a standalone repository:** [github.com/jacarejs/showcase](https://github.com/jacarejs/showcase)
+Also see: [Todo](https://jacarejs.github.io/core/todo/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [Lab](https://jacarejs.github.io/core/lab/)
 
 <p align="center">
   <img src="public/jacare-logo.png" width="120" alt="Jacaré logo" />
 </p>
 
----
-
-## Features demonstrated
-
-| Page | What it shows |
-|------|----------------|
-| **Home** | Gallery of demos with English blurbs |
-| **Reactivity** | `pulse`, `derive`, live metrics |
-| **Lists** | Keyed `#for` — add, filter, toggle, remove |
-| **Bindings** | `style---pct`, `class-*`, `bind-value` |
-| **Forms** | `createForm()`, validation, `Field` |
-| **Components** | Slots, Card / Badge / Stat composition |
-| **Poll** | Live tallies with derived percentage bars |
-| **Cart** | Shopping cart with derived totals and coupons |
-| **Timers** | `effect` intervals with cleanup |
-| **Performance** | CPW story + reactive CSS variables |
-
-Every demo includes **View code** — a modal with copyable source (same pattern as Lab / Todo).
-
-### Framework capabilities on display
-
-- **Zero VDOM** — direct DOM bindings via compiler
-- **CPW** — compile-time pulse wiring in production builds
-- **Reactive CSS vars** — `style---pct` for GPU-friendly animations
-- **Scoped CSS** — `export <style>` blocks per component
-- **Slots / children** — `<Card>content</Card>` in parent, `<slot />` in child
-- **Lazy screens** — code-split page modules
-- **Brand theme** — palette extracted from the Jacaré logo
-
-### Color palette
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| Deep | `#001818` | Text, code blocks |
-| Forest | `#003030` | Headings, dark surfaces |
-| Primary | `#189030` | Accents, values |
-| Lime | `#78c018` | Highlights, gradients |
-| Mint | `#d8f3dc` | Soft backgrounds |
+**Latest runtime in this example:** `@jacare/core` **v0.1.9**
 
 ---
 
-## Quick start (standalone repo)
+## Pages
+
+| Page | Content |
+|------|---------|
+| **Home** | Hero, flow diagram, learning tracks, CTAs |
+| **Tutorial** | 11 steps across Profile, Counter, and Lists |
+| **Playground** | Live AnimatedProfile + event log |
+| **Game** | River Run — move the Jacaré, solve concept pads |
+| **Components** | File tree, full source, Ocean reference |
+
+---
+
+## Quick start (monorepo)
 
 ```bash
-git clone https://github.com/jacarejs/showcase.git
-cd showcase
-yarn install
-yarn dev
+yarn showcase:dev
 ```
 
 Open [http://localhost:3001](http://localhost:3001).
 
-### From npm packages
-
 ```bash
-yarn add @jacare/core
-yarn add -D @jacare/cli @jacare/vite-plugin @jacare/meta @jacare/devtools
-```
-
----
-
-## Development (monorepo)
-
-Inside the [jacarejs/core](https://github.com/jacarejs/core) monorepo:
-
-```bash
-yarn showcase:dev
 yarn showcase:build
 ```
-
-For GitHub Pages (subpath `/core/showcase/`):
-
-```bash
-JACARE_BASE=/core/showcase/ yarn build
-```
-
----
-
-## Project structure
-
-```
-jacare-showcase/
-  public/jacare-logo.png
-  src/
-    shell.jcr              Layout + navigation
-    nav.js                 Screen map + lazy loading
-    boot.js                Entry point
-    components/
-      Card.jcr             Slots + scoped CSS
-      Stat.jcr             Scoped stat tile
-      Badge.jcr            Pill badge
-      Field.jcr            Form field
-    pages/
-      index.jcr            Home
-      reactivity.jcr       Signals demo
-      components.jcr       Slots demo
-      forms.jcr            Form validation
-      playground.jcr       Keyed list
-      performance.jcr    CPW + style---pct demo
-      cart.jcr           Shopping cart
-      not-found.jcr      404 screen
-  vite.config.js           @jacare/vite-plugin
-  jacare.config.js
-```
-
----
-
-## Extract as new repository
-
-1. Copy `examples/jacare-showcase/` to a new folder
-2. Update `package.json` `repository.url`
-3. Replace monorepo scripts with npm packages:
-
-```json
-{
-  "scripts": {
-    "dev": "jacare dev",
-    "build": "jacare build",
-    "check": "jacare check"
-  },
-  "dependencies": {
-    "@jacare/core": "^0.1.6"
-  },
-  "devDependencies": {
-    "@jacare/cli": "^0.1.6",
-    "@jacare/vite-plugin": "^0.1.6",
-    "@jacare/devtools": "^0.1.6"
-  }
-}
-```
-
-4. `git init && git remote add origin git@github.com:jacarejs/showcase.git`
 
 ---
 

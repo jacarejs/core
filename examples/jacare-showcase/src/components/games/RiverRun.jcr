@@ -1,0 +1,412 @@
+import { derive, pulse } from '@jacare/core'
+import { assetUrl } from '../../app-base.js'
+import CodeBlock from '../ui/CodeBlock.jcr'
+
+const COLS = 8
+const ROWS = 6
+
+const LESSONS = [
+  {
+    id: 'signal',
+    x: 2,
+    y: 1,
+    title: 'Signals',
+    prompt: 'State changed. Which approach updates only the bound nodes?',
+    options: [
+      { id: 'a', label: 'pulse() + template ${count}', correct: true, tip: 'Fine-grained writes. No VDOM diff.' },
+      { id: 'b', label: 'Force remount the whole page', correct: false, tip: 'Works, but wastes work.' },
+      { id: 'c', label: 'Copy DOM with innerHTML each time', correct: false, tip: 'Loses focus and event wiring.' },
+    ],
+    code: 'const score = pulse(0)\n\nexport view\n  <p>${score}</p>\n</view>',
+  },
+  {
+    id: 'props',
+    x: 5,
+    y: 1,
+    title: 'Props',
+    prompt: 'Parent owns the name. How do you pass it down?',
+    options: [
+      { id: 'a', label: ':name=${name} on the child tag', correct: true, tip: 'One-way props stay explicit.' },
+      { id: 'b', label: 'Reach into child internals', correct: false, tip: 'Breaks encapsulation.' },
+      { id: 'c', label: 'Global window.name', correct: false, tip: 'Hidden coupling.' },
+    ],
+    code: '<ProfileCard :name=${name} :variant=${variant} />',
+  },
+  {
+    id: 'events',
+    x: 1,
+    y: 3,
+    title: 'Events',
+    prompt: 'Child was clicked. How does the parent learn?',
+    options: [
+      { id: 'a', label: "emit('selected') + on-selected", correct: true, tip: 'Contracts keep emits typed.' },
+      { id: 'b', label: 'Child mutates parent variables', correct: false, tip: 'Hard to track.' },
+      { id: 'c', label: 'Polling every 16ms', correct: false, tip: 'Noisy and laggy.' },
+    ],
+    code: "emit('selected', { id })\n\n<Card on-selected=${onSelected} />",
+  },
+  {
+    id: 'list',
+    x: 6,
+    y: 3,
+    title: 'Lists',
+    prompt: 'Items reorder often. What keeps DOM stable?',
+    options: [
+      { id: 'a', label: 'Keyed loop with item.id', correct: true, tip: 'Keyed reconciliation.' },
+      { id: 'b', label: 'Rebuild ul from a string', correct: false, tip: 'Drops input state.' },
+      { id: 'c', label: 'Index-only keys forever', correct: false, tip: 'Breaks on insert/remove.' },
+    ],
+    code: 'loop items as item (item.id)\n  <li>${item.title}</li>\nend',
+  },
+  {
+    id: 'motion',
+    x: 4,
+    y: 4,
+    title: 'Motion',
+    prompt: 'Replay an entrance without remounting. Best lever?',
+    options: [
+      { id: 'a', label: 'Bump a playToken pulse', correct: true, tip: 'CSS animation restarts cleanly.' },
+      { id: 'b', label: 'Reload the browser tab', correct: false, tip: 'Nuclear option.' },
+      { id: 'c', label: 'Hide forever with display none', correct: false, tip: 'Awkward and brittle.' },
+    ],
+    code: 'const playToken = pulse(1)\nfunction replay() {\n  playToken.update(n => n + 1)\n}',
+  },
+  {
+    id: 'style',
+    x: 3,
+    y: 2,
+    title: 'Scoped CSS',
+    prompt: 'Styles should not leak to siblings. Where do they live?',
+    options: [
+      { id: 'a', label: 'export style block in the .jcr file', correct: true, tip: 'Hashed scope per module.' },
+      { id: 'b', label: 'One giant global.css for everything', correct: false, tip: 'Collisions await.' },
+      { id: 'c', label: 'Inline style on every node only', correct: false, tip: 'Hard to theme.' },
+    ],
+    code: 'export style\n.card { border-radius: 1rem; }\nstyle',
+  },
+]
+
+const x = pulse(0)
+const y = pulse(0)
+const message = pulse('Move the Jacaré. Swipe the board or use the pad.')
+const solved = pulse({})
+const activeLesson = pulse(null)
+const feedback = pulse('')
+const moves = pulse(0)
+
+const solvedCount = derive(() => Object.keys(solved()).length)
+const progressLabel = derive(() => `${solvedCount()} / ${LESSONS.length} lessons`)
+const posLabel = derive(() => `(${x()}, ${y()})`)
+const canFinish = derive(() => solvedCount() === LESSONS.length)
+const activeTitle = derive(() => activeLesson()?.title || 'Open water')
+const activePrompt = derive(() => activeLesson()?.prompt || 'Find a glowing pad to start a micro-lesson.')
+const activeCode = derive(() => activeLesson()?.code || '// Move with arrows / WASD / touch pad')
+const activeOptions = derive(() => activeLesson()?.options || [])
+const hasLesson = derive(() => !!activeLesson())
+
+function lessonAt(px, py) {
+  return LESSONS.find((item) => item.x === px && item.y === py) || null
+}
+
+function cellKey(cx, cy) {
+  return cx + ':' + cy
+}
+
+function inBounds(nx, ny) {
+  return nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS
+}
+
+function move(dx, dy) {
+  const nx = x() + dx
+  const ny = y() + dy
+  if (!inBounds(nx, ny)) {
+    message.set('River bank — try another direction.')
+    return
+  }
+  x.set(nx)
+  y.set(ny)
+  moves.update((n) => n + 1)
+  const lesson = lessonAt(nx, ny)
+  if (!lesson) {
+    activeLesson.set(null)
+    feedback.set('')
+    message.set('Keep swimming. Pads teach different solutions.')
+    return
+  }
+  activeLesson.set(lesson)
+  feedback.set('')
+  if (solved()[lesson.id]) {
+    message.set('Revisited: ' + lesson.title + '. Another valid path still exists in real apps.')
+  } else {
+    message.set('Lesson pad: ' + lesson.title)
+  }
+}
+
+function choose(option) {
+  const lesson = activeLesson()
+  if (!lesson) return
+  if (option.correct) {
+    solved.update((map) => ({ ...map, [lesson.id]: true }))
+    feedback.set('Correct — ' + option.tip)
+    message.set('Solved ' + lesson.title + '. Notice: other architectures can still work differently.')
+  } else {
+    feedback.set('Not ideal — ' + option.tip + ' Try another answer.')
+  }
+}
+
+function resetGame() {
+  x.set(0)
+  y.set(0)
+  solved.set({})
+  activeLesson.set(null)
+  feedback.set('')
+  moves.set(0)
+  message.set('Fresh river. Learn the same ideas through new choices.')
+}
+
+function onKey(event) {
+  const key = event.key.length === 1 ? event.key.toLowerCase() : event.key
+  const map = {
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0],
+    w: [0, -1],
+    s: [0, 1],
+    a: [-1, 0],
+    d: [1, 0],
+  }
+  const delta = map[key]
+  if (!delta) return
+  event.preventDefault()
+  move(delta[0], delta[1])
+}
+
+let swipeOrigin = null
+
+function onBoardPointerDown(event) {
+  if (event.pointerType === 'mouse' && event.button !== 0) return
+  swipeOrigin = { x: event.clientX, y: event.clientY, id: event.pointerId }
+  try {
+    event.currentTarget.setPointerCapture(event.pointerId)
+  } catch {
+    /* ignore */
+  }
+}
+
+function onBoardPointerUp(event) {
+  if (!swipeOrigin || swipeOrigin.id !== event.pointerId) return
+  const dx = event.clientX - swipeOrigin.x
+  const dy = event.clientY - swipeOrigin.y
+  swipeOrigin = null
+  const absX = Math.abs(dx)
+  const absY = Math.abs(dy)
+  if (Math.max(absX, absY) < 28) return
+  if (absX > absY) move(dx > 0 ? 1 : -1, 0)
+  else move(0, dy > 0 ? 1 : -1)
+}
+
+function onBoardPointerCancel() {
+  swipeOrigin = null
+}
+
+function focusRiver(event) {
+  const root = event.currentTarget
+  if (root && typeof root.focus === 'function' && document.activeElement !== root) {
+    root.focus({ preventScroll: true })
+  }
+}
+
+const cells = []
+for (let row = 0; row < ROWS; row += 1) {
+  for (let col = 0; col < COLS; col += 1) {
+    const lesson = lessonAt(col, row)
+    cells.push({
+      id: cellKey(col, row),
+      x: col,
+      y: row,
+      lessonId: lesson ? lesson.id : '',
+      title: lesson ? lesson.title : '',
+    })
+  }
+}
+
+export <view>
+  <section class="river-run" on-keydown=${onKey} on-click=${focusRiver} tabindex="0">
+    <div class="river-stats">
+      <span class="river-stat">${progressLabel}</span>
+      <span class="river-stat">Moves ${moves}</span>
+      <span class="river-stat">Tile ${posLabel}</span>
+    </div>
+
+    <div class="river-layout">
+      <div class="river-board-wrap">
+        <div
+          class="game-board river-board"
+          role="grid"
+          aria-label="River grid"
+          on-pointerdown=${onBoardPointerDown}
+          on-pointerup=${onBoardPointerUp}
+          on-pointercancel=${onBoardPointerCancel}
+        >
+          #for cells as cell (cell.id)
+            <div
+              class="game-cell"
+              class-has-lesson=${() => !!cell.lessonId}
+              class-is-player=${() => x() === cell.x && y() === cell.y}
+              class-is-solved=${() => !!(cell.lessonId && solved()[cell.lessonId])}
+              role="gridcell"
+            >
+              <span class="game-pad">${cell.title}</span>
+              <span class="game-hero" class-is-visible=${() => x() === cell.x && y() === cell.y}>
+                <img src=${assetUrl('jacare-logo.webp')} alt="" width="28" height="28" />
+              </span>
+            </div>
+          #end
+        </div>
+
+        <div class="game-dpad" aria-label="Touch controls">
+          <button type="button" class="btn btn-outline dpad-btn" on-click=${() => move(0, -1)}>Up</button>
+          <div class="dpad-mid">
+            <button type="button" class="btn btn-outline dpad-btn" on-click=${() => move(-1, 0)}>Left</button>
+            <button type="button" class="btn btn-outline dpad-btn" on-click=${() => move(1, 0)}>Right</button>
+          </div>
+          <button type="button" class="btn btn-outline dpad-btn" on-click=${() => move(0, 1)}>Down</button>
+        </div>
+        <p class="game-message" aria-live="polite">${message}</p>
+      </div>
+
+      <aside class="river-lesson">
+        <p class="kicker">${activeTitle}</p>
+        <h2 class="river-lesson-title">${activeTitle}</h2>
+        <p class="river-lesson-lead">${activePrompt}</p>
+
+        #if hasLesson()
+          <div class="game-options">
+            #for activeOptions() as option (option.id)
+              <button type="button" class="game-option" on-click=${() => choose(option)}>
+                ${option.label}
+              </button>
+            #end
+          </div>
+          #if feedback()
+            <p class="expect">${feedback}</p>
+          #end
+          <CodeBlock :title=${'One solid approach'} :code=${activeCode} />
+        #else
+          <p class="expect">Tip: swipe the board, use the pad, or arrows / WASD. Solved pads stay lit.</p>
+        #end
+
+        <div class="hero-actions">
+          <button type="button" class="btn btn-outline" on-click=${resetGame}>Reset river</button>
+          #if canFinish()
+            <span class="river-win">River cleared — every pad taught a trade-off.</span>
+          #end
+        </div>
+      </aside>
+    </div>
+  </section>
+</view>
+
+export <style>
+.river-run {
+  display: grid;
+  gap: 0.9rem;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.river-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.river-stat {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(0, 24, 24, 0.35);
+  border: 1px solid rgba(184, 224, 100, 0.28);
+  color: #d8f3dc;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.river-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.9fr);
+  align-items: start;
+}
+
+.river-board-wrap {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.river-board {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(120, 192, 24, 0.22), transparent 40%),
+    linear-gradient(160deg, #0b3a3a, #14524a 45%, #1c6b4a);
+  border-color: rgba(120, 192, 24, 0.35);
+  touch-action: none;
+  cursor: grab;
+}
+
+.river-board:active {
+  cursor: grabbing;
+}
+
+.river-lesson {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.1rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(184, 224, 196, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f0fff4;
+}
+
+.river-lesson-title {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.river-lesson-lead {
+  margin: 0;
+  color: rgba(240, 255, 244, 0.82);
+  line-height: 1.45;
+}
+
+.river-win {
+  align-self: center;
+  color: #b7e38a;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .river-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .river-lesson {
+    padding: 0.95rem;
+  }
+
+  .river-lesson-title {
+    font-size: 1.1rem;
+  }
+
+  .river-stats {
+    gap: 0.35rem;
+  }
+
+  .river-stat {
+    font-size: 0.7rem;
+  }
+}
+</style>

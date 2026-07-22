@@ -1,0 +1,125 @@
+export <contract>
+  props: {
+    code: { type: 'string', required: true }
+    tone: { type: 'string', default: 'soft' }
+  }
+</contract>
+
+function read(value) {
+  return typeof value === 'function' ? value() : value
+}
+
+function bootTyping(root, source) {
+  if (!root || root.dataset.typing === '1') return
+  root.dataset.typing = '1'
+
+  const textNode = root.querySelector('.code-wm-text')
+  const caret = root.querySelector('.code-wm-caret')
+  if (!textNode) return
+
+  const full = String(read(source) ?? '')
+  const reduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  if (reduced) {
+    textNode.textContent = full
+    if (caret) caret.hidden = true
+    return
+  }
+
+  let index = 0
+  const typeNext = () => {
+    index += 1
+    textNode.textContent = full.slice(0, index)
+    if (index >= full.length) {
+      if (caret) caret.classList.add('is-done')
+      setTimeout(() => {
+        index = 0
+        if (caret) caret.classList.remove('is-done')
+        setTimeout(typeNext, 900)
+      }, 2600)
+      return
+    }
+    const ch = full[index - 1]
+    const pause = ch === '\n' ? 110 : ch === ' ' ? 28 : 16 + Math.random() * 22
+    setTimeout(typeNext, pause)
+  }
+
+  setTimeout(typeNext, 350)
+}
+
+export <view>
+  <div
+    class="code-watermark"
+    class-tone-soft=${read(tone) === 'soft'}
+    class-tone-hero=${read(tone) === 'hero'}
+    class-tone-dark=${read(tone) === 'dark'}
+    aria-hidden="true"
+    on-animationstart=${(event) => bootTyping(event.currentTarget, code)}
+  >
+    <pre class="code-wm-pre"><code><span class="code-wm-text"></span><span class="code-wm-caret">▌</span></code></pre>
+  </div>
+</view>
+
+export <style>
+.code-watermark {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  animation: code-wm-boot 1ms linear;
+}
+
+.code-wm-pre {
+  margin: 0;
+  padding: 0.85rem 0.9rem;
+  height: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(0.58rem, 1.2vw, 0.72rem);
+  line-height: 1.5;
+  white-space: pre;
+  overflow: hidden;
+}
+
+.code-wm-caret {
+  display: inline-block;
+  margin-left: 1px;
+  opacity: 0.55;
+}
+
+.code-wm-caret.is-done {
+  opacity: 0.35;
+}
+
+.tone-soft {
+  color: rgba(0, 72, 48, 0.14);
+}
+
+.tone-hero {
+  color: rgba(216, 243, 220, 0.2);
+}
+
+.tone-dark {
+  color: rgba(184, 224, 100, 0.55);
+}
+
+@keyframes code-wm-boot {
+  from { opacity: 0.99; }
+  to { opacity: 1; }
+}
+
+@keyframes code-wm-blink {
+  0%, 45% { opacity: 0.9; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-wm-caret {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+</style>

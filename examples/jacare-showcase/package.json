@@ -2,7 +2,7 @@
   "name": "jacare-showcase",
   "version": "1.0.0",
   "private": true,
-  "description": "Jacaré showcase — reactive UI demos with brand colors",
+  "description": "Jacaré showcase — interactive animated components tutorial with River Run",
   "license": "MIT",
   "type": "module",
   "repository": {

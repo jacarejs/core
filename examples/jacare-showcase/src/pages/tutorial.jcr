@@ -1,0 +1,434 @@
+import { derive, pulse } from '@jacare/core'
+import { appHref } from '../app-base.js'
+import ProfileCard from '../components/profile-card/ProfileCard.jcr'
+import VariantSelector from '../components/variant-selector/VariantSelector.jcr'
+import AnimationControls from '../components/animation-controls/AnimationControls.jcr'
+import CodeBlock from '../components/ui/CodeBlock.jcr'
+import ProgressIndicator from '../components/ui/ProgressIndicator.jcr'
+import CodeWatermark from '../components/ui/CodeWatermark.jcr'
+import {
+  counterTrackCode,
+  listTrackCode,
+  oceanHint,
+  oceanSolution,
+  step1Code,
+  step2Code,
+  step3Code,
+  step4Code,
+  step5Code,
+  step6Code,
+  step7Code,
+  step8Code,
+  step8Tree,
+  styleOpen,
+  viewOpen,
+} from '../snippets/tutorial.js'
+import { tutorialCodeWm } from '../snippets/watermarks.js'
+
+const TOTAL = 11
+const step = pulse(1)
+const showOcean = pulse(false)
+const track = pulse('profile')
+
+const name = pulse('Jacaré Dev')
+const description = pulse('Reusable child component')
+const avatar = pulse('JD')
+const status = pulse('online')
+const variant = pulse('default')
+const animation = pulse('fade')
+const active = pulse(false)
+const playToken = pulse(1)
+const lastEvent = pulse('Waiting for a child event…')
+const codeHighlight = pulse('')
+const profileCount = pulse(0)
+const counterCount = pulse(0)
+const listCount = pulse(0)
+
+const trackCount = derive(() => {
+  if (track() === 'counter') return counterCount()
+  if (track() === 'list') return listCount()
+  return profileCount()
+})
+
+function bumpTrackCount() {
+  if (track() === 'counter') counterCount.update((n) => n + 1)
+  else if (track() === 'list') listCount.update((n) => n + 1)
+  else profileCount.update((n) => n + 1)
+}
+
+function resetTrackCount(nextTrack) {
+  if (nextTrack === 'counter') counterCount.set(0)
+  else if (nextTrack === 'list') listCount.set(0)
+  else profileCount.set(0)
+}
+
+const VARIANTS = [
+  { id: 'default', label: 'Default' },
+  { id: 'glass', label: 'Glass' },
+  { id: 'neon', label: 'Neon' },
+  { id: 'nature', label: 'Nature' },
+]
+
+const ANIMATIONS = [
+  { id: 'fade', label: 'Fade' },
+  { id: 'slide', label: 'Slide' },
+  { id: 'scale', label: 'Scale' },
+  { id: 'bounce', label: 'Bounce' },
+  { id: 'rotate', label: 'Rotate' },
+  { id: 'pulse', label: 'Pulse' },
+]
+
+const stepMeta = [
+  { id: 1, title: 'Create a component', expect: 'A .jcr with logic, template, and style.' },
+  { id: 2, title: 'Reactive state', expect: 'Signals drive variant, animation, and events.' },
+  { id: 3, title: 'Child component', expect: 'ProfileCard imported as a PascalCase tag.' },
+  { id: 4, title: 'Props to the child', expect: 'Editing a field updates the card live.' },
+  { id: 5, title: 'Events to the parent', expect: 'Card click updates the parent message.' },
+  { id: 6, title: 'Visual variants', expect: 'Default, Glass, Neon, and Nature via props.' },
+  { id: 7, title: 'Animations', expect: 'Swap animation and replay with playToken.' },
+  { id: 8, title: 'Counter track', expect: 'A tiny emit contract — different component, same idea.' },
+  { id: 9, title: 'List track', expect: 'Keyed loops keep list DOM stable.' },
+  { id: 10, title: 'Full example', expect: 'Parent, children, state, and style together.' },
+  { id: 11, title: 'Ocean challenge', expect: 'Invent a fifth variant, then reveal the solution.' },
+]
+
+const title = derive(() => stepMeta[step() - 1]?.title ?? '')
+const expectText = derive(() => stepMeta[step() - 1]?.expect ?? '')
+const canPrev = derive(() => step() > 1)
+const canNext = derive(() => step() < TOTAL)
+const isStep = (n) => derive(() => step() === n)
+const isStep1 = isStep(1)
+const isStep2 = isStep(2)
+const isStep3 = isStep(3)
+const isStep4 = isStep(4)
+const isStep5 = isStep(5)
+const isStep6 = isStep(6)
+const isStep7 = isStep(7)
+const isStep8 = isStep(8)
+const isStep9 = isStep(9)
+const isStep10 = isStep(10)
+const isStep11 = isStep(11)
+
+const activeCode = derive(() => {
+  switch (step()) {
+    case 1: return step1Code
+    case 2: return step2Code
+    case 3: return step3Code
+    case 4: return step4Code
+    case 5: return step5Code
+    case 6: return step6Code
+    case 7: return step7Code
+    case 8: return counterTrackCode
+    case 9: return listTrackCode
+    case 10: return step8Code
+    default: return oceanHint
+  }
+})
+
+const codeTitle = derive(() => `Step ${step()} · code`)
+const isProfileTrack = derive(() => track() === 'profile')
+const isCounterTrack = derive(() => track() === 'counter')
+const isListTrack = derive(() => track() === 'list')
+const stepLabel = derive(() => `Step ${step()} of ${TOTAL}`)
+
+function go(n) {
+  const nextTrack = n === 8 ? 'counter' : n === 9 ? 'list' : 'profile'
+  step.set(n)
+  codeHighlight.set('')
+  playToken.update((v) => v + 1)
+  if (nextTrack === 'counter') counterCount.set(0)
+  track.set(nextTrack)
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+function next() {
+  if (canNext()) go(step() + 1)
+}
+
+function prev() {
+  if (canPrev()) go(step() - 1)
+}
+
+function mark(propName) {
+  codeHighlight.set(propName)
+  playToken.update((n) => n + 1)
+}
+
+function onVariantChange(nextVariant) {
+  variant.set(nextVariant)
+  mark(':variant')
+}
+
+function onAnimationChange(nextAnim) {
+  animation.set(nextAnim)
+  mark(':animation')
+}
+
+function onReplay() {
+  playToken.update((n) => n + 1)
+  mark('playToken')
+}
+
+function onProfileSelected() {
+  lastEvent.set('ProfileCard emitted the event: profileSelected')
+  active.update((value) => !value)
+  profileCount.update((n) => n + 1)
+  mark('on-profileSelected')
+}
+
+function onAction() {
+  lastEvent.set('ProfileCard emitted the event: action')
+  active.set(true)
+  profileCount.update((n) => n + 1)
+  mark('emit')
+}
+
+function toggleOcean() {
+  showOcean.update((open) => !open)
+}
+
+export <view>
+  <section class="page tutorial-page">
+    <header class="tutorial-hero reveal-mask" data-reveal>
+      <div class="tutorial-hero-inner">
+        <div class="tutorial-hero-copy">
+          <p class="kicker tutorial-kicker">Tutorial</p>
+          <h1 class="tutorial-hero-title">Animated components, step by step</h1>
+          <p class="tutorial-hero-lead">
+            Each step pairs code with a live demo. Jump tracks anytime — profile, counter, or lists —
+            and keep the same Jacaré patterns in view.
+          </p>
+        </div>
+        <div class="tutorial-hero-side">
+          <ProgressIndicator :current=${step} :total=${TOTAL} :label=${'Tutorial progress'} :tone=${'hero'} />
+          <p class="tutorial-hero-meta">${stepLabel} · ${title}</p>
+        </div>
+      </div>
+
+      <div class="tutorial-toolbar">
+        <div class="track-switch" role="tablist" aria-label="Tracks">
+          <button type="button" class="track-btn" class-is-active=${isProfileTrack} on-click=${() => go(4)}>
+            <span class="track-btn-top">
+              <span>Profile</span>
+              <em class="track-count">${profileCount}</em>
+            </span>
+            <small>props + events</small>
+          </button>
+          <button type="button" class="track-btn" class-is-active=${isCounterTrack} on-click=${() => go(8)}>
+            <span class="track-btn-top">
+              <span>Counter</span>
+              <em class="track-count">${counterCount}</em>
+            </span>
+            <small>tiny emits</small>
+          </button>
+          <button type="button" class="track-btn" class-is-active=${isListTrack} on-click=${() => go(9)}>
+            <span class="track-btn-top">
+              <span>Lists</span>
+              <em class="track-count">${listCount}</em>
+            </span>
+            <small>keyed loops</small>
+          </button>
+        </div>
+
+        <div class="step-chip-scroll" role="tablist" aria-label="Steps">
+          #for stepMeta as item (item.id)
+            <button
+              type="button"
+              class="step-chip"
+              class-is-active=${() => step() === item.id}
+              class-is-done=${() => step() > item.id}
+              aria-pressed=${() => step() === item.id}
+              on-click=${() => go(item.id)}
+            >
+              <em>${item.id}</em>
+              <span>${item.title}</span>
+            </button>
+          #end
+        </div>
+      </div>
+    </header>
+
+    <article class="tutorial-stage reveal-fade has-code-wm" data-reveal>
+      <CodeWatermark :code=${tutorialCodeWm} :tone=${'soft'} />
+
+      <div class="tutorial-copy panel-foreground">
+        <div class="step-banner">
+          <span class="step-number">${step}</span>
+          <div class="step-banner-text">
+            <p class="kicker">Current lesson</p>
+            <h2 class="section-title">${title}</h2>
+            <p class="expect-banner">${expectText}</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          #if isStep1()
+            <p>
+              A <code>.jcr</code> file combines JavaScript, an <code>${viewOpen}</code> block,
+              and optional <code>${styleOpen}</code>. The compiler wires bindings straight to the DOM.
+            </p>
+            <div class="tip-card">
+              <strong>Tip</strong>
+              <span>Keep logic, template, and style together — that is the Jacaré unit of work.</span>
+            </div>
+          #end
+
+          #if isStep2()
+            <p>
+              Use <code>pulse()</code> for mutable state. Template reads stay reactive —
+              no virtual DOM and no full-tree re-render.
+            </p>
+            <div class="mini-demo mini-demo-wide">
+              <p><strong>variant:</strong> ${variant}</p>
+              <p><strong>animation:</strong> ${animation}</p>
+              <p><strong>active:</strong> ${active}</p>
+              <p><strong>lastEvent:</strong> ${lastEvent}</p>
+              <button type="button" class="btn btn-outline" on-click=${() => active.update((v) => !v)}>
+                Toggle active
+              </button>
+            </div>
+          #end
+
+          #if isStep3()
+            <p>
+              Import the child and use a PascalCase tag. The contract declares props and emits —
+              <code>jacare check</code> validates the parent usage.
+            </p>
+            <div class="tip-card tip-card-dark">
+              <strong>Contract</strong>
+              <span>Parents talk through props down and events up — nothing else sneaks across.</span>
+            </div>
+          #end
+
+          #if isStep4()
+            <p>The parent sends data with the <code>:</code> prefix. Edit the fields and watch the card.</p>
+            <div class="mini-demo mini-demo-wide">
+              <label class="ap-label" for="t-name">Name</label>
+              <input id="t-name" class="input" bind-value=${name} on-input=${() => mark(':name')} />
+              <label class="ap-label" for="t-desc">Description</label>
+              <input id="t-desc" class="input" bind-value=${description} on-input=${() => mark(':description')} />
+            </div>
+          #end
+
+          #if isStep5()
+            <p>
+              In the child, <code>emit('profileSelected', payload)</code>. In the parent, listen with
+              <code>on-profileSelected</code> and update a signal.
+            </p>
+            <p class="expect" aria-live="polite">${lastEvent}</p>
+          #end
+
+          #if isStep6()
+            <p>Four variants keep Jacaré identity with different atmospheres.</p>
+            <div class="control-panel">
+              <VariantSelector :value=${variant} :options=${VARIANTS} on-change=${onVariantChange} />
+            </div>
+          #end
+
+          #if isStep7()
+            <p>Animations use <code>transform</code> and <code>opacity</code>. <code>playToken</code> forces a fresh entrance.</p>
+            <div class="control-panel">
+              <AnimationControls
+                :value=${animation}
+                :options=${ANIMATIONS}
+                on-change=${onAnimationChange}
+                on-replay=${onReplay}
+              />
+            </div>
+          #end
+
+          #if isStep8()
+            <p>
+              Same communication model, different component: a Counter with <code>emits: ['inc']</code>.
+              There is more than one way to structure UI — contracts keep the edges clear.
+            </p>
+            <div class="mini-demo mini-demo-wide">
+              <button type="button" class="btn btn-primary" on-click=${bumpTrackCount}>
+                Score: ${trackCount}
+              </button>
+              <button type="button" class="btn btn-outline" on-click=${() => resetTrackCount('counter')}>
+                Reset counter
+              </button>
+            </div>
+          #end
+
+          #if isStep9()
+            <p>
+              Lists are another component shape. Keyed <code>#</code><code>for</code> reconciles by id so inputs and focus survive updates.
+            </p>
+            <ul class="expect-list">
+              <li>Signals</li>
+              <li>Events</li>
+              <li>Motion</li>
+            </ul>
+            <div class="mini-demo mini-demo-wide">
+              <button type="button" class="btn btn-primary" on-click=${bumpTrackCount}>
+                List ticks: ${listCount}
+              </button>
+              <button type="button" class="btn btn-outline" on-click=${() => resetTrackCount('list')}>
+                Reset list counter
+              </button>
+            </div>
+          #end
+
+          #if isStep10()
+            <p>Final structure for this showcase example:</p>
+            <pre class="tree-block"><code>${step8Tree}</code></pre>
+          #end
+
+          #if isStep11()
+            <p>
+              Challenge: invent an <strong>Ocean</strong> variant with water tones + Jacaré green.
+              Use the hint first — the full solution stays collapsed.
+            </p>
+            <button type="button" class="btn btn-primary" on-click=${toggleOcean}>
+              ${() => (showOcean() ? 'Hide solution' : 'Show solution')}
+            </button>
+            <div class="solution-panel" class-is-open=${showOcean}>
+              <CodeBlock :title=${'Ocean solution'} :code=${oceanSolution} />
+            </div>
+          #end
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn btn-outline" disabled=${!canPrev()} on-click=${prev}>
+            Previous
+          </button>
+          <span class="step-nav-label">${stepLabel}</span>
+          #if canNext()
+            <button type="button" class="btn btn-primary" on-click=${next}>Continue</button>
+          #else
+            <a class="btn btn-primary" jacare-go="/playground" href=${appHref('/playground')}>
+              Open playground
+            </a>
+          #end
+        </div>
+      </div>
+
+      <div class="tutorial-preview panel-foreground">
+        <CodeBlock :title=${codeTitle} :code=${activeCode} :highlight=${codeHighlight} />
+        <div class="live-panel">
+          <div class="live-panel-head">
+            <p class="kicker">Live demo</p>
+            <span>Expected outcome below</span>
+          </div>
+          <ProfileCard
+            :name=${name}
+            :description=${description}
+            :avatar=${avatar}
+            :status=${status}
+            :variant=${variant}
+            :animation=${animation}
+            :active=${active}
+            :playToken=${playToken}
+            on-profileSelected=${onProfileSelected}
+            on-action=${onAction}
+          />
+          <p class="expect">Expected: ${expectText}</p>
+        </div>
+      </div>
+    </article>
+  </section>
+</view>

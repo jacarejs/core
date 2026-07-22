@@ -1,0 +1,9 @@
+.pg-tok-keyword { color: #7dd3fc; }
+.pg-tok-string { color: #f9a8d4; }
+.pg-tok-number { color: #fbbf24; }
+.pg-tok-comment { color: #6b8f7a; font-style: italic; }
+.pg-tok-tag { color: #86efac; }
+.pg-tok-attr { color: #bef264; }
+.pg-tok-directive { color: #fde047; font-weight: 700; }
+.pg-tok-punct { color: #94a3b8; }
+.pg-tok-ident { color: #e2e8f0; }

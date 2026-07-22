@@ -1,0 +1,399 @@
+import { assetUrl } from '../../app-base.js'
+
+export <contract>
+  props: {
+    pulseProps: { type: 'boolean', default: true }
+    pulseEvents: { type: 'boolean', default: true }
+  }
+</contract>
+
+const marks = [
+  { id: 'a' },
+  { id: 'b' },
+  { id: 'c' },
+  { id: 'd' },
+  { id: 'e' },
+  { id: 'f' },
+]
+
+const concepts = [
+  { id: 'props', label: 'props ↓', hint: 'Parent pushes state' },
+  { id: 'emits', label: 'emits ↑', hint: 'Child reports events' },
+  { id: 'contract', label: 'contract', hint: 'Typed surface' },
+  { id: 'play', label: 'playToken', hint: 'Replay motion' },
+]
+
+export <view>
+  <div class="flow-diagram" aria-label="Component communication flow">
+    <div class="flow-watermarks" aria-hidden="true">
+      #for marks as mark (mark.id)
+        <img
+          class="flow-wm"
+          class-wm-a=${() => mark.id === 'a'}
+          class-wm-b=${() => mark.id === 'b'}
+          class-wm-c=${() => mark.id === 'c'}
+          class-wm-d=${() => mark.id === 'd'}
+          class-wm-e=${() => mark.id === 'e'}
+          class-wm-f=${() => mark.id === 'f'}
+          src=${assetUrl('jacare-logo.webp')}
+          alt=""
+        />
+      #end
+    </div>
+
+    <div class="flow-board">
+      <aside class="flow-rail flow-rail-in">
+        <p class="flow-rail-kicker">Controls</p>
+        <div class="flow-pill">VariantSelector</div>
+        <div class="flow-pill">AnimationControls</div>
+        <p class="flow-rail-note">User picks look + motion</p>
+      </aside>
+
+      <div class="flow-stage">
+        <div class="flow-node flow-parent">
+          <span class="flow-kicker">Parent</span>
+          <strong>AnimatedProfile</strong>
+          <code class="flow-snippet">pulse(variant) · pulse(animation)</code>
+        </div>
+
+        <div class="flow-bridge">
+          <div class="flow-line flow-down" class-is-live=${pulseProps}>
+            <span class="flow-dot" aria-hidden="true"></span>
+            <span class="flow-label">props ↓</span>
+          </div>
+          <div class="flow-line flow-up" class-is-live=${pulseEvents}>
+            <span class="flow-dot" aria-hidden="true"></span>
+            <span class="flow-label">events ↑</span>
+          </div>
+        </div>
+
+        <div class="flow-node flow-child">
+          <span class="flow-kicker">Child</span>
+          <strong>ProfileCard</strong>
+          <code class="flow-snippet">emit('profileSelected')</code>
+        </div>
+      </div>
+
+      <aside class="flow-rail flow-rail-out">
+        <p class="flow-rail-kicker">Result</p>
+        <div class="flow-result">
+          <span class="flow-result-dot"></span>
+          <div>
+            <strong>Live UI</strong>
+            <p>Card reacts without remounting the tree.</p>
+          </div>
+        </div>
+        <div class="flow-result soft">
+          <strong>Event log</strong>
+          <p>Parent hears clicks and updates state.</p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="flow-concepts">
+      #for concepts as item (item.id)
+        <div class="flow-concept">
+          <span>${item.label}</span>
+          <small>${item.hint}</small>
+        </div>
+      #end
+    </div>
+  </div>
+</view>
+
+export <style>
+.flow-diagram {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.35rem 1.25rem 1.2rem;
+  border-radius: 1.2rem;
+  border: 1px solid #b8e0c4;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(120, 192, 24, 0.16), transparent 42%),
+    radial-gradient(circle at 88% 100%, rgba(24, 144, 48, 0.1), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 251, 246, 0.9));
+  box-shadow: 0 14px 36px rgba(0, 48, 48, 0.06);
+}
+
+.flow-watermarks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.flow-wm {
+  position: absolute;
+  width: 3.4rem;
+  height: auto;
+  opacity: 0.055;
+  filter: grayscale(0.15) saturate(1.05);
+  user-select: none;
+}
+
+.flow-board,
+.flow-concepts {
+  position: relative;
+  z-index: 1;
+}
+
+.flow-board {
+  display: grid;
+  grid-template-columns: minmax(9.5rem, 0.85fr) minmax(0, 1.4fr) minmax(10rem, 0.95fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.flow-rail {
+  display: grid;
+  gap: 0.55rem;
+  align-content: start;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  border: 1px dashed rgba(24, 144, 48, 0.28);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.flow-rail-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #3d6b52;
+}
+
+.flow-pill {
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.75rem;
+  border: 1px solid #b8e0c4;
+  background: #f4fbf6;
+  color: #003030;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.flow-rail-note {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: #3d6b52;
+  line-height: 1.35;
+}
+
+.flow-stage {
+  display: grid;
+  gap: 0.55rem;
+  align-content: center;
+  justify-items: center;
+  padding: 0.85rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(120, 192, 24, 0.28);
+  background:
+    linear-gradient(180deg, rgba(216, 243, 220, 0.35), rgba(255, 255, 255, 0.75));
+}
+
+.flow-bridge {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  width: min(100%, 18rem);
+}
+
+.flow-node {
+  display: grid;
+  gap: 0.25rem;
+  width: min(100%, 18rem);
+  padding: 0.9rem 1rem;
+  border-radius: 0.95rem;
+  text-align: center;
+  border: 1px solid #b8e0c4;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 48, 48, 0.07);
+}
+
+.flow-node.flow-child {
+  background: linear-gradient(135deg, #d8f3dc, #f4fbf6);
+  border-color: #78c018;
+}
+
+.flow-kicker {
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3d6b52;
+}
+
+.flow-node strong {
+  font-size: 1rem;
+  color: #003030;
+}
+
+.flow-snippet {
+  display: block;
+  margin-top: 0.15rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.55rem;
+  background: rgba(0, 48, 48, 0.06);
+  color: #189030;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.flow-line {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  min-height: 2.7rem;
+  color: #189030;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.flow-line::before {
+  content: '';
+  position: absolute;
+  top: 0.2rem;
+  bottom: 1.05rem;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #189030, #78c018);
+  opacity: 0.55;
+}
+
+.flow-dot {
+  position: relative;
+  z-index: 1;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-top: 0.15rem;
+  border-radius: 50%;
+  background: #78c018;
+  box-shadow: 0 0 0 4px rgba(120, 192, 24, 0.16);
+}
+
+.flow-line.is-live .flow-dot {
+  opacity: 1;
+}
+
+.flow-line.flow-up .flow-dot {
+  opacity: 0.95;
+}
+
+.flow-label {
+  position: relative;
+  z-index: 1;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(244, 251, 246, 0.96);
+}
+
+.flow-result {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  align-items: start;
+  padding: 0.7rem;
+  border-radius: 0.85rem;
+  border: 1px solid #b8e0c4;
+  background: #ffffff;
+}
+
+.flow-result.soft {
+  grid-template-columns: 1fr;
+  background: rgba(216, 243, 220, 0.45);
+}
+
+.flow-result strong {
+  display: block;
+  font-size: 0.86rem;
+  color: #003030;
+}
+
+.flow-result p {
+  margin: 0.2rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #3d6b52;
+}
+
+.flow-result-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: 0.25rem;
+  border-radius: 50%;
+  background: #78c018;
+  box-shadow: 0 0 0 4px rgba(120, 192, 24, 0.16);
+}
+
+.flow-concepts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.flow-concept {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.7rem 0.75rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(184, 224, 196, 0.9);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.flow-concept span {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #189030;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.flow-concept small {
+  color: #3d6b52;
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+.wm-a { top: 8%; left: 3%; width: 4rem; }
+.wm-b { top: 12%; right: 4%; width: 3rem; opacity: 0.07; }
+.wm-c { top: 48%; left: 2%; width: 3.2rem; opacity: 0.05; }
+.wm-d { top: 52%; right: 3%; width: 4.2rem; opacity: 0.065; }
+.wm-e { bottom: 8%; left: 18%; width: 2.8rem; opacity: 0.05; }
+.wm-f { bottom: 10%; right: 16%; width: 3.4rem; opacity: 0.045; }
+
+@media (max-width: 900px) {
+  .flow-board {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-bridge {
+    width: 100%;
+  }
+
+  .flow-concepts {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .flow-concepts {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-bridge {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-line.is-live .flow-dot,
+  .flow-wm {
+    animation: none !important;
+  }
+}
+</style>

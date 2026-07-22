@@ -1,0 +1,94 @@
+export <contract>
+  props: {
+    value: { type: 'string', required: true }
+    options: { type: 'any', required: true }
+  }
+  emits: ['change']
+</contract>
+
+export <view>
+  <div class="variant-selector" role="group" aria-label="Variações visuais">
+    #for options as option (option.id)
+      <button
+        type="button"
+        class="variant-btn"
+        class-is-selected=${() => (typeof value === 'function' ? value() : value) === option.id}
+        class-tone-default=${() => option.id === 'default'}
+        class-tone-glass=${() => option.id === 'glass'}
+        class-tone-neon=${() => option.id === 'neon'}
+        class-tone-nature=${() => option.id === 'nature'}
+        class-tone-ocean=${() => option.id === 'ocean'}
+        aria-pressed=${() => (typeof value === 'function' ? value() : value) === option.id}
+        on-click=${() => emit('change', option.id)}
+      >
+        <span class="variant-swatch" aria-hidden="true"></span>
+        <span class="variant-label">${option.label}</span>
+      </button>
+    #end
+  </div>
+</view>
+
+export <style>
+.variant-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.variant-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #b8e0c4;
+  background: #ffffff;
+  color: #003030;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.variant-btn:hover {
+  transform: translateY(-1px);
+  background: #f4fbf6;
+}
+
+.variant-btn:focus-visible {
+  outline: 2px solid #78c018;
+  outline-offset: 2px;
+}
+
+.variant-btn.is-selected {
+  background: linear-gradient(135deg, #d8f3dc, #e8f8ec);
+  border-color: #78c018;
+  box-shadow: 0 0 0 2px rgba(120, 192, 24, 0.2);
+}
+
+.variant-swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 48, 48, 0.15);
+}
+
+.tone-default .variant-swatch { background: #f4fbf6; }
+.tone-glass .variant-swatch {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(216,243,220,0.6));
+}
+.tone-neon .variant-swatch {
+  background: #001818;
+  box-shadow: 0 0 8px #78c018;
+  border-color: #78c018;
+}
+.tone-nature .variant-swatch { background: linear-gradient(135deg, #189030, #78c018); }
+.tone-ocean .variant-swatch { background: linear-gradient(135deg, #189030, #2a9d8f); }
+
+@media (prefers-reduced-motion: reduce) {
+  .variant-btn { transition: none; }
+  .variant-btn:hover { transform: none; }
+}
+</style>

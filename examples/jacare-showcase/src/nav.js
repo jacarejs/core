@@ -9,15 +9,10 @@ export const nav = createNav({
   layout: Shell,
   screens: {
     '/': { use: screen(Home), title: 'Jacaré Showcase' },
-    '/reactivity': { use: lazy(() => import('./pages/reactivity.jcr')), title: 'Showcase · Reactivity' },
-    '/lists': { use: lazy(() => import('./pages/lists.jcr')), title: 'Showcase · Lists' },
-    '/bindings': { use: lazy(() => import('./pages/bindings.jcr')), title: 'Showcase · Bindings' },
-    '/forms': { use: lazy(() => import('./pages/forms.jcr')), title: 'Showcase · Forms' },
+    '/tutorial': { use: lazy(() => import('./pages/tutorial.jcr')), title: 'Showcase · Tutorial' },
+    '/playground': { use: lazy(() => import('./pages/playground.jcr')), title: 'Showcase · Playground' },
+    '/game': { use: lazy(() => import('./pages/game.jcr')), title: 'Showcase · River Run' },
     '/components': { use: lazy(() => import('./pages/components.jcr')), title: 'Showcase · Components' },
-    '/poll': { use: lazy(() => import('./pages/poll.jcr')), title: 'Showcase · Poll' },
-    '/cart': { use: lazy(() => import('./pages/cart.jcr')), title: 'Showcase · Cart' },
-    '/timers': { use: lazy(() => import('./pages/timers.jcr')), title: 'Showcase · Timers' },
-    '/performance': { use: lazy(() => import('./pages/performance.jcr')), title: 'Showcase · Performance' },
   },
   missing: NotFound,
 })
