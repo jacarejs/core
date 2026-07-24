@@ -53,22 +53,40 @@
       <ul id="jcr-list" class="list"></ul>
     </section>
 
-    <section>
+    <section class="graph-section">
       <div class="section-head">
-        <h2>Pulses &amp; values</h2>
-        <input id="filter" class="filter filter-inline" type="search" placeholder="Filter pulses…" />
+        <h2>Pulse Graph <span id="graph-meta" class="section-meta"></span></h2>
+        <input id="filter" class="filter filter-inline" type="search" placeholder="Filter nodes…" />
       </div>
+      <p class="graph-hint">Hover a node to outline DOM · click to inspect value, .jcr source, depends-on and feeds</p>
       <div class="split">
-        <ul id="pulse-list" class="list"></ul>
+        <ul id="pulse-list" class="list graph-list"></ul>
         <aside class="detail" id="pulse-detail">
-          <p class="muted" id="detail-empty">Select a pulse to inspect value and bindings.</p>
+          <p class="muted" id="detail-empty">Select a node to inspect live values.</p>
           <div id="detail-body" hidden>
-            <h3 id="detail-name">—</h3>
-            <p class="kind" id="detail-meta"></p>
-            <h4>Value</h4>
-            <pre id="detail-value" class="value-block"></pre>
-            <h4>Bindings (<span id="detail-bind-count">0</span>)</h4>
-            <ul id="bindings-list" class="list nested"></ul>
+            <div class="detail-section">
+              <h4>Value</h4>
+              <pre id="detail-value" class="value-block"></pre>
+            </div>
+            <div class="detail-section">
+              <h4>Meta</h4>
+              <pre id="detail-meta-json" class="value-block"></pre>
+              <p id="detail-source-wrap" class="source-wrap" hidden>
+                <button type="button" id="detail-source" class="link-btn"></button>
+              </p>
+            </div>
+            <div class="detail-section">
+              <h4>DOM bindings (<span id="detail-bind-count">0</span>)</h4>
+              <ul id="bindings-list" class="rel-list"></ul>
+            </div>
+            <div class="detail-section">
+              <h4>Depends on (<span id="detail-up-count">0</span>)</h4>
+              <ul id="upstream-list" class="rel-list"></ul>
+            </div>
+            <div class="detail-section">
+              <h4>Feeds (<span id="detail-down-count">0</span>)</h4>
+              <ul id="downstream-list" class="rel-list"></ul>
+            </div>
           </div>
         </aside>
       </div>
