@@ -3,6 +3,7 @@ import {
   enableDevtools,
   flashDom,
   getBindingsForPulse,
+  getMeshSnapshot,
   getPulseGraph,
   getPulsesForElement,
   highlightBinding,
@@ -10,15 +11,82 @@ import {
   pickElement,
 } from '@jacare/core'
 
-const PROTOCOL = 1
+const PROTOCOL = 2
 
 export interface InstallPageHookOptions {
   coreVersion?: string | null
 }
 
+type WhereLike = (() => RoutePlace) & { peek?: RoutePlace }
+
+type NavLike = {
+  where: WhereLike
+}
+
+export interface RoutePlace {
+  path: string
+  params: Record<string, string>
+  search: Record<string, string>
+  hash: string
+}
+
+export interface RouteSnapshot {
+  path: string
+  params: Record<string, string>
+  search: Record<string, string>
+  hash: string
+  href: string
+  title: string
+  base: string | null
+  screens: string[]
+}
+
+export interface SerializedBinding {
+  pulseId: number
+  kind: string
+  file?: string
+  line?: number
+  tag?: string
+  id?: string
+  className?: string
+}
+
+export interface SerializedPulse {
+  id: number
+  kind: string
+  name?: string
+  file?: string
+  line?: number
+  value: unknown
+  valuePreview: string
+  stale?: boolean
+  disposed: boolean
+  subscribers: number
+  bindings: number
+}
+
+export interface JcrFileGroup {
+  file: string
+  pulses: SerializedPulse[]
+  bindingCount: number
+}
+
+export interface InspectSnapshot {
+  protocol: number
+  coreVersion: string | null
+  enabled: boolean
+  updatedAt: number
+  route: RouteSnapshot | null
+  pulses: SerializedPulse[]
+  edges: { from: number; to: number }[]
+  jcrFiles: JcrFileGroup[]
+  meshBagCount: number
+}
+
 type GlobalWithJacare = typeof globalThis & {
   __JACARE_DEVTOOLS_HOOK__?: JacareDevtoolsHook
   __JACARE__?: Record<string, unknown>
+  __JACARE_NAV__?: NavLike | { nav: NavLike; base?: string; screens?: string[] }
 }
 
 export interface JacareDevtoolsHook {
@@ -27,11 +95,119 @@ export interface JacareDevtoolsHook {
   enable: () => void
   isEnabled: () => boolean
   getGraph: () => ReturnType<typeof getPulseGraph>
-  getBindings: (pulseId: number) => ReturnType<typeof getBindingsForPulse>
+  getBindings: (pulseId: number) => SerializedBinding[]
+  getRoute: () => RouteSnapshot | null
+  getInspect: () => InspectSnapshot
   highlight: (pulseId: number) => void
   clearHighlight: () => void
   flash: (pulseId: number) => void
   pickElement: () => Promise<{ pulseIds: number[] }>
+}
+
+function readPlace(nav: NavLike): RoutePlace | null {
+  try {
+    if (nav.where.peek) return nav.where.peek
+    return nav.where()
+  } catch {
+    return null
+  }
+}
+
+function resolveNav(): { nav: NavLike; base: string | null; screens: string[] } | null {
+  const g = globalThis as GlobalWithJacare
+  const raw = g.__JACARE_NAV__ as
+    | NavLike
+    | { nav: NavLike; base?: string; screens?: string[] }
+    | undefined
+  if (!raw || typeof raw !== 'object') return null
+  if ('nav' in raw && raw.nav) {
+    return {
+      nav: raw.nav,
+      base: raw.base ?? null,
+      screens: Array.isArray(raw.screens) ? raw.screens : [],
+    }
+  }
+  if ('where' in raw) {
+    return { nav: raw as NavLike, base: null, screens: [] }
+  }
+  return null
+}
+
+function serializeValue(value: unknown, depth = 0): unknown {
+  if (value == null) return value
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return value
+  if (typeof value === 'bigint') return `${value}n`
+  if (typeof value === 'function') return `[Function ${value.name || 'anonymous'}]`
+  if (typeof value === 'symbol') return value.toString()
+  if (depth > 4) return '[…]'
+  if (typeof Node !== 'undefined' && value instanceof Node) {
+    if (value.nodeType === Node.ELEMENT_NODE) {
+      const el = value as Element
+      return `<${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}>`
+    }
+    return `[Node ${value.nodeName}]`
+  }
+  if (Array.isArray(value)) {
+    return value.slice(0, 40).map((item) => serializeValue(item, depth + 1))
+  }
+  if (typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    let count = 0
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      if (count++ >= 40) {
+        out['…'] = 'truncated'
+        break
+      }
+      out[key] = serializeValue(item, depth + 1)
+    }
+    return out
+  }
+  return String(value)
+}
+
+function previewValue(value: unknown): string {
+  try {
+    const serialized = serializeValue(value)
+    if (typeof serialized === 'string') return JSON.stringify(serialized)
+    return JSON.stringify(serialized)
+  } catch {
+    return String(value)
+  }
+}
+
+function serializeBinding(binding: {
+  pulseId: number
+  target: Node
+  kind: string
+  file?: string
+  line?: number
+}): SerializedBinding {
+  const el =
+    binding.target.nodeType === Node.ELEMENT_NODE
+      ? (binding.target as Element)
+      : binding.target.parentElement
+  return {
+    pulseId: binding.pulseId,
+    kind: binding.kind,
+    ...(binding.file ? { file: binding.file } : {}),
+    ...(binding.line != null ? { line: binding.line } : {}),
+    ...(el
+      ? {
+          tag: el.tagName.toLowerCase(),
+          ...(el.id ? { id: el.id } : {}),
+          ...(typeof el.className === 'string' && el.className
+            ? { className: el.className }
+            : {}),
+        }
+      : {}),
+  }
+}
+
+function shortFile(file: string): string {
+  const jcr = file.match(/([^/\\]+\.jcr)(?:\?.*)?$/i)
+  if (jcr?.[1]) return jcr[1]
+  const parts = file.split(/[/\\]/)
+  return parts[parts.length - 1] ?? file
 }
 
 /**
@@ -55,7 +231,113 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
       return getPulseGraph()
     },
     getBindings(pulseId: number) {
-      return getBindingsForPulse(pulseId)
+      return getBindingsForPulse(pulseId).map(serializeBinding)
+    },
+    getRoute() {
+      const resolved = resolveNav()
+      if (!resolved) {
+        if (typeof location === 'undefined') return null
+        return {
+          path: location.pathname,
+          params: {},
+          search: Object.fromEntries(new URLSearchParams(location.search)),
+          hash: location.hash,
+          href: `${location.pathname}${location.search}${location.hash}`,
+          title: typeof document !== 'undefined' ? document.title : '',
+          base: null,
+          screens: [],
+        }
+      }
+      const place = readPlace(resolved.nav)
+      if (!place) return null
+      const href =
+        typeof location !== 'undefined'
+          ? `${location.pathname}${location.search}${location.hash}`
+          : place.path
+      return {
+        path: place.path,
+        params: { ...place.params },
+        search: { ...place.search },
+        hash: place.hash ?? '',
+        href,
+        title: typeof document !== 'undefined' ? document.title : '',
+        base: resolved.base,
+        screens: resolved.screens,
+      }
+    },
+    getInspect() {
+      const graph = getPulseGraph()
+      const nodes = graph.nodes ?? []
+      const pulses: SerializedPulse[] = nodes.map((node) => {
+        const bindings = getBindingsForPulse(node.id)
+        return {
+          id: node.id,
+          kind: node.kind,
+          ...(node.name ? { name: node.name } : {}),
+          ...(node.file ? { file: node.file } : {}),
+          ...(node.line != null ? { line: node.line } : {}),
+          value: serializeValue(node.value),
+          valuePreview: previewValue(node.value),
+          ...(node.stale !== undefined ? { stale: node.stale } : {}),
+          disposed: node.disposed,
+          subscribers: node.subscribers,
+          bindings: bindings.length,
+        }
+      })
+
+      const byFile = new Map<string, JcrFileGroup>()
+      for (const pulse of pulses) {
+        const file = pulse.file ? shortFile(pulse.file) : '(no .jcr source)'
+        let group = byFile.get(file)
+        if (!group) {
+          group = { file, pulses: [], bindingCount: 0 }
+          byFile.set(file, group)
+        }
+        group.pulses.push(pulse)
+        group.bindingCount += pulse.bindings
+      }
+
+      for (const pulse of pulses) {
+        for (const binding of getBindingsForPulse(pulse.id)) {
+          if (!binding.file) continue
+          const file = shortFile(binding.file)
+          let group = byFile.get(file)
+          if (!group) {
+            group = { file, pulses: [], bindingCount: 0 }
+            byFile.set(file, group)
+          }
+          if (!group.pulses.some((p) => p.id === pulse.id)) {
+            group.pulses.push(pulse)
+          }
+          group.bindingCount += 1
+        }
+      }
+
+      const jcrFiles = [...byFile.values()].sort((a, b) => {
+        const aJcr = a.file.endsWith('.jcr') ? 0 : 1
+        const bJcr = b.file.endsWith('.jcr') ? 0 : 1
+        if (aJcr !== bJcr) return aJcr - bJcr
+        return a.file.localeCompare(b.file)
+      })
+
+      let meshBagCount = 0
+      try {
+        meshBagCount = getMeshSnapshot()?.bags?.length ?? 0
+      } catch {
+        meshBagCount = 0
+      }
+
+      return {
+        protocol: PROTOCOL,
+        coreVersion: version,
+        enabled: isDevtoolsEnabled(),
+        updatedAt: graph.updatedAt ?? Date.now(),
+        route: hook.getRoute(),
+        pulses,
+        edges: graph.edges ?? [],
+        jcrFiles,
+        meshBagCount,
+      }
     },
     highlight(pulseId: number) {
       highlightBinding(pulseId)
@@ -87,6 +369,7 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
     clearHighlight,
     flashDom,
     pickElement,
+    getMeshSnapshot,
   }
 
   return () => {

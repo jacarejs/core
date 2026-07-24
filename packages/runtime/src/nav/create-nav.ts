@@ -287,7 +287,7 @@ export function createNav(options: NavOptions): Nav {
     void navigate(href, 'go')
   }
 
-  return {
+  const nav: Nav = {
     where,
 
     attach(target: HTMLElement): () => void {
@@ -339,6 +339,20 @@ export function createNav(options: NavOptions): Nav {
       if (!match?.entry.load) return
       await resolveMount(match.entry)
     },
+  }
+
+  exposeNavForDevtools(nav, base, screens.map((entry) => entry.pattern))
+  return nav
+}
+
+function exposeNavForDevtools(nav: Nav, base: string, screenPatterns: string[]): void {
+  try {
+    const g = globalThis as typeof globalThis & {
+      __JACARE_NAV__?: { nav: Nav; base: string; screens: string[] }
+    }
+    g.__JACARE_NAV__ = { nav, base, screens: screenPatterns }
+  } catch {
+    // ignore non-browser / frozen globals
   }
 }
 

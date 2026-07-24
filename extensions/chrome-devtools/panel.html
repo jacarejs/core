@@ -26,18 +26,52 @@
       <div>Core: <code id="core-version">—</code></div>
       <div>Enabled: <code id="enabled">—</code></div>
       <div>Pulses: <code id="pulse-count">0</code></div>
+      <div>.jcr: <code id="jcr-count">0</code></div>
+      <div>Mesh bags: <code id="mesh-count">0</code></div>
+    </section>
+
+    <section class="route-card">
+      <h2>Current route</h2>
+      <div id="route-empty" class="muted">No route data yet.</div>
+      <dl id="route-grid" class="route-grid" hidden>
+        <div><dt>Path</dt><dd><code id="route-path">—</code></dd></div>
+        <div><dt>Href</dt><dd><code id="route-href">—</code></dd></div>
+        <div><dt>Title</dt><dd><code id="route-title">—</code></dd></div>
+        <div><dt>Hash</dt><dd><code id="route-hash">—</code></dd></div>
+        <div><dt>Base</dt><dd><code id="route-base">—</code></dd></div>
+        <div class="span-2"><dt>Params</dt><dd><pre id="route-params">{}</pre></dd></div>
+        <div class="span-2"><dt>Search</dt><dd><pre id="route-search">{}</pre></dd></div>
+        <div class="span-2"><dt>Screens</dt><dd><pre id="route-screens">[]</pre></dd></div>
+      </dl>
     </section>
 
     <section>
-      <h2>Pulse graph</h2>
-      <input id="filter" class="filter" type="search" placeholder="Filter pulses…" />
-      <ul id="pulse-list" class="list"></ul>
+      <div class="section-head">
+        <h2>.jcr sources</h2>
+        <input id="filter-jcr" class="filter filter-inline" type="search" placeholder="Filter .jcr…" />
+      </div>
+      <ul id="jcr-list" class="list"></ul>
     </section>
 
     <section>
-      <h2>Bindings</h2>
-      <p id="bindings-empty" class="muted">Select a pulse to see DOM bindings.</p>
-      <ul id="bindings-list" class="list"></ul>
+      <div class="section-head">
+        <h2>Pulses &amp; values</h2>
+        <input id="filter" class="filter filter-inline" type="search" placeholder="Filter pulses…" />
+      </div>
+      <div class="split">
+        <ul id="pulse-list" class="list"></ul>
+        <aside class="detail" id="pulse-detail">
+          <p class="muted" id="detail-empty">Select a pulse to inspect value and bindings.</p>
+          <div id="detail-body" hidden>
+            <h3 id="detail-name">—</h3>
+            <p class="kind" id="detail-meta"></p>
+            <h4>Value</h4>
+            <pre id="detail-value" class="value-block"></pre>
+            <h4>Bindings (<span id="detail-bind-count">0</span>)</h4>
+            <ul id="bindings-list" class="list nested"></ul>
+          </div>
+        </aside>
+      </div>
     </section>
 
     <script src="panel.js" type="module"></script>
