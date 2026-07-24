@@ -11,7 +11,7 @@ import {
   pickElement,
 } from '@jacare/core'
 
-const PROTOCOL = 2
+const PROTOCOL = 3
 
 export interface InstallPageHookOptions {
   coreVersion?: string | null
@@ -63,12 +63,31 @@ export interface SerializedPulse {
   disposed: boolean
   subscribers: number
   bindings: number
+  /** True when the pulse is useful for everyday debugging (named, bound, or .jcr). */
+  useful: boolean
 }
 
 export interface JcrFileGroup {
   file: string
   pulses: SerializedPulse[]
   bindingCount: number
+}
+
+export interface SerializedMeshCell {
+  address: string
+  bagId: string
+  key: string
+  kind: string
+  value: unknown
+  valuePreview: string
+  pulseId?: number
+  bindings: number
+}
+
+export interface SerializedMeshBag {
+  id: string
+  published: boolean
+  cells: SerializedMeshCell[]
 }
 
 export interface InspectSnapshot {
@@ -80,6 +99,7 @@ export interface InspectSnapshot {
   pulses: SerializedPulse[]
   edges: { from: number; to: number }[]
   jcrFiles: JcrFileGroup[]
+  mesh: SerializedMeshBag[]
   meshBagCount: number
 }
 
@@ -203,6 +223,21 @@ function serializeBinding(binding: {
   }
 }
 
+function isUsefulPulse(pulse: {
+  disposed: boolean
+  name?: string
+  file?: string
+  bindings: number
+  kind: string
+}): boolean {
+  if (pulse.disposed) return false
+  if (pulse.name) return true
+  if (pulse.bindings > 0) return true
+  if (pulse.file && /\.jcr(?:\?|$)/i.test(pulse.file)) return true
+  if (pulse.kind === 'signal') return true
+  return false
+}
+
 function shortFile(file: string): string {
   const jcr = file.match(/([^/\\]+\.jcr)(?:\?.*)?$/i)
   if (jcr?.[1]) return jcr[1]
@@ -270,7 +305,7 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
       const nodes = graph.nodes ?? []
       const pulses: SerializedPulse[] = nodes.map((node) => {
         const bindings = getBindingsForPulse(node.id)
-        return {
+        const base = {
           id: node.id,
           kind: node.kind,
           ...(node.name ? { name: node.name } : {}),
@@ -283,11 +318,16 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
           subscribers: node.subscribers,
           bindings: bindings.length,
         }
+        return {
+          ...base,
+          useful: isUsefulPulse(base),
+        }
       })
 
       const byFile = new Map<string, JcrFileGroup>()
       for (const pulse of pulses) {
-        const file = pulse.file ? shortFile(pulse.file) : '(no .jcr source)'
+        if (!pulse.file || !/\.jcr(?:\?|$)/i.test(pulse.file)) continue
+        const file = shortFile(pulse.file)
         let group = byFile.get(file)
         if (!group) {
           group = { file, pulses: [], bindingCount: 0 }
@@ -299,7 +339,7 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
 
       for (const pulse of pulses) {
         for (const binding of getBindingsForPulse(pulse.id)) {
-          if (!binding.file) continue
+          if (!binding.file || !/\.jcr(?:\?|$)/i.test(binding.file)) continue
           const file = shortFile(binding.file)
           let group = byFile.get(file)
           if (!group) {
@@ -313,18 +353,27 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
         }
       }
 
-      const jcrFiles = [...byFile.values()].sort((a, b) => {
-        const aJcr = a.file.endsWith('.jcr') ? 0 : 1
-        const bJcr = b.file.endsWith('.jcr') ? 0 : 1
-        if (aJcr !== bJcr) return aJcr - bJcr
-        return a.file.localeCompare(b.file)
-      })
+      const jcrFiles = [...byFile.values()].sort((a, b) => a.file.localeCompare(b.file))
 
-      let meshBagCount = 0
+      let mesh: SerializedMeshBag[] = []
       try {
-        meshBagCount = getMeshSnapshot()?.bags?.length ?? 0
+        const snap = getMeshSnapshot()
+        mesh = (snap?.bags ?? []).map((bag) => ({
+          id: bag.id,
+          published: bag.published,
+          cells: (bag.cells ?? []).map((cell) => ({
+            address: cell.address,
+            bagId: cell.bagId,
+            key: cell.key,
+            kind: cell.kind,
+            value: serializeValue(cell.value),
+            valuePreview: previewValue(cell.value),
+            ...(cell.pulseId != null ? { pulseId: cell.pulseId } : {}),
+            bindings: cell.bindings ?? 0,
+          })),
+        }))
       } catch {
-        meshBagCount = 0
+        mesh = []
       }
 
       return {
@@ -336,7 +385,8 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
         pulses,
         edges: graph.edges ?? [],
         jcrFiles,
-        meshBagCount,
+        mesh,
+        meshBagCount: mesh.length,
       }
     },
     highlight(pulseId: number) {

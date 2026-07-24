@@ -511,26 +511,26 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         text-decoration: underline;
       }
     </style>
-    <button class="jacare-devtools__launcher" type="button" data-launcher aria-label="Show Pulse Graph">
+    <button class="jacare-devtools__launcher" type="button" data-launcher aria-label="Show State">
       <span class="jacare-devtools__launcher-dot" aria-hidden="true"></span>
-      Pulse Graph
+      State
     </button>
     <header class="jacare-devtools__header" data-drag>
       <div class="jacare-devtools__header-main">
-        <span class="jacare-devtools__title">Pulse Graph</span>
+        <span class="jacare-devtools__title">State</span>
         <span class="jacare-devtools__meta" data-meta></span>
       </div>
       <div class="jacare-devtools__actions">
         <button class="jacare-devtools__toggle" type="button" data-config aria-label="Config" title="Config">⚙</button>
         <button class="jacare-devtools__toggle" type="button" data-pick aria-label="Pick element" title="Pick element">◎</button>
-        <button class="jacare-devtools__toggle" type="button" data-minimize aria-label="Minimize Pulse Graph" title="Minimize">−</button>
-        <button class="jacare-devtools__toggle" type="button" data-hide aria-label="Hide Pulse Graph" title="Hide">×</button>
+        <button class="jacare-devtools__toggle" type="button" data-minimize aria-label="Minimize State" title="Minimize">−</button>
+        <button class="jacare-devtools__toggle" type="button" data-hide aria-label="Hide State" title="Hide">×</button>
       </div>
     </header>
     ${
       tabsEnabled
-        ? `<nav class="jacare-devtools__tabs" data-tabs aria-label="Pulse Graph tabs">
-      <button type="button" class="jacare-devtools__tab" data-tab="graph">Graph</button>
+        ? `<nav class="jacare-devtools__tabs" data-tabs aria-label="State tabs">
+      <button type="button" class="jacare-devtools__tab" data-tab="graph">State</button>
       ${meshEnabled ? `<button type="button" class="jacare-devtools__tab" data-tab="mesh">Mesh</button>` : ''}
       ${scopeEnabled ? `<button type="button" class="jacare-devtools__tab" data-tab="scope">Scope</button>` : ''}
     </nav>`
@@ -538,7 +538,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     }
     <div class="jacare-devtools__config" data-config-panel>
       <div class="jacare-devtools__config-row">
-        <label for="jacare-pulse-corner">Pulse Graph position</label>
+        <label for="jacare-pulse-corner">State position</label>
         <select id="jacare-pulse-corner" data-pulse-corner>
           ${cornerOptions()}
         </select>
@@ -669,7 +669,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     minimizeBtn.textContent = mode === 'minimized' ? '+' : '−'
     minimizeBtn.setAttribute(
       'aria-label',
-      mode === 'minimized' ? 'Expand Pulse Graph' : 'Minimize Pulse Graph',
+      mode === 'minimized' ? 'Expand State' : 'Minimize State',
     )
     minimizeBtn.setAttribute('title', mode === 'minimized' ? 'Expand' : 'Minimize')
     ui = writeUiConfig({ pulseMode: mode })

@@ -1,7 +1,7 @@
 ;(function installJacareDevtoolsPageHook() {
   const SOURCE_PAGE = 'jacare-devtools-page'
   const SOURCE_CONTENT = 'jacare-devtools-content'
-  const PROTOCOL = 2
+  const PROTOCOL = 3
 
   function reply(requestId, payload) {
     window.postMessage(

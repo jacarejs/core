@@ -6,37 +6,30 @@ const KIND_LABEL = {
 
 const statusEl = document.getElementById('status')
 const hintEl = document.getElementById('hint')
-const protocolEl = document.getElementById('protocol')
-const coreVersionEl = document.getElementById('core-version')
-const enabledEl = document.getElementById('enabled')
-const pulseCountEl = document.getElementById('pulse-count')
-const jcrCountEl = document.getElementById('jcr-count')
-const meshCountEl = document.getElementById('mesh-count')
-const graphMetaEl = document.getElementById('graph-meta')
+const routePathEl = document.getElementById('route-path')
+const routeExtraEl = document.getElementById('route-extra')
 const pulseListEl = document.getElementById('pulse-list')
 const jcrListEl = document.getElementById('jcr-list')
+const meshEmptyEl = document.getElementById('mesh-empty')
+const meshBodyEl = document.getElementById('mesh-body')
 const bindingsListEl = document.getElementById('bindings-list')
 const upstreamListEl = document.getElementById('upstream-list')
 const downstreamListEl = document.getElementById('downstream-list')
 const filterEl = document.getElementById('filter')
-const filterJcrEl = document.getElementById('filter-jcr')
-const routeEmptyEl = document.getElementById('route-empty')
-const routeGridEl = document.getElementById('route-grid')
+const showAllEl = document.getElementById('show-all')
 const detailEmptyEl = document.getElementById('detail-empty')
 const detailBodyEl = document.getElementById('detail-body')
-const detailValueEl = document.getElementById('detail-value')
-const detailMetaJsonEl = document.getElementById('detail-meta-json')
-const detailBindCountEl = document.getElementById('detail-bind-count')
-const detailUpCountEl = document.getElementById('detail-up-count')
-const detailDownCountEl = document.getElementById('detail-down-count')
-const detailSourceWrapEl = document.getElementById('detail-source-wrap')
+const detailNameEl = document.getElementById('detail-name')
+const detailKindEl = document.getElementById('detail-kind')
 const detailSourceEl = document.getElementById('detail-source')
+const detailValueEl = document.getElementById('detail-value')
+const detailBindCountEl = document.getElementById('detail-bind-count')
 
 let inspect = null
 let selectedPulseId = null
 let selectedJcr = null
 let hello = null
-let latestBindings = []
+let activeTab = 'state'
 const previousValues = new Map()
 let lastChanged = new Set()
 let lastPreviousById = new Map()
@@ -57,83 +50,41 @@ function sendToPage(message) {
 function renderHint() {
   if (!hello) {
     hintEl.textContent =
-      'No Jacaré hook on this page. Open a Jacaré app in DEV (Lab / yarn lab:dev), reload the tab, then Refresh.'
+      'No Jacaré app detected. Run yarn lab:dev, open the Lab, reload this tab, then Refresh.'
     return
   }
   if (!hello.enabled) {
-    hintEl.textContent =
-      'Hook found but DevTools collection is off. Refresh enables collection automatically.'
+    hintEl.textContent = 'Jacaré found — enabling live collection…'
     return
   }
   hintEl.textContent =
-    'Pulse Graph mirrors the in-page overlay: live values, .jcr sources, DOM bindings, depends-on and feeds. Route updates with createNav.'
-}
-
-function renderMeta() {
-  protocolEl.textContent = inspect?.protocol ?? hello?.protocol ?? '—'
-  coreVersionEl.textContent = inspect?.coreVersion ?? hello?.coreVersion ?? '—'
-  enabledEl.textContent = hello ? String(Boolean(hello.enabled)) : '—'
-  const pulses = activePulses()
-  const edges = inspect?.edges ?? []
-  pulseCountEl.textContent = String(pulses.length)
-  graphMetaEl.textContent = `· ${pulses.length} nodes · ${edges.length} edges`
-  jcrCountEl.textContent = String(
-    (inspect?.jcrFiles ?? []).filter((f) => f.file.endsWith('.jcr')).length,
-  )
-  meshCountEl.textContent = String(inspect?.meshBagCount ?? 0)
+    'State shows named values, DOM-bound pulses, and .jcr sources. Turn on “Show noise” only when you need internal watches.'
 }
 
 function renderRoute() {
   const route = inspect?.route
   if (!route) {
-    routeEmptyEl.hidden = false
-    routeGridEl.hidden = true
-    routeEmptyEl.textContent = 'No createNav route registered on this page.'
+    routePathEl.textContent = '—'
+    routeExtraEl.textContent = 'no createNav'
     return
   }
-  routeEmptyEl.hidden = true
-  routeGridEl.hidden = false
-  document.getElementById('route-path').textContent = route.path || '—'
-  document.getElementById('route-href').textContent = route.href || '—'
-  document.getElementById('route-title').textContent = route.title || '—'
-  document.getElementById('route-hash').textContent = route.hash || '—'
-  document.getElementById('route-base').textContent = route.base || '—'
-  document.getElementById('route-params').textContent = pretty(route.params ?? {})
-  document.getElementById('route-search').textContent = pretty(route.search ?? {})
-  document.getElementById('route-screens').textContent = pretty(route.screens ?? [])
+  routePathEl.textContent = route.path || '/'
+  const bits = []
+  const params = route.params ?? {}
+  const search = route.search ?? {}
+  if (Object.keys(params).length) bits.push(`params ${compactJson(params)}`)
+  if (Object.keys(search).length) bits.push(`search ${compactJson(search)}`)
+  if (route.hash) bits.push(route.hash)
+  routeExtraEl.textContent = bits.join(' · ')
 }
 
-function renderJcrFiles() {
-  const q = filterJcrEl.value.trim().toLowerCase()
-  const files = inspect?.jcrFiles ?? []
-  jcrListEl.replaceChildren()
-
-  for (const group of files) {
-    if (q && !group.file.toLowerCase().includes(q)) continue
-    const li = document.createElement('li')
-    if (selectedJcr === group.file) li.classList.add('active')
-
-    const left = document.createElement('div')
-    left.innerHTML = `<div class="file">${escapeHtml(group.file)}</div><div class="jcr-meta">${group.pulses.length} pulse${group.pulses.length === 1 ? '' : 's'} · ${group.bindingCount} bind${group.bindingCount === 1 ? '' : 's'}</div>`
-
-    const right = document.createElement('span')
-    right.className = 'kind'
-    right.textContent = group.file.endsWith('.jcr') ? 'jcr' : 'src'
-
-    li.append(left, right)
-    li.addEventListener('click', () => {
-      selectedJcr = selectedJcr === group.file ? null : group.file
-      renderJcrFiles()
-      renderPulses()
-    })
-    jcrListEl.append(li)
+function setTab(tab) {
+  activeTab = tab
+  for (const btn of document.querySelectorAll('.tab')) {
+    btn.classList.toggle('is-active', btn.dataset.tab === tab)
   }
-
-  if (!jcrListEl.children.length) {
-    const empty = document.createElement('li')
-    empty.className = 'muted'
-    empty.textContent = files.length ? 'No .jcr match the filter.' : 'No .jcr sources linked yet.'
-    jcrListEl.append(empty)
+  for (const pane of document.querySelectorAll('.pane')) {
+    pane.classList.toggle('is-active', pane.id === `pane-${tab}`)
   }
 }
 
@@ -143,9 +94,12 @@ function activePulses() {
 
 function visiblePulses() {
   const q = filterEl.value.trim().toLowerCase()
+  const showAll = showAllEl.checked
   return activePulses().filter((pulse) => {
+    if (!showAll && pulse.useful === false) return false
+    if (!showAll && pulse.kind === 'effect' && !pulse.name && !(pulse.bindings > 0)) return false
     if (selectedJcr) {
-      const file = pulse.file ? shortFile(pulse.file) : '(no .jcr source)'
+      const file = pulse.file ? shortFile(pulse.file) : ''
       const group = (inspect?.jcrFiles ?? []).find((g) => g.file === selectedJcr)
       const inSelected =
         file === selectedJcr || group?.pulses.some((p) => p.id === pulse.id)
@@ -169,10 +123,9 @@ function detectChanges(pulses) {
   }
   lastChanged = changed
   lastPreviousById = previousById
-  return { changed, previousById }
 }
 
-function renderPulses() {
+function renderState() {
   const all = activePulses()
   const pulses = visiblePulses()
   pulseListEl.replaceChildren()
@@ -180,13 +133,13 @@ function renderPulses() {
   for (const pulse of pulses) {
     const li = document.createElement('li')
     if (pulse.id === selectedPulseId) li.classList.add('active')
-    if (lastChanged.has(pulse.id)) li.classList.add('is-pulse')
+    if (lastChanged.has(pulse.id)) li.classList.add('is-flash')
 
     const src = sourceLabel(pulse)
+    const binds = pulse.bindings ? ` · ${pulse.bindings} bind` : ''
     li.innerHTML = `
-      <span class="item-kind">${escapeHtml(kindLabel(pulse))}</span>
-      <span class="item-id">${escapeHtml(nodeLabel(pulse))}</span>
-      ${src ? `<span class="item-source">${escapeHtml(src)}</span>` : ''}
+      <span class="item-name">${escapeHtml(nodeLabel(pulse))}</span>
+      <span class="item-meta">${escapeHtml(kindLabel(pulse))}${src ? ` · ${escapeHtml(src)}` : ''}${escapeHtml(binds)}</span>
       <span class="item-value">${escapeHtml(previewValue(pulse.value ?? pulse.valuePreview))}</span>
     `
 
@@ -199,7 +152,7 @@ function renderPulses() {
     })
     li.addEventListener('click', () => {
       selectedPulseId = pulse.id
-      renderPulses()
+      renderState()
       void selectPulse(pulse.id, {
         flashed: lastChanged.has(pulse.id),
         previousText: lastPreviousById.get(pulse.id),
@@ -208,13 +161,84 @@ function renderPulses() {
     pulseListEl.append(li)
   }
 
-  if (!pulseListEl.children.length) {
+  if (!pulses.length) {
     const empty = document.createElement('li')
     empty.className = 'muted'
+    empty.style.cursor = 'default'
     empty.textContent = all.length
-      ? 'No nodes match the filter / .jcr selection.'
-      : 'No pulse nodes yet.'
+      ? showAllEl.checked || selectedJcr
+        ? 'Nothing matches this filter.'
+        : 'Only internal nodes right now. Enable “Show noise” or interact with the page.'
+      : 'No state collected yet.'
     pulseListEl.append(empty)
+  }
+}
+
+function renderScreens() {
+  const files = inspect?.jcrFiles ?? []
+  jcrListEl.replaceChildren()
+  for (const group of files) {
+    const li = document.createElement('li')
+    if (selectedJcr === group.file) li.classList.add('active')
+    const usefulCount = group.pulses.filter((p) => p.useful !== false && !p.disposed).length
+    li.innerHTML = `
+      <span class="item-name file">${escapeHtml(group.file)}</span>
+      <span class="item-meta">${usefulCount} state · ${group.bindingCount} binds</span>
+    `
+    li.addEventListener('click', () => {
+      selectedJcr = selectedJcr === group.file ? null : group.file
+      setTab('state')
+      renderScreens()
+      renderState()
+    })
+    jcrListEl.append(li)
+  }
+  if (!files.length) {
+    const empty = document.createElement('li')
+    empty.className = 'muted'
+    empty.style.cursor = 'default'
+    empty.textContent = 'No .jcr bindings recorded yet.'
+    jcrListEl.append(empty)
+  }
+}
+
+function renderMesh() {
+  const bags = inspect?.mesh ?? []
+  meshBodyEl.replaceChildren()
+  meshEmptyEl.hidden = bags.length > 0
+  for (const bag of bags) {
+    const section = document.createElement('section')
+    section.className = 'mesh-bag'
+    const title = document.createElement('div')
+    title.className = 'mesh-bag-title'
+    title.innerHTML = `@${escapeHtml(bag.id)} <span>${bag.cells.length} cell${bag.cells.length === 1 ? '' : 's'}${bag.published ? '' : ' · not published'}</span>`
+    section.append(title)
+    for (const cell of bag.cells) {
+      const row = document.createElement('div')
+      row.className = 'mesh-cell'
+      row.innerHTML = `
+        <span class="mesh-addr">${escapeHtml(cell.address)}</span>
+        <span class="mesh-kind">${escapeHtml(cell.kind)}</span>
+        <span class="mesh-value">${escapeHtml(cell.valuePreview ?? previewValue(cell.value))}</span>
+      `
+      row.addEventListener('click', () => {
+        if (cell.pulseId != null) {
+          selectedPulseId = cell.pulseId
+          setTab('state')
+          renderState()
+          void selectPulse(cell.pulseId)
+        }
+      })
+      section.append(row)
+    }
+    if (!bag.cells.length) {
+      const empty = document.createElement('div')
+      empty.className = 'muted'
+      empty.style.padding = '8px 10px'
+      empty.textContent = 'No cells yet.'
+      section.append(empty)
+    }
+    meshBodyEl.append(section)
   }
 }
 
@@ -227,7 +251,7 @@ function relatedNodes(pulseId, direction) {
       : edges.filter((e) => e.from === pulseId).map((e) => e.to)
   return ids
     .map((id) => pulses.find((p) => p.id === id))
-    .filter(Boolean)
+    .filter((node) => node && (showAllEl.checked || node.useful !== false))
 }
 
 function renderRelationList(listEl, nodes) {
@@ -241,10 +265,10 @@ function renderRelationList(listEl, nodes) {
   }
   for (const node of nodes) {
     const li = document.createElement('li')
-    li.innerHTML = `<span>${escapeHtml(nodeLabel(node))}</span><span class="kind">${escapeHtml(kindLabel(node))}</span>`
+    li.innerHTML = `<span>${escapeHtml(nodeLabel(node))}</span><span class="item-meta">${escapeHtml(previewValue(node.value ?? node.valuePreview))}</span>`
     li.addEventListener('click', () => {
       selectedPulseId = node.id
-      renderPulses()
+      renderState()
       void selectPulse(node.id)
     })
     listEl.append(li)
@@ -253,15 +277,14 @@ function renderRelationList(listEl, nodes) {
 
 function renderBindings(bindings) {
   bindingsListEl.replaceChildren()
-  latestBindings = bindings ?? []
-  if (!latestBindings.length) {
+  if (!bindings?.length) {
     const empty = document.createElement('li')
     empty.className = 'muted'
-    empty.textContent = 'None'
+    empty.textContent = 'Not bound to the DOM'
     bindingsListEl.append(empty)
     return
   }
-  for (const binding of latestBindings) {
+  for (const binding of bindings) {
     const li = document.createElement('li')
     const loc = binding.file
       ? `${shortFile(binding.file)}${binding.line != null ? ':' + binding.line : ''}`
@@ -269,9 +292,6 @@ function renderBindings(bindings) {
     const dom = [
       binding.tag,
       binding.id ? `#${binding.id}` : '',
-      binding.className
-        ? `.${String(binding.className).split(/\s+/).filter(Boolean).slice(0, 2).join('.')}`
-        : '',
     ]
       .filter(Boolean)
       .join('')
@@ -296,6 +316,16 @@ function renderDetail(pulse, bindings, options = {}) {
   }
   detailEmptyEl.hidden = true
   detailBodyEl.hidden = false
+  detailNameEl.textContent = nodeLabel(pulse)
+  detailKindEl.textContent = kindLabel(pulse)
+
+  const src = sourceLabel(pulse)
+  if (src) {
+    detailSourceEl.hidden = false
+    detailSourceEl.textContent = src
+  } else {
+    detailSourceEl.hidden = true
+  }
 
   const valueText = formatValue(pulse.value)
   const flashed = Boolean(options.flashed)
@@ -304,41 +334,10 @@ function renderDetail(pulse, bindings, options = {}) {
     ? highlightChangedLines(options.previousText, valueText)
     : escapeHtml(valueText)
 
-  const src = sourceLabel(pulse)
-  detailMetaJsonEl.textContent = pretty({
-    id: pulse.id,
-    name: pulse.name ?? null,
-    kind: pulse.kind,
-    source: src || null,
-    stale: pulse.stale ?? false,
-    disposed: pulse.disposed,
-    subscribers: pulse.subscribers,
-    bindings: bindings?.length ?? pulse.bindings ?? 0,
-  })
-
-  if (src) {
-    detailSourceWrapEl.hidden = false
-    detailSourceEl.textContent = src
-    detailSourceEl.onclick = () => {
-      if (pulse.file) {
-        selectedJcr = shortFile(pulse.file)
-        renderJcrFiles()
-        renderPulses()
-      }
-    }
-  } else {
-    detailSourceWrapEl.hidden = true
-  }
-
   detailBindCountEl.textContent = String(bindings?.length ?? 0)
   renderBindings(bindings ?? [])
-
-  const upstream = relatedNodes(pulse.id, 'up')
-  const downstream = relatedNodes(pulse.id, 'down')
-  detailUpCountEl.textContent = String(upstream.length)
-  detailDownCountEl.textContent = String(downstream.length)
-  renderRelationList(upstreamListEl, upstream)
-  renderRelationList(downstreamListEl, downstream)
+  renderRelationList(upstreamListEl, relatedNodes(pulse.id, 'up'))
+  renderRelationList(downstreamListEl, relatedNodes(pulse.id, 'down'))
 }
 
 async function selectPulse(pulseId, options = {}) {
@@ -349,7 +348,7 @@ async function selectPulse(pulseId, options = {}) {
 }
 
 async function refresh() {
-  setStatus('refreshing…', false)
+  setStatus('…', false)
   try {
     const res = await sendToPage({ type: 'hello' })
     hello = res?.hello ?? null
@@ -360,21 +359,16 @@ async function refresh() {
     }
     const inspectRes = await sendToPage({ type: 'getInspect' })
     inspect = inspectRes?.inspect ?? null
-    if (!inspect) {
-      const graphRes = await sendToPage({ type: 'getGraph' })
-      const routeRes = await sendToPage({ type: 'getRoute' })
-      inspect = {
-        protocol: hello?.protocol,
-        coreVersion: hello?.coreVersion,
-        enabled: Boolean(hello?.enabled),
-        pulses: graphRes?.graph?.pulses ?? graphRes?.graph?.nodes ?? [],
-        edges: graphRes?.graph?.edges ?? [],
-        jcrFiles: [],
-        route: routeRes?.route ?? null,
-        meshBagCount: 0,
+    if (inspect?.pulses) {
+      for (const pulse of inspect.pulses) {
+        if (pulse.useful == null) {
+          pulse.useful =
+            !pulse.disposed &&
+            Boolean(pulse.name || pulse.bindings > 0 || (pulse.file && /\.jcr/i.test(pulse.file)) || pulse.kind === 'signal')
+        }
       }
     }
-    setStatus(hello ? 'connected' : 'no hook', Boolean(hello))
+    setStatus(hello ? 'live' : 'offline', Boolean(hello))
   } catch (error) {
     hello = null
     inspect = null
@@ -382,11 +376,11 @@ async function refresh() {
     hintEl.textContent = String(error?.message ?? error)
   }
   renderHint()
-  renderMeta()
   renderRoute()
-  renderJcrFiles()
   detectChanges(activePulses())
-  renderPulses()
+  renderState()
+  renderScreens()
+  renderMesh()
   if (selectedPulseId != null) {
     const pulse = activePulses().find((p) => p.id === selectedPulseId)
     if (pulse) {
@@ -409,6 +403,8 @@ function kindLabel(pulse) {
 
 function nodeLabel(pulse) {
   if (pulse.name) return pulse.name
+  const src = sourceLabel(pulse)
+  if (src) return `${kindLabel(pulse)} · ${src}`
   return `${kindLabel(pulse)} #${pulse.id}`
 }
 
@@ -418,9 +414,9 @@ function sourceLabel(pulse) {
   return pulse.line != null ? `${base}:${pulse.line}` : base
 }
 
-function pretty(value) {
+function compactJson(value) {
   try {
-    return JSON.stringify(value, null, 2)
+    return JSON.stringify(value)
   } catch {
     return String(value)
   }
@@ -440,7 +436,7 @@ function previewValue(value) {
   try {
     const text = typeof value === 'string' ? JSON.stringify(value) : JSON.stringify(value)
     if (text == null) return String(value)
-    return text.length > 42 ? `${text.slice(0, 41)}…` : text
+    return text.length > 48 ? `${text.slice(0, 47)}…` : text
   } catch {
     return String(value)
   }
@@ -483,24 +479,27 @@ function highlightChangedLines(previous, next) {
 document.getElementById('btn-refresh').addEventListener('click', () => {
   void refresh()
 })
-
 document.getElementById('btn-clear').addEventListener('click', () => {
   void sendToPage({ type: 'clearHighlight' })
 })
-
 document.getElementById('btn-pick').addEventListener('click', async () => {
   const res = await sendToPage({ type: 'pickElement' })
   if (res?.pulseIds?.length) {
     selectedPulseId = res.pulseIds[0]
+    setTab('state')
     await selectPulse(selectedPulseId)
-    renderPulses()
+    renderState()
   }
 })
 
-filterEl.addEventListener('input', () => renderPulses())
-filterJcrEl.addEventListener('input', () => renderJcrFiles())
+filterEl.addEventListener('input', () => renderState())
+showAllEl.addEventListener('change', () => renderState())
+
+for (const btn of document.querySelectorAll('.tab')) {
+  btn.addEventListener('click', () => setTab(btn.dataset.tab))
+}
 
 void refresh()
 setInterval(() => {
   void refresh()
-}, 2000)
+}, 1500)

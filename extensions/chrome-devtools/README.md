@@ -2,20 +2,28 @@
 
 Chrome DevTools panel for Jacaré apps (Manifest V3).
 
+The panel is called **Jacaré** in DevTools. Inside it, debug with three simple tabs:
+
+- **State** — live values that matter (named, DOM-bound, `.jcr`, signals). Internal watches stay behind **Show noise**.
+- **Screens** — `.jcr` files linked to state
+- **Mesh** — pulse bags (`@bag/key`)
+
+Plus a compact **Route** bar from `createNav`.
+
 ## Load unpacked (local)
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
-3. **Load unpacked** → select this folder: `extensions/chrome-devtools`
-4. Open a Jacaré app in DEV (e.g. `yarn lab:dev`)
-5. Open DevTools → tab **Jacaré** → **Refresh**
+3. **Load unpacked** → `extensions/chrome-devtools`
+4. Open a Jacaré app in DEV (`yarn lab:dev`)
+5. DevTools → tab **Jacaré**
 
-The Lab installs `window.__JACARE_DEVTOOLS_HOOK__` via `@jacare/devtools/hook` so the extension can read the pulse graph.
+The Lab installs `window.__JACARE_DEVTOOLS_HOOK__` via `@jacare/devtools/hook`.
 
 ## Pack ZIP
 
 ```bash
-node scripts/pack-chrome-devtools.mjs
+yarn chrome-devtools:pack
 # → extensions/chrome-devtools/dist/jacare-devtools.zip
 ```
 
@@ -23,15 +31,10 @@ node scripts/pack-chrome-devtools.mjs
 
 GitHub Action: `.github/workflows/publish-chrome-devtools.yml` (workflow_dispatch).
 
-Secrets required for upload (see private doc):
+Secrets: `CHROME_EXTENSION_ID`, `CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN`.
 
-- `CHROME_EXTENSION_ID`
-- `CHROME_CLIENT_ID`
-- `CHROME_CLIENT_SECRET`
-- `CHROME_REFRESH_TOKEN`
-
-**Before first API publish:** complete the Chrome Web Store **trader / negociante (EEA)** declaration in the [Developer Dashboard](https://chrome.google.com/webstore/devconsole) — otherwise upload/publish fails.
+Before first API publish, complete the Chrome Web Store **trader / negociante (EEA)** declaration in the [Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 
 ## Privacy
 
-The extension only talks to the inspected page’s Jacaré hook. No network telemetry.
+Talks only to the inspected page’s Jacaré hook. No network telemetry.

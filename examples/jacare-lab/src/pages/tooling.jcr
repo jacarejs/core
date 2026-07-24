@@ -33,10 +33,10 @@ export <view>
       <p class="page-lead">The CLI, Vite plugin, Binding IR, compiler, DevTools — and the VS Code extension for .jcr files.</p>
     </header>
 
-    <Tip :text=${'DevTools: use the top-bar toggle (DevTools on/off). Pulse Graph tabs: Graph | Mesh | Scope (↗ pops out). Try /bag for Mesh, Lifecycle for Scope, and /binding-ir for the compiler forest.'} />
+    <Tip :text=${'DevTools: top-bar toggle (DevTools on/off). Overlay tabs: State | Mesh | Scope (↗ pops out). Prefer the Chrome extension tab Jacaré for simpler debug. Try /bag for Mesh, Lifecycle for Scope, /binding-ir for the compiler forest.'} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Named pulses + DOM highlight'} :lead=${'Compiler injects { name, file, line } in DEV. Hover the Pulse Graph node to outline this counter.'} :code=${namedPulsesCode}>
+      <Demo :title=${'Named pulses + DOM highlight'} :lead=${'Compiler injects { name, file, line } in DEV. Hover a State node to outline this counter.'} :code=${namedPulsesCode}>
         <div class="stack">
           <div class="row">
             <button type="button" class="btn" on-click=${bump}>count++</button>
@@ -100,7 +100,7 @@ export <view>
 
       <div class="ref-card">
         <h3>DevTools</h3>
-        <p class="muted">Pulse Graph shows named pulses + DOM highlight; Scope shows registerScope() entries.</p>
+        <p class="muted">State shows named pulses + DOM highlight; Scope shows registerScope() entries.</p>
         <pre><code>${devtoolsCode}</code></pre>
       </div>
 

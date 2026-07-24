@@ -121,7 +121,7 @@ export function createMeshPanel(host: HTMLElement): MeshPanelHandle {
         <span class="jacare-mesh__meta" data-meta></span>
       </div>
       <div class="jacare-mesh__actions">
-        <button class="jacare-mesh__toggle" type="button" data-dock title="Dock into Pulse Graph" aria-label="Dock Mesh into Pulse Graph">↙</button>
+        <button class="jacare-mesh__toggle" type="button" data-dock title="Dock into State" aria-label="Dock Mesh into State">↙</button>
         <button class="jacare-mesh__toggle" type="button" data-reset title="Reset all bags to factory defaults" aria-label="Reset Mesh">Reset</button>
         <button class="jacare-mesh__toggle" type="button" data-minimize title="Minimize" aria-label="Minimize Mesh">−</button>
       </div>

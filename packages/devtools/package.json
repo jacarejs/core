@@ -1,7 +1,7 @@
 {
   "name": "@jacare/devtools",
   "version": "0.1.10",
-  "description": "Jacaré DevTools — Pulse Graph inspector",
+  "description": "Jacaré DevTools — State inspector (overlay + Chrome extension hook)",
   "license": "MIT",
   "repository": {
     "type": "git",

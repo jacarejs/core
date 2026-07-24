@@ -13,83 +13,66 @@
         <span id="status" class="badge badge-warn">checking…</span>
       </div>
       <div class="actions">
+        <button type="button" id="btn-pick" title="Pick an element in the page">Pick</button>
+        <button type="button" id="btn-clear" title="Clear DOM highlight">Clear</button>
         <button type="button" id="btn-refresh">Refresh</button>
-        <button type="button" id="btn-pick">Pick DOM</button>
-        <button type="button" id="btn-clear">Clear highlight</button>
       </div>
     </header>
 
+    <section id="route-bar" class="route-bar">
+      <span class="route-label">Route</span>
+      <code id="route-path">—</code>
+      <span id="route-extra" class="route-extra muted"></span>
+    </section>
+
     <p id="hint" class="hint"></p>
 
-    <section class="meta">
-      <div>Protocol: <code id="protocol">—</code></div>
-      <div>Core: <code id="core-version">—</code></div>
-      <div>Enabled: <code id="enabled">—</code></div>
-      <div>Pulses: <code id="pulse-count">0</code></div>
-      <div>.jcr: <code id="jcr-count">0</code></div>
-      <div>Mesh bags: <code id="mesh-count">0</code></div>
-    </section>
+    <nav class="tabs" aria-label="Jacaré inspector">
+      <button type="button" class="tab is-active" data-tab="state">State</button>
+      <button type="button" class="tab" data-tab="screens">Screens</button>
+      <button type="button" class="tab" data-tab="mesh">Mesh</button>
+    </nav>
 
-    <section class="route-card">
-      <h2>Current route</h2>
-      <div id="route-empty" class="muted">No route data yet.</div>
-      <dl id="route-grid" class="route-grid" hidden>
-        <div><dt>Path</dt><dd><code id="route-path">—</code></dd></div>
-        <div><dt>Href</dt><dd><code id="route-href">—</code></dd></div>
-        <div><dt>Title</dt><dd><code id="route-title">—</code></dd></div>
-        <div><dt>Hash</dt><dd><code id="route-hash">—</code></dd></div>
-        <div><dt>Base</dt><dd><code id="route-base">—</code></dd></div>
-        <div class="span-2"><dt>Params</dt><dd><pre id="route-params">{}</pre></dd></div>
-        <div class="span-2"><dt>Search</dt><dd><pre id="route-search">{}</pre></dd></div>
-        <div class="span-2"><dt>Screens</dt><dd><pre id="route-screens">[]</pre></dd></div>
-      </dl>
-    </section>
-
-    <section>
-      <div class="section-head">
-        <h2>.jcr sources</h2>
-        <input id="filter-jcr" class="filter filter-inline" type="search" placeholder="Filter .jcr…" />
+    <section id="pane-state" class="pane is-active">
+      <div class="toolbar">
+        <input id="filter" class="filter" type="search" placeholder="Filter state…" />
+        <label class="check">
+          <input type="checkbox" id="show-all" />
+          Show noise
+        </label>
       </div>
-      <ul id="jcr-list" class="list"></ul>
-    </section>
-
-    <section class="graph-section">
-      <div class="section-head">
-        <h2>Pulse Graph <span id="graph-meta" class="section-meta"></span></h2>
-        <input id="filter" class="filter filter-inline" type="search" placeholder="Filter nodes…" />
-      </div>
-      <p class="graph-hint">Hover a node to outline DOM · click to inspect value, .jcr source, depends-on and feeds</p>
       <div class="split">
-        <ul id="pulse-list" class="list graph-list"></ul>
-        <aside class="detail" id="pulse-detail">
-          <p class="muted" id="detail-empty">Select a node to inspect live values.</p>
+        <ul id="pulse-list" class="list state-list"></ul>
+        <aside class="detail">
+          <p class="muted" id="detail-empty">Select a value to inspect.</p>
           <div id="detail-body" hidden>
-            <div class="detail-section">
-              <h4>Value</h4>
-              <pre id="detail-value" class="value-block"></pre>
+            <div class="detail-head">
+              <strong id="detail-name">—</strong>
+              <span id="detail-kind" class="pill"></span>
             </div>
-            <div class="detail-section">
-              <h4>Meta</h4>
-              <pre id="detail-meta-json" class="value-block"></pre>
-              <p id="detail-source-wrap" class="source-wrap" hidden>
-                <button type="button" id="detail-source" class="link-btn"></button>
-              </p>
-            </div>
-            <div class="detail-section">
-              <h4>DOM bindings (<span id="detail-bind-count">0</span>)</h4>
-              <ul id="bindings-list" class="rel-list"></ul>
-            </div>
-            <div class="detail-section">
-              <h4>Depends on (<span id="detail-up-count">0</span>)</h4>
-              <ul id="upstream-list" class="rel-list"></ul>
-            </div>
-            <div class="detail-section">
-              <h4>Feeds (<span id="detail-down-count">0</span>)</h4>
-              <ul id="downstream-list" class="rel-list"></ul>
-            </div>
+            <p id="detail-source" class="file" hidden></p>
+            <h4>Value</h4>
+            <pre id="detail-value" class="value-block"></pre>
+            <h4>Bound in page (<span id="detail-bind-count">0</span>)</h4>
+            <ul id="bindings-list" class="rel-list"></ul>
+            <h4>Depends on</h4>
+            <ul id="upstream-list" class="rel-list"></ul>
+            <h4>Updates</h4>
+            <ul id="downstream-list" class="rel-list"></ul>
           </div>
         </aside>
       </div>
+    </section>
+
+    <section id="pane-screens" class="pane">
+      <p class="pane-lead muted">.jcr screens linked to live state. Click to focus State.</p>
+      <ul id="jcr-list" class="list"></ul>
+    </section>
+
+    <section id="pane-mesh" class="pane">
+      <p class="pane-lead muted">Pulse bags (`@bag/key`). Click a cell to open it in State.</p>
+      <div id="mesh-empty" class="muted">No bags on this page.</div>
+      <div id="mesh-body"></div>
     </section>
 
     <script src="panel.js" type="module"></script>
