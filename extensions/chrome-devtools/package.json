@@ -1,0 +1,11 @@
+{
+  "name": "@jacare/chrome-devtools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Jacaré Chrome DevTools extension (MV3)",
+  "license": "MIT",
+  "scripts": {
+    "pack": "node ../../scripts/pack-chrome-devtools.mjs",
+    "zip": "node ../../scripts/pack-chrome-devtools.mjs"
+  }
+}

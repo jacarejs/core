@@ -1,0 +1,94 @@
+name: Publish Chrome DevTools
+
+# Builds extensions/chrome-devtools and uploads to the Chrome Web Store.
+# Requires secrets (see docs/private/chrome-devtools-extension.md § deploy).
+#
+# Manual gate: Chrome Web Store “trader / negociante” EEA declaration must be
+# completed in the Developer Dashboard before API publish works.
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Upload + publish to Chrome Web Store (needs secrets)
+        type: boolean
+        default: false
+      dry_run:
+        description: Only build ZIP artifact (no upload)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-chrome-devtools
+  cancel-in-progress: false
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Pack extension ZIP
+        id: meta
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq zip
+          node scripts/pack-chrome-devtools.mjs
+          VERSION=$(node -p "require('./extensions/chrome-devtools/manifest.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacare-devtools-v${{ steps.meta.outputs.version }}
+          path: extensions/chrome-devtools/dist/jacare-devtools.zip
+          if-no-files-found: error
+
+  publish:
+    needs: pack
+    if: ${{ inputs.publish && !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: jacare-devtools-v${{ needs.pack.outputs.version }}
+          path: dist-chrome
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Upload & publish to Chrome Web Store
+        env:
+          EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EXTENSION_ID:-}" ] || [ -z "${CLIENT_ID:-}" ] || [ -z "${CLIENT_SECRET:-}" ] || [ -z "${REFRESH_TOKEN:-}" ]; then
+            echo "::error::Missing Chrome Web Store secrets. See docs/private/chrome-devtools-extension.md"
+            exit 1
+          fi
+          npx --yes chrome-webstore-upload-cli@3 upload \
+            --source dist-chrome/jacare-devtools.zip \
+            --extension-id "$EXTENSION_ID" \
+            --client-id "$CLIENT_ID" \
+            --client-secret "$CLIENT_SECRET" \
+            --refresh-token "$REFRESH_TOKEN" \
+            --auto-publish

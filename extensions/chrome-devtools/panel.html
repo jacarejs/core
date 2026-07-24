@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Jacaré</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <img src="icons/icon32.png" width="20" height="20" alt="" />
+        <strong>Jacaré</strong>
+        <span id="status" class="badge badge-warn">checking…</span>
+      </div>
+      <div class="actions">
+        <button type="button" id="btn-refresh">Refresh</button>
+        <button type="button" id="btn-pick">Pick DOM</button>
+        <button type="button" id="btn-clear">Clear highlight</button>
+      </div>
+    </header>
+
+    <p id="hint" class="hint"></p>
+
+    <section class="meta">
+      <div>Protocol: <code id="protocol">—</code></div>
+      <div>Core: <code id="core-version">—</code></div>
+      <div>Enabled: <code id="enabled">—</code></div>
+      <div>Pulses: <code id="pulse-count">0</code></div>
+    </section>
+
+    <section>
+      <h2>Pulse graph</h2>
+      <input id="filter" class="filter" type="search" placeholder="Filter pulses…" />
+      <ul id="pulse-list" class="list"></ul>
+    </section>
+
+    <section>
+      <h2>Bindings</h2>
+      <p id="bindings-empty" class="muted">Select a pulse to see DOM bindings.</p>
+      <ul id="bindings-list" class="list"></ul>
+    </section>
+
+    <script src="panel.js" type="module"></script>
+  </body>
+</html>

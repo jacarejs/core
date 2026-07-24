@@ -53,6 +53,9 @@ tmp/
 benchmarks/results/
 benchmarks/fixtures/counter/dist/
 
+# Chrome DevTools extension pack output
+extensions/chrome-devtools/dist/
+
 # Rust (compiler future)
 target/
 Cargo.lock

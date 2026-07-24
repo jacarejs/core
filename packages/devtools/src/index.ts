@@ -159,3 +159,4 @@ export {
   clearScope,
 } from '@jacare/core'
 export { readUiConfig, writeUiConfig } from './config.js'
+export { installPageHook } from './hook.js'
