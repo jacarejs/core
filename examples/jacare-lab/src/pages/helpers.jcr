@@ -14,7 +14,7 @@ const visibleRows = derive(() => {
   return IMPORT_CATALOG.filter((row) => {
     if (pkg !== 'all' && row.pkg !== pkg) return false
     if (!q) return true
-    const hay = `${row.name} ${row.group} ${row.pkg} ${row.usage} ${row.importLine} ${row.example}`.toLowerCase()
+    const hay = `${row.name} ${row.group} ${row.pkg} ${row.usage} ${row.about} ${row.importLine} ${row.example}`.toLowerCase()
     return hay.includes(q)
   })
 })
@@ -29,17 +29,17 @@ export <view>
       <p class="page-kicker">API §20</p>
       <h1 class="page-title">Import catalog</h1>
       <p class="page-lead">
-        Everything you can import — one simple English example per symbol.
-        Same catalog lives in
+        Every importable symbol with a short summary, a detailed English explanation, the import line, and a minimal example.
+        Full tables also live in
         <code>docs/api.md</code>
         §20.
       </p>
     </header>
 
-    <Tip :text=${'Prefer pulse / derive / watch in new code. DOM helpers (bindText, branch, …) are usually emitted from .jcr syntax — you write ${count}, not the helper call.'} />
+    <Tip :text=${'Prefer pulse / derive / watch in new code. DOM helpers (bindText, branch, …) are usually emitted from .jcr syntax — you write ${count}, not the helper call. Filter by package or search the explanations.'} />
 
     <div class="stack" style="gap:0.75rem">
-      <input class="input" bind-value=${query} placeholder="Filter by name, package, usage…" />
+      <input class="input" bind-value=${query} placeholder="Filter by name, package, explanation…" />
       <div class="row" style="flex-wrap:wrap;gap:0.4rem">
         #for packages as pkg (pkg)
           <button
@@ -62,7 +62,10 @@ export <view>
             <span class="badge badge-warn">${row.pkg}</span>
           </div>
           <p class="import-usage">${row.usage}</p>
+          <p class="import-about">${row.about}</p>
+          <p class="import-label muted">Import</p>
           <pre class="import-line"><code>${row.importLine}</code></pre>
+          <p class="import-label muted">Example</p>
           <pre class="import-example"><code>${row.example}</code></pre>
           <a class="btn btn-outline" jacare-go=${row.path} href=${appHref(row.path)}>Open lesson</a>
         </article>

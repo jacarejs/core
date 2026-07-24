@@ -10,7 +10,7 @@
 
 **Language reference (complete):** [`docs/language-reference.md`](../../docs/language-reference.md) · Lab lesson [`/language`](https://jacarejs.github.io/core/lab/#/language) — reserved words, all binds, `<view>` / `<style>` / `<contract>`, CLI create/dev/build.
 
-**Import catalog:** [`docs/api.md` §20](../../docs/api.md#20-import-catalog--everything-you-can-import) · Lab [`/helpers`](https://jacarejs.github.io/core/lab/#/helpers) — every symbol you can import from `@jacare/core`, compiler, vite-plugin, meta, CLI, and `.jcr` exports.
+**Import catalog:** [`docs/api.md` §20](../../docs/api.md#20-import-catalog--everything-you-can-import) · Lab [`/helpers`](https://jacarejs.github.io/core/lab/#/helpers) — every symbol you can import, with a detailed English explanation, import line, and example (`@jacare/core`, compiler, vite-plugin, meta, CLI, and `.jcr` exports).
 
 Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/)
 
@@ -104,7 +104,7 @@ Complete catalog: [language-reference.md §3](../../docs/language-reference.md#3
 | `/cookbook` | Tasks screen combining the pieces |
 | `/ssr` | `render` / `resume` via shared MountPlan |
 | `/tooling` | CLI (`check --bindings`), Vite, Binding IR, DevTools |
-| `/helpers` | Runtime helpers index |
+| `/helpers` | Import catalog — detailed English explanation per symbol |
 
 Each `Demo` card explains the idea, runs a live example, and opens the source in a modal.
 

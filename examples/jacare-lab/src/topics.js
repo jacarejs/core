@@ -117,6 +117,6 @@ export const LESSONS = [
   {
     path: '/helpers',
     title: 'Import catalog',
-    blurb: 'Everything you can import — @jacare/core, compiler, vite, CLI',
+    blurb: 'Every import — detailed English explanation, import line, example',
   },
 ]
