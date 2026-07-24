@@ -1,69 +1,74 @@
 import { pulse, derive } from '@jacare/core'
 import { appHref } from '../app-base.js'
 import Tip from '../components/Tip.jcr'
-
-const helpers = [
-  { name: 'mount / default', description: 'Client render entry from a compiled .jcr module — returns a dispose function', path: '/module' },
-  { name: 'export view / style', description: 'Required view block and optional scoped styles in a .jcr file', path: '/module' },
-  { name: 'signal / pulse', description: 'Mutable reactive cell — read with name(), write with .set() / .update()', path: '/reactivity' },
-  { name: 'createBag / ripple', description: 'Pulse Mesh — shared cells, Mesh Ports, native & light', path: '/bag' },
-  { name: 'computed / derive', description: 'Derived read-only value, recomputed only when a dependency changes', path: '/reactivity' },
-  { name: 'effect / watch', description: 'Side effect that reruns whenever a tracked signal changes', path: '/reactivity' },
-  { name: 'batch', description: 'Coalesce multiple writes into a single notification', path: '/reactivity' },
-  { name: 'untrack', description: 'Read a signal inside an effect without subscribing to it', path: '/reactivity' },
-  { name: 'bind-value / bind-checked', description: 'Two-way binding for text inputs and checkboxes (Binding IR → bindModel)', path: '/bindings' },
-  { name: 'class-*', description: 'Toggle a class from a boolean signal or expression (shared client/SSR leaf IR)', path: '/bindings' },
-  { name: 'style---*', description: 'Bind a signal to a reactive CSS custom property', path: '/bindings' },
-  { name: 'jacare check --bindings', description: 'Compile-check all .jcr files and print Binding IR sites', path: '/binding-ir' },
-  { name: 'expression style', description: 'Prefer ${count()} over ${() => count()} unless capturing a #for local', path: '/bindings' },
-  { name: 'inspectTemplateBindings', description: 'Programmatic Binding IR inspection from @jacare/compiler', path: '/binding-ir' },
-  { name: 'Binding IR / MountPlan', description: 'One forest for client mount, SSR render, CPW, and check', path: '/binding-ir' },
-  { name: 'on-* / @*', description: 'Attach a DOM event listener with automatic cleanup', path: '/events' },
-  { name: '<debug>', description: 'Dev-only JSON inspector — label, copy, object shorthand; stripped in production', path: '/debug' },
-  { name: 'if / elif / else', description: 'Mount exactly one branch at a time', path: '/if' },
-  { name: 'case / when / else', description: 'Match one value with Object.is arms', path: '/case' },
-  { name: 'for … as … (key)', description: 'Reconcile a keyed list incrementally instead of re-rendering it', path: '/for' },
-  { name: 'contract block', description: 'Declare props, pulses, slots, and emits so jacare check can validate usage', path: '/components' },
-  { name: 'style block', description: 'Scoped CSS per file, with if / for / case and a global() escape', path: '/css' },
-  { name: 'createNav / lazy / routeHref', description: 'Layout + screen routing, lazy loading, param and query helpers', path: '/nav' },
-  { name: 'createNav title', description: 'Per-route document.title via screens: { use, title } — string or (ctx) => string', path: '/nav' },
-  { name: 'setNavTitle / getNavTitle', description: 'Read/write document.title from a screen — pair setNavTitle with effect for live titles', path: '/lifecycle' },
-  { name: 'createForm', description: 'Validated fields with dirty / valid tracking and submit handling', path: '/forms' },
-  { name: 'createLifecycle / registerScope', description: 'Screen mount / activate hooks and live DevTools Scope entries', path: '/lifecycle' },
-  { name: 'renderToString / resume', description: 'Server render and client hydration for a .jcr module', path: '/ssr' },
-  { name: 'connectJacareDevtools', description: 'Pulse Graph tabs: Graph, Mesh, Scope — toggle from the Lab top bar', path: '/tooling' },
-  { name: 'renderToStream', description: 'Streaming SSR alongside renderToString + resumeBindings', path: '/ssr' },
-]
+import { IMPORT_CATALOG } from '../imports-catalog.js'
 
 const query = pulse('')
-const visibleHelpers = derive(() => {
+const pkgFilter = pulse('all')
+
+const packages = ['all', ...new Set(IMPORT_CATALOG.map((row) => row.pkg))]
+
+const visibleRows = derive(() => {
   const q = query().trim().toLowerCase()
-  if (!q) return helpers
-  return helpers.filter((helper) => helper.name.toLowerCase().includes(q) || helper.description.toLowerCase().includes(q))
+  const pkg = pkgFilter()
+  return IMPORT_CATALOG.filter((row) => {
+    if (pkg !== 'all' && row.pkg !== pkg) return false
+    if (!q) return true
+    const hay = `${row.name} ${row.group} ${row.pkg} ${row.usage} ${row.importLine} ${row.example}`.toLowerCase()
+    return hay.includes(q)
+  })
 })
+
+function setPkg(name) {
+  pkgFilter.set(name)
+}
 
 export <view>
   <section class="page">
     <header class="page-hero">
       <p class="page-kicker">API §20</p>
-      <h1 class="page-title">Helpers index</h1>
-      <p class="page-lead">Every runtime helper used in this lab, with a link back to the lesson that demonstrates it.</p>
+      <h1 class="page-title">Import catalog</h1>
+      <p class="page-lead">
+        Everything you can import — one simple English example per symbol.
+        Same catalog lives in
+        <code>docs/api.md</code>
+        §20.
+      </p>
     </header>
 
-    <Tip :text=${'This table is a plain array rendered with a loop — no special magic, the same pattern as any other list in this lab.'} />
+    <Tip :text=${'Prefer pulse / derive / watch in new code. DOM helpers (bindText, branch, …) are usually emitted from .jcr syntax — you write ${count}, not the helper call.'} />
 
-    <input class="input" bind-value=${query} placeholder="Filter helpers…" />
+    <div class="stack" style="gap:0.75rem">
+      <input class="input" bind-value=${query} placeholder="Filter by name, package, usage…" />
+      <div class="row" style="flex-wrap:wrap;gap:0.4rem">
+        #for packages as pkg (pkg)
+          <button
+            type="button"
+            class="btn btn-outline"
+            class-active=${pkgFilter() === pkg}
+            on-click=${() => setPkg(pkg)}
+          >${pkg}</button>
+        #end
+      </div>
+      <p class="muted">${() => `${visibleRows().length} of ${IMPORT_CATALOG.length} symbols`}</p>
+    </div>
 
-    <div class="helper-table">
-      #for visibleHelpers() as helper (helper.name)
-        <div class="helper-row">
-          <code>${helper.name}</code>
-          <span>${helper.description}</span>
-          <a class="btn btn-outline" jacare-go=${helper.path} href=${appHref(helper.path)}>Open</a>
-        </div>
+    <div class="helper-table import-catalog">
+      #for visibleRows() as row (row.name + row.pkg)
+        <article class="helper-row import-row">
+          <div class="import-row-head">
+            <code class="import-name">${row.name}</code>
+            <span class="badge">${row.group}</span>
+            <span class="badge badge-warn">${row.pkg}</span>
+          </div>
+          <p class="import-usage">${row.usage}</p>
+          <pre class="import-line"><code>${row.importLine}</code></pre>
+          <pre class="import-example"><code>${row.example}</code></pre>
+          <a class="btn btn-outline" jacare-go=${row.path} href=${appHref(row.path)}>Open lesson</a>
+        </article>
       #end
-      #if visibleHelpers().length === 0
-        <p class="muted">No helpers match that filter.</p>
+      #if visibleRows().length === 0
+        <p class="muted">No symbols match that filter.</p>
       #end
     </div>
   </section>

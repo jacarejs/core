@@ -10,6 +10,8 @@
 
 **Language reference (complete):** [`docs/language-reference.md`](../../docs/language-reference.md) · Lab lesson [`/language`](https://jacarejs.github.io/core/lab/#/language) — reserved words, all binds, `<view>` / `<style>` / `<contract>`, CLI create/dev/build.
 
+**Import catalog:** [`docs/api.md` §20](../../docs/api.md#20-import-catalog--everything-you-can-import) · Lab [`/helpers`](https://jacarejs.github.io/core/lab/#/helpers) — every symbol you can import from `@jacare/core`, compiler, vite-plugin, meta, CLI, and `.jcr` exports.
+
 Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/)
 
 ## Run

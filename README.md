@@ -54,6 +54,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | **Tutorial (Jacaré Lab)** | [Live](https://jacarejs.github.io/core/lab/) · [`examples/jacare-lab`](examples/jacare-lab) · `yarn lab:dev` |
 | **API reference (full)** | [docs/api.md](docs/api.md) |
 | **Language reference** | [docs/language-reference.md](docs/language-reference.md) — reserved words, all binds, view/style/contract, CLI |
+| **Import catalog** | [docs/api.md §20](docs/api.md#20-import-catalog--everything-you-can-import) · [Lab `/helpers`](https://jacarejs.github.io/core/lab/#/helpers) |
 | Template contracts | [docs/api.md §9](docs/api.md#template-contracts-export-contract) |
 | Events `on-*` / `@*` | [docs/api.md §6](docs/api.md#6-events-on---) |
 | Conditionals `#if` | [docs/api.md §7](docs/api.md#7-control-flow--if) |

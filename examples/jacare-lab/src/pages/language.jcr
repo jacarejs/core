@@ -83,7 +83,9 @@ export <view>
         <code>docs/language-reference.md</code>
         and
         <code>docs/api.md</code>
-        §2b · §5 · §17. Featured compiler lesson:
+        §2b · §5 · §17 · §20
+        <a class="text-link" jacare-go="/helpers" href=${appHref('/helpers')}>Import catalog</a>.
+        Featured compiler lesson:
         <a class="text-link" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>Binding IR</a>.
       </p>
     </header>
@@ -107,6 +109,7 @@ export <view>
           <a class="btn btn-outline" jacare-go="/nav" href=${appHref('/nav')}>Navigation</a>
           <a class="btn btn-outline" jacare-go="/forms" href=${appHref('/forms')}>Forms</a>
           <a class="btn btn-outline" jacare-go="/ssr" href=${appHref('/ssr')}>SSR</a>
+          <a class="btn btn-outline" jacare-go="/helpers" href=${appHref('/helpers')}>Imports</a>
         </div>
       </Demo>
 

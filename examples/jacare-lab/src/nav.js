@@ -32,7 +32,7 @@ export const nav = createNav({
     '/playground': { use: lazy(() => import('./pages/playground.jcr')), title: 'Jacaré Lab · Playground' },
     '/ssr': { use: lazy(() => import('./pages/ssr.jcr')), title: 'Jacaré Lab · SSR' },
     '/tooling': { use: lazy(() => import('./pages/tooling.jcr')), title: 'Jacaré Lab · Tooling' },
-    '/helpers': { use: lazy(() => import('./pages/helpers.jcr')), title: 'Jacaré Lab · Helpers' },
+    '/helpers': { use: lazy(() => import('./pages/helpers.jcr')), title: 'Jacaré Lab · Import catalog' },
     '/topic/:slug': {
       use: lazy(() => import('./pages/topic-param.jcr')),
       title: (ctx) => `Jacaré Lab · Topic · ${ctx.params.slug ?? '…'}`,

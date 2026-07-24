@@ -61,9 +61,9 @@ For syntax details see [syntax.md](syntax.md). For the **full language reference
 23. [CLI](#17-cli)
 24. [Vite plugin](#18-vite-plugin)
 25. [Testing](#19-testing)
-26. [Runtime helpers index](#20-runtime-helpers-index)
+26. [Import catalog (everything you can import)](#20-import-catalog--everything-you-can-import)
 
-Jump to: [Tutorial](#tutorial--jacaré-lab) · [Reserved words](#2b-reserved-words) · [Bindings](#5-dom-bindings) · [Pulse bags](#3b-pulse-bags-shared-state) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [CLI](#17-cli) · [Language reference](language-reference.md) · [Packages on npm](#packages-on-npm)
+Jump to: [Tutorial](#tutorial--jacaré-lab) · [Reserved words](#2b-reserved-words) · [Bindings](#5-dom-bindings) · [Pulse bags](#3b-pulse-bags-shared-state) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [Import catalog](#20-import-catalog--everything-you-can-import) · [CLI](#17-cli) · [Language reference](language-reference.md) · [Packages on npm](#packages-on-npm)
 
 ---
 
@@ -2263,37 +2263,723 @@ A dedicated package will provide `render()`, query helpers, and `cleanup()` arou
 
 ---
 
-## 20. Runtime helpers index
+## 20. Import catalog — everything you can import
 
-All from [`@jacare/core`](https://www.npmjs.com/package/@jacare/core) unless noted.
+Live index with the same examples: **[`/helpers`](https://jacarejs.github.io/core/lab/#/helpers)** (filterable). Syntax deep-dive: [language-reference.md](language-reference.md).
 
-| Helper | Doc | Role |
-|--------|-----|------|
-| `signal` / `pulse` | [§3](#3-reactivity) | Writable reactive cell |
-| `computed` / `derive` | [§3](#3-reactivity) | Derived value |
-| `effect` / `watch` | [§3](#3-reactivity) | Side effect |
-| `batch` | [§3](#3-reactivity) | Coalesce updates |
-| `createBag` / `ripple` / `getBag` / `getMeshSnapshot` | [§3b](#3b-pulse-bags-shared-state) | Shared pulse mesh |
-| `bindText` / `bindPropText` | [§5](#5-dom-bindings) | Text node |
-| `bindAttribute` / `bindProperty` | [§5](#5-dom-bindings) | Attributes / props |
-| `bindModel` | [§5](#5-dom-bindings) | Two-way input |
-| `bindClass` / `bindStyleVar` | [§5](#5-dom-bindings) | Class / CSS var |
-| `bindDebug` | [§7c `<debug>`](#7c-dev-debug-debug) | Dev JSON inspector |
-| `namePulse` / `devtoolsBind` | [§15](#15-devtools) | Source names + DOM bindings |
-| `highlightBinding` / `pickElement` | [§15](#15-devtools) | DOM outline / picker |
-| `branch` / `showIf` | [§7 `#if`](#7-control-flow--if) · [§7b `#case`](#7b-control-flow--case) | Conditionals / match |
-| `ensureScopedStyle` | [§10](#10-scoped-css) | Static scoped CSS inject |
-| `bindStyleSheet` / `scopeCss` | [§10](#10-scoped-css) | Reactive style (`#if` / `#for` / `#case`) |
-| `reconcileKeyedList` | [§8 `#for`](#8-control-flow--for) | Keyed lists |
-| `mountSlot` | [§9](#9-components-and-slots) | Slot projection |
-| Event `on-*` / `@*` | [§6](#6-events-on---) | DOM listeners |
-| `createNav` / `lazy` | [§11](#11-navigation) | Routing |
-| `screens: { use, title }` | [§11 Screen title](#screen-title) | Document title per route |
-| `setNavTitle` / `getNavTitle` | [§11 Dynamic title](#dynamic-title--setnavtitle--getnavtitle) | Live `document.title` read/write from a screen |
-| `createForm` | [§12](#12-forms) | Forms |
-| `createLifecycle` / `registerScope` | [§13](#13-lifecycle-and-scope) | Lifecycle / debug |
-| `renderToString` / `resumeBindings` | [§14](#14-ssr-and-hydration) | SSR |
-| `connectJacareDevtools` | [§15](#15-devtools) | [`@jacare/devtools`](https://www.npmjs.com/package/@jacare/devtools) |
+### How to read this section
+
+Each symbol has: **import line**, one-line role, and a **simple English example**.
+
+Compiler-emitted helpers (`bindText`, `branch`, …) are still public — you rarely import them by hand; write `.jcr` syntax instead.
+
+---
+
+### 20.1 `@jacare/core` — reactivity
+
+```javascript
+import { pulse, signal, derive, computed, effect, watch, batch, untrack } from '@jacare/core'
+```
+
+Aliases: `pulse` ≡ `signal`, `derive` ≡ `computed`, `watch` ≡ `effect`. Prefer **pulse / derive / watch** in new code. Details: [§3](#3-reactivity).
+
+**`pulse`**
+
+```javascript
+import { pulse } from '@jacare/core'
+
+const count = pulse(0)
+count()                      // → 0
+count.set(1)                 // → 1
+count.update(n => n + 1)     // → 2
+```
+
+**`signal`** (alias of `pulse`)
+
+```javascript
+import { signal } from '@jacare/core'
+
+const open = signal(false)
+open()
+open.set(true)
+```
+
+**`derive`**
+
+```javascript
+import { pulse, derive } from '@jacare/core'
+
+const n = pulse(2)
+const doubled = derive(() => n() * 2)
+doubled()  // → 4
+```
+
+**`computed`** (alias of `derive`)
+
+```javascript
+import { pulse, computed } from '@jacare/core'
+
+const price = pulse(10)
+const tax = computed(() => price() * 0.1)
+```
+
+**`effect`**
+
+```javascript
+import { pulse, effect } from '@jacare/core'
+
+const n = pulse(0)
+const { dispose } = effect(() => {
+  console.log('n is', n())
+})
+// later: dispose()
+```
+
+**`watch`** (alias of `effect`)
+
+```javascript
+import { pulse, watch } from '@jacare/core'
+
+const title = pulse('Hi')
+watch(() => {
+  document.title = title()
+})
+```
+
+**`batch`**
+
+```javascript
+import { pulse, batch, effect } from '@jacare/core'
+
+const a = pulse(0)
+const b = pulse(0)
+effect(() => console.log(a() + b()))
+
+batch(() => {
+  a.set(1)
+  b.set(2)
+})  // effect runs once → 3
+```
+
+**`untrack`**
+
+```javascript
+import { pulse, effect, untrack } from '@jacare/core'
+
+const a = pulse(1)
+const b = pulse(2)
+effect(() => {
+  console.log(a(), untrack(() => b()))
+  // only a() triggers re-runs
+})
+```
+
+---
+
+### 20.2 `@jacare/core` — Pulse bags (Mesh)
+
+```javascript
+import { createBag, getBag, listBags, ripple } from '@jacare/core'
+```
+
+Details: [§3b](#3b-pulse-bags-shared-state).
+
+**`createBag`**
+
+```javascript
+import { createBag, pulse } from '@jacare/core'
+
+export const cart = createBag('cart', () => ({
+  count: pulse(0),
+  total: pulse(0),
+}))
+
+cart.count.set(3)
+```
+
+**`getBag`**
+
+```javascript
+import { getBag } from '@jacare/core'
+
+const cart = getBag('cart')
+cart?.count()
+```
+
+**`listBags`**
+
+```javascript
+import { listBags } from '@jacare/core'
+
+listBags()  // → ['cart', 'theme', …]
+```
+
+**`ripple`**
+
+```javascript
+import { ripple } from '@jacare/core'
+import { cart } from './bags.js'
+
+ripple(cart.total, () => {
+  console.log('total changed', cart.total())
+})
+```
+
+**`bag.snap` / `hydrate` / `reset`** (methods on a bag instance)
+
+```javascript
+const data = cart.snap()
+localStorage.setItem('cart', JSON.stringify(data))
+
+cart.hydrate(JSON.parse(localStorage.getItem('cart')))
+cart.reset()
+```
+
+**Template Mesh address** `` ${@bag/key} ``
+
+```javascript
+<span>Items: ${@cart/count}</span>
+<button on-click=${() => cart.count.update(n => n + 1)}>Add</button>
+```
+
+---
+
+### 20.3 `@jacare/core` — DOM bindings (*usually emitted*)
+
+You write `.jcr` syntax; the compiler imports `bindText`, `bindAttribute`, `bindClass`, `bindStyleVar`, `bindModel`, … for you. Details: [§5](#5-dom-bindings).
+
+**`bindText`** ← `${expr}`
+
+```javascript
+<span>${count}</span>
+```
+
+**`bindAttribute`** ← `:attr=${expr}`
+
+```javascript
+<a :href=${url} :title=${label}>Open</a>
+```
+
+**`bindClass`** ← `class-name=${bool}`
+
+```javascript
+<div class-open=${open} class-busy=${loading}>…</div>
+```
+
+**`bindStyleVar`** ← `style---name=${expr}`
+
+```javascript
+<div style---pct=${pct}>…</div>
+/* CSS: width: calc(var(--pct) * 1%) */
+```
+
+**`bindModel`** ← `bind-value` / `bind-checked`
+
+```javascript
+<input bind-value=${name} />
+<input type="checkbox" bind-checked=${ok} />
+```
+
+---
+
+### 20.4 `@jacare/core` — control flow & slots (*emitted*)
+
+**`branch` / `showIf`** ← `#if` / `#case` — [§7](#7-control-flow--if)
+
+```javascript
+#if loading()
+  <p>Loading…</p>
+#elif error()
+  <p>Error</p>
+#else
+  <p>Ready</p>
+#end
+```
+
+**`reconcileKeyedList`** ← `#for` — [§8](#8-control-flow--for)
+
+```javascript
+#for items() as item (item.id)
+  <li>${item.name}</li>
+#end
+```
+
+**`mountSlot`** ← `<slot>` — [§9](#9-components-and-slots)
+
+```javascript
+<!-- parent -->
+<Card>
+  <slot name="title">Hello</slot>
+  <p>Body</p>
+</Card>
+
+<!-- Card.jcr -->
+<header><slot name="title" /></header>
+<slot />
+```
+
+---
+
+### 20.5 `@jacare/core` — navigation
+
+```javascript
+import {
+  createNav, lazy, screen,
+  createRoute, routeHref, routeParam, routeSearch,
+  setNavTitle, getNavTitle,
+} from '@jacare/core'
+```
+
+Details: [§11](#11-navigation).
+
+**`createNav` + `lazy` + `screen`**
+
+```javascript
+import { createNav, lazy, screen } from '@jacare/core'
+import Shell from './Shell.jcr'
+import Home from './Home.jcr'
+
+export const nav = createNav({
+  layout: Shell,
+  screens: {
+    '/': { use: screen(Home), title: 'Home' },
+    '/about': { use: lazy(() => import('./About.jcr')), title: 'About' },
+  },
+})
+```
+
+**`nav.attach` / `go` / `warm` / `undo`**
+
+```javascript
+nav.attach(document.getElementById('app'))
+nav.go('/about')
+nav.warm('/cart')
+nav.undo()
+```
+
+**`createRoute`**
+
+```javascript
+import { createRoute } from '@jacare/core'
+import { nav } from './nav.js'
+
+export const route = createRoute(nav.where)
+```
+
+**`routeParam`**
+
+```javascript
+import { routeParam } from '@jacare/core'
+import { route } from './route.js'
+
+const id = routeParam(route, 'id')
+id()  // → '42' when path is /item/42
+```
+
+**`routeSearch`**
+
+```javascript
+import { routeSearch } from '@jacare/core'
+import { route } from './route.js'
+
+const q = routeSearch(route, 'q')
+q()  // → 'tea' when URL has ?q=tea
+```
+
+**`routeHref`**
+
+```javascript
+import { routeHref } from '@jacare/core'
+
+routeHref('/item/:id', { id: 7 })  // → '/item/7'
+```
+
+**`setNavTitle` / `getNavTitle`**
+
+```javascript
+import { setNavTitle, getNavTitle, effect } from '@jacare/core'
+
+effect(() => {
+  setNavTitle(`Cart · ${count()}`)
+})
+getNavTitle()
+```
+
+**Template attrs** `jacare-frame` / `jacare-go` / `jacare-here`
+
+```javascript
+<main jacare-frame></main>
+<a jacare-go="/about" href="/about">About</a>
+<a jacare-go="/shop" jacare-here class-active>Shop</a>
+```
+
+---
+
+### 20.6 `@jacare/core` — forms
+
+**`createForm`** — [§12](#12-forms)
+
+```javascript
+import { createForm } from '@jacare/core'
+
+const form = createForm({
+  email: {
+    value: '',
+    validate: (v) => (v.includes('@') ? undefined : 'Invalid email'),
+  },
+})
+
+<form on-submit=${form.handleSubmit((values) => console.log(values))}>
+  <input bind-value=${form.fields.email} />
+  <span>${form.fields.email.error()}</span>
+</form>
+```
+
+---
+
+### 20.7 `@jacare/core` — lifecycle & Scope
+
+**`createLifecycle`** — [§13](#13-lifecycle-and-scope)
+
+```javascript
+import { createLifecycle } from '@jacare/core'
+
+export const lifecycle = createLifecycle({
+  onMount() { console.log('mounted') },
+  onActivate() { console.log('visible') },
+  onDeactivate() { console.log('hidden') },
+  onUnmount() { console.log('gone') },
+})
+```
+
+**`registerScope`**
+
+```javascript
+import { createLifecycle, registerScope } from '@jacare/core'
+
+export const lifecycle = createLifecycle({
+  onActivate() {
+    return registerScope('draft', 'Draft', () => draft())
+  },
+})
+```
+
+---
+
+### 20.8 `@jacare/core` — SSR helpers
+
+```javascript
+import { renderToString, renderToStream, resumeBindings, escapeHtml } from '@jacare/core'
+```
+
+Details: [§14](#14-ssr-and-hydration). Prefer `mount` / `render` / `resume` from the **`.jcr` module**.
+
+**`renderToString`**
+
+```javascript
+import { renderToString } from '@jacare/core'
+import { render } from './Page.jcr'
+
+const html = renderToString(render, { title: 'Hi' })
+```
+
+**`renderToStream`**
+
+```javascript
+import { renderToStream } from '@jacare/core'
+import { render } from './Page.jcr'
+
+for await (const chunk of renderToStream(render)) {
+  res.write(chunk)
+}
+```
+
+**`resumeBindings`** (low-level)
+
+```javascript
+import { resumeBindings } from '@jacare/core'
+
+resumeBindings(rootEl, state)
+// Prefer resume() from the .jcr module in apps.
+```
+
+**`escapeHtml`**
+
+```javascript
+import { escapeHtml } from '@jacare/core'
+
+escapeHtml('<script>')  // → '&lt;script&gt;'
+```
+
+---
+
+### 20.9 `@jacare/core` — DevTools hooks (core)
+
+Apps normally call **`connectJacareDevtools`** from `@jacare/devtools`. Low-level helpers: [§15](#15-devtools).
+
+**`enableDevtools`**
+
+```javascript
+import { enableDevtools } from '@jacare/core'
+
+enableDevtools()
+```
+
+**`namePulse`**
+
+```javascript
+import { pulse, namePulse } from '@jacare/core'
+
+const count = pulse(0)
+namePulse(count, 'count')
+```
+
+**`getPulseGraph`**
+
+```javascript
+import { getPulseGraph } from '@jacare/core'
+
+const graph = getPulseGraph()
+console.log(graph.pulses)
+```
+
+---
+
+### 20.10 `@jacare/devtools`
+
+**`connectJacareDevtools`** — [§15](#15-devtools)
+
+```javascript
+import { connectJacareDevtools } from '@jacare/devtools'
+
+const stop = connectJacareDevtools({
+  position: 'bottom-right',
+  scope: true,
+  mesh: true,
+})
+// stop() removes the overlay
+```
+
+Keep behind `import.meta.env.DEV` or a Lab toggle in production builds.
+
+---
+
+### 20.11 `@jacare/compiler` (tooling / tests)
+
+```javascript
+import {
+  compile, parseModule, parseTemplate,
+  inspectTemplateBindings, lowerMountAst,
+} from '@jacare/compiler'
+```
+
+Day-to-day apps use the Vite plugin / CLI — not `compile()` in the browser (except Lab). Details: [§16](#16-compiler-api).
+
+**`compile`**
+
+```javascript
+import { compile } from '@jacare/compiler'
+
+const { code } = compile(source, {
+  filename: 'Page.jcr',
+  mode: 'module',
+})
+```
+
+**`parseModule` / `parseTemplate`**
+
+```javascript
+import { parseModule } from '@jacare/compiler'
+
+const ast = parseModule(source, 'Page.jcr')
+```
+
+**`inspectTemplateBindings`**
+
+```javascript
+import { inspectTemplateBindings } from '@jacare/compiler'
+
+const sites = inspectTemplateBindings(source, 'Page.jcr')
+console.log(sites)
+```
+
+**`lowerMountAst`**
+
+```javascript
+import { parseTemplate, lowerMountAst } from '@jacare/compiler'
+
+const ast = parseTemplate(viewSource)
+const plan = lowerMountAst(ast)
+```
+
+---
+
+### 20.12 `@jacare/vite-plugin`
+
+Details: [§18](#18-vite-plugin).
+
+**`jacare`**
+
+```javascript
+import { defineConfig } from 'vite'
+import jacare from '@jacare/vite-plugin'
+
+export default defineConfig({
+  plugins: [jacare()],
+})
+```
+
+**`createJacareViteConfig`**
+
+```javascript
+import { createJacareViteConfig } from '@jacare/vite-plugin'
+
+export default createJacareViteConfig({
+  title: 'My App',
+})
+```
+
+---
+
+### 20.13 `@jacare/meta`
+
+**`jacareMeta`**
+
+```javascript
+import { jacareMeta } from '@jacare/meta'
+
+plugins: [jacareMeta({ pagesDir: 'src/pages' })]
+```
+
+**`discoverRoutes`**
+
+```javascript
+import { discoverRoutes } from '@jacare/meta'
+
+const routes = discoverRoutes('src/pages')
+// → [{ path: '/', file: '…' }, …]
+```
+
+**`createJacareApp`**
+
+```javascript
+import { createJacareApp } from '@jacare/meta'
+
+const app = createJacareApp({
+  pagesDir: 'src/pages',
+  layout: Shell,
+})
+app.attach(document.getElementById('app'))
+```
+
+---
+
+### 20.14 Compiled `.jcr` module exports
+
+Every `.jcr` file exports (import the **file**, not `@jacare/core`):
+
+**`mount`**
+
+```javascript
+import { mount } from './Counter.jcr'
+
+const dispose = mount(document.getElementById('app'), { start: 0 })
+// later: dispose()
+```
+
+**`render`**
+
+```javascript
+import { render } from './Page.jcr'
+
+const { html, state } = render({ title: 'Hi' })
+```
+
+**`resume`**
+
+```javascript
+import { resume } from './Page.jcr'
+
+resume(document.getElementById('app'), window.__STATE__)
+```
+
+---
+
+### 20.15 CLI & create (not JS imports)
+
+```bash
+npm create jacare@latest my-app
+jacare new my-app --template=todo
+jacare dev
+jacare build
+jacare check --bindings
+```
+
+See [§17 CLI](#17-cli).
+
+---
+
+### 20.16 Language / template surface (not package imports)
+
+**`export <view>`**
+
+```javascript
+import { pulse } from '@jacare/core'
+
+const count = pulse(0)
+
+export <view>
+  <button on-click=${() => count.update(n => n + 1)}>
+    ${count}
+  </button>
+</view>
+```
+
+**`export <style>`**
+
+```javascript
+export <style>
+  button { color: green; }
+</style>
+```
+
+**`export <contract>`**
+
+```javascript
+export <contract>
+  props: { title: string }
+</contract>
+```
+
+**Events** `on-*`
+
+```javascript
+<button on-click=${() => count.update(n => n + 1)}>Click</button>
+```
+
+**`<debug>`** (stripped in prod)
+
+```javascript
+<debug { count, cart } />
+```
+
+---
+
+### 20.17 Quick “what should I import?” cheat sheet
+
+| I want… | Import |
+|---------|--------|
+| State in a page | `pulse`, `derive`, `effect` / `watch`, `batch` from `@jacare/core` |
+| Shared cart / theme | `createBag`, `getBag`, `ripple` |
+| Router | `createNav`, `lazy`, `createRoute`, `setNavTitle` |
+| Form | `createForm` |
+| Screen hooks + DevTools Scope | `createLifecycle`, `registerScope` |
+| Overlay UI | `connectJacareDevtools` from `@jacare/devtools` |
+| SSR string | `render` from `.jcr` + `renderToString` from core |
+| Vite | `jacare` from `@jacare/vite-plugin` |
+| Template text/attrs/lists | Write `.jcr` syntax — compiler emits binds |
+
+**Lab:** filterable catalog with the same examples → [`/helpers`](https://jacarejs.github.io/core/lab/#/helpers).
 
 ---
 
