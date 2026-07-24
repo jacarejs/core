@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import {
@@ -12,7 +13,7 @@ import {
   parseTemplate,
   validateContractUsage,
 } from '@jacare/compiler'
-import type { Plugin, UserConfig } from 'vite'
+import type { IndexHtmlTransformResult, Plugin, UserConfig } from 'vite'
 import type { SourceMapInput } from 'rollup'
 
 export interface JacareConfig {
@@ -29,7 +30,12 @@ export interface JacarePluginOptions {
   inspect?: boolean
   emit?: JacareEmitMode
   cpw?: boolean | 'auto'
+  /** Install Chrome DevTools page hook in DEV when `@jacare/devtools` is installed. Default true. */
+  devtoolsHook?: boolean
 }
+
+const VIRTUAL_DEVTOOLS_HOOK = 'virtual:jacare-devtools-hook'
+const RESOLVED_VIRTUAL_DEVTOOLS_HOOK = `\0${VIRTUAL_DEVTOOLS_HOOK}`
 
 export async function loadJacareConfig(
   root: string,
@@ -92,6 +98,7 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
   let jacareConfig: JacareConfig = {}
   let projectRoot = process.cwd()
   let isProduction = false
+  let injectDevtoolsHook = false
 
   return {
     name: 'jacare',
@@ -109,15 +116,42 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
       projectRoot = resolved.root
       isProduction = resolved.isProduction
       jacareConfig = await loadJacareConfig(resolved.root, options.configFile)
+      injectDevtoolsHook =
+        !isProduction && options.devtoolsHook !== false && canResolveDevtoolsHook(projectRoot)
     },
 
-    transformIndexHtml(html) {
+    resolveId(id) {
+      if (id === VIRTUAL_DEVTOOLS_HOOK) return RESOLVED_VIRTUAL_DEVTOOLS_HOOK
+    },
+
+    load(id) {
+      if (id !== RESOLVED_VIRTUAL_DEVTOOLS_HOOK) return
+      return `import { installPageHook } from '@jacare/devtools/hook'\ninstallPageHook()\n`
+    },
+
+    transformIndexHtml(html): IndexHtmlTransformResult {
+      let next = html
       const title = jacareConfig.title
-      if (!title) return html
-      if (/<title>.*?<\/title>/i.test(html)) {
-        return html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
+      if (title) {
+        if (/<title>.*?<\/title>/i.test(next)) {
+          next = next.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
+        } else {
+          next = next.replace(/<head>/i, `<head>\n    <title>${escapeHtml(title)}</title>`)
+        }
       }
-      return html.replace(/<head>/i, `<head>\n    <title>${escapeHtml(title)}</title>`)
+
+      if (!injectDevtoolsHook) return next
+
+      return {
+        html: next,
+        tags: [
+          {
+            tag: 'script',
+            attrs: { type: 'module', src: `/@id/${VIRTUAL_DEVTOOLS_HOOK}` },
+            injectTo: 'body',
+          },
+        ],
+      }
     },
 
     transform(code, id, transformOptions) {
@@ -189,6 +223,20 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+}
+
+function canResolveDevtoolsHook(root: string): boolean {
+  try {
+    createRequire(join(root, 'package.json')).resolve('@jacare/devtools/hook')
+    return true
+  } catch {
+    try {
+      createRequire(import.meta.url).resolve('@jacare/devtools/hook')
+      return true
+    } catch {
+      return false
+    }
+  }
 }
 
 function validateContractsInModule(source: string, filename: string, root: string): string[] {

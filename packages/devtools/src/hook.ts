@@ -6,6 +6,7 @@ import {
   getMeshSnapshot,
   getPulseGraph,
   getPulsesForElement,
+  getScopeSnapshot,
   highlightBinding,
   isDevtoolsEnabled,
   pickElement,
@@ -90,6 +91,13 @@ export interface SerializedMeshBag {
   cells: SerializedMeshCell[]
 }
 
+export interface SerializedScopeEntry {
+  id: string
+  label: string
+  value: unknown
+  valuePreview: string
+}
+
 export interface InspectSnapshot {
   protocol: number
   coreVersion: string | null
@@ -101,6 +109,7 @@ export interface InspectSnapshot {
   jcrFiles: JcrFileGroup[]
   mesh: SerializedMeshBag[]
   meshBagCount: number
+  scope: SerializedScopeEntry[]
 }
 
 type GlobalWithJacare = typeof globalThis & {
@@ -376,6 +385,18 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
         mesh = []
       }
 
+      let scope: SerializedScopeEntry[] = []
+      try {
+        scope = (getScopeSnapshot()?.entries ?? []).map((entry) => ({
+          id: entry.id,
+          label: entry.label,
+          value: serializeValue(entry.value),
+          valuePreview: previewValue(entry.value),
+        }))
+      } catch {
+        scope = []
+      }
+
       return {
         protocol: PROTOCOL,
         coreVersion: version,
@@ -387,6 +408,7 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
         jcrFiles,
         mesh,
         meshBagCount: mesh.length,
+        scope,
       }
     },
     highlight(pulseId: number) {
@@ -420,6 +442,7 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
     flashDom,
     pickElement,
     getMeshSnapshot,
+    getScopeSnapshot,
   }
 
   return () => {

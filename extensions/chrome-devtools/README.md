@@ -7,8 +7,11 @@ The panel is called **Jacaré** in DevTools. Inside it, debug with three simple 
 - **State** — live values that matter (named, DOM-bound, `.jcr`, signals). Internal watches stay behind **Show noise**.
 - **Screens** — `.jcr` files linked to state
 - **Mesh** — pulse bags (`@bag/key`)
+- **Scope** — `registerScope` watch list
 
 Plus a compact **Route** bar from `createNav`.
+
+In DEV, `@jacare/vite-plugin` installs the page hook when `@jacare/devtools` is present (`devtoolsHook: false` to disable).
 
 ## Load unpacked (local)
 

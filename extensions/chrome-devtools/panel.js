@@ -12,6 +12,8 @@ const pulseListEl = document.getElementById('pulse-list')
 const jcrListEl = document.getElementById('jcr-list')
 const meshEmptyEl = document.getElementById('mesh-empty')
 const meshBodyEl = document.getElementById('mesh-body')
+const scopeEmptyEl = document.getElementById('scope-empty')
+const scopeListEl = document.getElementById('scope-list')
 const bindingsListEl = document.getElementById('bindings-list')
 const upstreamListEl = document.getElementById('upstream-list')
 const downstreamListEl = document.getElementById('downstream-list')
@@ -242,6 +244,22 @@ function renderMesh() {
   }
 }
 
+function renderScope() {
+  const entries = inspect?.scope ?? []
+  scopeListEl.replaceChildren()
+  scopeEmptyEl.hidden = entries.length > 0
+  for (const entry of entries) {
+    const li = document.createElement('li')
+    li.innerHTML = `
+      <span class="item-name">${escapeHtml(entry.label || entry.id)}</span>
+      <span class="item-meta">${escapeHtml(entry.id)}</span>
+      <span class="item-value">${escapeHtml(entry.valuePreview ?? previewValue(entry.value))}</span>
+    `
+    li.style.cursor = 'default'
+    scopeListEl.append(li)
+  }
+}
+
 function relatedNodes(pulseId, direction) {
   const edges = inspect?.edges ?? []
   const pulses = activePulses()
@@ -381,6 +399,7 @@ async function refresh() {
   renderState()
   renderScreens()
   renderMesh()
+  renderScope()
   if (selectedPulseId != null) {
     const pulse = activePulses().find((p) => p.id === selectedPulseId)
     if (pulse) {

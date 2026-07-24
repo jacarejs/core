@@ -31,6 +31,7 @@
       <button type="button" class="tab is-active" data-tab="state">State</button>
       <button type="button" class="tab" data-tab="screens">Screens</button>
       <button type="button" class="tab" data-tab="mesh">Mesh</button>
+      <button type="button" class="tab" data-tab="scope">Scope</button>
     </nav>
 
     <section id="pane-state" class="pane is-active">
@@ -73,6 +74,12 @@
       <p class="pane-lead muted">Pulse bags (`@bag/key`). Click a cell to open it in State.</p>
       <div id="mesh-empty" class="muted">No bags on this page.</div>
       <div id="mesh-body"></div>
+    </section>
+
+    <section id="pane-scope" class="pane">
+      <p class="pane-lead muted">Manual watch list from <code>registerScope(id, label, read)</code>.</p>
+      <div id="scope-empty" class="muted">No scope entries. Try Lab → Lifecycle.</div>
+      <ul id="scope-list" class="list"></ul>
     </section>
 
     <script src="panel.js" type="module"></script>
