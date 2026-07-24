@@ -33,6 +33,7 @@ try {
       'package.json',
       '.DS_Store',
       'README.md',
+      'STORE-LISTING.md',
     ],
     { cwd: extDir, stdio: 'inherit' },
   )

@@ -31,6 +31,8 @@ const KIND_LABEL: Record<PulseNodeKind, string> = {
   effect: 'Watch',
 }
 
+const LOOKOUT_MARK = `<img class="jacare-devtools__mark" width="28" height="13" alt="" decoding="async" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACsAAAAUCAYAAAAUccS4AAAFfElEQVR42s2We2zTVRTHv/feX7uHa7tuY65lfazdew7YeBhULBLEGEV0UlSixhiNGolR4j/yh2VBfGFEEyOCQAAfiZsIJjgNSrCgETEoDJDAZlBgL9YN1rXr63fv8Y91OFFRZBjPn/fenPPJOed+zxH4F0YEBoAHg/h/GRFYgMB9AZ8GPwQANvre74dIw//XZBcGAwCjESCaZg5SjYMooP2X0Bd0bjQCiUStdeXXSe+xw6qm85Ss7T9NtWf6VGlikKyWPPplss+4dvUjue8ytm9gBLqpCYox0GWD9TdBzPZ4ckKDRkdnuz6ho0PVhTrVpL4QlQ+cJXs0wrRolKAnAOgEEAEMsOQRvGW8bfKMjFVrHi/awNhXZy4XNCMCW9xcnJlvNT18cF/ygYN7ZV1HBzDQT0ByGAicCICCADHOGBgYiEBSMkBTSClhziN4KthP9ddmvPXaotwNZrYvNNbQ5zIbaKo2JqRynzgpfae75JzuDrq2t4dsoRAg44qY4ZwKEIgghFA52dmJgc5TWcjOZoxnSErqwmQFSsr4L/XXaKtfeNK0zsZaT48V9J/2rCaAg3qdfdNHsevbf5Rz9+xONZxsVxnMmK4+gXEpU8EPtkT27P/B8MrqN3j3iZ8zkZ3FoWUqJBXPySV4yvjJ+hnGVS8+kbW+iB3qGdNMBwJpJQD4yJngwBObyl82TXMTvE4dFU6lVZUQinL1D7e3RIiI+gcGhl5bvyZcOnN6FEVmHc58QqlTosRJOROLacJ8x4n7X/UEjlCd/TfNgwgEfotzyfrqb6o2AuA7aaJ7wsKSAbicile5pFbtUbBZ6LHAkrAupUqmUkREKp5MxN/7eHN42rybBzE+L4liq4LXkYZ2UG2Do+veFZ7nDlBt8WWBRgCcc+DOZaVbeLWLUOHSeZVbwWMj58zp0UQymUimkhSNDSldSkpbYvvu4OCtD90XZl57HDaThNsm4XFRzkQn1dzh6Fr4kueFnTTRPabQgeG2wPLtlQ32OSWEEqfOqlxK1HgItly96dNPwkRE0diQTKZSKhaPj2SaiCh18OiRyKJnnxmwTqqI4socHe4iCbeDsmqLqXqeM3TP855XWmI13lEhLwF6WAEYkS9z9mJPKzwu4lXD2WUeG7mumzIUjkSGhoFjKpaIq3giIaOxITkYjagRap1k7INtW/vLZ04/K7xFOsodKbiLKWuCg6puc4b8y0pW7qTqUj6qoudPxH80Hv1NEM0LIJfvqGxY+3pi8/Hvpc4tjAOCqXCYXV0/NdL85tvMYR+fNfpzAiAAeldPd2rXt9+oli93UEtwJw/1nc0AExws/ZaATDOD3U6qtIq/M22WceVzc9sOXNS4PR94892Qj75dvmLLe6mnu9okkA1dGDUuBwe5yWSJPTj/rtRNvht4gTUPkaEotR4+LD8L7kJw715DrLs7A5xryDfjijwDrBZCfiHrzSvgx3MsOKkkBvt6ZK6MqVJLITO4y8Tn3gqx1tvXdmiBHwoMxC5KkwNghuehHl9XHtixLbWk7SgZ42EFCAFIHQiHCeAKmgYoKUA6YDbCXHQFCscZVEEB7xxnox9txew7Tzn/ZtYNonUq5ncI3qiIht0IA/DU+5X5XaeSlTYXM0nSvl5x+9HIRWX2vGrQxvarpnyxNfFo2xF5Y6iXbPE4M3AhoGmEjEwaslh4KG+cOFF4pTgyrkjud5Xy1obJxqMu4/7eVOoPPvmIXwDqX21dF5IzNA47Jaq1bjzGy7q7kvlKgplzEHF7ee8t+aaerKw9/fH4H2P6Aj5RWBOk6sOgxkZQGvJ3Gr90KRiWAo3sr+H/OS+Bp3fev2l2CF/Ap/mbLn3fZWMx6RY0gwP+9Ekzqv2gpQCN9U77KwiNvPRiMktWAAAAAElFTkSuQmCC" />`
+
 export interface PanelOptions {
   /** Show Mesh as a tab (and optional pop-out window). Default true. */
   mesh?: boolean
@@ -226,6 +228,16 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         box-shadow: 0 0 0 3px rgba(143, 209, 42, 0.28);
       }
 
+      .jacare-devtools__mark {
+        flex-shrink: 0;
+        width: 1.75rem;
+        height: 0.85rem;
+        display: block;
+        object-fit: contain;
+        background: transparent;
+        border: 0;
+      }
+
       .jacare-devtools__header {
         display: flex;
         align-items: center;
@@ -245,7 +257,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       .jacare-devtools__header-main {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
         min-width: 0;
       }
 
@@ -280,7 +292,8 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
 
       .jacare-devtools__title {
         font-size: 0.8125rem;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 0.02em;
       }
 
       .jacare-devtools__meta {
@@ -511,20 +524,21 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         text-decoration: underline;
       }
     </style>
-    <button class="jacare-devtools__launcher" type="button" data-launcher aria-label="Show State">
-      <span class="jacare-devtools__launcher-dot" aria-hidden="true"></span>
-      State
+    <button class="jacare-devtools__launcher" type="button" data-launcher aria-label="Show Lookout">
+      ${LOOKOUT_MARK}
+      Lookout
     </button>
     <header class="jacare-devtools__header" data-drag>
       <div class="jacare-devtools__header-main">
-        <span class="jacare-devtools__title">State</span>
+        ${LOOKOUT_MARK}
+        <span class="jacare-devtools__title">Lookout</span>
         <span class="jacare-devtools__meta" data-meta></span>
       </div>
       <div class="jacare-devtools__actions">
         <button class="jacare-devtools__toggle" type="button" data-config aria-label="Config" title="Config">⚙</button>
         <button class="jacare-devtools__toggle" type="button" data-pick aria-label="Pick element" title="Pick element">◎</button>
-        <button class="jacare-devtools__toggle" type="button" data-minimize aria-label="Minimize State" title="Minimize">−</button>
-        <button class="jacare-devtools__toggle" type="button" data-hide aria-label="Hide State" title="Hide">×</button>
+        <button class="jacare-devtools__toggle" type="button" data-minimize aria-label="Minimize Lookout" title="Minimize">−</button>
+        <button class="jacare-devtools__toggle" type="button" data-hide aria-label="Hide Lookout" title="Hide">×</button>
       </div>
     </header>
     ${
@@ -669,7 +683,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     minimizeBtn.textContent = mode === 'minimized' ? '+' : '−'
     minimizeBtn.setAttribute(
       'aria-label',
-      mode === 'minimized' ? 'Expand State' : 'Minimize State',
+      mode === 'minimized' ? 'Expand Lookout' : 'Minimize Lookout',
     )
     minimizeBtn.setAttribute('title', mode === 'minimized' ? 'Expand' : 'Minimize')
     ui = writeUiConfig({ pulseMode: mode })
