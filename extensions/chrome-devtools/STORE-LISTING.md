@@ -78,7 +78,11 @@ This extension’s single purpose is to provide a Chrome DevTools panel that ins
 - **Does not** use remote code  
 - Communicates only with the inspected page via `postMessage` / extension messaging  
 
-Privacy policy URL: publish a short public page (GitHub Pages / docs) stating the same, if the form requires a URL.
+Privacy policy URL: publish `extensions/chrome-devtools/privacy.md` (raw / GitHub Pages) if the form requires a URL.
+
+Example raw URL after push to `main`:
+
+`https://raw.githubusercontent.com/jacarejs/core/main/extensions/chrome-devtools/privacy.md`
 
 ## Assets
 

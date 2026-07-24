@@ -34,6 +34,7 @@ try {
       '.DS_Store',
       'README.md',
       'STORE-LISTING.md',
+      'privacy.md',
       'store/*',
     ],
     { cwd: extDir, stdio: 'inherit' },
