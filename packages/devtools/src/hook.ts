@@ -2,6 +2,7 @@ import {
   clearHighlight,
   enableDevtools,
   flashDom,
+  getBag,
   getBindingsForPulse,
   getMeshSnapshot,
   getPulseGraph,
@@ -9,7 +10,9 @@ import {
   getScopeSnapshot,
   highlightBinding,
   isDevtoolsEnabled,
+  listBags,
   pickElement,
+  setPulseValue,
 } from '@jacare/core'
 
 const PROTOCOL = 3
@@ -127,6 +130,14 @@ export interface JacareDevtoolsHook {
   getBindings: (pulseId: number) => SerializedBinding[]
   getRoute: () => RouteSnapshot | null
   getInspect: () => InspectSnapshot
+  setPulseValue: (pulseId: number, value: unknown) => boolean
+  exportMesh: () => Record<string, Record<string, unknown>>
+  importMesh: (data: Record<string, Record<string, unknown>>) => {
+    ok: boolean
+    bags?: string[]
+    error?: string
+  }
+  setMeshCell: (bagId: string, key: string, value: unknown) => boolean
   highlight: (pulseId: number) => void
   clearHighlight: () => void
   flash: (pulseId: number) => void
@@ -422,6 +433,40 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
       const target = bindings[0]?.target
       if (target) flashDom(target)
     },
+    setPulseValue(pulseId: number, value: unknown) {
+      return setPulseValue(pulseId, value)
+    },
+    exportMesh() {
+      const out: Record<string, Record<string, unknown>> = {}
+      for (const id of listBags()) {
+        const bag = getBag(id)
+        if (!bag) continue
+        out[id] = bag.snap()
+      }
+      return out
+    },
+    importMesh(data: Record<string, Record<string, unknown>>) {
+      if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        return { ok: false, error: 'Expected a JSON object of bag snapshots' }
+      }
+      const hydrated: string[] = []
+      for (const [id, snap] of Object.entries(data)) {
+        const bag = getBag(id)
+        if (!bag || !snap || typeof snap !== 'object' || Array.isArray(snap)) continue
+        bag.hydrate(snap as Record<string, unknown>)
+        hydrated.push(id)
+      }
+      if (!hydrated.length) {
+        return { ok: false, error: 'No matching bags to hydrate' }
+      }
+      return { ok: true, bags: hydrated }
+    },
+    setMeshCell(bagId: string, key: string, value: unknown) {
+      const bag = getBag(bagId)
+      if (!bag) return false
+      bag.hydrate({ [key]: value })
+      return true
+    },
     async pickElement() {
       const el = await pickElement()
       if (!el) return { pulseIds: [] }
@@ -441,6 +486,9 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
     clearHighlight,
     flashDom,
     pickElement,
+    setPulseValue,
+    getBag,
+    listBags,
     getMeshSnapshot,
     getScopeSnapshot,
   }

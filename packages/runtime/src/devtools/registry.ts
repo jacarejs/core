@@ -161,6 +161,18 @@ export function namePulse(
   emit()
 }
 
+/** Write a value into a registered pulse cell (signals / writable mesh cells). */
+export function setPulseValue(pulseId: number, value: unknown): boolean {
+  const node = nodes.get(pulseId)
+  if (!node || node.disposed) return false
+  const cell = node.cell as { set?: (next: unknown) => void } | undefined
+  if (!cell || typeof cell.set !== 'function') return false
+  cell.set(value)
+  node.value = value
+  emit()
+  return true
+}
+
 export function linkDependency(cell: DependencyCell, owner: OwnerNode): void {
   const from = cellToId.get(cell)
   const to = ownerToId.get(owner)

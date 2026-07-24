@@ -5,6 +5,7 @@ export {
   subscribePulseGraph,
   resetDevtoolsForTests,
   namePulse,
+  setPulseValue,
   resolvePulseId,
   registerBinding,
   devtoolsBind,

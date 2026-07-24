@@ -231,7 +231,11 @@ export function createMeshPanel(host: HTMLElement): MeshPanelHandle {
 
   function render(snapshot: MeshSnapshot): void {
     meta.textContent = ` · ${meshSummary(snapshot)}`
-    renderMeshView(body, snapshot, viewState)
+    renderMeshView(body, snapshot, viewState, {
+      onSetCell: (bagId, key, value) => {
+        getBag(bagId)?.hydrate({ [key]: value })
+      },
+    })
   }
 
   return {

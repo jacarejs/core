@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Jacaré",
+  "name": "Jacaré Devtools",
   "version": "0.1.0",
   "description": "Inspect live state, routes, .jcr screens, Mesh, and Scope in Jacaré apps from Chrome DevTools.",
   "icons": {

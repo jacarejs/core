@@ -8,7 +8,9 @@ import {
   highlightBinding,
   listBags,
   pickElement,
+  setPulseValue,
 } from '@jacare/core'
+import { downloadMesh, importMeshFromFile } from './mesh-io.js'
 import {
   applyCorner,
   CORNER_LABELS,
@@ -481,6 +483,51 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         animation: jacare-devtools-value 0.45s ease;
       }
 
+      .jacare-devtools__stepper {
+        display: inline-flex;
+        align-items: stretch;
+        max-width: 12rem;
+        border: 1px solid #d4d4d8;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #f4f4f5;
+      }
+
+      .jacare-devtools__stepper button {
+        appearance: none;
+        border: none;
+        width: 2rem;
+        background: #fff;
+        color: #18181b;
+        font: inherit;
+        font-size: 1rem;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .jacare-devtools__stepper button:hover {
+        background: #eff6ff;
+      }
+
+      .jacare-devtools__stepper input {
+        width: 4rem;
+        border: none;
+        border-left: 1px solid #e4e4e7;
+        border-right: 1px solid #e4e4e7;
+        background: transparent;
+        color: #18181b;
+        font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+        text-align: center;
+        padding: 0.35rem 0.25rem;
+        -moz-appearance: textfield;
+      }
+
+      .jacare-devtools__stepper input::-webkit-outer-spin-button,
+      .jacare-devtools__stepper input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
       .jacare-devtools__changed {
         display: inline;
         padding: 0.05em 0.15em;
@@ -590,10 +637,13 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       <div class="jacare-devtools__mesh-toolbar">
         <span class="jacare-devtools__mesh-toolbar-meta" data-mesh-meta></span>
         <div class="jacare-devtools__actions">
+          <button type="button" class="jacare-devtools__toggle" data-export-mesh title="Export bag data as JSON" aria-label="Export Mesh">Export</button>
+          <button type="button" class="jacare-devtools__toggle" data-import-mesh title="Import bag data from JSON" aria-label="Import Mesh">Import</button>
           <button type="button" class="jacare-devtools__toggle" data-reset-mesh title="Reset all bags to factory defaults" aria-label="Reset Mesh">Reset</button>
           <button type="button" class="jacare-devtools__toggle" data-pop-mesh-inline title="Open Mesh in a separate window" aria-label="Pop out Mesh">↗ Pop out</button>
         </div>
       </div>
+      <input type="file" accept="application/json,.json" data-mesh-import-file hidden />
       <div class="jacare-mesh-view" data-mesh-body></div>
     </div>`
         : ''
@@ -787,7 +837,11 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       `
       return
     }
-    renderMeshView(meshBody, latestMesh, meshViewState)
+    renderMeshView(meshBody, latestMesh, meshViewState, {
+      onSetCell: (bagId, key, value) => {
+        getBag(bagId)?.hydrate({ [key]: value })
+      },
+    })
   }
 
   function renderScopeIntoTab(): void {
@@ -840,6 +894,29 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
   root.querySelector('[data-reset-mesh]')?.addEventListener('click', (event) => {
     event.stopPropagation()
     resetAllBags()
+  })
+
+  const meshImportFile = root.querySelector('[data-mesh-import-file]') as HTMLInputElement | null
+
+  root.querySelector('[data-export-mesh]')?.addEventListener('click', (event) => {
+    event.stopPropagation()
+    downloadMesh()
+  })
+
+  root.querySelector('[data-import-mesh]')?.addEventListener('click', (event) => {
+    event.stopPropagation()
+    meshImportFile?.click()
+  })
+
+  meshImportFile?.addEventListener('change', async () => {
+    const file = meshImportFile.files?.[0]
+    meshImportFile.value = ''
+    if (!file) return
+    try {
+      await importMeshFromFile(file)
+    } catch {
+      // ignore malformed JSON
+    }
   })
 
   root.querySelector('[data-reset-scope]')?.addEventListener('click', (event) => {
@@ -1090,11 +1167,17 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
     const valueHtml = flashed
       ? highlightChangedLines(previousText, valueText)
       : escapeHtml(valueText)
+    const editable =
+      node.kind === 'signal' && typeof node.value === 'number' && Number.isFinite(node.value)
 
     detail.innerHTML = `
       <div class="jacare-devtools__section">
         <h4>Value</h4>
-        <pre class="jacare-devtools__value${flashed ? ' is-pulse' : ''}">${valueHtml}</pre>
+        ${
+          editable
+            ? stepperHtml(node.value as number)
+            : `<pre class="jacare-devtools__value${flashed ? ' is-pulse' : ''}">${valueHtml}</pre>`
+        }
       </div>
       <div class="jacare-devtools__section">
         <h4>Meta</h4>
@@ -1162,6 +1245,13 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       event.preventDefault()
       openSource(node)
     })
+
+    if (editable) {
+      const stepper = detail.querySelector('[data-stepper]') as HTMLElement | null
+      wireStepper(stepper, node.value as number, (next) => {
+        setPulseValue(node.id, next)
+      })
+    }
   }
 
   function render(snapshot: PulseGraphSnapshot): void {
@@ -1283,6 +1373,52 @@ function escapeHtml(value: string): string {
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
+}
+
+export function stepperHtml(value: number): string {
+  return `
+    <div class="jacare-devtools__stepper" data-stepper>
+      <button type="button" data-step="dec" aria-label="Decrease" title="Decrease">−</button>
+      <input type="number" data-step-input value="${escapeHtml(String(value))}" step="${Number.isInteger(value) ? '1' : 'any'}" />
+      <button type="button" data-step="inc" aria-label="Increase" title="Increase">+</button>
+    </div>
+  `
+}
+
+export function wireStepper(
+  stepper: HTMLElement | null,
+  initial: number,
+  onCommit: (next: number) => void,
+): void {
+  if (!stepper) return
+  const input = stepper.querySelector('[data-step-input]') as HTMLInputElement | null
+  if (!input) return
+  const commit = (next: number): void => {
+    if (!Number.isFinite(next)) return
+    const rounded = Number.isInteger(next) ? next : Math.round(next * 1e6) / 1e6
+    input.value = String(rounded)
+    onCommit(rounded)
+  }
+  const stepFor = (current: number): number => (Number.isInteger(current) ? 1 : 0.1)
+  stepper.querySelector('[data-step="dec"]')?.addEventListener('click', (event) => {
+    event.stopPropagation()
+    const current = Number(input.value)
+    commit(current - stepFor(current))
+  })
+  stepper.querySelector('[data-step="inc"]')?.addEventListener('click', (event) => {
+    event.stopPropagation()
+    const current = Number(input.value)
+    commit(current + stepFor(current))
+  })
+  input.addEventListener('click', (event) => event.stopPropagation())
+  input.addEventListener('change', () => commit(Number(input.value)))
+  input.addEventListener('keydown', (event) => {
+    if ((event as KeyboardEvent).key === 'Enter') {
+      event.preventDefault()
+      commit(Number(input.value))
+    }
+  })
+  void initial
 }
 
 function highlightChangedLines(previous: string | undefined, next: string): string {

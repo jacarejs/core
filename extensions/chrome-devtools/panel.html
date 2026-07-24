@@ -2,32 +2,36 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Jacaré</title>
+    <title>Jacaré Devtools</title>
     <link rel="stylesheet" href="panel.css" />
   </head>
   <body>
-    <header class="top">
+    <header class="shell-top">
       <div class="brand">
-        <img src="icons/icon32.png" width="20" height="20" alt="" />
-        <strong>Jacaré</strong>
-        <span id="status" class="badge badge-warn">checking…</span>
+        <img src="icons/icon32.png" width="18" height="18" alt="" />
+        <strong>Jacaré Devtools</strong>
+        <span id="status" class="badge badge-warn">…</span>
+        <code id="route-path" class="route-chip" title="Current route">—</code>
       </div>
-      <div class="actions">
-        <button type="button" id="btn-pick" title="Pick an element in the page">Pick</button>
-        <button type="button" id="btn-clear" title="Clear DOM highlight">Clear</button>
-        <button type="button" id="btn-refresh">Refresh</button>
+      <div class="actions" role="toolbar" aria-label="Inspector actions">
+        <button type="button" id="btn-pick" class="tool-btn" title="Pick an element in the page">
+          <span class="tool-ico" aria-hidden="true">◎</span>
+          <span>Pick</span>
+        </button>
+        <button type="button" id="btn-clear" class="tool-btn" title="Clear DOM highlight">
+          <span class="tool-ico" aria-hidden="true">✕</span>
+          <span>Clear</span>
+        </button>
+        <button type="button" id="btn-refresh" class="tool-btn tool-btn-primary" title="Refresh snapshot">
+          <span class="tool-ico" aria-hidden="true">↻</span>
+          <span>Refresh</span>
+        </button>
       </div>
     </header>
 
-    <section id="route-bar" class="route-bar">
-      <span class="route-label">Route</span>
-      <code id="route-path">—</code>
-      <span id="route-extra" class="route-extra muted"></span>
-    </section>
+    <p id="hint" class="hint" hidden></p>
 
-    <p id="hint" class="hint"></p>
-
-    <nav class="tabs" aria-label="Jacaré inspector">
+    <nav class="tabs" aria-label="Jacaré Devtools">
       <button type="button" class="tab is-active" data-tab="state">State</button>
       <button type="button" class="tab" data-tab="screens">Screens</button>
       <button type="button" class="tab" data-tab="mesh">Mesh</button>
@@ -35,51 +39,125 @@
     </nav>
 
     <section id="pane-state" class="pane is-active">
-      <div class="toolbar">
-        <input id="filter" class="filter" type="search" placeholder="Filter state…" />
-        <label class="check">
-          <input type="checkbox" id="show-all" />
-          Show noise
-        </label>
-      </div>
-      <div class="split">
-        <ul id="pulse-list" class="list state-list"></ul>
-        <aside class="detail">
-          <p class="muted" id="detail-empty">Select a value to inspect.</p>
-          <div id="detail-body" hidden>
+      <div class="workspace" data-split="state">
+        <aside class="sidebar">
+          <div class="sidebar-toolbar">
+            <input id="filter" class="filter" type="search" placeholder="Filter pulses…" />
+            <span id="pulse-count" class="count">0 pulses</span>
+          </div>
+          <label class="check noise">
+            <input type="checkbox" id="show-all" />
+            Show noise
+          </label>
+          <ul id="pulse-list" class="tree-list"></ul>
+        </aside>
+        <div class="split" role="separator" aria-orientation="vertical" aria-label="Resize panes">
+          <span class="split-grip" aria-hidden="true"></span>
+        </div>
+        <main class="main">
+          <div class="empty-state" id="detail-empty">
+            <p class="empty-title">No pulse selected</p>
+            <p class="empty-copy">Pick a pulse in the list to inspect its live value, bindings, and graph links.</p>
+          </div>
+          <div id="detail-body" class="detail-panel" hidden>
             <div class="detail-head">
-              <strong id="detail-name">—</strong>
-              <span id="detail-kind" class="pill"></span>
+              <h2 id="detail-name">—</h2>
+              <span id="detail-kind" class="type-badge" hidden></span>
             </div>
             <p id="detail-source" class="file" hidden></p>
-            <h4>Value</h4>
-            <pre id="detail-value" class="value-block"></pre>
-            <h4>Bound in page (<span id="detail-bind-count">0</span>)</h4>
-            <ul id="bindings-list" class="rel-list"></ul>
-            <h4>Depends on</h4>
-            <ul id="upstream-list" class="rel-list"></ul>
-            <h4>Updates</h4>
-            <ul id="downstream-list" class="rel-list"></ul>
+            <section class="detail-section">
+              <h3>Value</h3>
+              <div id="detail-value-wrap" class="value-wrap">
+                <pre id="detail-value" class="value-block"></pre>
+              </div>
+            </section>
+            <section class="detail-section">
+              <h3>Bound in page <span id="detail-bind-count" class="count-inline">0</span></h3>
+              <ul id="bindings-list" class="rel-list"></ul>
+            </section>
+            <div class="rel-grid">
+              <section class="detail-section">
+                <h3>Depends on</h3>
+                <ul id="upstream-list" class="rel-list"></ul>
+              </section>
+              <section class="detail-section">
+                <h3>Updates</h3>
+                <ul id="downstream-list" class="rel-list"></ul>
+              </section>
+            </div>
           </div>
-        </aside>
+        </main>
       </div>
     </section>
 
     <section id="pane-screens" class="pane">
-      <p class="pane-lead muted">.jcr screens linked to live state. Click to focus State.</p>
-      <ul id="jcr-list" class="list"></ul>
+      <div class="workspace single">
+        <main class="main">
+          <p class="pane-lead muted">.jcr screens linked to live state. Click to focus State.</p>
+          <ul id="jcr-list" class="tree-list flat"></ul>
+        </main>
+      </div>
     </section>
 
     <section id="pane-mesh" class="pane">
-      <p class="pane-lead muted">Pulse bags (`@bag/key`). Click a cell to open it in State.</p>
-      <div id="mesh-empty" class="muted">No bags on this page.</div>
-      <div id="mesh-body"></div>
+      <div class="workspace" data-split="mesh">
+        <aside class="sidebar">
+          <div class="sidebar-toolbar">
+            <input id="mesh-filter" class="filter" type="search" placeholder="Search bags…" />
+          </div>
+          <ul id="mesh-tree" class="tree-list"></ul>
+          <p id="mesh-empty" class="muted empty-side">No bags on this page.</p>
+        </aside>
+        <div class="split" role="separator" aria-orientation="vertical" aria-label="Resize panes">
+          <span class="split-grip" aria-hidden="true"></span>
+        </div>
+        <main class="main">
+          <div id="mesh-table-wrap" hidden>
+            <div class="detail-head">
+              <h2 id="mesh-title">@bag</h2>
+              <span class="type-badge">bag</span>
+              <span id="mesh-cell-count" class="count">0 cells</span>
+              <div class="mesh-actions">
+                <button type="button" id="btn-mesh-export" class="tool-btn">Export</button>
+                <button type="button" id="btn-mesh-import" class="tool-btn">Import</button>
+                <input id="mesh-import-file" type="file" accept="application/json,.json" hidden />
+              </div>
+            </div>
+            <p id="mesh-io-status" class="mesh-io-status" hidden></p>
+            <table class="data-table" id="mesh-table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Address</th>
+                  <th>Kind</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody id="mesh-rows"></tbody>
+            </table>
+          </div>
+          <p id="mesh-detail-empty" class="muted empty">Select a bag to inspect cells.</p>
+        </main>
+      </div>
     </section>
 
     <section id="pane-scope" class="pane">
-      <p class="pane-lead muted">Manual watch list from <code>registerScope(id, label, read)</code>.</p>
-      <div id="scope-empty" class="muted">No scope entries. Try Lab → Lifecycle.</div>
-      <ul id="scope-list" class="list"></ul>
+      <div class="workspace single">
+        <main class="main">
+          <p class="pane-lead muted">Manual watch list from <code>registerScope(id, label, read)</code>.</p>
+          <div id="scope-empty" class="muted empty">No scope entries.</div>
+          <table class="data-table" id="scope-table" hidden>
+            <thead>
+              <tr>
+                <th>Label</th>
+                <th>Id</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody id="scope-rows"></tbody>
+          </table>
+        </main>
+      </div>
     </section>
 
     <script src="panel.js" type="module"></script>

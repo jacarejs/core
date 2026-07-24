@@ -189,6 +189,51 @@
       case 'flash':
         api?.flash?.(message.pulseId)
         return { ok: true }
+      case 'setPulseValue': {
+        const ok =
+          typeof api?.setPulseValue === 'function'
+            ? Boolean(api.setPulseValue(message.pulseId, message.value))
+            : Boolean(globalThis.__JACARE__?.setPulseValue?.(message.pulseId, message.value))
+        return { ok }
+      }
+      case 'exportMesh': {
+        if (typeof api?.exportMesh === 'function') return { mesh: api.exportMesh() }
+        const core = globalThis.__JACARE__
+        const out = {}
+        const ids = core?.listBags?.() ?? []
+        for (const id of ids) {
+          const bag = core?.getBag?.(id)
+          if (bag?.snap) out[id] = bag.snap()
+        }
+        return { mesh: out }
+      }
+      case 'importMesh': {
+        if (typeof api?.importMesh === 'function') return api.importMesh(message.data)
+        const core = globalThis.__JACARE__
+        const data = message.data
+        if (!data || typeof data !== 'object') {
+          return { ok: false, error: 'Expected a JSON object of bag snapshots' }
+        }
+        const hydrated = []
+        for (const [id, snap] of Object.entries(data)) {
+          const bag = core?.getBag?.(id)
+          if (!bag?.hydrate || !snap || typeof snap !== 'object') continue
+          bag.hydrate(snap)
+          hydrated.push(id)
+        }
+        return hydrated.length
+          ? { ok: true, bags: hydrated }
+          : { ok: false, error: 'No matching bags to hydrate' }
+      }
+      case 'setMeshCell': {
+        if (typeof api?.setMeshCell === 'function') {
+          return { ok: Boolean(api.setMeshCell(message.bagId, message.key, message.value)) }
+        }
+        const bag = globalThis.__JACARE__?.getBag?.(message.bagId)
+        if (!bag?.hydrate) return { ok: false }
+        bag.hydrate({ [message.key]: message.value })
+        return { ok: true }
+      }
       case 'pickElement':
         return (await api?.pickElement?.()) ?? { pulseIds: [] }
       default:

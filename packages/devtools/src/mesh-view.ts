@@ -108,6 +108,51 @@ export const MESH_VIEW_STYLES = `
     color: #3f3f46;
   }
 
+  .jacare-mesh-view__stepper {
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 10rem;
+    border: 1px solid #d4d4d8;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #f4f4f5;
+  }
+
+  .jacare-mesh-view__stepper button {
+    appearance: none;
+    border: none;
+    width: 1.6rem;
+    background: #fff;
+    color: #18181b;
+    font: inherit;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .jacare-mesh-view__stepper button:hover {
+    background: #eff6ff;
+  }
+
+  .jacare-mesh-view__stepper input {
+    width: 3.5rem;
+    border: none;
+    border-left: 1px solid #e4e4e7;
+    border-right: 1px solid #e4e4e7;
+    background: transparent;
+    color: #18181b;
+    font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-align: center;
+    padding: 0.2rem;
+    -moz-appearance: textfield;
+  }
+
+  .jacare-mesh-view__stepper input::-webkit-outer-spin-button,
+  .jacare-mesh-view__stepper input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   .jacare-mesh-view__bound {
     font-size: 0.625rem;
     color: #2563eb;
@@ -133,10 +178,15 @@ export function meshSummary(snapshot: MeshSnapshot): string {
   return `${snapshot.bags.length} bag${snapshot.bags.length === 1 ? '' : 's'} · ${cellCount} cell${cellCount === 1 ? '' : 's'}`
 }
 
+export interface MeshViewOptions {
+  onSetCell?: (bagId: string, key: string, value: number) => void
+}
+
 export function renderMeshView(
   target: HTMLElement,
   snapshot: MeshSnapshot,
   state: MeshViewState,
+  options: MeshViewOptions = {},
 ): void {
   if (snapshot.bags.length === 0) {
     target.innerHTML = `
@@ -178,11 +228,20 @@ export function renderMeshView(
                 : cell.bindings > 0
                   ? `<span class="jacare-mesh-view__bound">${cell.bindings} bind${cell.bindings === 1 ? '' : 's'}</span>`
                   : ''
+            const editable =
+              options.onSetCell != null &&
+              cell.kind === 'pulse' &&
+              typeof cell.value === 'number' &&
+              Number.isFinite(cell.value)
+            const valueHtml = editable
+              ? cellStepperHtml(cell.value as number)
+              : `<pre class="jacare-mesh-view__value">${escapeHtml(formatValue(cell.value))}</pre>`
             return `
-              <li class="jacare-mesh-view__cell${flashSet.has(cell.address) ? ' is-flash' : ''}">
+              <li class="jacare-mesh-view__cell${flashSet.has(cell.address) ? ' is-flash' : ''}"
+                  data-bag-id="${escapeHtml(cell.bagId)}" data-cell-key="${escapeHtml(cell.key)}">
                 <span class="jacare-mesh-view__addr">${escapeHtml(cell.address)}</span>
                 <span class="jacare-mesh-view__kind">${escapeHtml(cell.kind)}</span>
-                <pre class="jacare-mesh-view__value">${escapeHtml(formatValue(cell.value))}</pre>
+                ${valueHtml}
                 ${bound}
               </li>
             `
@@ -210,6 +269,48 @@ export function renderMeshView(
         `
       })
       .join('')
+
+  const onSetCell = options.onSetCell
+  if (!onSetCell) return
+  for (const stepper of target.querySelectorAll<HTMLElement>('[data-cell-key] [data-stepper]')) {
+    const cell = stepper.closest('[data-cell-key]') as HTMLElement | null
+    const input = stepper.querySelector('[data-step-input]') as HTMLInputElement | null
+    if (!cell || !input) continue
+    const bagId = cell.dataset['bagId'] ?? ''
+    const key = cell.dataset['cellKey'] ?? ''
+    const commit = (next: number): void => {
+      if (!Number.isFinite(next)) return
+      const rounded = Number.isInteger(next) ? next : Math.round(next * 1e6) / 1e6
+      input.value = String(rounded)
+      onSetCell(bagId, key, rounded)
+    }
+    const stepFor = (current: number): number => (Number.isInteger(current) ? 1 : 0.1)
+    stepper.querySelector('[data-step="dec"]')?.addEventListener('click', () => {
+      const current = Number(input.value)
+      commit(current - stepFor(current))
+    })
+    stepper.querySelector('[data-step="inc"]')?.addEventListener('click', () => {
+      const current = Number(input.value)
+      commit(current + stepFor(current))
+    })
+    input.addEventListener('change', () => commit(Number(input.value)))
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        commit(Number(input.value))
+      }
+    })
+  }
+}
+
+function cellStepperHtml(value: number): string {
+  return `
+    <div class="jacare-mesh-view__stepper" data-stepper>
+      <button type="button" data-step="dec" aria-label="Decrease" title="Decrease">−</button>
+      <input type="number" data-step-input value="${escapeHtml(String(value))}" step="${Number.isInteger(value) ? '1' : 'any'}" />
+      <button type="button" data-step="inc" aria-label="Increase" title="Increase">+</button>
+    </div>
+  `
 }
 
 function formatValue(value: unknown): string {

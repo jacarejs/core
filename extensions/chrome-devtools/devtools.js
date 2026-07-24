@@ -1,5 +1,5 @@
 chrome.devtools.panels.create(
-  'Jacaré',
+  'Jacaré Devtools',
   'icons/icon32.png',
   'panel.html',
   () => {},

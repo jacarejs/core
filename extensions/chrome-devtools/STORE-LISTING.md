@@ -6,8 +6,8 @@ Copy/paste helpers for the first upload. Extension ZIP: `extensions/chrome-devto
 
 | Field | Value |
 |-------|--------|
-| **Name** | Jacaré |
-| **Short name** (if asked) | Jacaré |
+| **Name** | Jacaré Devtools |
+| **Short name** (if asked) | Jacaré Devtools |
 | **Version** | `0.1.0` (from `manifest.json`) |
 | **Category** | Developer Tools |
 | **Language** | English (primary); Portuguese optional for listing |

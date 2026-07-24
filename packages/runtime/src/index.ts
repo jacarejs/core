@@ -74,6 +74,7 @@ export {
   getPulseGraph,
   subscribePulseGraph,
   namePulse,
+  setPulseValue,
   resolvePulseId,
   registerBinding,
   devtoolsBind,
