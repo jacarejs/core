@@ -136,6 +136,21 @@
     ],
     "description": "Import helpers from @jacare/core"
   },
+  "Mount island": {
+    "prefix": ["jcr-island", "mountIsland"],
+    "body": [
+      "import { mountIsland } from '@jacare/core/island'",
+      "import ${1:Widget} from './${1:Widget}.jcr'",
+      "",
+      "const dispose = mountIsland('${2:#slot}', ${1:Widget}, {",
+      "  props: { ${3:start}: ${4:0} },",
+      "  ${5:shadow: true,}",
+      "})",
+      "",
+      "// later: dispose()"
+    ],
+    "description": "Embed a .jcr widget in a host page via @jacare/core/island"
+  },
   "Text binding (prefer bare)": {
     "prefix": ["jcr-text", "jcr-expr"],
     "body": [

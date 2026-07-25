@@ -35,7 +35,7 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | **Pulse Mesh** | Highlight `${@bag/key}` addresses; snippets for `createBag`, contract `links`, and mesh sugar |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) |
 | **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` (`from` / `mode`) |
-| **Snippets** | Component scaffold, contracts, Pulse bags, Mesh addresses, signals, control flow |
+| **Snippets** | Component scaffold, contracts, Pulse bags, Mesh addresses, islands (`mountIsland`), signals, control flow |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
 | **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `class-active`, `${expr}` — prefer bare calls over `${() => …}` when no local is captured |
 | **Scoped CSS** | `style` tagged templates and `export <style>` highlighted as CSS |
@@ -65,7 +65,7 @@ cd packages/vscode-jacare
 yarn install
 yarn build
 yarn package
-code --install-extension jacare-0.0.13.vsix --force
+code --install-extension jacare-0.0.14.vsix --force
 ```
 
 ### Development mode
@@ -88,6 +88,7 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 | `jcr-mesh-click` | `@bag-click` | `on-click=${@cart/clear}` |
 | `jcr-links` | `contract-links` | Contract `links` + view alias (no bag import) |
 | `jcr-import` | `import-jacare` | `import { … }` including `createBag` / `getBag` / `ripple` |
+| `jcr-island` | `mountIsland` | `mountIsland` from `@jacare/core/island` + dispose |
 | `jcr-component` | `jacare-component` | Full scaffold: `export <contract>` + `<view>` + `<style>` |
 | `jcr-contract` | `export-contract` | Contract with `props`, `pulses`, `slots`, and `emits` |
 | `jcr-props` | `contract-props` | Minimal contract (`required` + `model` props) |
@@ -181,6 +182,18 @@ export const cart = createBag('cart', () => { /* … */ })
 export <view>
   <span>${@cart/count}</span>
 </view>
+```
+
+**Island host** (`jcr-island`):
+
+```javascript
+import { mountIsland } from '@jacare/core/island'
+import Widget from './Widget.jcr'
+
+const dispose = mountIsland('#slot', Widget, {
+  props: { start: 0 },
+  shadow: true,
+})
 ```
 
 **Control flow** (`jcr-if`, `jcr-for`):
