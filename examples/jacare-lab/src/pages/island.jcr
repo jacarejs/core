@@ -83,10 +83,15 @@ function disposeShadowIsland() {
 
 export const lifecycle = createLifecycle({
   onMount() {
-    mountBasic()
-    remountProps()
-    mountShadow()
+    let cancelled = false
+    queueMicrotask(() => {
+      if (cancelled) return
+      mountBasic()
+      remountProps()
+      mountShadow()
+    })
     return () => {
+      cancelled = true
       disposeBasic?.()
       disposeProps?.()
       disposeShadow?.()
