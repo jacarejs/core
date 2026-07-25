@@ -1,8 +1,8 @@
-import { signal, computed } from '@jacare/core'
+import { pulse, derive } from '@jacare/core'
 
-const count = signal(0)
-const label = computed(() => count())
-const mood = computed(() => {
+const count = pulse(0)
+const label = derive(() => count())
+const mood = derive(() => {
   const value = count()
   if (value === 0) return 'Tap +1 to start'
   if (value < 5) return 'Warming up'
@@ -27,7 +27,7 @@ export <view>
     <header class="header">
       <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
       <div class="brand">
-        <h1 class="title">vite-starter</h1>
+        <h1 class="title">vite-minimal</h1>
         <p class="subtitle">Reactive UI without the virtual DOM tax</p>
       </div>
     </header>

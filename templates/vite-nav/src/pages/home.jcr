@@ -1,8 +1,13 @@
 import { view } from '@jacare/core'
+import { route } from '../nav.js'
 
 export default view`
   <section class="page">
     <h2 class="page-title">Home</h2>
-    <p class="lead">Jacaré nav with layout, lazy screens, and warm preload.</p>
+    <p class="lead">
+      Jacaré nav with layout, lazy screens, titles, and
+      <code>createRoute(nav.where)</code>.
+    </p>
+    <p class="lead">Current path: <code>${route.path()}</code></p>
   </section>
 `

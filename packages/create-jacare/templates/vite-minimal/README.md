@@ -1,6 +1,6 @@
-# vite-starter
+# vite-minimal
 
-Jacaré app scaffolded with Vite — counter demo with brand colors and scoped styles.
+Single-page Jacaré counter — `pulse` / `derive` style reactivity with scoped `<style>`.
 
 ## Commands
 
@@ -14,18 +14,20 @@ npm run check
 
 ## Editor
 
-Install the [Jacaré VS Code extension](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) for `.jcr` syntax highlighting and file icons.
+Install the [Jacaré VS Code extension](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) for `.jcr` highlighting.
 
-## Project layout
+## Layout
 
 ```
 public/
   jacare-logo.png
 src/
-  app.jcr       UI + state
-  boot.js       entry — mounts the app
+  app.jcr       UI + state + scoped CSS
+  boot.js       entry
 index.html
 vite.config.js
 jacare.config.js
 jacare.d.ts
 ```
+
+Next step: upgrade to [`vite-nav`](../vite-nav) when you need routes.

@@ -36,9 +36,21 @@ npm run dev
 
 | Template | Description |
 |----------|-------------|
-| `vite-minimal` | Single-page counter app |
-| `vite-nav` | Multi-page app with routing and lazy loading |
-| `vite-todo` | Todo app with forms, lists, and devtools |
+| `vite-minimal` | Single-page counter (`export <view>` + scoped style) |
+| `vite-nav` | Multi-page: `createNav` + `screen` / `lazy` + titles + `createRoute` |
+| `vite-todo` | Todo list with `pulse`, `#for`, nav shell |
+
+## Canonical routing (vite-nav / vite-todo)
+
+Screens use the rich entry form taught in Lab `/nav` and [api.md §11](../docs/api.md#11-navigation):
+
+```js
+screens: {
+  '/': { use: screen(Home), title: 'Home · Jacaré' },
+  '/about': { use: lazy(() => import('./pages/about.jcr')), title: 'About · Jacaré' },
+}
+export const route = createRoute(nav.where)
+```
 
 ## What's included
 

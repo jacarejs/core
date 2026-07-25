@@ -1,6 +1,6 @@
-# vite-starter
+# vite-todo
 
-Jacaré todo app with navigation and devtools, scaffolded with Vite.
+Todo starter with navigation, `pulse` state, lists (`#for`), and lazy About.
 
 ## Commands
 
@@ -11,3 +11,18 @@ npm run build
 npm run preview
 npm run check
 ```
+
+## Layout
+
+```
+src/
+  shell.jcr
+  nav.js             createNav + createRoute (canonical { use, title })
+  boot.js
+  pages/
+    tasks.jcr        pulse list + bind-value
+    about.jcr
+    not-found.jcr
+```
+
+Docs: [api.md §11](https://github.com/jacarejs/core/blob/main/docs/api.md#11-navigation) · Lab [`/nav`](https://jacarejs.github.io/core/lab/#/nav) · Lab [`/for`](https://jacarejs.github.io/core/lab/#/for)

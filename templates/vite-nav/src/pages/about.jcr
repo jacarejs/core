@@ -1,8 +1,10 @@
 import { view } from '@jacare/core'
+import { route } from '../nav.js'
 
 export default view`
   <section class="page">
     <h2 class="page-title">About</h2>
-    <p class="lead">This screen was lazy-loaded.</p>
+    <p class="lead">This screen was lazy-loaded with <code>lazy(() => import(...))</code>.</p>
+    <p class="lead">Current path: <code>${route.path()}</code></p>
   </section>
 `

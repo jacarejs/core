@@ -1,11 +1,11 @@
-import { signal, view } from '@jacare/core'
+import { pulse, view } from '@jacare/core'
 
-const items = signal([
+const items = pulse([
   { id: '1', label: 'Learn Jacaré syntax', done: false },
   { id: '2', label: 'Build something fast', done: false },
 ])
 
-const draft = signal('')
+const draft = pulse('')
 
 function addItem() {
   const label = draft().trim()

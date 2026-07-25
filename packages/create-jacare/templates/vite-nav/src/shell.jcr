@@ -5,7 +5,7 @@ export default view`
     <header class="header">
       <div class="brand">
         <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
-        <span class="title">vite-starter</span>
+        <span class="title">vite-nav</span>
       </div>
       <nav class="nav">
         <a class="nav-link" jacare-go="/" href="/">Home</a>
