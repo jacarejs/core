@@ -1,0 +1,261 @@
+import { createLifecycle, pulse } from '@jacare/core'
+import { mountIsland } from '@jacare/core/island'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import IslandCounter from '../components/IslandCounter.jcr'
+import IslandTip from '../components/IslandTip.jcr'
+import { appHref } from '../app-base.js'
+import {
+  basicMountCode,
+  widgetSourceCode,
+  propsRemountCode,
+  shadowCode,
+  optionsCode,
+  disposeCode,
+  howItWorksCode,
+  whySubpathCode,
+  reactHostCode,
+  vueHostCode,
+  angularHostCode,
+  staticHostCode,
+  viteHostCode,
+} from '../snippets/island.js'
+
+const basicLive = pulse(false)
+const propsStart = pulse(2)
+const propsLabel = pulse('From Lab state')
+const propsLive = pulse(false)
+const shadowLive = pulse(false)
+const marked = pulse(false)
+
+let disposeBasic
+let disposeProps
+let disposeShadow
+
+function syncMark() {
+  const el = document.querySelector('#lab-island-basic')
+  marked.set(!!el?.hasAttribute('data-jacare-island'))
+}
+
+function mountBasic() {
+  disposeBasic?.()
+  disposeBasic = mountIsland('#lab-island-basic', IslandCounter, {
+    props: { start: 3, label: 'Lab clicks' },
+  })
+  basicLive.set(true)
+  syncMark()
+}
+
+function disposeBasicIsland() {
+  disposeBasic?.()
+  disposeBasic = null
+  basicLive.set(false)
+  syncMark()
+}
+
+function remountProps() {
+  disposeProps?.()
+  disposeProps = mountIsland('#lab-island-props', IslandCounter, {
+    props: { start: propsStart(), label: propsLabel() },
+  })
+  propsLive.set(true)
+}
+
+function bumpStart() {
+  propsStart.update((n) => n + 1)
+  remountProps()
+}
+
+function mountShadow() {
+  disposeShadow?.()
+  disposeShadow = mountIsland('#lab-island-shadow', IslandTip, {
+    props: { topic: 'lab · shadow' },
+    shadow: true,
+  })
+  shadowLive.set(true)
+}
+
+function disposeShadowIsland() {
+  disposeShadow?.()
+  disposeShadow = null
+  shadowLive.set(false)
+}
+
+export const lifecycle = createLifecycle({
+  onMount() {
+    mountBasic()
+    remountProps()
+    mountShadow()
+    return () => {
+      disposeBasic?.()
+      disposeProps?.()
+      disposeShadow?.()
+      disposeBasic = null
+      disposeProps = null
+      disposeShadow = null
+    }
+  },
+})
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §14b</p>
+      <h1 class="page-title">Island mount kit</h1>
+      <p class="page-lead">
+        Embed a compiled <code>.jcr</code> widget into any host page — static HTML, React, Vue, Angular —
+        without making Jacaré the app shell.         Import <code>mountIsland</code> from the thin
+        <code>&#64;jacare/core/island</code> subpath.
+      </p>
+    </header>
+
+    <Tip :text=${'This lesson mounts real islands into the cards below. Full host apps live in examples/jacare-island, jacare-island-react, jacare-island-vue, and jacare-island-angular. Prefer shadow: true when the host has aggressive global CSS.'} />
+
+    <div class="lesson-grid">
+      <Demo :title=${'mountIsland — live embed'} :lead=${'Resolve a host element, call the compiled mount, mark the host, return dispose. Same fine-grained bindings as a SPA — just no createNav shell.'} :code=${basicMountCode}>
+        <div class="stack">
+          <div id="lab-island-basic" class="lab-island-slot">
+            <p class="muted">Loading island…</p>
+          </div>
+          <div class="row">
+            <button type="button" class="btn" on-click=${mountBasic}>Remount</button>
+            <button type="button" class="btn btn-outline" on-click=${disposeBasicIsland}>Dispose</button>
+          </div>
+          <p class="muted">
+            Live: ${() => (basicLive() ? 'yes' : 'no')} ·
+            Host mark <code>data-jacare-island</code>: ${() => (marked() ? 'set' : 'cleared')}
+          </p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'The widget is a normal .jcr'} :lead=${'Contracts, pulses, scoped style — nothing special. The island kit only changes how the host mounts it.'} :code=${widgetSourceCode}>
+        <p class="muted">Default export of a compiled <code>.jcr</code> is <code>mount</code>. <code>mountIsland</code> accepts the module, <code>module.mount</code>, or a bare mount function.</p>
+      </Demo>
+
+      <Demo :title=${'Props from the host'} :lead=${'There is no live prop bridge yet — when host state changes, dispose and remount with new props. React, Vue, and Angular wrappers use the same remount pattern.'} :code=${propsRemountCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn btn-outline" on-click=${bumpStart}>
+              start = ${propsStart}
+            </button>
+            <button type="button" class="btn btn-ghost" on-click=${remountProps}>Remount</button>
+          </div>
+          <div id="lab-island-props" class="lab-island-slot"></div>
+          <p class="muted">Label: ${propsLabel} · mounted: ${() => (propsLive() ? 'yes' : 'no')}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'shadow: true — CSS isolation'} :lead=${'Attaches an open shadow root, mounts into an inner Element wrapper, and injects island styles into that shadow. Host rules stay out.'} :code=${shadowCode}>
+        <div class="stack lab-island-host-clash">
+          <p class="lab-island-clash-note">This host paragraph uses a loud host class (serif + underline). The shadow tip below ignores it.</p>
+          <div id="lab-island-shadow" class="lab-island-slot">
+            <p class="muted">Loading tip…</p>
+          </div>
+          <div class="row">
+            <button type="button" class="btn" on-click=${mountShadow}>Remount shadow</button>
+            <button type="button" class="btn btn-outline" on-click=${disposeShadowIsland}>Dispose</button>
+          </div>
+          <p class="muted">Shadow tip live: ${() => (shadowLive() ? 'yes' : 'no')}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Options: props · shadow · clear · mark'} :lead=${'All options are optional. Defaults clear the host — drops Loading… — and set data-jacare-island on the host element.'} :code=${optionsCode}>
+        <ul class="list">
+          <li class="list-item"><span class="item-label"><code>props</code></span> — object passed through to compiled mount</li>
+          <li class="list-item"><span class="item-label"><code>shadow</code></span> — <code>true</code> / <code>open</code> / <code>closed</code></li>
+          <li class="list-item"><span class="item-label"><code>clear</code></span> — default <code>true</code>; wipe host children before mount</li>
+          <li class="list-item"><span class="item-label"><code>mark</code></span> — attribute name, or <code>false</code> to skip</li>
+        </ul>
+      </Demo>
+
+      <Demo :title=${'Dispose contract'} :lead=${'Same cleanup model as SPA mount: effects, listeners, scoped styles. Always dispose on host unmount / HMR.'} :code=${disposeCode}>
+        <p class="muted">Use the Dispose button on the first card to watch the mark clear and the slot empty.</p>
+      </Demo>
+
+      <Demo :title=${'How mountIsland works'} :lead=${'Seven steps — resolve host, resolve mount, resolve target — shadow wrapper — then clear, mount, mark, return dispose.'} :code=${howItWorksCode}>
+        <p class="muted">Shadow mounts need an Element wrapper because <code>bindStyleSheet</code> / scoped styles call <code>setAttribute</code> on the mount target.</p>
+      </Demo>
+
+      <Demo :title=${'Why the island subpath'} :lead=${'Main @jacare/core also exports nav, forms, SSR, and DevTools hooks. Islands stay on a thin subpath so host bundles stay small.'} :code=${whySubpathCode}>
+        <p class="muted">The widget still imports <code>pulse</code> / <code>derive</code> from core — Vite tree-shakes unused symbols.</p>
+      </Demo>
+
+      <Demo :title=${'Static HTML host'} :lead=${'WordPress, Rails, or any static page: a div + a module script is enough.'} :code=${staticHostCode}>
+        <p class="muted">
+          Live demo:
+          <a class="text-link" href="https://jacarejs.github.io/core/island/" target="_blank" rel="noreferrer">jacare-island</a>
+          · local <code>yarn island:dev</code> (:3006)
+        </p>
+      </Demo>
+
+      <Demo :title=${'Vite host config'} :lead=${'Add the jacare plugin next to React, Vue, or Angular JIT so .jcr imports compile.'} :code=${viteHostCode}>
+        <p class="muted">Without the plugin, <code>import X from './X.jcr'</code> fails. Pre-bundling the widget as JS is the other option.</p>
+      </Demo>
+
+      <Demo :title=${'React host wrapper'} :lead=${'ref + useEffect: mount on mount, dispose on cleanup, remount when props change.'} :code=${reactHostCode}>
+        <p class="muted">
+          <a class="text-link" href="https://jacarejs.github.io/core/island-react/" target="_blank" rel="noreferrer">Island × React</a>
+          · <code>yarn island-react:dev</code> (:3007)
+        </p>
+      </Demo>
+
+      <Demo :title=${'Vue 3 host wrapper'} :lead=${'onMounted + watch + onBeforeUnmount — same dispose discipline.'} :code=${vueHostCode}>
+        <p class="muted">
+          <a class="text-link" href="https://jacarejs.github.io/core/island-vue/" target="_blank" rel="noreferrer">Island × Vue</a>
+          · <code>yarn island-vue:dev</code> (:3008)
+        </p>
+      </Demo>
+
+      <Demo :title=${'Angular host wrapper'} :lead=${'AfterViewInit + OnChanges + OnDestroy with classic Input decorators — signal inputs skip ngOnChanges.'} :code=${angularHostCode}>
+        <p class="muted">
+          <a class="text-link" href="https://jacarejs.github.io/core/island-angular/" target="_blank" rel="noreferrer">Island × Angular</a>
+          · <code>yarn island-angular:dev</code> (:3009). Escape <code>&#64;</code> in Angular templates as <code>&amp;#64;</code>.
+        </p>
+      </Demo>
+    </div>
+
+    <aside class="page-aside">
+      <h2 class="page-aside-title">Also see</h2>
+      <div class="row">
+        <a class="btn btn-outline" jacare-go="/ssr" href=${appHref('/ssr')}>SSR §14</a>
+        <a class="btn btn-outline" jacare-go="/helpers" href=${appHref('/helpers')}>Import catalog</a>
+        <a class="btn btn-outline" jacare-go="/module" href=${appHref('/module')}>Module exports</a>
+      </div>
+      <p class="muted">Full guide: <code>docs/island.md</code> · API: <code>docs/api.md</code> §14b</p>
+    </aside>
+  </section>
+</view>
+
+export <style>
+.lab-island-slot {
+  min-height: 4.5rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px dashed var(--j-border, #c9d9ce);
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.lab-island-host-clash {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.lab-island-clash-note {
+  margin: 0;
+  text-decoration: underline;
+  color: #6b2b1a;
+}
+
+.page-aside {
+  margin-top: 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--j-border, #c9d9ce);
+  border-radius: 0.65rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.page-aside-title {
+  margin: 0;
+  font-size: 0.95rem;
+}
+</style>

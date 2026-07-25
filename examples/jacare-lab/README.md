@@ -103,6 +103,7 @@ Complete catalog: [language-reference.md §3](../../docs/language-reference.md#3
 | `/lifecycle` | `createLifecycle`, `registerScope` |
 | `/cookbook` | Tasks screen combining the pieces |
 | `/ssr` | `render` / `resume` via shared MountPlan |
+| `/island` | `mountIsland`, shadow, React/Vue/Angular hosts |
 | `/tooling` | CLI (`check --bindings`), Vite, Binding IR, DevTools |
 | `/helpers` | Import catalog — detailed English explanation per symbol |
 
@@ -139,6 +140,7 @@ Demo “View code” sources live in `src/snippets/` (one module per lesson), bu
 | `lifecycle.js` | `/lifecycle` |
 | `cookbook.js` | `/cookbook` |
 | `ssr.js` | `/ssr` |
+| `island.js` | `/island` |
 | `tooling.js` | `/tooling` |
 | `index.js` | barrel + `SNIPPET_CATALOG` |
 

@@ -31,6 +31,7 @@ export const nav = createNav({
     '/cookbook': { use: lazy(() => import('./pages/cookbook.jcr')), title: 'Jacaré Lab · Cookbook' },
     '/playground': { use: lazy(() => import('./pages/playground.jcr')), title: 'Jacaré Lab · Playground' },
     '/ssr': { use: lazy(() => import('./pages/ssr.jcr')), title: 'Jacaré Lab · SSR' },
+    '/island': { use: lazy(() => import('./pages/island.jcr')), title: 'Jacaré Lab · Islands' },
     '/tooling': { use: lazy(() => import('./pages/tooling.jcr')), title: 'Jacaré Lab · Tooling' },
     '/helpers': { use: lazy(() => import('./pages/helpers.jcr')), title: 'Jacaré Lab · Import catalog' },
     '/topic/:slug': {

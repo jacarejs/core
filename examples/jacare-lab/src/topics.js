@@ -110,6 +110,11 @@ export const LESSONS = [
     blurb: 'render, resume, streaming — reference cards',
   },
   {
+    path: '/island',
+    title: 'Islands',
+    blurb: 'API §14b — mountIsland, shadow, React/Vue/Angular hosts',
+  },
+  {
     path: '/tooling',
     title: 'Tooling',
     blurb: 'CLI, check --bindings, Binding IR, DevTools',

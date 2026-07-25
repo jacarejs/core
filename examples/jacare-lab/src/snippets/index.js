@@ -106,6 +106,22 @@ export {
 } from './ssr.js'
 
 export {
+  basicMountCode,
+  widgetSourceCode,
+  propsRemountCode,
+  shadowCode,
+  optionsCode,
+  disposeCode as islandDisposeCode,
+  howItWorksCode,
+  whySubpathCode,
+  reactHostCode,
+  vueHostCode,
+  angularHostCode,
+  staticHostCode,
+  viteHostCode,
+} from './island.js'
+
+export {
   cliCode,
   checkBindingsCode,
   expressionStyleCode,
@@ -204,6 +220,21 @@ import {
   renderToStringCode,
   renderToStreamCode,
 } from './ssr.js'
+import {
+  basicMountCode,
+  widgetSourceCode,
+  propsRemountCode,
+  shadowCode,
+  optionsCode,
+  disposeCode as islandDisposeCode,
+  howItWorksCode,
+  whySubpathCode,
+  reactHostCode,
+  vueHostCode,
+  angularHostCode,
+  staticHostCode,
+  viteHostCode,
+} from './island.js'
 import {
   cliCode,
   checkBindingsCode,
@@ -336,6 +367,20 @@ export const SNIPPET_CATALOG = [
   { id: 'ssr.resume', title: 'resume(target, state, props)', lesson: '/ssr', code: resumeCode },
   { id: 'ssr.render-to-string', title: 'renderToString: one HTML string', lesson: '/ssr', code: renderToStringCode },
   { id: 'ssr.render-to-stream', title: 'renderToStream: chunked HTML', lesson: '/ssr', code: renderToStreamCode },
+
+  { id: 'island.mount', title: 'mountIsland — live embed', lesson: '/island', code: basicMountCode },
+  { id: 'island.widget', title: 'The widget is a normal .jcr', lesson: '/island', code: widgetSourceCode },
+  { id: 'island.props', title: 'Props from the host', lesson: '/island', code: propsRemountCode },
+  { id: 'island.shadow', title: 'shadow: true — CSS isolation', lesson: '/island', code: shadowCode },
+  { id: 'island.options', title: 'Options: props · shadow · clear · mark', lesson: '/island', code: optionsCode },
+  { id: 'island.dispose', title: 'Dispose contract', lesson: '/island', code: islandDisposeCode },
+  { id: 'island.how', title: 'How mountIsland works', lesson: '/island', code: howItWorksCode },
+  { id: 'island.subpath', title: 'Why @jacare/core/island', lesson: '/island', code: whySubpathCode },
+  { id: 'island.static', title: 'Static HTML host', lesson: '/island', code: staticHostCode },
+  { id: 'island.vite', title: 'Vite host config', lesson: '/island', code: viteHostCode },
+  { id: 'island.react', title: 'React host wrapper', lesson: '/island', code: reactHostCode },
+  { id: 'island.vue', title: 'Vue 3 host wrapper', lesson: '/island', code: vueHostCode },
+  { id: 'island.angular', title: 'Angular host wrapper', lesson: '/island', code: angularHostCode },
 
   { id: 'tooling.cli', title: 'CLI commands', lesson: '/tooling', code: cliCode },
   { id: 'tooling.check-bindings', title: 'jacare check --bindings', lesson: '/tooling', code: checkBindingsCode },

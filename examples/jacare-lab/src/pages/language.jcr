@@ -109,6 +109,7 @@ export <view>
           <a class="btn btn-outline" jacare-go="/nav" href=${appHref('/nav')}>Navigation</a>
           <a class="btn btn-outline" jacare-go="/forms" href=${appHref('/forms')}>Forms</a>
           <a class="btn btn-outline" jacare-go="/ssr" href=${appHref('/ssr')}>SSR</a>
+          <a class="btn btn-outline" jacare-go="/island" href=${appHref('/island')}>Islands</a>
           <a class="btn btn-outline" jacare-go="/helpers" href=${appHref('/helpers')}>Imports</a>
         </div>
       </Demo>

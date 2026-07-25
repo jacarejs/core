@@ -1,0 +1,67 @@
+import { pulse } from '@jacare/core'
+
+export <contract>
+  props: {
+    topic: { type: 'string', default: 'islands' }
+  }
+</contract>
+
+const open = pulse(true)
+
+function toggle() {
+  open.update((v) => !v)
+}
+
+export <view>
+  <section class="lab-island-tip" data-jacare-island>
+    <button type="button" class="lab-island-tip-btn" on-click=${toggle}>
+      ${() => (open() ? 'Hide tip' : 'Show tip')}
+    </button>
+    #if open()
+      <p class="lab-island-tip-body">
+        Shadow island — host page CSS does not restyle this box.
+        Topic: <code>${topic}</code>.
+      </p>
+    #end
+  </section>
+</view>
+
+export <style>
+.lab-island-tip {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.55rem;
+  background: #0a2a18;
+  color: #d8f3dc;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.lab-island-tip-btn {
+  justify-self: start;
+  border: 1px solid #3d7a4a;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #123d24;
+  color: #9be06a;
+}
+
+.lab-island-tip-body {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #c5e8cc;
+}
+
+.lab-island-tip-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #9be06a;
+  background: #123d24;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+}
+</style>

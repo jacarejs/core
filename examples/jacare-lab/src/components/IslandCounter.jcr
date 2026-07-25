@@ -1,0 +1,62 @@
+import { pulse } from '@jacare/core'
+
+export <contract>
+  props: {
+    start: { type: 'number', default: 0 }
+    label: { type: 'string', default: 'Clicks' }
+  }
+</contract>
+
+const clicks = pulse(0)
+
+function bump() {
+  clicks.update((n) => n + 1)
+}
+
+function reset() {
+  clicks.set(0)
+}
+
+export <view>
+  <section class="lab-island-counter" data-jacare-island>
+    <p class="lab-island-label">${label}</p>
+    <p class="lab-island-value">${() => (Number(start) || 0) + clicks()}</p>
+    <div class="lab-island-actions">
+      <button type="button" class="btn" on-click=${bump}>+1</button>
+      <button type="button" class="btn btn-outline" on-click=${reset}>Reset</button>
+    </div>
+  </section>
+</view>
+
+export <style>
+.lab-island-counter {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+}
+
+.lab-island-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--j-leaf, #189030);
+}
+
+.lab-island-value {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--j-deep, #0a2a18);
+}
+
+.lab-island-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+</style>
