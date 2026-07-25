@@ -35,7 +35,7 @@ yarn bmi:build
 For GitHub Pages (subpath `/core/bmi/`):
 
 ```bash
-JACARE_BASE=/core/bmi/ yarn build
+JACARE_BASE=/core/bmi/ yarn bmi:build
 ```
 
 ## DevTools

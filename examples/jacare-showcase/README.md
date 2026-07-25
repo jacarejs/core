@@ -16,7 +16,7 @@ Also see: [Todo](https://jacarejs.github.io/core/todo/) · [Scale BMI](https://j
   <img src="public/jacare-logo.png" width="120" alt="Jacaré logo" />
 </p>
 
-**Latest runtime in this example:** `@jacare/core` **v0.1.9**
+**Latest runtime in this example:** `@jacare/core` **v0.1.10**
 
 ---
 

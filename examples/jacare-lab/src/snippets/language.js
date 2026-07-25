@@ -45,7 +45,7 @@ export const allBindsCode = viewSnippet(
 
 const draft = pulse('')
 const on = pulse(false)
-const href = pulse('/about')
+const href = pulse('/helpers')
 const busy = pulse(false)
 const width = pulse(45)
 const pct = derive(() => width() + '%')

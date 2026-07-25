@@ -4,7 +4,7 @@ import { activeCode, hideCode } from './code-viewer.js'
 import { pageLoading, pageLoadingLabel } from './page-loading.js'
 import CodeModal from './components/CodeModal.jcr'
 
-const JACARE_VERSION = '0.1.9'
+const JACARE_VERSION = '0.1.10'
 
 const menuOpen = pulse(false)
 const scrolled = pulse(false)

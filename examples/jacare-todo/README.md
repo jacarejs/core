@@ -14,6 +14,7 @@ A focused demo app with creative surfaces showing Jacaré’s fine-grained react
 | `/habits` | **Habits** — 7-day grid with streak derives |
 | `/seats` | **Seats** — venue map selection |
 | `/league` | **League** — football simulator with crests and standings |
+| `/shop` | **Shop** — shared cart bag, totals, and Mesh state |
 
 Tasks and Kanban share one store (`src/store.js`), so moving a card updates the list and vice versa.
 

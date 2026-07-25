@@ -54,7 +54,7 @@ export <view>
       <p class="page-lead">createForm builds signal-backed fields with validation, dirty tracking, and a ready-to-wire submit handler.</p>
     </header>
 
-    <Tip :text=${"Field uses bind-value (model prop) plus :error={field.error()} so the child receives the message string. Native checkboxes still need bind-checked on a top-level pulse — that is why newsletter lives beside the form schema."} />
+    <Tip :text=${"Field uses bind-value (model prop) plus :error=${field.error()} so the child receives the message string. Native checkboxes still need bind-checked on a top-level pulse — that is why newsletter lives beside the form schema."} />
 
     <div class="lesson-grid">
       <Demo :title=${'Schema + validation'} :lead=${'Each field tracks its own value, error, touched, and dirty state.'} :code=${formCode}>
