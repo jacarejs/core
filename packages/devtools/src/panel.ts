@@ -153,6 +153,13 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         display: block;
       }
 
+      .jacare-devtools--minimized .jacare-devtools__mesh-pane.is-active,
+      .jacare-devtools--minimized .jacare-devtools__scope-pane.is-active,
+      .jacare-devtools--hidden .jacare-devtools__mesh-pane.is-active,
+      .jacare-devtools--hidden .jacare-devtools__scope-pane.is-active {
+        display: none;
+      }
+
       .jacare-devtools__mesh-toolbar,
       .jacare-devtools__scope-toolbar {
         display: flex;
