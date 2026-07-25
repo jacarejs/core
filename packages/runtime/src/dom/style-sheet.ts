@@ -17,7 +17,12 @@ export function bindStyleSheet(
 
   const style = document.createElement('style')
   style.setAttribute('data-jacare-s', scopeId)
-  document.head.appendChild(style)
+  const rootNode = target.getRootNode()
+  if (rootNode instanceof ShadowRoot) {
+    rootNode.appendChild(style)
+  } else {
+    document.head.appendChild(style)
+  }
 
   const stop = effect(() => {
     style.textContent = scopeCss(readCss(), scopeId)

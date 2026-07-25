@@ -26,6 +26,7 @@ Jacaré compiles `.jcr` modules into direct DOM updates. When a value changes, o
 - [Lifecycle hooks](#lifecycle-hooks)
 - [Scope debugging](#scope-debugging)
 - [Server-side rendering](#server-side-rendering)
+- [Island mount kit](#island-mount-kit)
 - [API reference](#api-reference)
 - [Links](#links)
 
@@ -448,6 +449,31 @@ SSR output includes `data-jacare-bind` markers for precise hydration targets.
 
 ---
 
+## Island mount kit
+
+Embed a `.jcr` widget into a host page without a Jacaré SPA shell. Use the thin subpath:
+
+```javascript
+import { mountIsland } from '@jacare/core/island'
+import Widget from './Widget.jcr'
+
+const dispose = mountIsland('#slot', Widget, {
+  props: { start: 2 },
+  shadow: true,
+})
+```
+
+| Option | Role |
+|--------|------|
+| `props` | Passed to compiled `mount` |
+| `shadow` | Mount inside a shadow root (CSS isolation) |
+| `clear` | Clear host children before mount (default `true`) |
+| `mark` | Host attribute after mount (default `data-jacare-island`) |
+
+Docs: [island.md](../../docs/island.md) · demo: [`examples/jacare-island`](../../examples/jacare-island)
+
+---
+
 ## API reference
 
 ### Reactivity
@@ -470,6 +496,9 @@ SSR output includes `data-jacare-bind` markers for precise hydration targets.
 
 ### SSR
 `renderToString`, `renderToStream`, `resumeBindings`, `escapeHtml`
+
+### Island
+`mountIsland` — import from `@jacare/core/island`
 
 ### DevTools hooks
 `enableDevtools`, `getPulseGraph`, `subscribePulseGraph`

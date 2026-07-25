@@ -19,6 +19,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./island": {
+      "types": "./dist/island.d.ts",
+      "import": "./dist/island.js"
     }
   },
   "files": [
