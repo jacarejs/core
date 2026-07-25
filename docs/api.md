@@ -1519,9 +1519,29 @@ $color: #003030;
 
 ## 11. Navigation
 
-`createNav` provides layout + screen routing without a virtual DOM router.
+`createNav` is a layout + screen router: the shell stays mounted, screens swap inside `[jacare-frame]`, and URL changes update a reactive `nav.where` signal. There is no virtual DOM router and no separate `link()` helper — in-app links use the `jacare-go` attribute.
+
+Live tutorial: **[Jacaré Lab → `/nav`](https://jacarejs.github.io/core/lab/#/nav)** (`yarn lab:dev`). Param demo: [`/topic/:slug`](https://jacarejs.github.io/core/lab/#/topic/alpha).
+
+### Imports
+
+```javascript
+import {
+  createNav,
+  lazy,
+  screen,
+  createRoute,
+  routeHref,
+  routeParam,
+  routeSearch,
+  setNavTitle,
+  getNavTitle,
+} from '@jacare/core'
+```
 
 ### Step 1 — Shell (`shell.jcr`)
+
+The layout must include one element with `jacare-frame`. Links that should navigate inside the app use `jacare-go` (click is intercepted → `nav.go`). Matching links receive `.jacare-here` and `aria-current="page"`.
 
 ```javascript
 export <view>
@@ -1533,21 +1553,66 @@ export <view>
 </view>
 ```
 
+| Attribute | Role |
+|-----------|------|
+| `jacare-frame` | Outlet where the active screen mounts |
+| `jacare-go` | In-app path (or expression). Prefer also setting `href` for accessibility / open-in-new-tab |
+| `jacare-here` | Applied automatically to the active `jacare-go` link |
+
 ### Step 2 — Screen map (`nav.js`)
 
 ```javascript
-import { createNav, lazy } from '@jacare/core'
+import { createNav, createRoute, lazy, screen } from '@jacare/core'
 import Shell from './shell.jcr'
+import Home from './pages/home.jcr'
+import NotFound from './pages/not-found.jcr'
 
 export const nav = createNav({
+  base: '/', // optional — URL prefix stripped before match (e.g. '/core/lab' on GitHub Pages)
   layout: Shell,
   screens: {
-    '/': () => import('./pages/home.jcr'),
-    '/about': lazy(() => import('./pages/about.jcr')),
+    '/': { use: screen(Home), title: 'Home' },
+    '/about': { use: lazy(() => import('./pages/about.jcr')), title: 'About' },
+    '/item/:id': {
+      use: lazy(() => import('./pages/item.jcr')),
+      title: (ctx) => `Item · ${ctx.params.id}`,
+    },
   },
-  missing: lazy(() => import('./pages/not-found.jcr')),
+  missing: NotFound,
+  beforeGo(to, from) {
+    // return false → cancel; return '/login' → redirect; otherwise continue
+  },
 })
+
+export const route = createRoute(nav.where)
 ```
+
+#### `createNav` options
+
+| Option | Type | Role |
+|--------|------|------|
+| `layout` | mount | Persistent shell; must contain `[jacare-frame]` |
+| `screens` | `Record<path, ScreenDefinition>` | Path → mount, loader, `lazy(...)`, or `{ use, title? }` |
+| `missing` | mount / loader | Fallback when no pattern matches |
+| `base` | string | Prefix stripped from `location.pathname` before matching |
+| `beforeGo` | `(to, from) => void \| false \| string \| Promise<…>` | Guard on every `go` / `swap` |
+
+**Screen definition forms (all supported today):**
+
+```javascript
+screens: {
+  '/': screen(Home),                                    // eager mount
+  '/a': lazy(() => import('./a.jcr')),                  // lazy chunk
+  '/b': () => import('./b.jcr'),                        // zero-arg loader (also warmable)
+  '/c': { use: lazy(() => import('./c.jcr')), title: 'C' },
+  '/user/:id': {
+    use: lazy(() => import('./user.jcr')),
+    title: (ctx) => `User · ${ctx.params.id}`,
+  },
+}
+```
+
+Dynamic segments use `:name` (e.g. `/topic/:slug`). Matched params (and search keys) are merged into the props passed to the screen mount — see Lab `/topic/:slug`.
 
 ### Step 3 — Boot
 
@@ -1555,60 +1620,115 @@ export const nav = createNav({
 import { nav } from './nav.js'
 
 nav.attach(document.getElementById('app'))
+// optional: nav.warm('/about') after attach to preload lazy chunks
 ```
 
 ### Nav API
 
-| Method / property | Description |
-|-------------------|-------------|
-| `attach(target)` | Mount layout; navigate to current URL |
-| `go(path)` | Push navigation |
-| `swap(path)` | Replace history entry |
+| Member | Description |
+|--------|-------------|
+| `attach(target)` | Mount layout; sync to the current URL; returns a dispose function |
+| `go(path)` | Push history and mount the matching screen (queued) |
+| `swap(path)` | Replace the current history entry (queued) |
 | `undo()` | `history.back()` |
-| `warm(path)` | Preload lazy screen |
-| `where` | `Signal<NavPlace>` — current route |
-| `beforeGo(to, from)` | Guard; return `false` or redirect path |
+| `warm(path)` | Preload a lazy / loader screen without navigating |
+| `where` | `Signal<NavPlace>` — `{ path, params, search, hash }` |
 
-### Route params and search
+`NavPlace` / `NavContext` fields:
+
+| Field | Meaning |
+|-------|---------|
+| `path` | Path after `base` is stripped |
+| `params` | Matched `:segments` |
+| `search` | Query string as `Record<string, string>` |
+| `hash` | `#…` including the `#` (on `NavPlace`) |
+
+### Reading the route — `createRoute`
+
+Prefer **`createRoute(nav.where)`** once in `nav.js` and import `route` in screens:
 
 ```javascript
-import { createRoute, routeParam, routeSearch, routeHref } from '@jacare/core'
+import { createRoute } from '@jacare/core'
+import { nav } from './nav.js'
 
-export const lifecycle = createRoute({
-  path: '/tutorial/:topic',
-  screen: lazy(() => import('./tutorial.jcr')),
-})
+export const route = createRoute(nav.where)
 
-// inside screen:
-const topic = routeParam('topic')
-const tab = routeSearch('tab')
-const href = routeHref('/about', { tab: 'feedback' })
+// in a screen / component:
+route.path()           // Computed<string>
+route.param('id')()    // Computed<string | undefined>
+route.search('q')()    // Computed<string | undefined>
+nav.where().hash       // string
 ```
+
+#### One-shot helpers from `NavContext`
+
+Inside a mount/`title` function you already have `ctx`:
+
+```javascript
+import { routeParam, routeSearch } from '@jacare/core'
+
+title: (ctx) => `Item · ${routeParam(ctx, 'id') ?? '…'}`,
+
+// or:
+routeSearch(ctx, 'tab') // → 'feedback' when ?tab=feedback
+```
+
+These are **not** reactive subscriptions — they read the context object you pass. For live UI updates in a mounted screen, use `createRoute(nav.where)`.
+
+### Building links — `routeHref`
+
+```javascript
+import { routeHref } from '@jacare/core'
+
+routeHref('/item/:id', { id: '7' })
+// → '/item/7'
+
+routeHref('/about', {}, { tab: 'feedback' })
+// → '/about?tab=feedback'
+
+routeHref('/item/:id', { id: '7' }, { tab: 'specs' })
+// → '/item/7?tab=specs'
+```
+
+Signature: `routeHref(pattern, params?, search?)`.
+
+Wire into templates:
+
+```javascript
+<a
+  jacare-go=${routeHref('/item/:id', { id })}
+  href=${routeHref('/item/:id', { id })}
+>
+  Open
+</a>
+```
+
+### Guards — `beforeGo`
+
+```javascript
+beforeGo(to, from) {
+  if (to.path.startsWith('/admin') && !isLoggedIn()) return '/login'
+  if (to.path === '/blocked') return false
+  // void / undefined → allow
+}
+```
+
+| Return | Effect |
+|--------|--------|
+| `false` | Cancel navigation |
+| `string` | Redirect to that path (can include `?query` / `#hash`) |
+| anything else (`void`, `true`, …) | Continue to `to` |
+
+Async guards are supported (`Promise<…>`).
 
 ### Screen title
 
-Configure `title` on each route in `createNav` — applied when that screen activates:
-
-```javascript
-export const nav = createNav({
-  layout: Shell,
-  screens: {
-    '/': { use: screen(Home), title: 'Jacaré · Home' },
-    '/about': { use: lazy(() => import('./pages/about.jcr')), title: 'Jacaré · About' },
-    '/topic/:slug': {
-      use: lazy(() => import('./pages/topic.jcr')),
-      title: (ctx) => `Topic · ${ctx.params.slug}`,
-    },
-  },
-})
-```
+Configure `title` on each route in `createNav` — applied when that screen activates. Nav titles win over an optional page-level `export const title`.
 
 | Form | Behavior |
 |------|----------|
-| `title: '…'` | Static document title on activate |
+| `title: '…'` | Static `document.title` on activate |
 | `title: (ctx) => …` | Title from `NavContext` (`params`, `search`, `path`) |
-
-Nav titles win over an optional page-level `export const title`.
 
 ### Dynamic title — `setNavTitle` / `getNavTitle`
 
@@ -1628,7 +1748,6 @@ export const lifecycle = createLifecycle({
   },
 })
 
-// later / elsewhere:
 getNavTitle() // → "Jacaré · Focus · 24:59"
 ```
 
@@ -1640,6 +1759,117 @@ getNavTitle() // → "Jacaré · Focus · 24:59"
 | `document.title = …` in `onActivate` | One-shot; prefer `setNavTitle` for the same job |
 
 See the live example on **Focus** in the Todo suite (`examples/jacare-todo` → `/focus`).
+
+### Use cases (what ships today)
+
+#### 1. App shell with lazy lessons / pages
+
+Keep chrome in `layout`; load pages on demand with `lazy` / `warm`.
+
+```javascript
+export const nav = createNav({
+  layout: Shell,
+  screens: {
+    '/': { use: screen(Home), title: 'Home' },
+    '/shop': { use: lazy(() => import('./pages/shop.jcr')), title: 'Shop' },
+  },
+  missing: NotFound,
+})
+
+nav.attach(document.getElementById('app'))
+nav.warm('/shop') // optional prefetch
+```
+
+**When:** multi-page apps, docs sites, admin shells (Lab, Showcase, Todo).
+
+#### 2. Product / entity URL with `:id`
+
+```javascript
+screens: {
+  '/item/:id': {
+    use: lazy(() => import('./pages/item.jcr')),
+    title: (ctx) => `Item · ${ctx.params.id}`,
+  },
+}
+
+// link:
+<a jacare-go=${routeHref('/item/:id', { id: row.id })} href=…>Open</a>
+
+// screen receives mount prop `id` (and can also use route.param('id'))
+```
+
+**When:** detail pages, tutorial topics (Lab `/topic/:slug`).
+
+#### 3. Filters and tabs via search (`?q=` / `?tab=`)
+
+```javascript
+const q = route.search('q')
+
+function applyFilter(value) {
+  nav.go(value ? `/shop?q=${encodeURIComponent(value)}` : '/shop')
+}
+
+function openTab(tab) {
+  nav.swap(routeHref('/about', {}, { tab })) // replace history — good for tabs
+}
+```
+
+**When:** search boxes, shareable filters, secondary UI state you want in the URL without stacking history (`swap`).
+
+#### 4. Auth / onboarding gate
+
+```javascript
+beforeGo(to) {
+  if (to.path.startsWith('/app') && !session.isAuthed()) return '/login'
+  if (to.path === '/login' && session.isAuthed()) return '/app'
+}
+```
+
+**When:** protect a subtree, bounce logged-in users away from login, soft-block a path with `return false`.
+
+#### 5. Prefetch on hover
+
+```javascript
+<a
+  jacare-go="/forms"
+  href="/forms"
+  on-pointerenter=${() => nav.warm('/forms')}
+>
+  Forms
+</a>
+```
+
+**When:** sidebar / menu links where the next click should feel instant (Lab `/nav` demo).
+
+#### 6. Deploy under a subpath
+
+```javascript
+createNav({
+  base: '/core/lab',
+  layout: Shell,
+  screens: { /* paths without the base prefix */ },
+})
+```
+
+**When:** GitHub Pages / CDN under `/repo/…` (Lab uses `APP_BASE`).
+
+#### 7. Live document title
+
+```javascript
+effect(() => setNavTitle(`Cart · ${total()} items`))
+```
+
+**When:** carts, timers, unsaved draft names (Todo `/focus`).
+
+### Related
+
+| | |
+|--|--|
+| Lab lesson | [`/nav`](https://jacarejs.github.io/core/lab/#/nav) |
+| Param screen | [`/topic/:slug`](https://jacarejs.github.io/core/lab/#/topic/alpha) |
+| Cheatsheet | [syntax.md → Nav](syntax.md#nav) |
+| Language attrs | [language-reference.md](language-reference.md) (`jacare-frame` / `jacare-go` / `jacare-here`) |
+| Quick import list | [§20.5](#205-jacarecore--navigation) |
 
 ---
 
@@ -2530,7 +2760,7 @@ import {
 } from '@jacare/core'
 ```
 
-Details: [§11](#11-navigation).
+Full guide + use cases: [§11](#11-navigation). Live: [Lab `/nav`](https://jacarejs.github.io/core/lab/#/nav).
 
 **`createNav` + `lazy` + `screen`**
 
@@ -2544,54 +2774,59 @@ export const nav = createNav({
   screens: {
     '/': { use: screen(Home), title: 'Home' },
     '/about': { use: lazy(() => import('./About.jcr')), title: 'About' },
+    '/item/:id': {
+      use: lazy(() => import('./Item.jcr')),
+      title: (ctx) => `Item · ${ctx.params.id}`,
+    },
+  },
+  missing: NotFound,
+  beforeGo(to) {
+    if (to.path.startsWith('/admin') && !authed()) return '/login'
   },
 })
 ```
 
-**`nav.attach` / `go` / `warm` / `undo`**
+**`nav.attach` / `go` / `swap` / `warm` / `undo` / `where`**
 
 ```javascript
 nav.attach(document.getElementById('app'))
 nav.go('/about')
+nav.swap('/about?tab=bio')
 nav.warm('/cart')
 nav.undo()
+nav.where() // { path, params, search, hash }
 ```
 
-**`createRoute`**
+**`createRoute(nav.where)`** — reactive reads in screens
 
 ```javascript
 import { createRoute } from '@jacare/core'
 import { nav } from './nav.js'
 
 export const route = createRoute(nav.where)
+
+route.path()
+route.param('id')()
+route.search('q')()
 ```
 
-**`routeParam`**
+**`routeParam` / `routeSearch`** — one-shot reads from a `NavContext`
 
 ```javascript
-import { routeParam } from '@jacare/core'
-import { route } from './route.js'
+import { routeParam, routeSearch } from '@jacare/core'
 
-const id = routeParam(route, 'id')
-id()  // → '42' when path is /item/42
+title: (ctx) => `Item · ${routeParam(ctx, 'id') ?? '…'}`
+routeSearch(ctx, 'q')
 ```
 
-**`routeSearch`**
-
-```javascript
-import { routeSearch } from '@jacare/core'
-import { route } from './route.js'
-
-const q = routeSearch(route, 'q')
-q()  // → 'tea' when URL has ?q=tea
-```
-
-**`routeHref`**
+**`routeHref(pattern, params?, search?)`**
 
 ```javascript
 import { routeHref } from '@jacare/core'
 
-routeHref('/item/:id', { id: 7 })  // → '/item/7'
+routeHref('/item/:id', { id: '7' })                 // → '/item/7'
+routeHref('/about', {}, { tab: 'feedback' })        // → '/about?tab=feedback'
+routeHref('/item/:id', { id: '7' }, { tab: 'specs' }) // → '/item/7?tab=specs'
 ```
 
 **`setNavTitle` / `getNavTitle`**
@@ -2610,7 +2845,6 @@ getNavTitle()
 ```javascript
 <main jacare-frame></main>
 <a jacare-go="/about" href="/about">About</a>
-<a jacare-go="/shop" jacare-here class-active>Shop</a>
 ```
 
 ---

@@ -15,6 +15,7 @@ import {
   guardCode,
   warmOnHoverCode,
   shellCode,
+  useCasesCode,
 } from '../snippets/navigation.js'
 
 
@@ -111,10 +112,41 @@ function warmOnHover(path) {
 
 const createNavOptions = [
   { name: 'layout', detail: 'Persistent shell; must contain an element with jacare-frame' },
-  { name: 'screens', detail: 'Map of path → screen() / lazy() / mount. Use :param for dynamic segments' },
+  { name: 'screens', detail: 'Map of path → screen() / lazy() / mount / { use, title }. Use :param for dynamic segments' },
   { name: 'missing', detail: 'Fallback screen when no pattern matches' },
   { name: 'base', detail: 'URL prefix stripped before matching (e.g. /core/lab on GitHub Pages)' },
-  { name: 'beforeGo', detail: 'Guard: return true, false (cancel), or a path string (redirect)' },
+  { name: 'beforeGo', detail: 'Guard: return false (cancel), a path string (redirect), or void to continue' },
+]
+
+const useCases = [
+  {
+    name: 'Shell + lazy pages',
+    detail: 'layout stays mounted; screens swap in jacare-frame. Use screen() for home, lazy() for the rest.',
+  },
+  {
+    name: 'Entity URL /:id',
+    detail: 'Declare /item/:id, build links with routeHref, read id as a mount prop or route.param("id").',
+  },
+  {
+    name: 'Filters & tabs (?q=)',
+    detail: 'Put shareable UI state in search. Prefer nav.swap for tabs so Back does not walk every tab.',
+  },
+  {
+    name: 'Auth / onboarding gate',
+    detail: 'beforeGo can redirect to /login or return false to block a path.',
+  },
+  {
+    name: 'Prefetch on hover',
+    detail: 'Call nav.warm(path) on pointerenter so the lazy chunk is ready before click.',
+  },
+  {
+    name: 'Deploy under a subpath',
+    detail: 'Set base (Lab uses APP_BASE) so matching ignores /core/lab while screens stay at /nav.',
+  },
+  {
+    name: 'Live document title',
+    detail: 'Static: { use, title } in createNav. Live: setNavTitle inside an effect (see Todo /focus).',
+  },
 ]
 
 const navMethods = [
@@ -137,10 +169,10 @@ export <view>
     <header class="page-hero">
       <p class="page-kicker">API §11</p>
       <h1 class="page-title">Navigation</h1>
-      <p class="page-lead">createNav keeps a persistent layout around jacare-frame. createRoute exposes a reactive read of path, params, and search for any screen.</p>
+      <p class="page-lead">createNav keeps a persistent layout around jacare-frame. createRoute exposes a reactive read of path, params, and search for any screen. Matches API §11 — only APIs that ship today.</p>
     </header>
 
-    <Tip :text=${'Boot order: createNav({ layout, screens, … }) → export route = createRoute(nav.where) → nav.attach(#app). Links use jacare-go; the active one gets jacare-here.'} />
+    <Tip :text=${'Boot order: createNav({ layout, screens, … }) → export route = createRoute(nav.where) → nav.attach(#app). Links use jacare-go; the active one gets jacare-here. Full write-up: docs/api.md §11.'} />
 
     <article class="nav-setup">
       <header class="nav-setup-head">
@@ -195,6 +227,25 @@ export <view>
             #end
           </div>
         </section>
+      </div>
+    </article>
+
+    <article class="nav-setup">
+      <header class="nav-setup-head">
+        <div>
+          <Badge :text=${'use cases'} />
+          <h2 class="nav-setup-title">What you build with this API</h2>
+          <p class="nav-setup-lead">Patterns that already work in Lab, Showcase, and Todo — no experimental APIs.</p>
+        </div>
+        <button type="button" class="btn btn-ghost" on-click=${() => showCode('Navigation use cases', useCasesCode)}>View code</button>
+      </header>
+      <div class="nav-live">
+        #for useCases as item (item.name)
+          <div class="nav-live-row">
+            <span>${item.name}</span>
+            <code>${item.detail}</code>
+          </div>
+        #end
       </div>
     </article>
 
@@ -349,13 +400,13 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'beforeGo guard'} :lead=${'Arm a sessionStorage flag, navigate to /nav, and the guard redirects to ?guard=blocked.'} :code=${guardCode}>
+      <Demo :title=${'beforeGo guard'} :lead=${'Arm a sessionStorage flag, navigate to /nav, and the guard redirects to ?guard=blocked. Return false to cancel, a path to redirect, or void to continue.'} :code=${guardCode}>
         <div class="stack">
           <button type="button" class="btn" on-click=${armGuard}>Arm guard + nav.go('/nav')</button>
           #if guardSearch() === 'blocked'
             <p class="nav-alert">Guard fired — redirected to /nav?guard=blocked.</p>
           #else
-            <p class="muted">beforeGo can return true, false, or another path string.</p>
+            <p class="muted">beforeGo: false cancels · string redirects · otherwise continue.</p>
           #end
         </div>
       </Demo>

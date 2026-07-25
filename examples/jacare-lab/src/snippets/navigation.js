@@ -40,8 +40,8 @@ export const nav = createNav({
     },
   },
   missing: NotFound,         // unmatched paths
-  beforeGo(to, from) {       // guard: return true | false | redirect path
-    return true
+  beforeGo(to, from) {       // guard: return false | redirect path | void to continue
+    // if (to.path === '/admin') return '/login'
   },
 })
 
@@ -172,9 +172,9 @@ export const guardCode = viewSnippet(
 beforeGo(to) {
   if (to.path === '/nav' && sessionStorage.getItem('jacare-lab:guard') === '1') {
     sessionStorage.removeItem('jacare-lab:guard')
-    return '/nav?guard=blocked'
+    return '/nav?guard=blocked' // redirect
   }
-  return true
+  // return false to cancel; void / undefined continues
 }
 
 function armGuard() {
@@ -220,6 +220,35 @@ function warmOnHover(path) {
     <p class="muted">Warmed so far: \${warmedLabel}</p>
   </div>`,
 )
+
+export const useCasesCode = `// 1) Entity URL
+screens: {
+  '/item/:id': {
+    use: lazy(() => import('./pages/item.jcr')),
+    title: (ctx) => \`Item · \${ctx.params.id}\`,
+  },
+}
+<a jacare-go=\${routeHref('/item/:id', { id })} href=…>Open</a>
+
+// 2) Filters in the query string
+const q = route.search('q')
+nav.go(value ? \`/shop?q=\${encodeURIComponent(value)}\` : '/shop')
+nav.swap(routeHref('/about', {}, { tab: 'bio' })) // tabs — no extra history
+
+// 3) Auth gate
+beforeGo(to) {
+  if (to.path.startsWith('/app') && !authed()) return '/login'
+  if (to.path === '/blocked') return false
+}
+
+// 4) Prefetch
+<a jacare-go="/forms" on-pointerenter=\${() => nav.warm('/forms')}>Forms</a>
+
+// 5) Subpath deploy
+createNav({ base: '/core/lab', layout: Shell, screens: { … } })
+
+// 6) Live title
+effect(() => setNavTitle(\`Cart · \${total()} items\`))`
 
 export const shellCode = viewSnippet(
   `import { createNav, lazy, screen } from '@jacare/core'

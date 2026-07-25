@@ -98,7 +98,7 @@ Complete catalog: [language-reference.md §3](../../docs/language-reference.md#3
 | `/for` | Keyed lists, reorder, stable parents |
 | `/components` | Props, slots, contracts, `emit`, model `bind-*` |
 | `/css` | Scoped styles + isolation |
-| `/nav` | `createNav`, params, search, guards, `routeHref` |
+| `/nav` | `createNav`, `createRoute`, params, search, guards, `routeHref`, use cases |
 | `/forms` | `createForm`, Field, validate, submit, reset |
 | `/lifecycle` | `createLifecycle`, `registerScope` |
 | `/cookbook` | Tasks screen combining the pieces |

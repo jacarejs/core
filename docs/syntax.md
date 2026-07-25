@@ -441,19 +441,30 @@ export const nav = createJacareAppFromRoutes({
 ## Nav
 
 ```javascript
-import { createNav, lazy } from '@jacare/core'
+import { createNav, createRoute, lazy, screen } from '@jacare/core'
+import Shell from './shell.jcr'
+import Home from './pages/home.jcr'
+import NotFound from './pages/not-found.jcr'
 
 export const nav = createNav({
+  base: '/', // optional subpath (e.g. '/core/lab')
   layout: Shell,
   screens: {
-    '/': Home,
-    '/about': lazy(() => import('./pages/about.jcr')),
+    '/': { use: screen(Home), title: 'Home' },
+    '/about': { use: lazy(() => import('./pages/about.jcr')), title: 'About' },
+    '/item/:id': {
+      use: lazy(() => import('./pages/item.jcr')),
+      title: (ctx) => `Item · ${ctx.params.id}`,
+    },
   },
-  missing: lazy(() => import('./pages/not-found.jcr')),
+  missing: NotFound,
   beforeGo: (to, from) => {
-    if (to.path === '/admin') return '/login'
+    if (to.path === '/admin') return '/login' // redirect
+    // return false to cancel; otherwise continue
   },
 })
+
+export const route = createRoute(nav.where)
 
 nav.attach(document.getElementById('app'))
 nav.go('/about')
@@ -462,7 +473,7 @@ nav.undo()
 nav.warm('/about')
 ```
 
-| Method | Role |
+| Member | Role |
 |--------|------|
 | `attach(target)` | Mount layout + active screen |
 | `go(path)` | Navigate forward (queued if another navigation is in progress) |
@@ -471,8 +482,12 @@ nav.warm('/about')
 | `warm(path)` | Preload lazy screen modules |
 | `missing` | 404 screen when no URL matches |
 | `where` | `Signal<NavPlace>` — reactive current place (`.peek` for untracked read) |
+| `createRoute(nav.where)` | `route.path` / `route.param(name)` / `route.search(name)` |
+| `routeHref(pattern, params?, search?)` | Build paths for `jacare-go` / `href` |
 
 `createNav({ base: '/app' })` sets the URL prefix for all screens.
+
+Full guide and use cases: [api.md §11](api.md#11-navigation). Lab: [`/nav`](https://jacarejs.github.io/core/lab/#/nav).
 
 ### Screen title
 

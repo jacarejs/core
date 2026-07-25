@@ -82,7 +82,7 @@ export const LESSONS = [
   {
     path: '/nav',
     title: 'Navigation',
-    blurb: 'createNav, lazy, params, search, guards',
+    blurb: 'createNav, createRoute, params, search, guards, use cases',
   },
   {
     path: '/forms',

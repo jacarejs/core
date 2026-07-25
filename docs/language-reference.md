@@ -708,6 +708,8 @@ export <view>
 
 `createNav` mounts screens into `[jacare-frame]` and toggles `.jacare-here` on matching `jacare-go` links.
 
+Full navigation API, examples, and use cases: [api.md §11](api.md#11-navigation) · Lab [`/nav`](https://jacarejs.github.io/core/lab/#/nav).
+
 ---
 
 ## 8. Pulse Mesh addresses
