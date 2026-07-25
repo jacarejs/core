@@ -27,4 +27,5 @@ export interface EffectOptions {
   name?: string
   file?: string
   line?: number
+  onError?: (error: unknown) => void
 }

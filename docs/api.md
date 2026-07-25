@@ -2613,6 +2613,17 @@ const { dispose } = effect(() => {
 // later: dispose()
 ```
 
+If the callback throws, dependencies are cleared so the next `set` does not re-run the failed effect. Pass `onError` to handle the error without rethrowing:
+
+```javascript
+effect(
+  () => {
+    if (!ready()) throw new Error('not ready')
+  },
+  { onError: (err) => console.error(err) },
+)
+```
+
 **`watch`** (alias of `effect`)
 
 ```javascript

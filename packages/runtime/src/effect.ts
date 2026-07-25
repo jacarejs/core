@@ -20,10 +20,19 @@ export function effect(fn: () => void | (() => void), options?: EffectOptions): 
       userCleanup = undefined
     }
     owner.clearDependencies()
-    runTracked(owner, () => {
-      userCleanup = fn() ?? undefined
-    })
-    devtools.recordEffectRun(owner)
+    try {
+      runTracked(owner, () => {
+        userCleanup = fn() ?? undefined
+      })
+      devtools.recordEffectRun(owner)
+    } catch (error) {
+      owner.clearDependencies()
+      if (options?.onError) {
+        options.onError(error)
+        return
+      }
+      throw error
+    }
   }
 
   owner.run = run
@@ -43,7 +52,12 @@ export function effect(fn: () => void | (() => void), options?: EffectOptions): 
   if (options?.defer) {
     queueMicrotask(run)
   } else {
-    run()
+    try {
+      run()
+    } catch (error) {
+      handle.dispose()
+      throw error
+    }
   }
 
   return handle

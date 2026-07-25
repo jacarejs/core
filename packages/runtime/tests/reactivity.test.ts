@@ -100,6 +100,56 @@ describe('effect', () => {
     count.set(1)
     expect(cleanup).toHaveBeenCalledTimes(1)
   })
+
+  it('unsubscribes after a throw so the next set does not re-explode', () => {
+    const count = signal(0)
+    const runs = vi.fn()
+    expect(() =>
+      effect(() => {
+        count()
+        runs()
+        throw new Error('boom')
+      }),
+    ).toThrow('boom')
+    expect(runs).toHaveBeenCalledTimes(1)
+    expect(() => count.set(1)).not.toThrow()
+    expect(runs).toHaveBeenCalledTimes(1)
+  })
+
+  it('unsubscribes after a throw on a later run', () => {
+    const count = signal(0)
+    const runs = vi.fn()
+    effect(() => {
+      const value = count()
+      runs()
+      if (value > 0) throw new Error('later boom')
+    })
+    expect(runs).toHaveBeenCalledTimes(1)
+    expect(() => count.set(1)).toThrow('later boom')
+    expect(runs).toHaveBeenCalledTimes(2)
+    expect(() => count.set(2)).not.toThrow()
+    expect(runs).toHaveBeenCalledTimes(2)
+  })
+
+  it('calls onError and stops tracking instead of rethrowing', () => {
+    const count = signal(0)
+    const onError = vi.fn()
+    const runs = vi.fn()
+    effect(
+      () => {
+        count()
+        runs()
+        throw new Error('handled')
+      },
+      { onError },
+    )
+    expect(onError).toHaveBeenCalledTimes(1)
+    expect(onError.mock.calls[0]![0]).toMatchObject({ message: 'handled' })
+    expect(runs).toHaveBeenCalledTimes(1)
+    count.set(1)
+    expect(runs).toHaveBeenCalledTimes(1)
+    expect(onError).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('batch', () => {
