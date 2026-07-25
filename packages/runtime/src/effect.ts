@@ -5,6 +5,7 @@ import type { Effect, EffectOptions } from './types.js'
 export function effect(fn: () => void | (() => void), options?: EffectOptions): Effect {
   const owner = new OwnerNode()
   let userCleanup: (() => void) | void
+  let disposed = false
   const meta =
     options?.name || options?.file || options?.line != null
       ? {
@@ -15,6 +16,7 @@ export function effect(fn: () => void | (() => void), options?: EffectOptions): 
       : undefined
 
   const run = (): void => {
+    if (disposed) return
     if (userCleanup) {
       userCleanup()
       userCleanup = undefined
@@ -39,6 +41,8 @@ export function effect(fn: () => void | (() => void), options?: EffectOptions): 
   const id = devtools.registerEffect(owner, meta)
   const handle = {
     dispose: () => {
+      if (disposed) return
+      disposed = true
       if (userCleanup) {
         userCleanup()
         userCleanup = undefined
@@ -50,7 +54,14 @@ export function effect(fn: () => void | (() => void), options?: EffectOptions): 
   devtools.attachPulseSource(handle, id)
 
   if (options?.defer) {
-    queueMicrotask(run)
+    queueMicrotask(() => {
+      try {
+        run()
+      } catch (error) {
+        handle.dispose()
+        throw error
+      }
+    })
   } else {
     try {
       run()

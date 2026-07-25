@@ -150,6 +150,22 @@ describe('effect', () => {
     expect(runs).toHaveBeenCalledTimes(1)
     expect(onError).toHaveBeenCalledTimes(1)
   })
+
+  it('does not run a deferred effect after disposal', async () => {
+    const count = signal(0)
+    const runs = vi.fn()
+    const handle = effect(
+      () => {
+        count()
+        runs()
+      },
+      { defer: true },
+    )
+    handle.dispose()
+    await Promise.resolve()
+    count.set(1)
+    expect(runs).not.toHaveBeenCalled()
+  })
 })
 
 describe('batch', () => {
