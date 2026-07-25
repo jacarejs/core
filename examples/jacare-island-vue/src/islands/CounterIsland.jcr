@@ -1,0 +1,80 @@
+import { pulse } from '@jacare/core'
+
+export <contract>
+  props: {
+    start: { type: 'number', default: 0 }
+    label: { type: 'string', default: 'Clicks' }
+  }
+</contract>
+
+const clicks = pulse(0)
+
+function bump() {
+  clicks.update((n) => n + 1)
+}
+
+function reset() {
+  clicks.set(0)
+}
+
+export <view>
+  <section class="island-counter" data-jacare-island>
+    <p class="island-label">${label}</p>
+    <p class="island-value">${() => (Number(start) || 0) + clicks()}</p>
+    <div class="island-actions">
+      <button type="button" class="island-btn" on-click=${bump}>+1</button>
+      <button type="button" class="island-btn island-btn-ghost" on-click=${reset}>Reset</button>
+    </div>
+  </section>
+</view>
+
+export <style>
+.island-counter {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: start;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.island-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #189030;
+}
+
+.island-value {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: #0a2a18;
+}
+
+.island-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.island-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #189030, #78c018);
+  color: #fff;
+}
+
+.island-btn-ghost {
+  background: #f3f7f4;
+  color: #0a2a18;
+  border: 1px solid #c9d9ce;
+}
+</style>

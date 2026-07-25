@@ -1,0 +1,72 @@
+import { pulse } from '@jacare/core'
+
+export <contract>
+  props: {
+    topic: { type: 'string', default: 'islands' }
+  }
+</contract>
+
+const open = pulse(true)
+
+function toggle() {
+  open.update((v) => !v)
+}
+
+export <view>
+  <section class="tip" data-jacare-island>
+    <button type="button" class="tip-toggle" on-click=${toggle}>
+      ${() => (open() ? 'Hide tip' : 'Show tip')}
+    </button>
+    #if open()
+      <p class="tip-body">
+        This tip island uses <strong>shadow DOM</strong>. Host page rules
+        (like Georgia body text) do not restyle this box — scoped island CSS wins.
+        Topic: <code>${topic}</code>.
+      </p>
+    #end
+  </section>
+</view>
+
+export <style>
+.tip {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+  background: #0a2a18;
+  color: #d8f3dc;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.tip-toggle {
+  justify-self: start;
+  border: 1px solid #3d7a4a;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #123d24;
+  color: #9be06a;
+}
+
+.tip-body {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #c5e8cc;
+}
+
+.tip-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #9be06a;
+  background: #123d24;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+}
+
+.tip-body strong {
+  color: #fff;
+}
+</style>

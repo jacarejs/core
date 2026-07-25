@@ -1,0 +1,24 @@
+{
+  "name": "jacare-island-vue",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Jacaré Island kit inside a Vue 3 host app",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "predev": "yarn --cwd ../.. build",
+    "prebuild": "yarn --cwd ../.. build",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@jacare/core": "0.1.11",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@jacare/vite-plugin": "0.1.11",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.3"
+  }
+}
