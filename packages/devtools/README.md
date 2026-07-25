@@ -51,7 +51,7 @@ if (import.meta.env.DEV) {
 }
 ```
 
-Two floating panels appear (dev only):
+One floating panel appears by default (dev only):
 
 1. **Pulse Graph** — tabs **Graph** | **Mesh** | **Scope** (↗ pops Mesh or Scope into a separate window)
 2. *(optional)* detached Mesh / Scope windows when popped out
@@ -165,8 +165,8 @@ const form = createForm({
   initial: { email: '', message: '' },
 })
 
-registerScope('email', () => form.fields.email())
-registerScope('email.error', () => form.fields.email.error())
+registerScope('email', 'Email', () => form.fields.email())
+registerScope('email.error', 'Email error', () => form.fields.email.error())
 ```
 
 ---
@@ -203,21 +203,24 @@ interface PulseGraphSnapshot {
 }
 
 interface PulseNode {
-  id: string
+  id: number
   kind: 'signal' | 'computed' | 'effect'
-  value: unknown
+  name?: string
+  file?: string
+  line?: number
+  value?: unknown
   stale?: boolean
-  subscribers?: number
-  disposed?: boolean
+  subscribers: number
+  disposed: boolean
 }
 ```
 
-`name` (e.g. `pulse#count` from compiler metadata) is planned — see [docs/phases/06-devtools.md](https://github.com/jacarejs/core/blob/main/docs/phases/06-devtools.md#compiler-node-names).
+`name`, `file`, and `line` are populated when compiler metadata is available.
 
 ```typescript
 interface PulseEdge {
-  from: string
-  to: string
+  from: number
+  to: number
 }
 ```
 

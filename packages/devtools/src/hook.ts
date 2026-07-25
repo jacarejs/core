@@ -474,8 +474,7 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
     },
   }
 
-  g.__JACARE_DEVTOOLS_HOOK__ = hook
-  g.__JACARE__ = {
+  const bridge = {
     version,
     enableDevtools,
     isDevtoolsEnabled,
@@ -492,10 +491,15 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
     getMeshSnapshot,
     getScopeSnapshot,
   }
+  g.__JACARE_DEVTOOLS_HOOK__ = hook
+  g.__JACARE__ = bridge
 
   return () => {
     if (g.__JACARE_DEVTOOLS_HOOK__ === hook) {
       delete g.__JACARE_DEVTOOLS_HOOK__
+    }
+    if (g.__JACARE__ === bridge) {
+      delete g.__JACARE__
     }
   }
 }
