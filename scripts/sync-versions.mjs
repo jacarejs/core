@@ -15,6 +15,18 @@ const NPM_PACKAGES = [
   'packages/cli',
 ]
 
+const EXAMPLE_PACKAGES = [
+  'examples/jacare-todo',
+  'examples/jacare-showcase',
+  'examples/jacare-bmi',
+  'examples/jacare-lab',
+  'examples/jacare-studio',
+  'examples/jacare-island',
+  'examples/jacare-island-react',
+  'examples/jacare-island-vue',
+  'examples/jacare-island-angular',
+]
+
 const VERSION_SOURCE = join(ROOT, 'packages/runtime/package.json')
 
 function readJson(path) {
@@ -84,25 +96,12 @@ function syncNpmVersion(version) {
   setDependencyVersions(rootPkg, version)
   writeJson(join(ROOT, 'package.json'), rootPkg)
 
-  const examplePkg = readJson(join(ROOT, 'examples/jacare-todo/package.json'))
-  setDependencyVersions(examplePkg, version)
-  writeJson(join(ROOT, 'examples/jacare-todo/package.json'), examplePkg)
-
-  const showcasePkg = readJson(join(ROOT, 'examples/jacare-showcase/package.json'))
-  setDependencyVersions(showcasePkg, version)
-  writeJson(join(ROOT, 'examples/jacare-showcase/package.json'), showcasePkg)
-
-  const bmiPkg = readJson(join(ROOT, 'examples/jacare-bmi/package.json'))
-  setDependencyVersions(bmiPkg, version)
-  writeJson(join(ROOT, 'examples/jacare-bmi/package.json'), bmiPkg)
-
-  const labPkg = readJson(join(ROOT, 'examples/jacare-lab/package.json'))
-  setDependencyVersions(labPkg, version)
-  writeJson(join(ROOT, 'examples/jacare-lab/package.json'), labPkg)
-
-  const studioPkg = readJson(join(ROOT, 'examples/jacare-studio/package.json'))
-  setDependencyVersions(studioPkg, version)
-  writeJson(join(ROOT, 'examples/jacare-studio/package.json'), studioPkg)
+  for (const dir of EXAMPLE_PACKAGES) {
+    const path = join(ROOT, dir, 'package.json')
+    const pkg = readJson(path)
+    setDependencyVersions(pkg, version)
+    writeJson(path, pkg)
+  }
 }
 
 function syncVscodeVersion(version) {
