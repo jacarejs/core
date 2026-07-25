@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Validate changelog
+        run: yarn changelog:check
+
       - name: Typecheck
         run: yarn typecheck
 

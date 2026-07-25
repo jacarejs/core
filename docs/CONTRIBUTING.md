@@ -104,6 +104,8 @@ yarn build          # build all packages
 yarn test           # run tests (132 tests)
 yarn bench          # CPW vs runtime microbenchmarks
 yarn typecheck      # TypeScript check
+yarn changelog      # preview unreleased notes from commits
+yarn changelog:check # validate CHANGELOG.md structure
 yarn example:build  # build jacare-todo example
 yarn showcase:build # build jacare-showcase example
 yarn lab:dev        # interactive API tutorial (jacare-lab)
@@ -127,8 +129,35 @@ See [benchmarks/README.md](../benchmarks/README.md) for the local performance su
 ## CI and publish
 
 - **CI** — `.github/workflows/ci.yml` runs on every push/PR to `main`
-- **npm** — `.github/workflows/publish.yml` (`workflow_dispatch`) bumps versions, publishes packages, tags the release
+- **npm** — `.github/workflows/publish.yml` (`workflow_dispatch`) bumps versions, generates the changelog, publishes packages, tags the release, and creates the GitHub Release
 - GitHub Pages — `.github/workflows/pages.yml` deploys todo / showcase / BMI / **Lab** demos
+
+### Commits and automatic changelog
+
+Release notes are generated from commits after the latest npm tag (`vX.Y.Z`). Use Conventional
+Commits so each change lands in the right section:
+
+```text
+feat(core): add a public capability
+fix(compiler): preserve strings while rewriting signals
+perf(runtime): reduce allocations in pulse updates
+docs(nav): clarify route precedence
+refactor(meta): simplify route discovery
+test(core): cover deferred effect disposal
+chore: update repository maintenance
+```
+
+Use `!` for breaking changes, for example `feat(core)!: change the signal contract`.
+
+The npm release workflow automatically:
+
+1. bumps all aligned package versions;
+2. reads commits since the latest `vX.Y.Z` tag;
+3. inserts a dated version in [`CHANGELOG.md`](../CHANGELOG.md);
+4. commits and tags the release;
+5. publishes the same notes as a GitHub Release.
+
+Do not edit released sections manually. Use `yarn changelog` to preview the next release locally.
 
 ### Why Pages used to break after npm publish
 

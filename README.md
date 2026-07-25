@@ -587,7 +587,16 @@ cd demo && yarn install && yarn dev
 - [Phase 7 — Forms](docs/phases/07-forms.md)
 - [Testing guide](docs/testing.md)
 - [Benchmarks](benchmarks/README.md)
+- [Changelog](CHANGELOG.md)
 - [Contributing & local development](docs/CONTRIBUTING.md)
+
+## Releases
+
+The aligned npm package version and its changes are recorded in
+[`CHANGELOG.md`](CHANGELOG.md). The publish workflow generates each entry from Conventional
+Commits since the previous `vX.Y.Z` tag and publishes the same text as a GitHub Release.
+
+Preview the next entry with `yarn changelog`.
 
 ## Roadmap
 
