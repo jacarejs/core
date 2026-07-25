@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { build as viteBuild, createServer } from 'vite'
 import { createJacareViteConfig, jacare } from '@jacare/vite-plugin'
 import { flagBool, flagNumber, flagString, parseArgv } from './args.js'
@@ -151,7 +152,7 @@ async function loadConfig(cwd: string): Promise<{ title?: string; port?: number 
   if (!existsSync(configPath)) {
     return {}
   }
-  const mod = await import(configPath)
+  const mod = await import(pathToFileURL(configPath).href)
   return mod.default ?? mod
 }
 

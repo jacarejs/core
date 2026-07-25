@@ -5,6 +5,9 @@ import { compile } from '@jacare/compiler'
 export function compileOnce(inputPath: string, outputPath?: string): void {
   const input = resolve(inputPath)
   const output = resolve(outputPath ?? input.replace(/\.jcr$/, '.js'))
+  if (output === input) {
+    throw new Error('Refusing to overwrite the input file; use a .jcr input or pass an output path')
+  }
   const source = readFileSync(input, 'utf-8')
   const result = compile(source, { filename: basename(input) })
   writeFileSync(output, result.code, 'utf-8')

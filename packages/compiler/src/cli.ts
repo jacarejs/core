@@ -12,6 +12,10 @@ if (args.length < 1) {
 
 const input = resolve(args[0]!)
 const output = resolve(args[1] ?? input.replace(/\.jcr$/, '.js'))
+if (output === input) {
+  console.error('Refusing to overwrite the input file; use a .jcr input or pass an output path')
+  process.exit(1)
+}
 
 const source = readFileSync(input, 'utf-8')
 const result = compile(source, { filename: basename(input) })
