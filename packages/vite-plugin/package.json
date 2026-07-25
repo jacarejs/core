@@ -1,6 +1,6 @@
 {
   "name": "@jacare/vite-plugin",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Vite plugin for Jacaré .jcr files",
   "license": "MIT",
   "repository": {
@@ -31,11 +31,11 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@jacare/compiler": "0.1.10"
+    "@jacare/compiler": "0.1.11"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0",
-    "@jacare/devtools": "0.1.10"
+    "@jacare/devtools": "0.1.11"
   },
   "peerDependenciesMeta": {
     "@jacare/devtools": {

@@ -10,6 +10,53 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.1.11](https://github.com/jacarejs/core/compare/v0.1.10...v0.1.11) - 2026-07-25
+
+### Added
+
+- **release:** automate versioned changelog and release notes ([c8b9fe0](https://github.com/jacarejs/core/commit/c8b9fe00fc4770ef467e077466803f6f393deca9))
+- **devtools:** mesh export/import and numeric steppers in Lookout overlay ([85f1b21](https://github.com/jacarejs/core/commit/85f1b2178bac86bf6dd2d57fb490f348f74f48de))
+- **devtools:** name extension Jacaré and brand overlay as Lookout ([92375e8](https://github.com/jacarejs/core/commit/92375e8cf7e22a4a4b645b3c60e23b61f8e121b6))
+- **devtools:** add Scope tab and Vite DEV hook inject ([aed0518](https://github.com/jacarejs/core/commit/aed05183da4cdd13aa666cfe2dad942a9dcdd1a7))
+- **devtools:** rename Pulse Graph to State and simplify Chrome panel ([0e2ba89](https://github.com/jacarejs/core/commit/0e2ba899517e7fdfb73436ea1335750dba74a706))
+- **devtools:** mirror overlay Pulse Graph in Chrome panel ([c337c09](https://github.com/jacarejs/core/commit/c337c090139766f1437487459ea41c17a6f8357f))
+- **devtools:** inspect .jcr pulses, values, and current route in Chrome panel ([028b145](https://github.com/jacarejs/core/commit/028b145c8a966a457017a6cfd851c9ed416dd941))
+- **devtools:** scaffold Chrome DevTools extension and store publish Action ([443a78c](https://github.com/jacarejs/core/commit/443a78c1fd6e5d4ab37e81366c87605286f956ce))
+- **lab:** Binding IR lesson, DevTools toggle, and forms/playground fixes ([3a3acae](https://github.com/jacarejs/core/commit/3a3acae56f22b8fedbbc244fb75ec0365bcbefe1))
+
+### Fixed
+
+- **docs:** align leftover demo ports and done-task CSS ([ba83b9a](https://github.com/jacarejs/core/commit/ba83b9ae12424becfe3cc56197563d546fcb5940))
+- **docs:** align leftover demo ports and done-task CSS ([09c78d0](https://github.com/jacarejs/core/commit/09c78d04b2cc47b03de59fb4fbabce386226758c))
+- **meta:** keep mid-path index segments in file routes ([9aba63d](https://github.com/jacarejs/core/commit/9aba63dc1c4d2ce5d4e92533fa1e93c1142c468f))
+- **cli:** use file URLs for config and refuse compile overwrite ([8eb3bd4](https://github.com/jacarejs/core/commit/8eb3bd4a7461ae85435ec4f5de6e8118ff704ad0))
+- **compiler:** escape single quotes in HTML output ([f99007f](https://github.com/jacarejs/core/commit/f99007f7febcf99486a860427a16a67a8b5e90a4))
+- **core:** ignore deferred effects after dispose ([7d275d3](https://github.com/jacarejs/core/commit/7d275d38c6b98d0780842a16dba9c08f38b57234))
+- **devtools:** harden dispose/escape and align README with shipped API ([a6098c5](https://github.com/jacarejs/core/commit/a6098c55214f0c0480c072890329eed3797aea29))
+- **vscode:** stop forcing global theme defaults and build before pack ([7047c3b](https://github.com/jacarejs/core/commit/7047c3b04f4d555baed4e5b46afc022290ba8061))
+- **chrome-devtools:** drop unused scripting permission and rebuild ZIP cleanly ([de8d943](https://github.com/jacarejs/core/commit/de8d9431a0711ca9927d2bce7865bc6d7ac78188))
+- **templates:** style completed tasks with .done class ([382d98f](https://github.com/jacarejs/core/commit/382d98fc656fa0b22c2591a845bc28d59e6681e9))
+- **examples:** correct demos, ports, versions, and CodeModal a11y ([f619c3e](https://github.com/jacarejs/core/commit/f619c3e8d9779e1d5692e137cf2dc3c843fff50f))
+- **core:** stop effects from re-exploding after throw ([e21225d](https://github.com/jacarejs/core/commit/e21225dd9574149ad3bf8edb29eefa9cf8253b93))
+- **devtools:** hide mesh/scope panes when overlay is minimized or hidden ([6165226](https://github.com/jacarejs/core/commit/61652269bb596e2248b340b6c49fb9647324a0ef))
+- **core:** detect reactive cycles instead of overflowing the stack ([5d9d241](https://github.com/jacarejs/core/commit/5d9d2417d6b15519f09e2ac63a71dd1aef63ed8a))
+- **lab:** avoid top-level await in boot for Vite build target ([8f02eaf](https://github.com/jacarejs/core/commit/8f02eaf8410d2c31ee42f81f6e3b973e58ed768d))
+
+### Documentation
+
+- align public docs with current package version and suite size ([ae6ad5f](https://github.com/jacarejs/core/commit/ae6ad5f6c0bf88b682fe840bd91e0f576c8ffecc))
+- align ripple examples with ripple(fn) API ([e4d528c](https://github.com/jacarejs/core/commit/e4d528c963a29f68fd2b610c4de9cb5f9c231d12))
+- **nav:** expand route API and Lab with real use cases ([19d7ebc](https://github.com/jacarejs/core/commit/19d7ebcd0148870c85620e5d252bf6040368816a))
+- **chrome-devtools:** add store privacy policy ([acef980](https://github.com/jacarejs/core/commit/acef980c3dc79d49dcff9d65401e03b8868162b4))
+- **lab:** add detailed English explanations for every import catalog entry ([1482882](https://github.com/jacarejs/core/commit/14828823823cbe1aa35199f09d54ad6aacb0ba75))
+- **lab:** add simple English usage examples for every import ([b1a5e6e](https://github.com/jacarejs/core/commit/b1a5e6e25ca8a440be62f99765128a0cd27e681b))
+
+### Maintenance
+
+- add MIT LICENSE at repository root ([d934767](https://github.com/jacarejs/core/commit/d9347679f9f2d8aced04c921b32424da0e6effab))
+- **templates:** move global styles from index.html into app.css ([f93b60d](https://github.com/jacarejs/core/commit/f93b60d8cdde4e61f20ed43621342a144ab95095))
+- **templates:** align starters with canonical nav and pulse API ([9bf30a2](https://github.com/jacarejs/core/commit/9bf30a2690ca0f88c290b47d35d7a88b51e9f5e7))
+
 ## [0.1.10](https://github.com/jacarejs/core/compare/v0.1.9...v0.1.10) - 2026-07-22
 
 ### Added
