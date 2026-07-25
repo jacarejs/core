@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { compile, parseModule, parseTemplate, flattenViewLiteral } from '../src/index.js'
+import { escapeHtml } from '../src/codegen-shared.js'
 
 const COUNTER = `import { signal, computed, view } from '@jacare/core'
 
@@ -73,6 +74,12 @@ export <view>
     const result = compile(source)
     expect(result.code).toContain('export function mount')
     expect(result.code).toContain('bindText')
+  })
+})
+
+describe('escapeHtml', () => {
+  it('escapes both HTML quote variants', () => {
+    expect(escapeHtml(`"Jacaré's"`)).toBe('&quot;Jacaré&#39;s&quot;')
   })
 })
 
