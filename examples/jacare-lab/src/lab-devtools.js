@@ -17,7 +17,7 @@ let disposeHook = null
 export async function syncDevtools() {
   if (!disposeHook) {
     const { installPageHook } = await import('@jacare/devtools/hook')
-    disposeHook = installPageHook({ coreVersion: '0.1.10' })
+    disposeHook = installPageHook({ coreVersion: import.meta.env.JACARE_VERSION })
   }
 
   if (devtoolsEnabled()) {

@@ -77,6 +77,19 @@ body {
   color: var(--ink);
 }
 
+.jacare-version {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.55rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #062013;
+  background: linear-gradient(135deg, var(--lime), var(--leaf));
+}
+
 .hero-title {
   margin: 0;
   max-width: 16ch;

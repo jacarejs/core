@@ -5,6 +5,7 @@ import { highlightJacare } from '../lib/highlight.js'
 import { runPlayground } from '../lib/run.js'
 import { readShareFromLocation, writeShareToLocation } from '../lib/share.js'
 
+const JACARE_VERSION = import.meta.env.JACARE_VERSION
 const source = pulse(DEFAULT_STUDIO_SOURCE)
 const files = pulse([{ name: 'App.jcr', source: DEFAULT_STUDIO_SOURCE }])
 const activeFile = pulse('App.jcr')
@@ -262,6 +263,7 @@ export <view>
           <span class="studio-brand-name">Jacaré Studio</span>
           <span class="studio-brand-tag">Compile · mount · share</span>
         </span>
+        <span class="jacare-version" title="@jacare/core">v${JACARE_VERSION}</span>
       </a>
 
       <nav class="studio-links" aria-label="Learn">

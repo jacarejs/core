@@ -12,3 +12,11 @@ declare module '*.jcr' {
   const _default: typeof mount
   export default _default
 }
+
+interface ImportMetaEnv {
+  readonly JACARE_VERSION: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}

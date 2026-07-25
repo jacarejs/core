@@ -103,6 +103,17 @@ body {
   text-transform: uppercase;
 }
 
+.jacare-version {
+  flex-shrink: 0;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #062013;
+  background: linear-gradient(135deg, #8fd12a, #1f8f4e);
+}
+
 .nav {
   display: flex;
   flex-wrap: wrap;

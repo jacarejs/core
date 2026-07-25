@@ -1,6 +1,7 @@
 import { pulse, derive } from '@jacare/core'
 import { assetUrl } from '../app-base.js'
 
+const JACARE_VERSION = import.meta.env.JACARE_VERSION
 const unit = pulse('metric')
 const heightCmOrIn = pulse(170)
 const weightKgOrLb = pulse(70)
@@ -109,6 +110,7 @@ export <view>
     <header class="hero">
       <img class="hero-logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
       <p class="hero-brand">Scale</p>
+      <span class="jacare-version" title="@jacare/core">v${JACARE_VERSION}</span>
       <h1 class="hero-title">Feel the math of your body.</h1>
       <p class="hero-lead">
         A live BMI gauge — height and weight wire straight into the number, with no page reload.
@@ -188,7 +190,7 @@ export <view>
     </section>
 
     <footer class="foot">
-      <span>Built with Jacaré · educational demo, not medical advice</span>
+      <span>Built with Jacaré v${JACARE_VERSION} · educational demo, not medical advice</span>
       <a
         class="footer-repo"
         href="https://github.com/jacarejs/core"

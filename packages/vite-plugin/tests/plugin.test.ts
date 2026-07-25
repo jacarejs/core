@@ -99,6 +99,14 @@ describe('createJacareViteConfig', () => {
   })
 })
 
+describe('resolveJacareVersion', () => {
+  it('reads the installed @jacare/core package version', async () => {
+    const { resolveJacareVersion } = await import('../src/index.js')
+    const version = resolveJacareVersion(process.cwd())
+    expect(version).toMatch(/^\d+\.\d+\.\d+/)
+  })
+})
+
 describe('loadJacareConfig', () => {
   it('returns empty config when file is missing', async () => {
     const { loadJacareConfig } = await import('../src/index.js')

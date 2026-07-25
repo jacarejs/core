@@ -4,6 +4,7 @@ import { activeCode, hideCode } from './code-viewer.js'
 import { cart } from './bags/cart.js'
 import CodeModal from './components/CodeModal.jcr'
 
+const JACARE_VERSION = import.meta.env.JACARE_VERSION
 const viewerTitle = derive(() => activeCode()?.title ?? '')
 const viewerFiles = derive(() => activeCode()?.files ?? [])
 const cartLabel = derive(() => `Shop · ${cart.count()}`)
@@ -19,6 +20,7 @@ export <view>
             <strong class="brand-name">Jacaré</strong>
             <span class="brand-tag">Suite</span>
           </div>
+          <span class="jacare-version" title="@jacare/core">v${JACARE_VERSION}</span>
         </a>
         <nav class="nav" aria-label="Primary">
           <a class="nav-link" jacare-go="/" href=${appHref('/')}>Tasks</a>
@@ -38,7 +40,7 @@ export <view>
       <main class="main" jacare-frame></main>
 
       <footer class="footer">
-        <span>Fine-grained reactivity · zero VDOM</span>
+        <span>Fine-grained reactivity · zero VDOM · v${JACARE_VERSION}</span>
         <a
           class="footer-repo"
           href="https://github.com/jacarejs/core"

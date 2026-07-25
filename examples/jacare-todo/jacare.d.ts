@@ -14,3 +14,11 @@ declare module '*?raw' {
   export default source
 }
 
+
+interface ImportMetaEnv {
+  readonly JACARE_VERSION: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}

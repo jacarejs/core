@@ -169,6 +169,18 @@ code {
   text-transform: uppercase;
 }
 
+.jacare-version {
+  flex-shrink: 0;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #062013;
+  background: linear-gradient(135deg, var(--lime), var(--leaf));
+}
+
 .studio-links {
   display: flex;
   flex-wrap: wrap;

@@ -5,6 +5,7 @@ import { activeCode, hideCode } from './code-viewer.js'
 import { devtoolsEnabled, toggleDevtools } from './lab-devtools.js'
 import CodeModal from './components/CodeModal.jcr'
 
+const JACARE_VERSION = import.meta.env.JACARE_VERSION
 const menuOpen = pulse(false)
 const menuLabel = computed(() => (menuOpen() ? 'Close' : 'Lessons'))
 const viewerTitle = derive(() => activeCode()?.title ?? '')
@@ -28,6 +29,7 @@ export <view>
           <span class="brand-copy">
             <span class="brand-name">Jacaré Lab</span>
             <span class="brand-tag">Complete API tutorial</span>
+            <span class="jacare-version" title="@jacare/core">v${JACARE_VERSION}</span>
           </span>
         </a>
 
@@ -67,6 +69,7 @@ export <view>
         <footer class="site-footer">
           <p class="site-footer-line">
             Made in Brazil <span class="site-footer-flag" aria-hidden="true">🇧🇷</span>
+            · Jacaré v${JACARE_VERSION}
           </p>
         </footer>
       </div>

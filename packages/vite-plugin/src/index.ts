@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { pathToFileURL, fileURLToPath } from 'node:url'
 import {
   collectComponents,
   compile,
@@ -62,6 +62,37 @@ export function createJacareViteConfig(config: JacareConfig = {}): UserConfig {
   }
 }
 
+export function resolveJacareVersion(root = process.cwd()): string {
+  const candidates = [
+    findInstalledPackageJson(root, '@jacare/core'),
+    join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'runtime', 'package.json'),
+  ]
+
+  for (const pkgPath of candidates) {
+    if (!pkgPath || !existsSync(pkgPath)) continue
+    try {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version?: string }
+      if (pkg.version) return pkg.version
+    } catch {
+      /* try next */
+    }
+  }
+  return '0.0.0'
+}
+
+function findInstalledPackageJson(root: string, name: string): string | null {
+  const parts = name.split('/')
+  let dir = root
+  while (true) {
+    const candidate = join(dir, 'node_modules', ...parts, 'package.json')
+    if (existsSync(candidate)) return candidate
+    const parent = dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+  return null
+}
+
 function resolveCompileMode(
   options: JacarePluginOptions,
   ssr?: boolean,
@@ -104,8 +135,18 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
     name: 'jacare',
     enforce: 'pre',
 
-    config() {
+    config(userConfig) {
+      const root =
+        typeof userConfig.root === 'string' && userConfig.root
+          ? isAbsolute(userConfig.root)
+            ? userConfig.root
+            : resolve(process.cwd(), userConfig.root)
+          : process.cwd()
+      const version = resolveJacareVersion(root)
       return {
+        define: {
+          'import.meta.env.JACARE_VERSION': JSON.stringify(version),
+        },
         optimizeDeps: {
           exclude: ['@jacare/core'],
         },
