@@ -18,12 +18,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@jacare/core": "0.1.11"
+    "@jacare/core": "0.1.12"
   },
   "devDependencies": {
-    "@jacare/cli": "0.1.11",
-    "@jacare/devtools": "0.1.11",
-    "@jacare/vite-plugin": "0.1.11",
+    "@jacare/cli": "0.1.12",
+    "@jacare/devtools": "0.1.12",
+    "@jacare/vite-plugin": "0.1.12",
     "vite": "^6.0.3"
   }
 }

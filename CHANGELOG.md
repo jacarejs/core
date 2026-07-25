@@ -10,6 +10,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.1.12](https://github.com/jacarejs/core/compare/v0.1.11...v0.1.12) - 2026-07-25
+
+### Added
+
+- **core:** add Island mount kit via @jacare/core/island ([75a4c48](https://github.com/jacarejs/core/commit/75a4c486abef7ab4a255dee7ac3450f0d19ac5b3))
+- **examples:** show dynamic @jacare/core npm version in every demo ([afe72f3](https://github.com/jacarejs/core/commit/afe72f349bab8892a58c0191d76e34341702ab7d))
+
+### Fixed
+
+- **lab:** defer island mounts until view DOM exists ([9031d9b](https://github.com/jacarejs/core/commit/9031d9b320198b365d56b6b344dcb6d9d300029e))
+
+### Changed
+
+- add Islands lesson for mountIsland API §14b ([c3cae22](https://github.com/jacarejs/core/commit/c3cae22ab43e95e49dc134ca79ca8bd8cb59814b))
+- add Angular host for Jacaré islands ([18e54a8](https://github.com/jacarejs/core/commit/18e54a873448e5db45adf2bd8f64cc69c6474939))
+- add React and Vue hosts for Jacaré islands ([9829b7e](https://github.com/jacarejs/core/commit/9829b7eee3a1ff4c03145481b8ef065de6dd6680))
+- add static HTML host for Jacaré islands ([ef96484](https://github.com/jacarejs/core/commit/ef964845d7e271d6327f4de0437c478bb039b2c1))
+
 ### Added
 
 - **core:** Island mount kit via `@jacare/core/island` (`mountIsland`) with static host demo
