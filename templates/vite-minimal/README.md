@@ -23,7 +23,8 @@ public/
   jacare-logo.png
 src/
   app.jcr       UI + state + scoped CSS
-  boot.js       entry
+  app.css       global tokens / body
+  boot.js       import './app.css' + mount
 index.html
 vite.config.js
 jacare.config.js

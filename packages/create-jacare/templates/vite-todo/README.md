@@ -18,7 +18,8 @@ npm run check
 src/
   shell.jcr
   nav.js             createNav + createRoute (canonical { use, title })
-  boot.js
+  boot.js            import './app.css' + attach
+  app.css            global styles
   pages/
     tasks.jcr        pulse list + bind-value
     about.jcr

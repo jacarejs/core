@@ -1,3 +1,4 @@
+import './app.css'
 import { nav } from './nav.js'
 
 const root = document.getElementById('app')

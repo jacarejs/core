@@ -18,7 +18,8 @@ npm run check
 src/
   shell.jcr          layout + jacare-frame + jacare-go links
   nav.js             createNav({ screens: { use, title } }) + createRoute
-  boot.js            nav.attach(#app)
+  boot.js            import './app.css' + nav.attach(#app)
+  app.css            global styles
   pages/
     home.jcr         eager (screen())
     about.jcr        lazy

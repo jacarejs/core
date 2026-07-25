@@ -1,3 +1,4 @@
+import './app.css'
 import App from './app.jcr'
 
 const root = document.getElementById('app')
