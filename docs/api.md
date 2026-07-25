@@ -2530,7 +2530,7 @@ Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
 | DevTools registry | `enableDevtools()` + `getPulseGraph()` in tests |
 
 ```bash
-yarn test          # monorepo — 127 tests
+yarn test          # monorepo — 261 tests
 ```
 
 Full guide: [testing.md](testing.md)

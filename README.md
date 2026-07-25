@@ -29,7 +29,7 @@
   <a href="https://jacarejs.github.io/core/lab/"><img src="https://img.shields.io/badge/demo-Lab%20API%20tutorial-78c018.svg" alt="Lab demo" /></a>
 </p>
 
-**Jacaré** is a front-end framework for building fast, reactive web apps with plain JavaScript — no Virtual DOM, no component re-renders, no proprietary file format.
+**Jacaré** is a front-end framework for building fast, reactive web apps with plain JavaScript — no Virtual DOM and no component re-renders — plain JavaScript modules with a small `.jcr` template surface.
 
 Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 
@@ -85,7 +85,7 @@ jacare new my-app
 cd my-app && npm install && jacare dev
 ```
 
-Open `http://localhost:5173` (create-jacare) or `http://localhost:3000` (`jacare new`) — a reactive counter is already running.
+Open `http://localhost:3000` (create-jacare or `jacare new`) — a reactive counter is already running.
 
 **How small is it?**
 
@@ -236,7 +236,7 @@ No provider. No props drilling. Open **Lab → Pulse bags** for the architecture
 
 ## Packages
 
-Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) scope on npm (**v0.1.6**):
+Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) scope on npm (**v0.1.10**):
 
 | Package | Badges | Description |
 |---------|--------|-------------|
@@ -651,7 +651,7 @@ Run locally:
 
 ```bash
 yarn lab:dev        # Jacaré Lab (tutorial) — http://localhost:3003
-yarn showcase:dev   # http://localhost:3001
+yarn showcase:dev   # http://localhost:3004
 yarn example:dev    # jacare-todo — http://localhost:3000
 yarn bmi:dev        # Scale BMI — http://localhost:3002
 ```
