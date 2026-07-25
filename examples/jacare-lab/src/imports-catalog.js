@@ -213,8 +213,7 @@ listBags()  // → ['cart', 'theme', …]`,
 import { cart } from './bags.js'
 
 ripple(() => {
-  cart.count.set(1)
-  cart.total.set(20)
+  cart.items.set([])
 })`,
     path: '/bag',
   },

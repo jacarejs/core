@@ -2724,11 +2724,13 @@ listBags()  // → ['cart', 'theme', …]
 import { ripple } from '@jacare/core'
 import { cart } from './bags.js'
 
-ripple(cart.total, () => {
-  console.log('total changed', cart.total())
+ripple(() => {
+  cart.items.set([])
+  // related bag writes flush as one mesh notification wave
 })
 ```
 
+Signature is `ripple(fn)` — not `ripple(port, fn)`. Same engine as `batch`; Mesh DevTools records which cells changed in that wave.
 **`bag.snap` / `hydrate` / `reset`** (methods on a bag instance)
 
 ```javascript
