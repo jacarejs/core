@@ -27,6 +27,7 @@
   <a href="https://jacarejs.github.io/core/showcase/"><img src="https://img.shields.io/badge/demo-Showcase-78c018.svg" alt="Showcase demo" /></a>
   <a href="https://jacarejs.github.io/core/bmi/"><img src="https://img.shields.io/badge/demo-Scale%20BMI-78c018.svg" alt="BMI demo" /></a>
   <a href="https://jacarejs.github.io/core/lab/"><img src="https://img.shields.io/badge/demo-Lab%20API%20tutorial-78c018.svg" alt="Lab demo" /></a>
+  <a href="https://jacarejs.github.io/core/studio/"><img src="https://img.shields.io/badge/demo-Studio-78c018.svg" alt="Studio demo" /></a>
 </p>
 
 **Jacaré** is a front-end framework for building fast, reactive web apps with plain JavaScript — no Virtual DOM and no component re-renders — plain JavaScript modules with a small `.jcr` template surface.
@@ -52,6 +53,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 | Topic | Link |
 |-------|------|
 | **Tutorial (Jacaré Lab)** | [Live](https://jacarejs.github.io/core/lab/) · [`examples/jacare-lab`](examples/jacare-lab) · `yarn lab:dev` |
+| **Studio (playground)** | [Live](https://jacarejs.github.io/core/studio/) · [`examples/jacare-studio`](examples/jacare-studio) · `yarn studio:dev` |
 | **API reference (full)** | [docs/api.md](docs/api.md) |
 | **Language reference** | [docs/language-reference.md](docs/language-reference.md) — reserved words, all binds, view/style/contract, CLI |
 | **Import catalog** | [docs/api.md §20](docs/api.md#20-import-catalog--everything-you-can-import) · [Lab `/helpers`](https://jacarejs.github.io/core/lab/#/helpers) |
@@ -178,7 +180,7 @@ Jacaré asks a different question: **why re-render anything when only one text n
 | DevTools | `@jacare/devtools` | Pulse Graph — signals, Mesh (`@bag/key`), Scope |
 | Scaffolding | `create-jacare` | `npm create jacare@latest` |
 
-Live demos: [**Lab (tutorial)**](https://jacarejs.github.io/core/lab/) · [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/)
+Live demos: [**Lab (tutorial)**](https://jacarejs.github.io/core/lab/) · [**Studio**](https://jacarejs.github.io/core/studio/) · [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/)
 
 Full docs: [API](docs/api.md) · [Pulse bags](docs/api.md#3b-pulse-bags-shared-state) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Cookbook](docs/api.md#13b-cookbook--if--for--events--props--lifecycle)
 
@@ -643,6 +645,7 @@ See also: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare
 | Demo | Badges | URL | What to explore |
 |------|--------|-----|-----------------|
 | **Lab (tutorial)** | [![demo](https://img.shields.io/badge/tutorial-featured-78c018.svg)](https://jacarejs.github.io/core/lab/) | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) | **Featured** — full API walkthrough with View code modals |
+| **Studio** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/studio/) | [jacarejs.github.io/core/studio](https://jacarejs.github.io/core/studio/) | Live `.jcr` editor — compile, mount, share URL |
 | **Todo app** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/todo/) | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
 | **Showcase** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/showcase/) | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | CPW, `style---`, components, slots, cart |
 | **Scale BMI** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/bmi/) | [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/) | Live BMI gauge, metric/imperial, reactive CSS |
@@ -651,8 +654,9 @@ Run locally:
 
 ```bash
 yarn lab:dev        # Jacaré Lab (tutorial) — http://localhost:3003
+yarn studio:dev     # Jacaré Studio — http://localhost:3005
 yarn showcase:dev   # http://localhost:3004
-yarn example:dev    # jacare-todo — http://localhost:3000
+yarn example:dev    # jacare-todo — http://localhost:3001
 yarn bmi:dev        # Scale BMI — http://localhost:3002
 ```
 

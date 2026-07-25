@@ -59,20 +59,28 @@ jobs:
           JACARE_BASE: /core/lab/
         run: yarn build
 
+      - name: Build Studio demo
+        working-directory: examples/jacare-studio
+        env:
+          JACARE_BASE: /core/studio/
+        run: yarn build
+
       - name: Prepare Pages site
         run: |
-          mkdir -p site/todo site/showcase site/bmi site/lab
+          mkdir -p site/todo site/showcase site/bmi site/lab site/studio
           cp scripts/gh-pages-index.html site/index.html
           cp -r examples/jacare-todo/dist/. site/todo/
           cp -r examples/jacare-showcase/dist/. site/showcase/
           cp -r examples/jacare-bmi/dist/. site/bmi/
           cp -r examples/jacare-lab/dist/. site/lab/
+          cp -r examples/jacare-studio/dist/. site/studio/
           cp scripts/gh-pages-404.html site/404.html
           cp scripts/gh-pages-404.html site/todo/404.html
           cp scripts/gh-pages-404.html site/showcase/404.html
           cp scripts/gh-pages-404.html site/bmi/404.html
           cp scripts/gh-pages-404.html site/lab/404.html
-          touch site/.nojekyll site/todo/.nojekyll site/showcase/.nojekyll site/bmi/.nojekyll site/lab/.nojekyll
+          cp scripts/gh-pages-404.html site/studio/404.html
+          touch site/.nojekyll site/todo/.nojekyll site/showcase/.nojekyll site/bmi/.nojekyll site/lab/.nojekyll site/studio/.nojekyll
 
       - name: Verify Pages artifact
         run: |
@@ -82,6 +90,7 @@ jobs:
           test -f site/todo/index.html
           test -f site/bmi/index.html
           test -f site/lab/index.html
+          test -f site/studio/index.html
           echo "Pages artifact:"
           find site -maxdepth 2 -type f | sort
 

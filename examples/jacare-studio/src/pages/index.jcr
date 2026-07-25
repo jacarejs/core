@@ -1,0 +1,386 @@
+import { createLifecycle, derive, effect, pulse } from '@jacare/core'
+import { assetUrl } from '../app-base.js'
+import { DEFAULT_STUDIO_SOURCE, STUDIO_EXAMPLES, emptyComponentSource } from '../lib/examples.js'
+import { highlightJacare } from '../lib/highlight.js'
+import { runPlayground } from '../lib/run.js'
+import { readShareFromLocation, writeShareToLocation } from '../lib/share.js'
+
+const source = pulse(DEFAULT_STUDIO_SOURCE)
+const files = pulse([{ name: 'App.jcr', source: DEFAULT_STUDIO_SOURCE }])
+const activeFile = pulse('App.jcr')
+const addingFile = pulse(false)
+const newFileName = pulse('Component.jcr')
+const fileNote = pulse('')
+const error = pulse('')
+const status = pulse('Ready')
+const layout = pulse('split')
+const shareNote = pulse('')
+const activeExample = pulse('blank')
+const meta = derive(() => {
+  const text = source()
+  const lines = text ? text.split('\n').length : 0
+  return `${files().length} ${files().length === 1 ? 'file' : 'files'} · ${lines} lines · ${text.length} chars`
+})
+const statusTone = derive(() => {
+  if (error()) return 'error'
+  if (status() === 'Live') return 'live'
+  if (status() === 'Compiling…') return 'busy'
+  return 'idle'
+})
+const layoutLabel = derive(() => (layout() === 'split' ? 'Stack panes' : 'Side by side'))
+
+let host = null
+let highlightCode = null
+let disposePreview = null
+let timer = null
+let shareTimer = null
+
+function loadExample(value) {
+  const id = typeof value === 'string' ? value : value.currentTarget.dataset.example
+  const example = STUDIO_EXAMPLES.find((item) => item.id === id)
+  if (!example) return
+  const nextFiles = example.files
+    ? example.files.map((file) => ({ ...file }))
+    : [{ name: 'App.jcr', source: example.source }]
+  activeExample.set(id)
+  files.set(nextFiles)
+  activeFile.set(nextFiles[0].name)
+  source.set(nextFiles[0].source)
+  addingFile.set(false)
+  fileNote.set('')
+  shareNote.set('')
+}
+
+function projectFiles() {
+  return files().map((file) =>
+    file.name === activeFile() ? { ...file, source: source() } : file,
+  )
+}
+
+function commitSource() {
+  files.set(projectFiles())
+}
+
+function switchFile(value) {
+  const name = typeof value === 'string' ? value : value.currentTarget.dataset.file
+  if (name === activeFile()) return
+  commitSource()
+  const file = files().find((item) => item.name === name)
+  if (!file) return
+  activeFile.set(name)
+  source.set(file.source)
+  fileNote.set('')
+}
+
+function openFileCreator() {
+  addingFile.set(true)
+  newFileName.set('Component.jcr')
+  fileNote.set('')
+  queueMicrotask(() => document.getElementById('studio-new-file')?.focus())
+}
+
+function closeFileCreator() {
+  addingFile.set(false)
+  fileNote.set('')
+}
+
+function createFile() {
+  let name = newFileName().trim()
+  if (!name.endsWith('.jcr')) name += '.jcr'
+  if (!/^[A-Za-z][A-Za-z0-9_-]*\.jcr$/.test(name)) {
+    fileNote.set('Use a name like Card.jcr')
+    return
+  }
+  if (files().some((file) => file.name === name)) {
+    fileNote.set(`${name} already exists`)
+    return
+  }
+
+  commitSource()
+  const nextSource = emptyComponentSource(name)
+  files.update((items) => [...items, { name, source: nextSource }])
+  activeFile.set(name)
+  source.set(nextSource)
+  activeExample.set('custom')
+  addingFile.set(false)
+  fileNote.set('File created')
+}
+
+function onFileNameKeydown(event) {
+  if (event.key === 'Enter') createFile()
+  if (event.key === 'Escape') closeFileCreator()
+}
+
+function paintHighlight() {
+  if (!highlightCode) return
+  highlightCode.innerHTML = highlightJacare(source())
+}
+
+function syncEditorScroll(event) {
+  const layer = event.currentTarget.previousElementSibling
+  if (!layer) return
+  layer.scrollTop = event.currentTarget.scrollTop
+  layer.scrollLeft = event.currentTarget.scrollLeft
+}
+
+function onEditorKeydown(event) {
+  if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+    event.preventDefault()
+    runNow()
+  }
+  if (event.key === 'Tab') {
+    event.preventDefault()
+    const el = event.currentTarget
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const value = el.value
+    const next = value.slice(0, start) + '  ' + value.slice(end)
+    source.set(next)
+    queueMicrotask(() => {
+      el.selectionStart = el.selectionEnd = start + 2
+    })
+  }
+}
+
+function runNow() {
+  if (!host) return
+  try {
+    disposePreview?.()
+    disposePreview = null
+    disposePreview = runPlayground(host, projectFiles(), 'App.jcr')
+    error.set('')
+    status.set('Live')
+  } catch (err) {
+    disposePreview?.()
+    disposePreview = null
+    host.replaceChildren()
+    error.set(err?.message || String(err))
+    status.set('Error')
+  }
+}
+
+function scheduleRun() {
+  clearTimeout(timer)
+  status.set('Compiling…')
+  timer = setTimeout(runNow, 220)
+}
+
+function scheduleShareSync() {
+  clearTimeout(shareTimer)
+  shareTimer = setTimeout(() => {
+    const project = JSON.stringify({ version: 2, entry: 'App.jcr', files: projectFiles() })
+    void writeShareToLocation(project).catch(() => {})
+  }, 500)
+}
+
+function toggleLayout() {
+  layout.update((mode) => (mode === 'split' ? 'stack' : 'split'))
+}
+
+function resetSource() {
+  const id = activeExample()
+  const example = STUDIO_EXAMPLES.find((item) => item.id === id) ?? STUDIO_EXAMPLES[0]
+  loadExample(example.id)
+  shareNote.set('Reset to preset')
+}
+
+async function copyShareLink() {
+  try {
+    const project = JSON.stringify({ version: 2, entry: 'App.jcr', files: projectFiles() })
+    const url = await writeShareToLocation(project)
+    await navigator.clipboard.writeText(url)
+    shareNote.set('Link copied')
+  } catch {
+    shareNote.set('Could not copy — URL updated in the address bar')
+  }
+}
+
+export const lifecycle = createLifecycle({
+  onMount() {
+    let cancelled = false
+    let tracker = null
+
+    queueMicrotask(() => {
+      if (cancelled) return
+      host = document.getElementById('studio-host')
+      highlightCode = document.getElementById('studio-highlight-code')
+      if (!host) {
+        error.set('Preview host not found')
+        status.set('Error')
+        return
+      }
+
+      void readShareFromLocation().then((shared) => {
+        if (cancelled || !shared) return
+        try {
+          const project = JSON.parse(shared)
+          if (project.version === 2 && Array.isArray(project.files) && project.files.length > 0) {
+            files.set(project.files)
+            activeFile.set(project.entry ?? project.files[0].name)
+            const entry = project.files.find((file) => file.name === activeFile()) ?? project.files[0]
+            activeFile.set(entry.name)
+            source.set(entry.source)
+          } else {
+            throw new Error('Legacy share')
+          }
+        } catch {
+          files.set([{ name: 'App.jcr', source: shared }])
+          activeFile.set('App.jcr')
+          source.set(shared)
+        }
+        activeExample.set('custom')
+        shareNote.set('Loaded from share link')
+      })
+
+      tracker = effect(() => {
+        source()
+        paintHighlight()
+        scheduleRun()
+        scheduleShareSync()
+      })
+    })
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+      clearTimeout(shareTimer)
+      tracker?.dispose()
+      disposePreview?.()
+      disposePreview = null
+      host = null
+      highlightCode = null
+    }
+  },
+})
+
+export <view>
+  <section class="studio-page">
+    <header class="studio-chrome">
+      <a class="studio-brand" href="https://jacarejs.github.io/core/lab/" target="_blank" rel="noopener noreferrer">
+        <img class="studio-logo" src=${assetUrl('lookout.svg')} alt="" />
+        <span class="studio-brand-text">
+          <span class="studio-brand-name">Jacaré Studio</span>
+          <span class="studio-brand-tag">Compile · mount · share</span>
+        </span>
+      </a>
+
+      <nav class="studio-links" aria-label="Learn">
+        <a class="studio-link" href="https://jacarejs.github.io/core/lab/" target="_blank" rel="noopener noreferrer">Lab</a>
+        <a class="studio-link" href="https://jacarejs.github.io/core/lab/playground" target="_blank" rel="noopener noreferrer">Lab playground</a>
+        <a class="studio-link" href="https://github.com/jacarejs/core/blob/main/docs/api.md" target="_blank" rel="noopener noreferrer">API docs</a>
+        <a class="studio-link" href="https://github.com/jacarejs/core/blob/main/docs/language-reference.md" target="_blank" rel="noopener noreferrer">Language</a>
+        <a class="studio-link" href="https://github.com/jacarejs/core/blob/main/docs/syntax.md" target="_blank" rel="noopener noreferrer">Syntax</a>
+      </nav>
+
+      <div class="studio-actions">
+        <button type="button" class="btn btn-ghost" on-click=${toggleLayout}>${layoutLabel}</button>
+        <button type="button" class="btn btn-ghost" on-click=${resetSource}>Reset</button>
+        <button type="button" class="btn btn-ghost" on-click=${() => void copyShareLink()}>Copy link</button>
+        <button type="button" class="btn btn-run" on-click=${runNow}>Run</button>
+      </div>
+    </header>
+
+    <p class="studio-lead">
+      Type a full <code>.jcr</code>${' '}module on the left — Jacaré compiles it in the browser and mounts a live preview on the right.
+      Share by URL. Learn more in the <a href="https://jacarejs.github.io/core/lab/" target="_blank" rel="noopener noreferrer">Lab</a>${' '}or <a href="https://github.com/jacarejs/core/blob/main/docs/api.md" target="_blank" rel="noopener noreferrer">API docs</a>.
+    </p>
+
+    <div class="studio-presets" role="toolbar" aria-label="Example presets">
+      #for STUDIO_EXAMPLES as example (example.id)
+        <button
+          type="button"
+          class="preset"
+          class-active=${activeExample() === example.id}
+          data-example=${example.id}
+          on-click=${loadExample}
+          title=${example.blurb}
+        >
+          <span class="preset-label">${example.label}</span>
+          <span class="preset-blurb">${example.blurb}</span>
+        </button>
+      #end
+    </div>
+
+    <div class="studio-meta">
+      <span
+        class="studio-status"
+        class-live=${statusTone() === 'live'}
+        class-busy=${statusTone() === 'busy'}
+        class-error=${statusTone() === 'error'}
+      >${status}</span>
+      <span class="studio-meta-sep" aria-hidden="true">·</span>
+      <span class="studio-meta-text">${meta}</span>
+      #if shareNote()
+        <span class="studio-meta-sep" aria-hidden="true">·</span>
+        <span class="studio-share-note">${shareNote}</span>
+      #end
+      <span class="studio-hint">⌘/Ctrl + Enter to run</span>
+    </div>
+
+    <div class="studio-workspace" class-stack=${layout() === 'stack'}>
+      <section class="pane pane-source">
+        <header class="pane-head">
+          <h2 class="pane-title">Source</h2>
+          <span class="pane-badge">${activeFile}</span>
+        </header>
+        <div class="file-bar">
+          <div class="file-tabs" role="tablist" aria-label="Project files">
+            #for files() as file (file.name)
+              <button
+                type="button"
+                class="file-tab"
+                class-active=${activeFile() === file.name}
+                data-file=${file.name}
+                on-click=${switchFile}
+                role="tab"
+                aria-selected=${activeFile() === file.name}
+              >${file.name}</button>
+            #end
+          </div>
+          #if addingFile()
+            <div class="file-create">
+              <input
+                id="studio-new-file"
+                class="file-name-input"
+                bind-value=${newFileName}
+                on-keydown=${onFileNameKeydown}
+                aria-label="New component file name"
+              />
+              <button type="button" class="file-action confirm" on-click=${createFile}>Create</button>
+              <button type="button" class="file-action" on-click=${closeFileCreator}>Cancel</button>
+            </div>
+          #else
+            <button type="button" class="file-add" on-click=${openFileCreator}>+ File</button>
+          #end
+          #if fileNote()
+            <span class="file-note">${fileNote}</span>
+          #end
+        </div>
+        <div class="editor-wrap">
+          <pre class="editor-highlight" aria-hidden="true"><code id="studio-highlight-code"></code></pre>
+          <textarea
+            class="editor"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            bind-value=${source}
+            on-scroll=${syncEditorScroll}
+            on-keydown=${onEditorKeydown}
+            aria-label="Jacaré source editor"
+          ></textarea>
+        </div>
+      </section>
+
+      <section class="pane pane-preview">
+        <header class="pane-head">
+          <h2 class="pane-title">Result</h2>
+          <span class="pane-badge">live mount</span>
+        </header>
+        #if error()
+          <pre class="studio-error">${error}</pre>
+        #end
+        <div id="studio-host" class="preview-host"></div>
+      </section>
+    </div>
+  </section>
+</view>

@@ -27,6 +27,8 @@
     "bmi:build": "yarn workspace jacare-bmi build",
     "lab:dev": "yarn workspace jacare-lab dev",
     "lab:build": "yarn workspace jacare-lab build",
+    "studio:dev": "yarn workspace jacare-studio dev",
+    "studio:build": "yarn workspace jacare-studio build",
     "bench": "yarn build && node benchmarks/run.mjs",
     "changelog": "node scripts/changelog.mjs preview",
     "changelog:bootstrap": "node scripts/changelog.mjs bootstrap",

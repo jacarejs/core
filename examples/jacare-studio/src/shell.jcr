@@ -1,0 +1,6 @@
+export <view>
+  <div class="studio-app">
+    <div class="studio-atmosphere" aria-hidden="true"></div>
+    <main class="studio-main" jacare-frame></main>
+  </div>
+</view>

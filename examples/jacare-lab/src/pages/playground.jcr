@@ -96,7 +96,13 @@ export <view>
       <p class="page-lead">Type Jacaré source on the left — it compiles and mounts on the right as you type.</p>
     </header>
 
-    <Tip :text=${'Use a full module: imports, pulses, functions, then an export view block. Presets below are complete starting points.'} />
+    <Tip :text=${'Use a full module: imports, pulses, functions, then an export view block. Presets below are complete starting points. For a full-viewport shareable editor, open Jacaré Studio.'} />
+
+    <div class="row" style="margin-bottom: 0.75rem">
+      <a class="btn" href="https://jacarejs.github.io/core/studio/" target="_blank" rel="noopener noreferrer">Open Jacaré Studio</a>
+      <a class="btn btn-outline" href="https://github.com/jacarejs/core/blob/main/docs/api.md" target="_blank" rel="noopener noreferrer">API docs</a>
+      <a class="btn btn-outline" href="https://github.com/jacarejs/core/blob/main/docs/language-reference.md" target="_blank" rel="noopener noreferrer">Language reference</a>
+    </div>
 
     <div class="playground-toolbar">
       <div class="row">

@@ -110,6 +110,8 @@ yarn example:build  # build jacare-todo example
 yarn showcase:build # build jacare-showcase example
 yarn lab:dev        # interactive API tutorial (jacare-lab)
 yarn lab:build      # build jacare-lab
+yarn studio:dev     # live shareable playground (jacare-studio)
+yarn studio:build   # build jacare-studio
 jacare check                # compile all .jcr files (from app root)
 jacare check --bindings     # same + print IR binding sites per file
 jacare check --strict-style # fail on redundant ${() => …} style warnings

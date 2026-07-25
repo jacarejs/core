@@ -12,7 +12,7 @@
 
 **Import catalog:** [`docs/api.md` §20](../../docs/api.md#20-import-catalog--everything-you-can-import) · Lab [`/helpers`](https://jacarejs.github.io/core/lab/#/helpers) — every symbol you can import, with a detailed English explanation, import line, and example (`@jacare/core`, compiler, vite-plugin, meta, CLI, and `.jcr` exports).
 
-Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/)
+Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) · Studio: [jacarejs.github.io/core/studio](https://jacarejs.github.io/core/studio/)
 
 ## Run
 
