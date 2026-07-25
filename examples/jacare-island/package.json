@@ -1,0 +1,24 @@
+{
+  "name": "jacare-island",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Jacaré Island kit — embed a .jcr widget in a static host page",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "predev": "yarn --cwd ../.. build",
+    "prebuild": "yarn --cwd ../.. build",
+    "dev": "node ../../packages/cli/dist/index.js dev",
+    "build": "node ../../packages/cli/dist/index.js build",
+    "check": "node ../../packages/cli/dist/index.js check",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@jacare/core": "0.1.11"
+  },
+  "devDependencies": {
+    "@jacare/cli": "0.1.11",
+    "@jacare/vite-plugin": "0.1.11",
+    "vite": "^6.0.3"
+  }
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Host site — Jacaré Island demo</title>
+    <meta
+      name="description"
+      content="Static host page with Jacaré islands mounted via @jacare/core/island"
+    />
+    <link rel="icon" href="/jacare-logo.png" type="image/png" />
+    <link rel="stylesheet" href="/host.css" />
+  </head>
+  <body>
+    <header class="host-top">
+      <p class="host-brand">Northwind Blog</p>
+      <p class="host-note">
+        Plain static HTML — not a Jacaré SPA.
+        <span class="host-version" id="jacare-version" hidden></span>
+      </p>
+    </header>
+
+    <main class="host-main">
+      <article class="host-article">
+        <h1>Embedding interactivity without a full rewrite</h1>
+        <p>
+          This page is ordinary markup: header, article, footer. The widgets below
+          are Jacaré islands — each mounts into a host element with
+          <code>mountIsland</code> from <code>@jacare/core/island</code>.
+        </p>
+        <p>
+          Use this pattern on WordPress, Rails, or any static site where you want
+          a small reactive widget without adopting the whole framework as the shell.
+        </p>
+      </article>
+
+      <aside class="host-aside">
+        <h2>Island: counter</h2>
+        <p class="host-hint">Light mount — shares the host document.</p>
+        <div id="counter-island">
+          <p class="host-loading">Loading counter…</p>
+        </div>
+      </aside>
+
+      <aside class="host-aside">
+        <h2>Island: tip (shadow)</h2>
+        <p class="host-hint">
+          Same kit with <code>shadow: true</code> — island CSS stays inside the
+          shadow root and does not leak into this host page.
+        </p>
+        <div id="tip-island">
+          <p class="host-loading">Loading tip…</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="host-foot">
+      <p>
+        Demo source:
+        <a href="https://github.com/jacarejs/core/tree/main/examples/jacare-island"
+          >examples/jacare-island</a
+        >
+        ·
+        <a href="https://jacarejs.github.io/core/island-react/">React host</a>
+        ·
+        <a href="https://jacarejs.github.io/core/island-vue/">Vue host</a>
+        ·
+        <a href="https://jacarejs.github.io/core/island-angular/">Angular host</a>
+        ·
+        <a href="https://jacarejs.github.io/core/lab/">Jacaré Lab</a>
+      </p>
+    </footer>
+
+    <script type="module" src="/src/boot.js"></script>
+  </body>
+</html>
