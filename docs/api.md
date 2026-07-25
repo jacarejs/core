@@ -59,14 +59,15 @@ For syntax details see [syntax.md](syntax.md). For the **full language reference
 18. [Lifecycle and scope](#13-lifecycle-and-scope)
 19. [Cookbook (if + for + events + props + lifecycle)](#13b-cookbook--if--for--events--props--lifecycle)
 20. [SSR and hydration](#14-ssr-and-hydration)
-21. [DevTools](#15-devtools)
-22. [Compiler API](#16-compiler-api)
-23. [CLI](#17-cli)
-24. [Vite plugin](#18-vite-plugin)
-25. [Testing](#19-testing)
-26. [Import catalog (everything you can import)](#20-import-catalog--everything-you-can-import)
+21. [Island mount kit](#14b-island-mount-kit)
+22. [DevTools](#15-devtools)
+23. [Compiler API](#16-compiler-api)
+24. [CLI](#17-cli)
+25. [Vite plugin](#18-vite-plugin)
+26. [Testing](#19-testing)
+27. [Import catalog (everything you can import)](#20-import-catalog--everything-you-can-import)
 
-Jump to: [Tutorial](#tutorial--jacaré-lab) · [Reserved words](#2b-reserved-words) · [Bindings](#5-dom-bindings) · [Pulse bags](#3b-pulse-bags-shared-state) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [Import catalog](#20-import-catalog--everything-you-can-import) · [CLI](#17-cli) · [Language reference](language-reference.md) · [Packages on npm](#packages-on-npm)
+Jump to: [Tutorial](#tutorial--jacaré-lab) · [Reserved words](#2b-reserved-words) · [Bindings](#5-dom-bindings) · [Pulse bags](#3b-pulse-bags-shared-state) · [Events](#6-events-on---) · [`#if`](#7-control-flow--if) · [`#case`](#7b-control-flow--case) · [`#for`](#8-control-flow--for) · [Islands](#14b-island-mount-kit) · [Import catalog](#20-import-catalog--everything-you-can-import) · [CLI](#17-cli) · [Language reference](language-reference.md) · [Packages on npm](#packages-on-npm)
 
 ---
 
@@ -2196,6 +2197,31 @@ for await (const chunk of renderToStream(render)) {
 
 ---
 
+## 14b. Island mount kit
+
+Embed a `.jcr` widget into an existing static page without a Jacaré SPA shell. Import from the **thin subpath** so nav / DevTools stay out of the island entry:
+
+```javascript
+import { mountIsland } from '@jacare/core/island'
+import Widget from './Widget.jcr'
+
+const dispose = mountIsland('#widget', Widget, {
+  props: { unit: 'metric' },
+  shadow: true, // optional — isolate island CSS from the host page
+})
+```
+
+| Option | Default | Role |
+|--------|---------|------|
+| `props` | `{}` | Passed to compiled `mount(root, props)` |
+| `shadow` | off | `true` / `'open'` / `'closed'` — mount inside a shadow root |
+| `clear` | `true` | Remove host children (e.g. “Loading…”) before mount |
+| `mark` | `'data-jacare-island'` | Attribute set on the host; pass `false` to skip |
+
+Returns a dispose function. Full guide: [island.md](island.md). Demos: static [`jacare-island`](../examples/jacare-island) · React [`jacare-island-react`](../examples/jacare-island-react) · Vue [`jacare-island-vue`](../examples/jacare-island-vue) · Angular [`jacare-island-angular`](../examples/jacare-island-angular).
+
+---
+
 ## 15. DevTools
 
 ```javascript
@@ -2509,15 +2535,23 @@ declare module '*.jcr' {
 | **Todo** | `examples/jacare-todo` | Nav, forms, Shop (`createBag`), tutorial, lifecycle |
 | **Showcase** | `examples/jacare-showcase` | CPW, `style---`, components, slots, cart |
 | **Scale BMI** | `examples/jacare-bmi` | Live gauge, metric/imperial, `derive` + range inputs |
+| **Island** | `examples/jacare-island` | Static host page + `mountIsland` (light + shadow) |
+| **Island × React** | `examples/jacare-island-react` | React host + `useEffect` dispose |
+| **Island × Vue** | `examples/jacare-island-vue` | Vue 3 host + Composition API dispose |
+| **Island × Angular** | `examples/jacare-island-angular` | Angular host + `effect`/`onCleanup` dispose |
 
 ```bash
 yarn lab:dev        # Jacaré Lab (tutorial) — http://localhost:3003
 yarn example:dev    # todo app
 yarn showcase:dev   # showcase
 yarn bmi:dev        # Scale BMI
+yarn island:dev     # Island embed demo — http://localhost:3006
+yarn island-react:dev     # Island × React — http://localhost:3007
+yarn island-vue:dev       # Island × Vue — http://localhost:3008
+yarn island-angular:dev   # Island × Angular — http://localhost:3009
 ```
 
-Live demos: [Lab](https://jacarejs.github.io/core/lab/) · [Todo](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [BMI](https://jacarejs.github.io/core/bmi/)
+Live demos: [Lab](https://jacarejs.github.io/core/lab/) · [Todo](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [BMI](https://jacarejs.github.io/core/bmi/) · [Island](https://jacarejs.github.io/core/island/) · [Island React](https://jacarejs.github.io/core/island-react/) · [Island Vue](https://jacarejs.github.io/core/island-vue/) · [Island Angular](https://jacarejs.github.io/core/island-angular/)
 
 ---
 
@@ -3026,6 +3060,19 @@ escapeHtml('<script>')  // → '&lt;script&gt;'
 
 ---
 
+### 20.8b `@jacare/core/island` — Island mount kit
+
+```javascript
+import { mountIsland } from '@jacare/core/island'
+import Widget from './Widget.jcr'
+
+mountIsland('#slot', Widget, { props: { start: 2 }, shadow: true })
+```
+
+Thin entry for embedding a compiled `.jcr` into a host page. See [§14b](#14b-island-mount-kit) and [island.md](island.md).
+
+---
+
 ### 20.9 `@jacare/core` — DevTools hooks (core)
 
 Apps normally call **`connectJacareDevtools`** from `@jacare/devtools`. Low-level helpers: [§15](#15-devtools).
@@ -3289,6 +3336,7 @@ export <contract>
 | Screen hooks + DevTools Scope | `createLifecycle`, `registerScope` |
 | Overlay UI | `connectJacareDevtools` from `@jacare/devtools` |
 | SSR string | `render` from `.jcr` + `renderToString` from core |
+| Embed in a static/host page | `mountIsland` from `@jacare/core/island` |
 | Vite | `jacare` from `@jacare/vite-plugin` |
 | Template text/attrs/lists | Write `.jcr` syntax — compiler emits binds |
 

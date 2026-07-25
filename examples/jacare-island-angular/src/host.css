@@ -1,0 +1,167 @@
+:root {
+  color-scheme: light;
+  --host-ink: #1a2420;
+  --host-muted: #5a6a62;
+  --host-line: #d5ddd8;
+  --host-paper: #f7f5f0;
+  --host-card: #ffffff;
+  --host-accent: #0b5f4a;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top, #fffef9 0%, var(--host-paper) 55%, #ebe6dc 100%);
+  color: var(--host-ink);
+  line-height: 1.55;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  background: #ece8df;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+}
+
+.host-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--host-line);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.host-brand {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.host-note {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.9rem;
+  color: var(--host-muted);
+}
+
+.host-version {
+  margin-left: 0.5rem;
+  font-weight: 700;
+  color: var(--host-accent);
+}
+
+.host-main {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  display: grid;
+  gap: 1.75rem;
+}
+
+.host-article h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.host-article p {
+  margin: 0 0 1rem;
+  color: #2c3732;
+}
+
+.host-aside {
+  padding: 1.15rem 1.2rem 1.35rem;
+  border: 1px solid var(--host-line);
+  border-radius: 0.35rem;
+  background: var(--host-card);
+}
+
+.host-aside h2 {
+  margin: 0 0 0.35rem;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.host-hint {
+  margin: 0 0 1rem;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.88rem;
+  color: var(--host-muted);
+}
+
+.host-loading {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.9rem;
+  color: var(--host-muted);
+  font-style: italic;
+}
+
+.host-foot {
+  padding: 1.25rem 1.5rem 2rem;
+  border-top: 1px solid var(--host-line);
+  text-align: center;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.88rem;
+  color: var(--host-muted);
+}
+
+.host-foot a {
+  color: var(--host-accent);
+  font-weight: 600;
+}
+
+.host-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.25rem;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.host-controls label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--host-muted);
+}
+
+.host-controls input {
+  min-width: 8rem;
+  border: 1px solid var(--host-line);
+  border-radius: 0.35rem;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--host-ink);
+  background: #fff;
+}
+
+.island-host:empty::before {
+  content: 'Mounting island…';
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.9rem;
+  color: var(--host-muted);
+  font-style: italic;
+}
+

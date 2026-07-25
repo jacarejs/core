@@ -54,6 +54,10 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 |-------|------|
 | **Tutorial (Jacaré Lab)** | [Live](https://jacarejs.github.io/core/lab/) · [`examples/jacare-lab`](examples/jacare-lab) · `yarn lab:dev` |
 | **Studio (playground)** | [Live](https://jacarejs.github.io/core/studio/) · [`examples/jacare-studio`](examples/jacare-studio) · `yarn studio:dev` |
+| **Island (embed)** | [Live](https://jacarejs.github.io/core/island/) · [`examples/jacare-island`](examples/jacare-island) · `yarn island:dev` · [docs/island.md](docs/island.md) |
+| **Island × React** | [Live](https://jacarejs.github.io/core/island-react/) · [`examples/jacare-island-react`](examples/jacare-island-react) · `yarn island-react:dev` |
+| **Island × Vue** | [Live](https://jacarejs.github.io/core/island-vue/) · [`examples/jacare-island-vue`](examples/jacare-island-vue) · `yarn island-vue:dev` |
+| **Island × Angular** | [Live](https://jacarejs.github.io/core/island-angular/) · [`examples/jacare-island-angular`](examples/jacare-island-angular) · `yarn island-angular:dev` |
 | **API reference (full)** | [docs/api.md](docs/api.md) |
 | **Language reference** | [docs/language-reference.md](docs/language-reference.md) — reserved words, all binds, view/style/contract, CLI |
 | **Import catalog** | [docs/api.md §20](docs/api.md#20-import-catalog--everything-you-can-import) · [Lab `/helpers`](https://jacarejs.github.io/core/lab/#/helpers) |
@@ -649,6 +653,10 @@ See also: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare
 | **Todo app** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/todo/) | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
 | **Showcase** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/showcase/) | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | CPW, `style---`, components, slots, cart |
 | **Scale BMI** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/bmi/) | [jacarejs.github.io/core/bmi](https://jacarejs.github.io/core/bmi/) | Live BMI gauge, metric/imperial, reactive CSS |
+| **Island** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/island/) | [jacarejs.github.io/core/island](https://jacarejs.github.io/core/island/) | Embed `.jcr` widgets in a static host page |
+| **Island × React** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/island-react/) | [jacarejs.github.io/core/island-react](https://jacarejs.github.io/core/island-react/) | Same islands inside a React host |
+| **Island × Vue** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/island-vue/) | [jacarejs.github.io/core/island-vue](https://jacarejs.github.io/core/island-vue/) | Same islands inside a Vue 3 host |
+| **Island × Angular** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/island-angular/) | [jacarejs.github.io/core/island-angular](https://jacarejs.github.io/core/island-angular/) | Same islands inside an Angular host |
 
 Run locally:
 
@@ -658,6 +666,10 @@ yarn studio:dev     # Jacaré Studio — http://localhost:3005
 yarn showcase:dev   # http://localhost:3004
 yarn example:dev    # jacare-todo — http://localhost:3001
 yarn bmi:dev        # Scale BMI — http://localhost:3002
+yarn island:dev     # Island embed — http://localhost:3006
+yarn island-react:dev     # Island × React — http://localhost:3007
+yarn island-vue:dev       # Island × Vue — http://localhost:3008
+yarn island-angular:dev   # Island × Angular — http://localhost:3009
 ```
 
 ---

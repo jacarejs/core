@@ -10,6 +10,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+
+- **core:** Island mount kit via `@jacare/core/island` (`mountIsland`) with static host demo
+- **examples:** React, Vue, and Angular hosts embedding Jacaré islands
+
 ## [0.1.11](https://github.com/jacarejs/core/compare/v0.1.10...v0.1.11) - 2026-07-25
 
 ### Added
