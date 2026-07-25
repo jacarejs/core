@@ -125,6 +125,41 @@ function bumpUntrackedSource() {
   </div>`,
 )
 
+export const cycleGuardCode = viewSnippet(
+  `const cycleStatus = signal('Not run yet.')
+
+function triggerCycle() {
+  const a = signal(0)
+  const b = signal(0)
+  try {
+    effect(() => { a(); b.set(b() + 1) })
+    effect(() => { b(); a.set(a() + 1) })
+    a.set(1)
+    cycleStatus.set('Settled — no cycle.')
+  } catch (error) {
+    cycleStatus.set(error instanceof ReactiveCycleError ? error.message : String(error))
+  }
+}
+
+const settled = signal(0)
+
+function triggerSettling() {
+  const step = signal(0)
+  effect(() => {
+    if (step() < 3) step.set(step() + 1)
+  })
+  settled.set(step.peek)
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <button type="button" class="btn" on-click=\${triggerCycle}>Run a cycle</button>
+      <button type="button" class="btn btn-outline" on-click=\${triggerSettling}>Run a self-write that settles</button>
+    </div>
+    <pre class="log">\${cycleStatus}</pre>
+    <p class="muted">Self-write settled at: \${settled}</p>
+  </div>`,
+)
+
 export const aliasCode = viewSnippet(
   `import { pulse, derive } from '@jacare/core'
 

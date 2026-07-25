@@ -4,7 +4,24 @@ import * as devtools from './devtools/registry.js'
 let tracking = false
 let currentOwner: OwnerNode | null = null
 let batchDepth = 0
+let notifyDepth = 0
 const pending = new Set<Subscriber>()
+
+const MAX_NOTIFY_DEPTH = 200
+
+export class ReactiveCycleError extends Error {
+  readonly depth: number
+
+  constructor(depth: number) {
+    super(
+      `Jacaré: reactive cycle detected — updates kept cascading past ${depth} nested levels. ` +
+        'An effect is writing to a pulse that it also reads. Read with `pulse.peek`, write with ' +
+        '`pulse.update(fn)`, or wrap the read in `untrack(() => ...)` to break the loop.',
+    )
+    this.name = 'ReactiveCycleError'
+    this.depth = depth
+  }
+}
 
 export class OwnerNode {
   run?: Subscriber
@@ -113,7 +130,15 @@ export function schedule(subscriber: Subscriber): void {
     pending.add(subscriber)
     return
   }
-  subscriber()
+  if (notifyDepth >= MAX_NOTIFY_DEPTH) {
+    throw new ReactiveCycleError(MAX_NOTIFY_DEPTH)
+  }
+  notifyDepth++
+  try {
+    subscriber()
+  } finally {
+    notifyDepth--
+  }
 }
 
 export function batch<T>(fn: () => T): T {

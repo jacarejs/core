@@ -136,6 +136,28 @@ effect(() => {
   },
   {
     pkg: '@jacare/core',
+    group: 'Reactivity',
+    name: 'ReactiveCycleError',
+    importLine: "import { ReactiveCycleError } from '@jacare/core'",
+    usage: 'Error thrown when updates never settle.',
+    about:
+      'Updates are delivered synchronously, so two effects that write to each other would recurse forever. Jacaré stops the cascade after 200 nested levels and throws ReactiveCycleError instead of a stack overflow. error.depth carries the limit that was hit. Break the loop with pulse.peek, pulse.update(fn) or untrack.',
+    example: `import { pulse, effect, ReactiveCycleError } from '@jacare/core'
+
+const a = pulse(0)
+const b = pulse(0)
+effect(() => { a(); b.set(b() + 1) })
+effect(() => { b(); a.set(a() + 1) })
+
+try {
+  a.set(1)
+} catch (error) {
+  if (error instanceof ReactiveCycleError) console.warn(error.message)
+}`,
+    path: '/reactivity',
+  },
+  {
+    pkg: '@jacare/core',
     group: 'Pulse bags',
     name: 'createBag',
     importLine: "import { createBag, pulse } from '@jacare/core'",

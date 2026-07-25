@@ -2,6 +2,7 @@ export type { Cleanup, Computed, Effect, EffectOptions, ReadonlySignal, Signal, 
 export { signal, untrack } from './signal.js'
 export { computed } from './computed.js'
 export { effect, batch, isTracking, runUntracked } from './effect.js'
+export { ReactiveCycleError } from './context.js'
 export { view } from './view.js'
 export { bindText, bindPropText, bindAttribute, bindProperty, bindClass, bindStyleVar, bindModel } from './dom/bind.js'
 export { bindDebug } from './dom/bind-debug.js'

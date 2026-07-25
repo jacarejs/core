@@ -327,6 +327,54 @@ effect(() => {
 })
 ```
 
+### Step 6 — Writing inside an effect
+
+Updates are delivered **synchronously**: a write notifies its subscribers before `set` returns. Writing to a signal from inside an effect is allowed, and it settles as long as the cascade ends:
+
+```javascript
+const count = signal(0)
+
+effect(() => {
+  if (count() < 3) count.set(count() + 1) // settles at 3
+})
+```
+
+Two effects that read and write each other never settle. Instead of blowing the JavaScript stack, Jacaré stops the cascade after 200 nested update levels and throws a `ReactiveCycleError`:
+
+```javascript
+const a = signal(0)
+const b = signal(0)
+
+effect(() => { a(); b.set(b() + 1) })
+effect(() => { b(); a.set(a() + 1) })
+
+a.set(1)
+// ReactiveCycleError: Jacaré: reactive cycle detected — updates kept cascading
+// past 200 nested levels.
+```
+
+Three ways to break a loop:
+
+| Fix | Use when |
+|-----|----------|
+| `count.peek` | The effect needs the current value but should not depend on it |
+| `count.update(n => n + 1)` | You were reading only to compute the next value |
+| `untrack(() => other())` | A whole read block should stay out of the dependency set |
+
+```javascript
+import { signal, effect, untrack, ReactiveCycleError } from '@jacare/core'
+
+const total = signal(0)
+const log = signal([])
+
+effect(() => {
+  total()
+  log.set([...untrack(() => log()), total()]) // reads log without subscribing
+})
+```
+
+The error is a normal exception: it propagates out of the write that started the cascade (`a.set(1)`, an event handler, a `batch`), the reactive graph stays usable, and unrelated effects keep running. Catch it with `instanceof ReactiveCycleError` when you need to report the cycle instead of crashing the handler.
+
 ---
 
 ## 3b. Pulse bags (shared state)
@@ -2508,7 +2556,7 @@ Compiler-emitted helpers (`bindText`, `branch`, …) are still public — you ra
 ### 20.1 `@jacare/core` — reactivity
 
 ```javascript
-import { pulse, signal, derive, computed, effect, watch, batch, untrack } from '@jacare/core'
+import { pulse, signal, derive, computed, effect, watch, batch, untrack, ReactiveCycleError } from '@jacare/core'
 ```
 
 Aliases: `pulse` ≡ `signal`, `derive` ≡ `computed`, `watch` ≡ `effect`. Prefer **pulse / derive / watch** in new code. Details: [§3](#3-reactivity).
@@ -2603,6 +2651,21 @@ effect(() => {
   // only a() triggers re-runs
 })
 ```
+
+**`ReactiveCycleError`**
+
+```javascript
+import { pulse, effect, ReactiveCycleError } from '@jacare/core'
+
+try {
+  save()
+} catch (error) {
+  if (error instanceof ReactiveCycleError) reportCycle(error.depth)
+  else throw error
+}
+```
+
+Thrown when synchronous updates cascade past 200 nested levels — see [§3 Step 6](#step-6--writing-inside-an-effect).
 
 ---
 

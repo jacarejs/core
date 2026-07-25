@@ -12,6 +12,7 @@ const RUNTIME_BINDINGS = [
   'batch',
   'untrack',
   'runUntracked',
+  'ReactiveCycleError',
   'getBag',
   'createBag',
   'ripple',

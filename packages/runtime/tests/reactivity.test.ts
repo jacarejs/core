@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { batch, computed, effect, signal, untrack } from '../src/index.js'
+import { batch, computed, effect, ReactiveCycleError, signal, untrack } from '../src/index.js'
 import { DependencyCell } from '../src/context.js'
 
 describe('signal', () => {
@@ -120,6 +120,78 @@ describe('batch', () => {
     expect(spy).toHaveBeenCalledTimes(1)
     expect(a()).toBe(1)
     expect(b()).toBe(1)
+  })
+})
+
+describe('reactive cycles', () => {
+  const runPingPongCycle = (wrap: (fn: () => void) => void = (fn) => fn()): void => {
+    const a = signal(0)
+    const b = signal(0)
+    effect(() => {
+      a()
+      b.set(b() + 1)
+    })
+    effect(() => {
+      b()
+      a.set(a() + 1)
+    })
+    wrap(() => a.set(1))
+  }
+
+  it('throws a named error instead of overflowing the stack', () => {
+    let caught: unknown
+    try {
+      runPingPongCycle()
+    } catch (error) {
+      caught = error
+    }
+
+    expect(caught).toBeInstanceOf(ReactiveCycleError)
+    expect(caught).not.toBeInstanceOf(RangeError)
+    expect((caught as Error).message).toMatch(/reactive cycle detected/)
+  })
+
+  it('throws a named error for cycles inside batch', () => {
+    expect(() => runPingPongCycle(batch)).toThrow(ReactiveCycleError)
+  })
+
+  it('keeps reacting after a cycle error', () => {
+    const other = signal(0)
+    const spy = vi.fn()
+    effect(() => {
+      other()
+      spy()
+    })
+    spy.mockClear()
+
+    expect(() => runPingPongCycle()).toThrow(ReactiveCycleError)
+
+    other.set(1)
+    expect(spy).toHaveBeenCalledTimes(1)
+  })
+
+  it('allows self-writes that settle', () => {
+    const limit = 3
+    const count = signal(0)
+    effect(() => {
+      if (count() < limit) count.set(count() + 1)
+    })
+    expect(count()).toBe(limit)
+  })
+
+  it('allows deep cascades below the guard depth', () => {
+    const chainLength = 50
+    const cells = Array.from({ length: chainLength }, () => signal(0))
+    for (let i = 0; i < chainLength - 1; i++) {
+      const from = cells[i]!
+      const to = cells[i + 1]!
+      effect(() => {
+        to.set(from())
+      })
+    }
+
+    cells[0]!.set(1)
+    expect(cells[chainLength - 1]!()).toBe(1)
   })
 })
 
