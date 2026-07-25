@@ -13,6 +13,7 @@ describe('filePathToRoute', () => {
   it('maps nested paths', () => {
     expect(filePathToRoute('about')).toBe('/about')
     expect(filePathToRoute('tutorial/getting-started')).toBe('/tutorial/getting-started')
+    expect(filePathToRoute('index/about')).toBe('/index/about')
   })
 
   it('maps dynamic segments', () => {

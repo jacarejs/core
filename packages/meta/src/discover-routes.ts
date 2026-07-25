@@ -50,8 +50,9 @@ export function filePathToRoute(filePath: string): string {
   const segments = filePath.split('/').filter(Boolean)
   const routeSegments: string[] = []
 
-  for (const segment of segments) {
-    if (segment === 'index') continue
+  for (let index = 0; index < segments.length; index++) {
+    const segment = segments[index]!
+    if (segment === 'index' && index === segments.length - 1) continue
 
     const param = PARAM_SEGMENT.exec(segment)
     if (param) {
