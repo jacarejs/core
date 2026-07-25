@@ -137,7 +137,7 @@ body {
   border-radius: var(--radius);
 }
 
-.list li.class-done .label {
+.list li.done .label {
   text-decoration: line-through;
   color: var(--text-muted);
 }
