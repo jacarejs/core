@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdirSync, readFileSync, writeFileSync, createWriteStream, existsSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
@@ -15,6 +15,7 @@ if (!existsSync(join(extDir, 'manifest.json'))) {
 }
 
 mkdirSync(outDir, { recursive: true })
+rmSync(zipPath, { force: true })
 
 const manifest = JSON.parse(readFileSync(join(extDir, 'manifest.json'), 'utf8'))
 const version = manifest.version

@@ -46,7 +46,6 @@ Inspect data stays in memory for the DevTools session. It is **not** uploaded to
 
 | Permission | Purpose |
 |------------|---------|
-| `scripting` | Inject and coordinate the bundled page-hook bridge in the inspected tab |
 | Host permissions (`http://*/*`, `https://*/*`, `localhost`) | Allow the content script on pages where a Jacaré app may run (local and remote development) |
 
 These permissions are used only for the Extension’s single purpose: inspecting Jacaré apps in DevTools.

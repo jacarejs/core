@@ -68,7 +68,6 @@ This extension’s single purpose is to provide a Chrome DevTools panel that ins
 
 | Permission | Why |
 |------------|-----|
-| `scripting` | Inject / coordinate the page hook bridge for the inspected tab |
 | Host permissions (`http(s)://*`, localhost) | Attach the content script so the DevTools panel can talk to Jacaré apps during local and remote DEV |
 
 ## Privacy summary (store form)
