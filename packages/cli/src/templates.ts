@@ -678,7 +678,7 @@ function lightIndexHtml(title: string): string {
         border: 1px solid var(--border);
         border-radius: var(--radius);
       }
-      .list li.class-done .label { text-decoration: line-through; color: var(--text-muted); }
+      .list li.done .label { text-decoration: line-through; color: var(--text-muted); }
       .label { flex: 1; }
       .check, .remove { border: none; background: transparent; cursor: pointer; }
     </style>

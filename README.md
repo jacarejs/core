@@ -562,8 +562,8 @@ yarn build
 yarn test
 yarn bench          # CPW vs runtime microbenchmarks
 yarn typecheck
-yarn example:dev      # todo demo — http://localhost:3000
-yarn showcase:dev     # showcase — http://localhost:3001
+yarn example:dev      # todo demo — http://localhost:3001
+yarn showcase:dev     # showcase — http://localhost:3004
 yarn bmi:dev          # Scale BMI — http://localhost:3002
 ```
 

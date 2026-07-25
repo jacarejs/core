@@ -38,7 +38,7 @@ Also see: [Todo](https://jacarejs.github.io/core/todo/) · [Scale BMI](https://j
 yarn showcase:dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001).
+Open [http://localhost:3004](http://localhost:3004).
 
 ```bash
 yarn showcase:build
