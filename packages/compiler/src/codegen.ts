@@ -251,7 +251,10 @@ const BUILTIN_GLOBALS = new Set([
   'Object',
   'String',
   'console',
+  'document',
   'emit',
+  'globalThis',
+  'window',
 ])
 
 const RESERVED_WORDS = new Set([
@@ -457,11 +460,21 @@ function collectExprRefs(expr: string, refs: Set<string>): void {
     refs.add(bare[1]!)
     return
   }
+  const source = stripStringsAndComments(expr)
   const re = /(?<![.\w$])([A-Za-z_$][\w$]*)\s*\(/g
   let match: RegExpExecArray | null
-  while ((match = re.exec(expr)) !== null) {
+  while ((match = re.exec(source)) !== null) {
     refs.add(match[1]!)
   }
+}
+
+function stripStringsAndComments(code: string): string {
+  return code
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/\/\/.*$/gm, ' ')
+    .replace(/'(?:\\.|[^'\\])*'/g, ' ')
+    .replace(/"(?:\\.|[^"\\])*"/g, ' ')
+    .replace(/`(?:\\.|[^`\\])*`/g, ' ')
 }
 
 export { resolveSignalExpr } from './codegen-shared.js'
