@@ -63,6 +63,27 @@ describe('matchScreen', () => {
     expect(match?.entry.pattern).toBe('/tasks/:id')
     expect(match?.params).toEqual({ id: '7' })
   })
+
+  it('prefers static routes over longer param patterns', () => {
+    const screens = normalizeScreens({
+      '/:organization': vi.fn(),
+      '/settings': vi.fn(),
+    })
+
+    expect(matchScreen(screens, '/settings')?.entry.pattern).toBe('/settings')
+    expect(matchScreen(screens, '/acme')?.entry.pattern).toBe('/:organization')
+  })
+
+  it('prefers static segments over params at the same depth', () => {
+    const screens = normalizeScreens({
+      '/users/:id': vi.fn(),
+      '/users/settings': vi.fn(),
+    })
+
+    expect(matchScreen(screens, '/users/settings')?.entry.pattern).toBe('/users/settings')
+    expect(matchScreen(screens, '/users/42')?.entry.pattern).toBe('/users/:id')
+    expect(matchScreen(screens, '/users/42')?.params).toEqual({ id: '42' })
+  })
 })
 
 describe('createNav', () => {

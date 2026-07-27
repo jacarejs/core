@@ -32,4 +32,5 @@ export {
   normalizePath,
   normalizeScreens,
   parseSearch,
+  routeSpecificity,
 } from './match.js'

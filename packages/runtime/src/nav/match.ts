@@ -70,6 +70,22 @@ export function matchPath(pattern: string, path: string): Record<string, string>
   return params
 }
 
+/** Higher = more specific. Static beats `:param`; earlier segments weigh more. */
+export function routeSpecificity(pattern: string): number {
+  const parts = splitSegments(pattern)
+  let score = 0
+  for (let i = 0; i < parts.length; i++) {
+    const token = parts[i]!
+    const weight = 10 ** (parts.length - i)
+    if (token.startsWith(':')) {
+      score += (token.endsWith('*') ? 1 : 2) * weight
+    } else {
+      score += 3 * weight
+    }
+  }
+  return score
+}
+
 export function matchScreen(entries: ScreenEntry[], path: string): ScreenMatch | null {
   let best: ScreenMatch | null = null
   let bestScore = -1
@@ -78,8 +94,8 @@ export function matchScreen(entries: ScreenEntry[], path: string): ScreenMatch |
     const params = matchPath(entry.pattern, path)
     if (!params) continue
 
-    const score = entry.pattern.length
-    if (score >= bestScore) {
+    const score = routeSpecificity(entry.pattern)
+    if (score > bestScore) {
       best = { entry, params }
       bestScore = score
     }
