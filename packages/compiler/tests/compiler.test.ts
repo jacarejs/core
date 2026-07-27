@@ -318,6 +318,26 @@ export default view\`<p>value = \${doubled}</p>\``
     expect(result.code).not.toContain('`value = ${doubled}`')
   })
 
+  it('does not rewrite signal names inside string literals', () => {
+    const source = `import { pulse, view } from '@jacare/core'
+const count = pulse(0)
+export default view\`<p>\${count + ' count'}</p>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).toContain("count() + ' count'")
+    expect(result.code).not.toContain("' count()'")
+  })
+
+  it('does not rewrite signal names inside double-quoted or template strings', () => {
+    const source = `import { pulse, view } from '@jacare/core'
+const count = pulse(5)
+export default view\`<p>\${count + " count" + \` count\`}</p>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).toContain('count() + " count"')
+    expect(result.code).toContain('` count`')
+    expect(result.code).not.toContain('" count()"')
+    expect(result.code).not.toContain('` count()`')
+  })
+
   it('calls signals in dynamic attributes', () => {
     const source = `import { view } from '@jacare/core'
 const id = 'x'

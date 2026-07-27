@@ -33,8 +33,13 @@ export function rewriteSignalsInExpr(
 ): string {
   const names = new Set<string>([...(signals ?? []), ...(extraNames ?? [])])
   if (names.size === 0) return expr
-  let out = expr
-  for (const name of [...names].sort((a, b) => b.length - a.length)) {
+  const sorted = [...names].sort((a, b) => b.length - a.length)
+  return mapOutsideStrings(expr, (code) => rewriteBareSignals(code, sorted))
+}
+
+function rewriteBareSignals(code: string, sortedNames: string[]): string {
+  let out = code
+  for (const name of sortedNames) {
     // `{ clicks, fruits }` → `{ clicks: clicks(), fruits: fruits() }`
     const shorthand = new RegExp(`(?<=[{,]\\s*)${escapeRegExp(name)}(?=\\s*[,}])`, 'g')
     out = out.replace(shorthand, `${name}: ${name}()`)
@@ -44,6 +49,151 @@ export function rewriteSignalsInExpr(
     out = out.replace(bare, `${name}()`)
   }
   return out
+}
+
+/** Rewrite only code regions; leave quotes / templates / comments intact. */
+function mapOutsideStrings(source: string, map: (code: string) => string): string {
+  let result = ''
+  let i = 0
+  let codeStart = 0
+
+  const flush = (end: number) => {
+    if (end > codeStart) result += map(source.slice(codeStart, end))
+  }
+
+  while (i < source.length) {
+    const c = source[i]!
+
+    if (c === "'" || c === '"') {
+      flush(i)
+      const end = scanQuoted(source, i, c)
+      result += source.slice(i, end)
+      i = end
+      codeStart = i
+      continue
+    }
+
+    if (c === '`') {
+      flush(i)
+      const { end, text } = scanTemplate(source, i, map)
+      result += text
+      i = end
+      codeStart = i
+      continue
+    }
+
+    if (c === '/' && source[i + 1] === '/') {
+      flush(i)
+      const nl = source.indexOf('\n', i)
+      const end = nl === -1 ? source.length : nl
+      result += source.slice(i, end)
+      i = end
+      codeStart = i
+      continue
+    }
+
+    if (c === '/' && source[i + 1] === '*') {
+      flush(i)
+      const close = source.indexOf('*/', i + 2)
+      const end = close === -1 ? source.length : close + 2
+      result += source.slice(i, end)
+      i = end
+      codeStart = i
+      continue
+    }
+
+    i++
+  }
+
+  flush(source.length)
+  return result
+}
+
+function scanQuoted(source: string, start: number, quote: string): number {
+  let i = start + 1
+  while (i < source.length) {
+    const c = source[i]!
+    if (c === '\\') {
+      i += 2
+      continue
+    }
+    if (c === quote) return i + 1
+    i++
+  }
+  return source.length
+}
+
+function scanTemplate(
+  source: string,
+  start: number,
+  map: (code: string) => string,
+): { end: number; text: string } {
+  let text = '`'
+  let i = start + 1
+  while (i < source.length) {
+    const c = source[i]!
+    if (c === '\\') {
+      text += source.slice(i, i + 2)
+      i += 2
+      continue
+    }
+    if (c === '`') {
+      text += '`'
+      return { end: i + 1, text }
+    }
+    if (c === '$' && source[i + 1] === '{') {
+      const exprStart = i + 2
+      const exprEnd = scanBalanced(source, exprStart)
+      text += '${' + mapOutsideStrings(source.slice(exprStart, exprEnd), map) + '}'
+      i = exprEnd + (exprEnd < source.length && source[exprEnd] === '}' ? 1 : 0)
+      continue
+    }
+    text += c
+    i++
+  }
+  return { end: source.length, text }
+}
+
+function scanBalanced(source: string, start: number): number {
+  let depth = 1
+  let i = start
+  while (i < source.length) {
+    const c = source[i]!
+    if (c === "'" || c === '"') {
+      i = scanQuoted(source, i, c)
+      continue
+    }
+    if (c === '`') {
+      i = skipTemplate(source, i)
+      continue
+    }
+    if (c === '{') depth++
+    else if (c === '}') {
+      depth--
+      if (depth === 0) return i
+    }
+    i++
+  }
+  return source.length
+}
+
+function skipTemplate(source: string, start: number): number {
+  let i = start + 1
+  while (i < source.length) {
+    const c = source[i]!
+    if (c === '\\') {
+      i += 2
+      continue
+    }
+    if (c === '`') return i + 1
+    if (c === '$' && source[i + 1] === '{') {
+      const end = scanBalanced(source, i + 2)
+      i = end + (end < source.length && source[end] === '}' ? 1 : 0)
+      continue
+    }
+    i++
+  }
+  return source.length
 }
 
 function escapeRegExp(value: string): string {
