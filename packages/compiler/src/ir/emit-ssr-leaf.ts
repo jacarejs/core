@@ -20,14 +20,12 @@ export function emitSSRLoweredText(ctx: CodegenContext, lowered: LoweredText): v
   const op = lowered.op
   if (op.mixed) {
     ctx.useRuntime('escapeHtml')
-    const template = op.parts
-      .map((p) => {
-        if (p.type === 'static') return escapeHtml(p.value)
-        noteMeshRuntime(ctx, p.source)
-        return `' + escapeHtml(String(${readExprFromSource(ctx, p.source, p.raw)})) + '`
-      })
-      .join('')
-    ctx.line(`_html += \`${template}\``)
+    const chunks = op.parts.map((p) => {
+      if (p.type === 'static') return JSON.stringify(escapeHtml(p.value))
+      noteMeshRuntime(ctx, p.source)
+      return `escapeHtml(String(${readExprFromSource(ctx, p.source, p.raw)}))`
+    })
+    ctx.line(`_html += ${chunks.join(' + ')}`)
     return
   }
 

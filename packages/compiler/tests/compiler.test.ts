@@ -402,6 +402,16 @@ export default view\`<p>\${count}</p>\``
     expect(result.code).toContain('export default render')
   })
 
+  it('SSR mixed text concatenates static + escaped dynamic parts', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const name = signal('Ada')
+export default view\`<p>Hello \${name}!</p>\``
+    const result = compile(source, { mode: 'server' })
+    expect(result.code).toContain('_html += "Hello " + escapeHtml(String(name())) + "!"')
+    expect(result.code).not.toMatch(/_html \+= `Hello/)
+    expect(result.code).not.toContain("`Hello ' + escapeHtml")
+  })
+
   it('mounts components inside runUntracked to avoid branch resubscriptions', () => {
     const source = `import Field from './Field.jcr'
 import { view } from '@jacare/core'
