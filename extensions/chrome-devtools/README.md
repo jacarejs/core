@@ -36,7 +36,12 @@ GitHub Action: `.github/workflows/publish-chrome-devtools.yml` (workflow_dispatc
 
 Secrets: `CHROME_EXTENSION_ID`, `CHROME_CLIENT_ID`, `CHROME_CLIENT_SECRET`, `CHROME_REFRESH_TOKEN`.
 
+
 Before first API publish, complete the Chrome Web Store **trader / negociante (EEA)** declaration in the [Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+
+## Chrome Web Store
+
+[Jacaré Devtools](https://chromewebstore.google.com/detail/jacar%C3%A9-devtools/cjemkcfolgmpfkpkpiklmkijalpfmkcm)
 
 ## Privacy
 

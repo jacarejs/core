@@ -321,6 +321,7 @@ Tree-shaking removes `@jacare/devtools` from production bundles when the import 
 ## Links
 
 - [npm — @jacare/devtools](https://www.npmjs.com/package/@jacare/devtools)
+- [Jacaré Devtools — Chrome Web Store](https://chromewebstore.google.com/detail/jacar%C3%A9-devtools/cjemkcfolgmpfkpkpiklmkijalpfmkcm)
 - [Repository](https://github.com/jacarejs/core)
 - [DevTools docs](https://github.com/jacarejs/core/blob/main/docs/phases/06-devtools.md)
 - [@jacare/core](https://www.npmjs.com/package/@jacare/core)
