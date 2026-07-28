@@ -18,10 +18,18 @@ export function routeHref(
   params: Record<string, string> = {},
   search?: Record<string, string>,
 ): string {
-  let path = pattern
-  for (const [key, value] of Object.entries(params)) {
-    path = path.replace(`:${key}`, encodeURIComponent(value))
-  }
+  const path = pattern.replace(/:([A-Za-z_][\w]*)(\*)?/g, (segment, name: string, splat?: string) => {
+    if (!Object.prototype.hasOwnProperty.call(params, name)) return segment
+    const value = params[name]!
+    if (splat) {
+      return value
+        .split('/')
+        .filter(Boolean)
+        .map((part) => encodeURIComponent(part))
+        .join('/')
+    }
+    return encodeURIComponent(value)
+  })
   return buildPath(path, search)
 }
 

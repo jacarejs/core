@@ -8,6 +8,12 @@ describe('route helpers', () => {
     expect(routeHref('/about', {}, { tab: 'feedback' })).toBe('/about?tab=feedback')
   })
 
+  it('replaces every param token without prefix collisions', () => {
+    expect(routeHref('/a/:idea/:id', { id: '1', idea: 'x' })).toBe('/a/x/1')
+    expect(routeHref('/docs/:slug/:slug', { slug: 'nav' })).toBe('/docs/nav/nav')
+    expect(routeHref('/files/:path*', { path: 'a/b' })).toBe('/files/a/b')
+  })
+
   it('merges params and search into screen props', () => {
     expect(
       screenProps({
