@@ -44,9 +44,18 @@ function rewriteBareSignals(code: string, sortedNames: string[]): string {
     const shorthand = new RegExp(`(?<=[{,]\\s*)${escapeRegExp(name)}(?=\\s*[,}])`, 'g')
     out = out.replace(shorthand, `${name}: ${name}()`)
 
-    // Bare reads → `name()`, but skip calls `name(`, keys `name:`, and property access `.name`
-    const bare = new RegExp(`(?<![.\\w$])${escapeRegExp(name)}(?![\\w$])(?!\\s*[:(])`, 'g')
-    out = out.replace(bare, `${name}()`)
+    // Bare reads → `name()`, but skip calls `name(` and object keys `name:`
+    // (ternary consequent `? name :` must still rewrite — colon alone is not enough to skip)
+    const bare = new RegExp(`(?<![.\\w$])${escapeRegExp(name)}(?![\\w$])`, 'g')
+    out = out.replace(bare, (match, offset, full) => {
+      const after = full.slice(offset + match.length)
+      if (/^\s*\(/.test(after)) return match
+      if (/^\s*:/.test(after)) {
+        const before = full.slice(0, offset)
+        if (/[{,]\s*$/.test(before)) return match
+      }
+      return `${name}()`
+    })
   }
   return out
 }

@@ -507,6 +507,17 @@ export default view\`<button>Turbo: \${turbo ? 'on' : 'off'}</button>\``
     expect(result.code).not.toMatch(/`\$\{turbo \?/)
   })
 
+  it('calls both branches of a signal ternary', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const flag = signal(true)
+const on = signal('yes')
+const off = signal('no')
+export default view\`<span>\${flag ? on : off}</span>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).toContain('flag() ? on() : off()')
+    expect(result.code).not.toMatch(/flag\(\) \? on :/)
+  })
+
   it('does not treat reserved words in braced text as mount props', () => {
     const source = `import { view } from '@jacare/core'
 export default view\`<pre>.x { width: var(--pct); }</pre>\``

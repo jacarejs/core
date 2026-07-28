@@ -37,4 +37,13 @@ describe('rewriteSignalsInExpr', () => {
   it('skips names inside line comments', () => {
     expect(rewriteSignalsInExpr('count // count here', signals)).toBe('count() // count here')
   })
+
+  it('rewrites ternary consequent and alternate signals', () => {
+    const names = new Set(['flag', 'on', 'off'])
+    expect(rewriteSignalsInExpr('flag ? on : off', names)).toBe('flag() ? on() : off()')
+  })
+
+  it('still skips object keys followed by colon', () => {
+    expect(rewriteSignalsInExpr('{ count: label }', signals)).toBe('{ count: label() }')
+  })
 })
