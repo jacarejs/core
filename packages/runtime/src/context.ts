@@ -1,5 +1,6 @@
 import type { Subscriber } from './types.js'
 import * as devtools from './devtools/registry.js'
+import { formatWhyChain, whyLast, type WhyChain } from './devtools/why.js'
 
 let tracking = false
 let currentOwner: OwnerNode | null = null
@@ -14,15 +15,19 @@ const MAX_NOTIFY_DEPTH = 200
 
 export class ReactiveCycleError extends Error {
   readonly depth: number
+  why?: WhyChain
+  whyText?: string
 
-  constructor(depth: number) {
-    super(
+  constructor(depth: number, whyText?: string, why?: WhyChain) {
+    const base =
       `Jacaré: reactive cycle detected — updates kept cascading past ${depth} nested levels. ` +
-        'An effect is writing to a pulse that it also reads. Read with `pulse.peek`, write with ' +
-        '`pulse.update(fn)`, or wrap the read in `untrack(() => ...)` to break the loop.',
-    )
+      'An effect is writing to a pulse that it also reads. Read with `pulse.peek`, write with ' +
+      '`pulse.update(fn)`, or wrap the read in `untrack(() => ...)` to break the loop.'
+    super(whyText ? `${base}\n\nwhy:\n${whyText}` : base)
     this.name = 'ReactiveCycleError'
     this.depth = depth
+    if (why) this.why = why
+    if (whyText) this.whyText = whyText
   }
 }
 
@@ -191,7 +196,23 @@ export function flushPending(): void {
 
 function runSubscriber(subscriber: Subscriber): void {
   if (notifyDepth >= MAX_NOTIFY_DEPTH) {
-    throw new ReactiveCycleError(MAX_NOTIFY_DEPTH)
+    let whyText: string | undefined
+    let whyChain: WhyChain | undefined
+    try {
+      if (devtools.isDevtoolsEnabled()) {
+        const chain = whyLast()
+        if (chain) {
+          whyChain = {
+            ...chain,
+            target: { kind: 'error', label: 'ReactiveCycleError' },
+          }
+          whyText = formatWhyChain(whyChain)
+        }
+      }
+    } catch {
+      // why attachment is best-effort
+    }
+    throw new ReactiveCycleError(MAX_NOTIFY_DEPTH, whyText, whyChain)
   }
   notifyDepth++
   try {

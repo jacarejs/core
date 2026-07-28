@@ -1,5 +1,14 @@
-import { describe, expect, it, vi } from 'vitest'
-import { batch, computed, effect, ReactiveCycleError, signal, untrack } from '../src/index.js'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import {
+  batch,
+  computed,
+  effect,
+  enableDevtools,
+  ReactiveCycleError,
+  signal,
+  untrack,
+} from '../src/index.js'
+import { resetDevtoolsForTests } from '../src/devtools/registry.js'
 import { DependencyCell } from '../src/context.js'
 
 describe('signal', () => {
@@ -190,6 +199,10 @@ describe('batch', () => {
 })
 
 describe('reactive cycles', () => {
+  afterEach(() => {
+    resetDevtoolsForTests()
+  })
+
   const runPingPongCycle = (wrap: (fn: () => void) => void = (fn) => fn()): void => {
     const a = signal(0)
     const b = signal(0)
@@ -215,6 +228,20 @@ describe('reactive cycles', () => {
     expect(caught).toBeInstanceOf(ReactiveCycleError)
     expect(caught).not.toBeInstanceOf(RangeError)
     expect((caught as Error).message).toMatch(/reactive cycle detected/)
+  })
+
+  it('attaches WhyChain when DevTools are enabled', () => {
+    enableDevtools()
+    let caught: ReactiveCycleError | undefined
+    try {
+      runPingPongCycle()
+    } catch (error) {
+      caught = error as ReactiveCycleError
+    }
+    expect(caught).toBeInstanceOf(ReactiveCycleError)
+    expect(caught?.why).toBeDefined()
+    expect(caught?.whyText).toMatch(/why /)
+    expect(caught?.message).toMatch(/why:/)
   })
 
   it('throws a named error for cycles inside batch', () => {
