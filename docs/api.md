@@ -2270,6 +2270,21 @@ export <view>
 
 ## 14. SSR and hydration
 
+Jacaré is **SPA-first**. Server helpers exist for initial HTML; they are **not** a full React/Vue-style hydrate of every binding kind.
+
+### Honest contract (current)
+
+| Promise | Status |
+|---------|--------|
+| `mount()` for interactive apps | ✅ Primary path |
+| `render()` → HTML string + binding state | ✅ For text-oriented SSR / bake experiments |
+| Compiled `resume(target, state)` from the `.jcr` module | ✅ Prefer this in apps — re-wires what that module’s SSR emit marked |
+| `resumeBindings(target, state)` (core helper) | ⚠️ **Text only** — finds `[data-jacare-bind]` and calls `bindText`. Does **not** restore `class-*`, dynamic attrs, style vars, or models |
+| `renderToStream` | Splits already-built HTML into top-level chunks — **not** incremental render-as-you-go |
+| Class / attr / model parity after SSR | ❌ Not guaranteed — do not sell “universal SSR” yet |
+
+Prefer honest SPA (or static HTML per URL) over a half-hydrated page that flickers.
+
 ### Server render
 
 ```javascript
@@ -2299,7 +2314,7 @@ for await (const chunk of renderToStream(render)) {
 }
 ```
 
-`resumeBindings(target, state)` re-attaches signal bindings without recreating DOM.
+`resumeBindings(target, state)` is the low-level text-only helper used by some `resume()` paths. Prefer the module’s `resume()` export in applications.
 
 ---
 
@@ -3249,13 +3264,14 @@ for await (const chunk of renderToStream(render)) {
 }
 ```
 
-**`resumeBindings`** (low-level)
+**`resumeBindings`** (low-level, **text only**)
 
 ```javascript
 import { resumeBindings } from '@jacare/core'
 
 resumeBindings(rootEl, state)
 // Prefer resume() from the .jcr module in apps.
+// Does not restore class-*, dynamic attrs, style vars, or models.
 ```
 
 **`escapeHtml`**
@@ -3285,12 +3301,14 @@ Thin entry for embedding a compiled `.jcr` into a host page. See [§14b](#14b-is
 
 Apps normally call **`connectJacareDevtools`** from `@jacare/devtools`. Low-level helpers: [§15](#15-devtools).
 
-**`enableDevtools`**
+**`enableDevtools` / `disableDevtools`**
 
 ```javascript
-import { enableDevtools } from '@jacare/core'
+import { enableDevtools, disableDevtools, isDevtoolsEnabled } from '@jacare/core'
 
 enableDevtools()
+// …
+disableDevtools() // called automatically when connectJacareDevtools() dispose runs
 ```
 
 **`why` / `whyLast` / `formatWhyChain`** — [§15 why()](#why--causal-chain-dev)

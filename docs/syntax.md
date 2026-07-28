@@ -600,13 +600,15 @@ See [Phase 2 — Compiler](phases/02-compiler.md#binding-ir).
 
 ## SSR
 
-Every `.jcr` file exports three functions:
+Jacaré is **SPA-first**. Every `.jcr` file exports three functions:
 
 | Export | Purpose |
 |--------|---------|
-| `mount(target)` | Client render |
+| `mount(target)` | Client render (primary) |
 | `render()` | Server HTML + binding state |
-| `resume(target, state)` | Hydrate on the client |
+| `resume(target, state)` | Hydrate on the client (prefer over raw `resumeBindings`) |
+
+**Limits today:** low-level `resumeBindings` from `@jacare/core` re-attaches **text** binds (`[data-jacare-bind]` → `bindText`) only. Do not assume class/attr/model hydrate the same way. `renderToStream` chunks finished HTML — it is not a true streaming renderer.
 
 `render()` walks the same `MountPlan` as `mount()`. Dynamic text, `class-*`, and `bind-*` attrs emit escaped HTML plus `data-jacare-bind` markers from the leaf IR — not a second “is this a signal?” pass.
 
@@ -620,8 +622,8 @@ resume(document.getElementById('app'), state)
 
 ### Binding types
 
-| Kind | SSR `render()` | `resume()` |
-|------|----------------|------------|
+| Kind | SSR `render()` | `resume()` / `resumeBindings` |
+|------|----------------|-------------------------------|
 | `signal` | `{ id, kind: 'signal', read: count }` | `bindText` via signal |
 | `expr` | `{ id, kind: 'expr', read: () => expr }` | `bindText` via lambda |
 
