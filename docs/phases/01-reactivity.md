@@ -193,8 +193,10 @@ Phase 1 coverage:
 - User cleanup
 - Batch coalescing
 - Untrack
-- `DependencyCell` membership via `Set` (idempotent public `subscribe`)
+- DependencyCell membership via `Set` (idempotent public `subscribe`)
 - Opt-in Patience coalesce + internal lanes (`scheduler.test.ts`)
+- `computed` / `derive` `dispose()` for dynamic lifetimes
+- DevTools page epoch prunes orphan registry nodes
 
 ## Not yet implemented
 

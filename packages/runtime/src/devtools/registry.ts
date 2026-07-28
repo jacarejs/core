@@ -218,7 +218,7 @@ function removeNode(id: number): void {
 export function beginDevtoolsPage(): void {
   graphPage++
   for (const [id, node] of [...nodes]) {
-    if (node.disposed) removeNode(id)
+    if (node.disposed || !isNodeInCurrentPage(node)) removeNode(id)
   }
   for (const [bindingId, entry] of [...bindings]) {
     if (!entry.target.isConnected) {
@@ -591,6 +591,11 @@ export function resetDevtoolsForTests(): void {
   bindingsByPulse.clear()
   clearHighlight()
   clearLedger()
+}
+
+/** @internal test helper — registry Map size after page pruning */
+export function getDevtoolsRegistrySizeForTests(): number {
+  return nodes.size
 }
 
 export { getWrites, getLastWritePulseId }

@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { resetDevtoolsForTests } from '../src/devtools/registry.js'
+import {
+  getDevtoolsRegistrySizeForTests,
+  resetDevtoolsForTests,
+} from '../src/devtools/registry.js'
 import {
   clearHighlight,
   computed,
@@ -269,5 +272,33 @@ describe('devtools', () => {
     expect(names).toContain('pageBEffect')
     expect(names).not.toContain('pageA')
     expect(names).not.toContain('pageAEffect')
+  })
+
+  it('prunes orphan pulses from the registry Map on page change', () => {
+    enableDevtools()
+    const shell = signal(0, { name: 'shell' })
+    effect(() => {
+      shell()
+    }, { name: 'shellEffect' })
+
+    beginDevtoolsPage()
+    for (let i = 0; i < 5; i++) {
+      signal(i, { name: `orphan${i}` })
+    }
+    const sizeWithOrphans = getDevtoolsRegistrySizeForTests()
+
+    beginDevtoolsPage()
+    signal(2, { name: 'pageB' })
+    const sizeAfter = getDevtoolsRegistrySizeForTests()
+
+    const names = getPulseGraph()
+      .nodes.map((n) => n.name)
+      .filter((name): name is string => name != null)
+      .sort()
+
+    expect(names).toEqual(['pageB', 'shell', 'shellEffect'])
+    expect(names.some((name) => name.startsWith('orphan'))).toBe(false)
+    expect(sizeWithOrphans).toBeGreaterThan(sizeAfter)
+    expect(sizeAfter).toBe(3)
   })
 })
