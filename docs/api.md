@@ -1710,8 +1710,7 @@ export const route = createRoute(nav.where)
 ```javascript
 screens: {
   '/': screen(Home),                                    // eager mount
-  '/a': lazy(() => import('./a.jcr')),                  // lazy chunk
-  '/b': () => import('./b.jcr'),                        // zero-arg loader (also warmable)
+  '/a': lazy(() => import('./a.jcr')),                  // lazy chunk — required marker
   '/c': { use: lazy(() => import('./c.jcr')), title: 'C' },
   '/user/:id': {
     use: lazy(() => import('./user.jcr')),
@@ -1719,6 +1718,8 @@ screens: {
   },
 }
 ```
+
+Use `lazy(() => import(...))` for code-split screens. A bare `() => import(...)` is **not** treated as a loader (zero-arg mounts are valid); wrap with `lazy(...)`.
 
 Dynamic segments use `:name` (e.g. `/topic/:slug`). Catch-all segments use `:name*` (e.g. `/docs/:slug*` from `[...slug].jcr`) and capture the rest of the path as one param (`a/b`). Matched params (and search keys) are merged into the props passed to the screen mount — see Lab `/topic/:slug`.
 
@@ -3439,10 +3440,12 @@ export default createJacareViteConfig({
 
 ### 20.13 `@jacare/meta`
 
+Browser-safe entry (`@jacare/meta`) exports app helpers. Node/Vite APIs live under `@jacare/meta/vite`.
+
 **`jacareMeta`**
 
 ```javascript
-import { jacareMeta } from '@jacare/meta'
+import { jacareMeta } from '@jacare/meta/vite'
 
 plugins: [jacareMeta({ pagesDir: 'src/pages' })]
 ```
@@ -3450,23 +3453,30 @@ plugins: [jacareMeta({ pagesDir: 'src/pages' })]
 **`discoverRoutes`**
 
 ```javascript
-import { discoverRoutes } from '@jacare/meta'
+import { discoverRoutes } from '@jacare/meta/vite'
 
-const routes = discoverRoutes('src/pages')
+const routes = discoverRoutes({ pagesDir: 'src/pages' })
 // → [{ path: '/', file: '…' }, …]
 ```
 
 **`createJacareApp`**
 
+Runtime helper that wraps `createNav` when you already have a `screens` map. It does **not** scan `pagesDir` at runtime (browser cannot turn file paths into `import()` maps).
+
 ```javascript
 import { createJacareApp } from '@jacare/meta'
 
 const app = createJacareApp({
-  pagesDir: 'src/pages',
   layout: Shell,
+  screens: {
+    '/': Home,
+    '/about': About,
+  },
 })
 app.attach(document.getElementById('app'))
 ```
+
+For file-based routes use `jacareMeta()` + `createJacareAppFromRoutes({ routeLoaders })` with `virtual:jacare-routes` (see above). `pagesDir` / `routes` on the config object are for `defineJacareConfig` / tooling metadata only.
 
 ---
 

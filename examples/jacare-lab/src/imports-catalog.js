@@ -927,11 +927,11 @@ export default createJacareViteConfig({
     pkg: '@jacare/meta',
     group: 'Meta / file routes',
     name: 'jacareMeta',
-    importLine: "import { jacareMeta } from '@jacare/meta'",
+    importLine: "import { jacareMeta } from '@jacare/meta/vite'",
     usage: 'Vite plugin for file-based routes.',
     about:
-      'Optional Vite plugin for file-based routing (a pages directory becomes a route table). Complements createNav; you still understand screens under the hood.',
-    example: `import { jacareMeta } from '@jacare/meta'
+      'Optional Vite plugin for file-based routing (a pages directory becomes a route table). Import from @jacare/meta/vite — the main @jacare/meta entry stays browser-safe.',
+    example: `import { jacareMeta } from '@jacare/meta/vite'
 
 plugins: [jacareMeta({ pagesDir: 'src/pages' })]`,
     path: '/helpers',
@@ -940,13 +940,13 @@ plugins: [jacareMeta({ pagesDir: 'src/pages' })]`,
     pkg: '@jacare/meta',
     group: 'Meta / file routes',
     name: 'discoverRoutes',
-    importLine: "import { discoverRoutes } from '@jacare/meta'",
+    importLine: "import { discoverRoutes } from '@jacare/meta/vite'",
     usage: 'Map pages/** files to route paths.',
     about:
-      'Scans a pages directory and maps file paths to URL patterns (including dynamic segments). Used by meta tooling and createJacareApp.',
-    example: `import { discoverRoutes } from '@jacare/meta'
+      'Scans a pages directory and maps file paths to URL patterns (including dynamic segments). Used by meta tooling at build time — import from @jacare/meta/vite.',
+    example: `import { discoverRoutes } from '@jacare/meta/vite'
 
-const routes = discoverRoutes('src/pages')
+const routes = discoverRoutes({ pagesDir: 'src/pages' })
 // → [{ path: '/', file: '…' }, …]`,
     path: '/helpers',
   },
@@ -955,14 +955,14 @@ const routes = discoverRoutes('src/pages')
     group: 'Meta / file routes',
     name: 'createJacareApp',
     importLine: "import { createJacareApp } from '@jacare/meta'",
-    usage: 'Bootstrap nav + screens from discovered routes.',
+    usage: 'Bootstrap nav from an explicit screens map.',
     about:
-      'Bootstraps a nav from discovered file routes plus a layout — a shortcut when you want pages/** conventions instead of a hand-written screens map.',
+      'Wraps createNav when you already have screens. Does not scan pagesDir at runtime — for file routes use jacareMeta() + createJacareAppFromRoutes({ routeLoaders }) from virtual:jacare-routes.',
     example: `import { createJacareApp } from '@jacare/meta'
 
 const app = createJacareApp({
-  pagesDir: 'src/pages',
   layout: Shell,
+  screens: { '/': Home },
 })
 app.attach(document.getElementById('app'))`,
     path: '/helpers',

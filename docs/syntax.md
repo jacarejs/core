@@ -419,7 +419,7 @@ Static style sheets still use a shared scoped inject. Reactive sheets use a per-
 ```javascript
 // vite.config.js
 import { jacare } from '@jacare/vite-plugin'
-import { jacareMeta } from '@jacare/meta'
+import { jacareMeta } from '@jacare/meta/vite'
 
 export default {
   plugins: [jacareMeta(), jacare()],

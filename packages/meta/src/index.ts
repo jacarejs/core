@@ -1,17 +1,6 @@
 export {
-  jacareMeta,
-  VIRTUAL_ROUTES_ID,
-  discoverRoutes,
-  filePathToRoute,
-  generateRoutesModule,
   createJacareApp,
   createJacareAppFromRoutes,
   defineJacareConfig,
-} from './vite-plugin.js'
-export type {
-  JacareMetaPluginOptions,
-  DiscoveredRoute,
-  DiscoverRoutesOptions,
-  JacareAppConfig,
-  JacareAppFromRoutesConfig,
-} from './vite-plugin.js'
+} from './create-app.js'
+export type { JacareAppConfig, JacareAppFromRoutesConfig } from './create-app.js'

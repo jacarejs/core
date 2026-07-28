@@ -20,7 +20,7 @@ npm: [https://www.npmjs.com/package/@jacare/meta](https://www.npmjs.com/package/
 ```js
 // vite.config.js
 import { jacare } from '@jacare/vite-plugin'
-import { jacareMeta } from '@jacare/meta'
+import { jacareMeta } from '@jacare/meta/vite'
 
 export default {
   plugins: [jacareMeta(), jacare()],
@@ -51,9 +51,10 @@ export const nav = createJacareAppFromRoutes({
 
 ## API
 
-- `jacareMeta()` — Vite plugin, generates `virtual:jacare-routes`
-- `createJacareAppFromRoutes()` — wraps `createNav` with discovered loaders
-- `discoverRoutes()` — scan pages directory at build time
+- `jacareMeta()` — Vite plugin (`@jacare/meta/vite`), generates `virtual:jacare-routes` (invalidates on page add/remove/change in dev)
+- `createJacareAppFromRoutes()` — wraps `createNav` with `routeLoaders` from the virtual module (`@jacare/meta`)
+- `createJacareApp()` — wraps `createNav` when you already have `screens` (does not scan `pagesDir`)
+- `discoverRoutes()` — scan pages directory at build time (`@jacare/meta/vite`)
 - `defineJacareConfig()` — typed config helper
 
 ## Links
