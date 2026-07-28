@@ -70,6 +70,23 @@ describe('computed', () => {
     expect(doubled()).toBe(4)
     expect(spy).toHaveBeenCalledTimes(2)
   })
+
+  it('disposes and stops tracking dependencies', () => {
+    const spy = vi.fn()
+    const a = signal(1)
+    const doubled = computed(() => {
+      spy()
+      return a() * 2
+    })
+    expect(doubled()).toBe(2)
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    doubled.dispose()
+    a.set(5)
+    expect(doubled()).toBe(2)
+    expect(spy).toHaveBeenCalledTimes(1)
+    doubled.dispose()
+  })
 })
 
 describe('effect', () => {

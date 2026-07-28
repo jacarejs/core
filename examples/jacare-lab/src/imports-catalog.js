@@ -41,12 +41,13 @@ open.set(true)`,
     importLine: "import { derive } from '@jacare/core'",
     usage: 'Computed value that updates when dependencies change.',
     about:
-      'derive builds a cached computed value from other pulses or derives. The function re-runs only when a dependency it actually read has changed. Read it like a pulse: doubled(). Use it for labels, filters, totals, and any value you do not want to set by hand.',
+      'derive builds a cached computed value from other pulses or derives. The function re-runs only when a dependency it actually read has changed. Read it like a pulse: doubled(). Call dispose() when you create derives dynamically (e.g. per list item) and tear them down — long-lived derives in bags/forms/nav usually do not need it.',
     example: `import { pulse, derive } from '@jacare/core'
 
 const n = pulse(2)
 const doubled = derive(() => n() * 2)
-doubled()  // → 4`,
+doubled()  // → 4
+doubled.dispose()`,
     path: '/reactivity',
   },
   {
@@ -56,11 +57,12 @@ doubled()  // → 4`,
     importLine: "import { computed } from '@jacare/core'",
     usage: 'Alias of derive.',
     about:
-      'computed is an alias of derive with the same lazy, cached dependency tracking. Prefer derive in new Jacaré code; keep computed only when matching external examples that use that name.',
+      'computed is an alias of derive with the same lazy, cached dependency tracking and dispose(). Prefer derive in new Jacaré code; keep computed only when matching external examples that use that name.',
     example: `import { pulse, computed } from '@jacare/core'
 
 const price = pulse(10)
-const tax = computed(() => price() * 0.1)`,
+const tax = computed(() => price() * 0.1)
+tax.dispose()`,
     path: '/reactivity',
   },
   {

@@ -16,7 +16,9 @@ export interface ReadonlySignal<T> {
   subscribe(fn: Subscriber): Cleanup
 }
 
-export interface Computed<T> extends ReadonlySignal<T> {}
+export interface Computed<T> extends ReadonlySignal<T> {
+  dispose(): void
+}
 
 export interface Effect {
   dispose(): void

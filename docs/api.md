@@ -265,7 +265,7 @@ Jacaré uses **fine-grained reactivity**: signals track dependencies at read tim
 | API | Alias | Role |
 |-----|-------|------|
 | `signal(initial)` | `pulse` | Mutable reactive cell |
-| `computed(fn)` | `derive` | Derived read-only value |
+| `computed(fn)` | `derive` | Derived read-only value (`dispose()` for dynamic lifetimes) |
 | `effect(fn)` | `watch` | Side effect on dependency change |
 | `untrack(fn)` | `runUntracked` | Run without tracking |
 | `batch(fn)` | — | Coalesce writes (sync flush) |
@@ -2854,6 +2854,8 @@ import { pulse, derive } from '@jacare/core'
 const n = pulse(2)
 const doubled = derive(() => n() * 2)
 doubled()  // → 4
+// optional when creating/destroying derives dynamically:
+doubled.dispose()
 ```
 
 **`computed`** (alias of `derive`)
@@ -2863,6 +2865,7 @@ import { pulse, computed } from '@jacare/core'
 
 const price = pulse(10)
 const tax = computed(() => price() * 0.1)
+tax.dispose()  // unsubscribe + drop DevTools node when done
 ```
 
 **`effect`**

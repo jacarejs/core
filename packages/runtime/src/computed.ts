@@ -14,13 +14,13 @@ export function computed<T>(fn: () => T, options?: DevtoolsMeta): Computed<T> {
   const owner = new OwnerNode()
   let value: T
   let stale = true
+  let disposed = false
 
   const markStale = (): void => {
-    if (!stale) {
-      stale = true
-      devtools.recordStale(cell)
-      cell.notify()
-    }
+    if (disposed || stale) return
+    stale = true
+    devtools.recordStale(cell)
+    cell.notify()
   }
 
   owner.run = markStale
@@ -28,6 +28,7 @@ export function computed<T>(fn: () => T, options?: DevtoolsMeta): Computed<T> {
   const id = devtools.registerComputed(cell, owner, undefined, options)
 
   const refresh = (): void => {
+    if (disposed) return
     owner.clearDependencies()
     value = runTracked(owner, fn)
     stale = false
@@ -37,6 +38,7 @@ export function computed<T>(fn: () => T, options?: DevtoolsMeta): Computed<T> {
   refresh()
 
   const read = (): T => {
+    if (disposed) return value
     if (isTracking()) {
       trackDependency(cell)
     }
@@ -52,12 +54,23 @@ export function computed<T>(fn: () => T, options?: DevtoolsMeta): Computed<T> {
   Object.defineProperties(comp, {
     peek: {
       get: () => {
+        if (disposed) return value
         if (stale) refresh()
         return value
       },
     },
     subscribe: {
       value: (sub: () => void) => cell.subscribe(sub),
+    },
+    dispose: {
+      value: () => {
+        if (disposed) return
+        disposed = true
+        stale = false
+        owner.clearDependencies()
+        devtools.disposeOwner(owner)
+        owner.dispose()
+      },
     },
   })
 

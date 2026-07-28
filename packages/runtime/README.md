@@ -140,7 +140,7 @@ Jacaré does not diff a virtual tree. The compiler emits precise DOM operations 
 | API | Alias | Description |
 |-----|-------|-------------|
 | `signal(initial)` | `pulse(initial)` | Reactive value |
-| `computed(fn)` | `derive(fn)` | Derived value |
+| `computed(fn)` | `derive(fn)` | Derived value — `dispose()` for dynamic lifetimes |
 | `effect(fn)` | `watch(fn)` | Side effect |
 | `untrack(fn)` | — | Run without tracking |
 | `batch(fn)` | — | Batch multiple writes |
