@@ -56,10 +56,19 @@ export <view>
         />
         <div class="vscode-card-copy">
           <strong>Jacaré for VS Code</strong>
-          <span>Syntax highlighting, snippets (@route · jacare-when · focus), file icons, and contracts for .jcr — install from the Marketplace.</span>
+          <span>Syntax highlighting (JS + optional // @jacare-ts / *.jcr.ts), snippets, file icons, Jacaré scope themes — install from the Marketplace.</span>
           <span class="vscode-card-link">marketplace.visualstudio.com/items?itemName=heberalmeida.jacare</span>
         </div>
       </a>
+
+      <div class="ref-card">
+        <h3>TypeScript (optional)</h3>
+        <p class="muted">
+          Sibling <code>*.jcr.ts</code>, <code>// @jacare-ts</code>, or import from <code>.ts</code> —
+          reference cards (no live mount):
+          <a class="text-link" jacare-go="/typescript" href=${appHref('/typescript')}>/typescript</a>.
+        </p>
+      </div>
 
       <Demo :title=${'CLI commands'} :lead=${'jacare new / dev / build / compile / check wrap Vite and the compiler. Pass --bindings for IR sites, --routes for static jacare-go vs createNav screens.'} :code=${cliCode}>
         <pre class="log">${cliCode}</pre>

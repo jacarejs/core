@@ -1,0 +1,73 @@
+import Tip from '../components/Tip.jcr'
+import { appHref } from '../app-base.js'
+import {
+  overviewCode,
+  siblingTsCode,
+  siblingJcrCode,
+  pragmaCode,
+  importTsCode,
+  dtsCode,
+  rulesCode,
+} from '../snippets/typescript.js'
+
+const docsHref = 'https://github.com/jacarejs/core/blob/main/docs/syntax.md#typescript'
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">Optional · TypeScript</p>
+      <h1 class="page-title">TypeScript</h1>
+      <p class="page-lead">
+        Jacaré stays JS-first. Use a sibling <code>.jcr.ts</code>, a
+        <code>// @jacare-ts</code> pragma, or a normal <code>.ts</code> import —
+        types are stripped at compile; these cards show the patterns (no live mount).
+      </p>
+    </header>
+
+    <Tip :text=${'Reference only — copy into your app. Full write-up: docs/syntax.md § TypeScript. VS Code extension highlights // @jacare-ts and *.jcr.ts.'} />
+
+    <div class="ref-card">
+      <h3>Overview</h3>
+      <pre><code>${overviewCode}</code></pre>
+    </div>
+
+    <div class="ref-card">
+      <h3>1 · Sibling <code>Foo.jcr.ts</code> (recommended)</h3>
+      <p class="muted">Typed logic next to a clean view. Compiler prepends the stripped sibling automatically.</p>
+      <pre><code>${siblingTsCode}</code></pre>
+      <pre><code>${siblingJcrCode}</code></pre>
+    </div>
+
+    <div class="ref-card">
+      <h3>2 · Pragma <code>// @jacare-ts</code></h3>
+      <p class="muted">One line at the top of the .jcr — script region is TypeScript until compile strip.</p>
+      <pre><code>${pragmaCode}</code></pre>
+    </div>
+
+    <div class="ref-card">
+      <h3>3 · Import any <code>.ts</code> module</h3>
+      <p class="muted">No Jacaré special case — Vite compiles the .ts; the .jcr only imports.</p>
+      <pre><code>${importTsCode}</code></pre>
+    </div>
+
+    <div class="ref-card">
+      <h3>4 · <code>jacare.d.ts</code> for host imports</h3>
+      <p class="muted">Type <code>import App from './app.jcr'</code> in a TypeScript entry.</p>
+      <pre><code>${dtsCode}</code></pre>
+    </div>
+
+    <div class="ref-card">
+      <h3>Rules</h3>
+      <pre><code>${rulesCode}</code></pre>
+    </div>
+
+    <p class="muted">
+      Also see
+      <a jacare-go="/module" href=${appHref('/module')}>Module format</a>
+      ·
+      <a jacare-go="/tooling" href=${appHref('/tooling')}>Tooling / VS Code</a>
+      ·
+      <a href=${docsHref} target="_blank" rel="noopener noreferrer">syntax.md § TypeScript</a>
+    </p>
+  </section>
+</view>

@@ -12,6 +12,7 @@ export const nav = createNav({
     '/': { use: screen(Home), title: 'Jacaré Lab' },
     '/quick-start': { use: lazy(() => import('./pages/quick-start.jcr')), title: 'Jacaré Lab · Quick start' },
     '/module': { use: lazy(() => import('./pages/module.jcr')), title: 'Jacaré Lab · Module' },
+    '/typescript': { use: lazy(() => import('./pages/typescript.jcr')), title: 'Jacaré Lab · TypeScript' },
     '/language': { use: lazy(() => import('./pages/language.jcr')), title: 'Jacaré Lab · Language' },
     '/binding-ir': { use: lazy(() => import('./pages/binding-ir.jcr')), title: 'Jacaré Lab · Binding IR' },
     '/reactivity': { use: lazy(() => import('./pages/reactivity.jcr')), title: 'Jacaré Lab · Reactivity' },

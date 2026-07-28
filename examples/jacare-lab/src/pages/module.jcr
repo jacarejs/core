@@ -32,7 +32,7 @@ export <view>
       <p class="page-lead">A .jcr file is a JavaScript module with optional script logic and one or more exported blocks — view required, style optional.</p>
     </header>
 
-    <Tip :text=${'Recommended order inside a .jcr file: imports → state/logic → export view → export style last.'} />
+    <Tip :text=${'Recommended order inside a .jcr file: imports → state/logic → export view → export style last. Optional TypeScript: /typescript.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'Recommended layout'} :lead=${'Imports, state, view, then scoped styles. The view block is required; style is optional and should come last.'} :code=${layoutCode}>

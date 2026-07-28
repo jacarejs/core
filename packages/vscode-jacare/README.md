@@ -32,6 +32,8 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | Feature | Description |
 |---------|-------------|
 | **Syntax highlighting** | JavaScript module body, `view` / `style` / `contract` blocks, directives, HTML, and bindings |
+| **TypeScript** | `// @jacare-ts` turns the script region into `source.ts`; sibling `*.jcr.ts` uses full TypeScript mode |
+| **Jacaré scope themes** | Optional dark/light themes that color `@jacare-ts`, `#if`/`#for`, `<view>`/`<contract>`, and mesh addresses |
 | **Pulse Mesh** | Highlight `${@bag/key}` / `${@route/key}`; snippets for bags, links, and route sugar |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) · `jacare-when` |
 | **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` (`from` / `mode`) |
@@ -378,6 +380,8 @@ export <style>
 | Scope | Used for |
 |-------|----------|
 | `source.jacare` | Root language scope |
+| `keyword.control.directive.jacare-ts` | `// @jacare-ts` pragma (green in Jacaré scope themes) |
+| `meta.embedded.block.typescript.jacare` | Script region when the file starts with `// @jacare-ts` |
 | `keyword.control.jacare` | `#if`, `#for`, `#end`, `@each`, etc. |
 | `entity.name.tag.jacare` | `view`, `style`, and `contract` block tags |
 | `entity.name.tag.jacare.contract` | `<contract>` / `</contract>` specifically |
@@ -390,6 +394,21 @@ export <style>
 | `meta.contract.jacare` | Entire `export <contract>…</contract>` block |
 | `source.css` | Content inside `style` blocks |
 
+### TypeScript coloring
+
+| File / marker | Highlighting |
+|---------------|--------------|
+| `Foo.jcr` (default) | Script as JavaScript |
+| `Foo.jcr` starting with `// @jacare-ts` | Script as TypeScript (`source.ts`) · pragma in Jacaré green |
+| `Foo.jcr.ts` sibling | Full TypeScript language mode + Jacaré file icon |
+
+Optional color themes (**Preferences: Color Theme**):
+
+- **Jacaré scopes (dark)** — accent for `@jacare-ts`, directives, tags, mesh
+- **Jacaré scopes (light)** — same scopes for light UI
+
+Snippets: `jcr-ts` (pragma scaffold) · `jcr-ts-sibling` in `.jcr.ts` files.
+
 ---
 
 ## File icons
@@ -399,6 +418,7 @@ The extension contributes the **Jacaré Icons** file icon theme and sets it as t
 | File type | Icon |
 |-----------|------|
 | `.jcr` | Jacaré logo |
+| `.jcr.ts` | Jacaré logo (typed sibling) |
 | Other files | Minimal generic file/folder icons |
 
 If icons do not appear:

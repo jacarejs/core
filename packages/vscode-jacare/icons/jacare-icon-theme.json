@@ -17,7 +17,8 @@
   "folder": "_folder",
   "folderExpanded": "_folder_open",
   "fileExtensions": {
-    "jcr": "_jacare"
+    "jcr": "_jacare",
+    "jcr.ts": "_jacare"
   },
   "languageIds": {
     "jacare": "_jacare"

@@ -1,0 +1,15 @@
+{
+  "Jacaré sibling .jcr.ts logic": {
+    "prefix": ["jcr-ts-sibling", "jacare-jcr-ts"],
+    "body": [
+      "import { pulse } from '@jacare/core'",
+      "",
+      "export const ${1:count} = pulse(${2:0})",
+      "",
+      "export function ${3:increment}(): void {",
+      "  ${1:count}.set(${1:count}() + 1)",
+      "}"
+    ],
+    "description": "Typed logic for a sibling Foo.jcr.ts (view stays in Foo.jcr)"
+  }
+}

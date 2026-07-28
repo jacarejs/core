@@ -15,6 +15,11 @@ export const LESSONS = [
     blurb: 'API §2 — .jcr layout, view/style syntax, compiled exports',
   },
   {
+    path: '/typescript',
+    title: 'TypeScript',
+    blurb: '// @jacare-ts · sibling *.jcr.ts · jacare.d.ts — optional types',
+  },
+  {
     path: '/language',
     title: 'Language reference',
     blurb: 'Reserved words, @route, jacare-when, runtime map, CLI',

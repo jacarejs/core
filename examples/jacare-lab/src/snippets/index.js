@@ -11,6 +11,16 @@ export {
 } from './module.js'
 
 export {
+  overviewCode as typescriptOverviewCode,
+  siblingTsCode,
+  siblingJcrCode,
+  pragmaCode as typescriptPragmaCode,
+  importTsCode,
+  dtsCode as typescriptDtsCode,
+  rulesCode as typescriptRulesCode,
+} from './typescript.js'
+
+export {
   reservedBlocksCode,
   reservedDirectivesCode,
   allBindsCode,
@@ -146,6 +156,15 @@ import {
   liveModuleCode,
 } from './module.js'
 import {
+  overviewCode as typescriptOverviewCode,
+  siblingTsCode,
+  siblingJcrCode,
+  pragmaCode as typescriptPragmaCode,
+  importTsCode,
+  dtsCode as typescriptDtsCode,
+  rulesCode as typescriptRulesCode,
+} from './typescript.js'
+import {
   reservedBlocksCode,
   reservedDirectivesCode,
   allBindsCode,
@@ -269,6 +288,14 @@ export const SNIPPET_CATALOG = [
   { id: 'module.view-syntax', title: 'Supported view syntax', lesson: '/module', code: viewSyntaxCode },
   { id: 'module.style-syntax', title: 'Supported style syntax', lesson: '/module', code: styleSyntaxCode },
   { id: 'module.compiled', title: 'Compiled output', lesson: '/module', code: compiledExportsCode },
+
+  { id: 'typescript.overview', title: 'TypeScript overview', lesson: '/typescript', code: typescriptOverviewCode },
+  { id: 'typescript.sibling-ts', title: 'Sibling .jcr.ts logic', lesson: '/typescript', code: siblingTsCode },
+  { id: 'typescript.sibling-jcr', title: 'Sibling view-only .jcr', lesson: '/typescript', code: siblingJcrCode },
+  { id: 'typescript.pragma', title: '// @jacare-ts pragma', lesson: '/typescript', code: typescriptPragmaCode },
+  { id: 'typescript.import-ts', title: 'Import from .ts', lesson: '/typescript', code: importTsCode },
+  { id: 'typescript.dts', title: 'jacare.d.ts', lesson: '/typescript', code: typescriptDtsCode },
+  { id: 'typescript.rules', title: 'TypeScript rules', lesson: '/typescript', code: typescriptRulesCode },
 
   { id: 'language.blocks', title: 'Module blocks', lesson: '/language', code: reservedBlocksCode },
   { id: 'language.directives', title: 'Directives', lesson: '/language', code: reservedDirectivesCode },

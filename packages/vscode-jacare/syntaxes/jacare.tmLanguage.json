@@ -4,12 +4,51 @@
   "scopeName": "source.jacare",
   "patterns": [
     {
+      "include": "#script-ts"
+    },
+    {
       "include": "#script"
     }
   ],
   "repository": {
+    "script-ts": {
+      "begin": "\\A([ \\t]*//[ \\t]*@jacare-ts\\b[^\\r\\n]*\\r?\\n?)",
+      "beginCaptures": {
+        "1": {
+          "name": "meta.directive.jacare-ts keyword.control.directive.jacare-ts"
+        }
+      },
+      "end": "\\z",
+      "name": "meta.embedded.block.typescript.jacare",
+      "patterns": [
+        {
+          "include": "#jacare-ts-pragma"
+        },
+        {
+          "include": "#style-blocks"
+        },
+        {
+          "include": "#contract-block"
+        },
+        {
+          "include": "#view-block"
+        },
+        {
+          "include": "#view-template"
+        },
+        {
+          "include": "#style-template"
+        },
+        {
+          "include": "source.ts"
+        }
+      ]
+    },
     "script": {
       "patterns": [
+        {
+          "include": "#jacare-ts-pragma"
+        },
         {
           "include": "#style-blocks"
         },
@@ -29,6 +68,10 @@
           "include": "source.js"
         }
       ]
+    },
+    "jacare-ts-pragma": {
+      "match": "^[ \\t]*(//[ \\t]*@jacare-ts\\b[^\\r\\n]*)",
+      "name": "meta.directive.jacare-ts keyword.control.directive.jacare-ts"
     },
     "contract-block": {
       "begin": "(\\bexport)(\\s+)(<)(contract)\\b([^>]*)(>)",

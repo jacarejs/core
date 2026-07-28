@@ -1,4 +1,19 @@
 {
+  "Jacaré TypeScript pragma": {
+    "prefix": ["jcr-ts", "jacare-ts", "@jacare-ts"],
+    "body": [
+      "// @jacare-ts",
+      "import { pulse } from '@jacare/core'",
+      "",
+      "const ${1:count}: number = ${2:0}",
+      "const value = pulse(${1:count})",
+      "",
+      "export <view>",
+      "  <p>\\${value}</p>",
+      "</view>"
+    ],
+    "description": "Mark this .jcr script as TypeScript (// @jacare-ts) and scaffold a typed pulse"
+  },
   "Jacaré component": {
     "prefix": ["jcr-component", "jacare-component"],
     "body": [
