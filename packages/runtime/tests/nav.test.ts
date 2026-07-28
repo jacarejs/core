@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createNav } from '../src/nav/create-nav.js'
-import { lazy } from '../src/nav/lazy.js'
+import { isLoader, lazy } from '../src/nav/lazy.js'
 import {
   matchPath,
   matchScreen,
@@ -223,7 +223,7 @@ describe('createNav', () => {
 
     const nav = createNav({
       screens: {
-        '/module': load,
+        '/module': lazy(load),
       },
     })
 
@@ -247,7 +247,7 @@ describe('createNav', () => {
 
     const nav = createNav({
       screens: {
-        '/lazy': load,
+        '/lazy': lazy(load),
       },
     })
 
@@ -461,6 +461,35 @@ describe('createNav', () => {
 
     expect(load).toHaveBeenCalledTimes(1)
     expect(target.textContent).toBe('lazy')
+  })
+
+  it('treats zero-arg functions as mounts, not loaders', async () => {
+    window.history.pushState({}, '', '/')
+    const Home = vi.fn(() => () => {})
+
+    const nav = createNav({
+      screens: {
+        '/': Home as unknown as NavMount,
+      },
+      missing: (target) => {
+        target.textContent = 'missing'
+        return () => {}
+      },
+    })
+
+    const target = document.createElement('div')
+    nav.attach(target)
+    await nav.go('/')
+    await flush()
+
+    expect(Home).toHaveBeenCalled()
+    expect(target.textContent).not.toBe('missing')
+  })
+
+  it('does not treat bare async factories as loaders without lazy()', () => {
+    const bare = () => Promise.resolve({ mount: (() => () => {}) as NavMount })
+    expect(isLoader(bare)).toBe(false)
+    expect(isLoader(lazy(bare))).toBe(true)
   })
 
   it('handles subpath base for navigation and active links', async () => {

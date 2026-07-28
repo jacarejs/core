@@ -503,10 +503,10 @@ import Shell from './shell.jcr'
 export const nav = createNav({
   layout: Shell,
   screens: {
-    '/': () => import('./pages/home.jcr'),
+    '/': lazy(() => import('./pages/home.jcr')),
     '/about': lazy(() => import('./pages/about.jcr')),
   },
-  missing: () => import('./pages/not-found.jcr'),
+  missing: lazy(() => import('./pages/not-found.jcr')),
 })
 
 nav.attach(document.getElementById('app'))

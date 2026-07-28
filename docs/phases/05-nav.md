@@ -76,12 +76,11 @@ nav.warm('/about')
 |-----|------|
 | `'/'`, `'/about'` | URL pattern (`:id` for params) |
 | `mount` function | Eager screen |
-| `lazy(() => import(...))` | Lazy screen (preferred) |
-| `() => import(...)` | Lazy screen (zero-arg arrow) |
+| `lazy(() => import(...))` | Lazy screen (required for dynamic import) |
 | `missing` | 404 screen when no match |
 
 ```javascript
-missing: () => import('./pages/not-found.jcr')
+missing: lazy(() => import('./pages/not-found.jcr'))
 ```
 
 ### Nav pulse

@@ -12,6 +12,6 @@ export function lazy(load: NavLoader): LazyScreen {
 
 export function isLoader(handler: unknown): handler is NavLoader {
   if (typeof handler !== 'function') return false
-  if ((handler as LazyScreen)[LAZY]) return true
-  return handler.length === 0
+  // Only `lazy(...)` — never infer from arity (zero-arg mounts are valid NavMount).
+  return Boolean((handler as LazyScreen)[LAZY])
 }
