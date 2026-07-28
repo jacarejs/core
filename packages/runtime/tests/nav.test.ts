@@ -657,6 +657,31 @@ describe('createNav', () => {
     await flush()
     expect(id()).toBe('42')
   })
+
+  it('shows the load error message when a screen fails', async () => {
+    window.history.pushState({}, '', '/')
+    const Home = vi.fn((target: HTMLElement) => {
+      target.textContent = 'home'
+      return () => {}
+    })
+
+    const nav = createNav({
+      screens: {
+        '/': Home,
+        '/broken': () => Promise.reject(new Error('process is not defined')),
+      },
+    })
+
+    const target = document.createElement('div')
+    nav.attach(target)
+    await flush()
+    expect(target.textContent).toBe('home')
+
+    await nav.go('/broken')
+    await flush()
+    expect(target.textContent).toContain('Failed to load screen')
+    expect(target.textContent).toContain('process is not defined')
+  })
 })
 
 async function flush(): Promise<void> {

@@ -25,12 +25,16 @@
       "import": "./dist/typescript-fs.js"
     }
   },
+  "browser": {
+    "esbuild": "./esbuild-browser-stub.js"
+  },
   "bin": {
     "jacare-compile": "./dist/cli.js"
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "esbuild-browser-stub.js"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",

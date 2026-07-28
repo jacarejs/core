@@ -30,6 +30,16 @@ type NavRequest = {
   resolve: () => void
 }
 
+function screenLoadErrorMessage(error: unknown): string {
+  const detail =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'string'
+        ? error
+        : String(error)
+  return detail ? `Failed to load screen: ${detail}` : 'Failed to load screen'
+}
+
 export function createNav(options: NavOptions): Nav {
   const base = normalizePath(options.base ?? '/')
   const screens = normalizeScreens(options.screens, base)
@@ -265,7 +275,7 @@ export function createNav(options: NavOptions): Nav {
           })
           .catch((error) => {
             console.error(error)
-            host.textContent = 'Failed to load screen'
+            host.textContent = screenLoadErrorMessage(error)
           })
         return
       }
@@ -281,7 +291,7 @@ export function createNav(options: NavOptions): Nav {
         })
         .catch((error) => {
           console.error(error)
-          host.textContent = 'Failed to load screen'
+          host.textContent = screenLoadErrorMessage(error)
         })
     })
 

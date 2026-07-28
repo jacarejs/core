@@ -4,6 +4,9 @@ import jacareConfig from './jacare.config.js'
 
 const base = createJacareViteConfig(jacareConfig)
 const pathShim = fileURLToPath(new URL('./src/shims/path.js', import.meta.url))
+const esbuildStub = fileURLToPath(
+  new URL('../../packages/compiler/esbuild-browser-stub.js', import.meta.url),
+)
 
 export default {
   ...base,
@@ -13,11 +16,12 @@ export default {
       ...(base.resolve?.alias ?? {}),
       'node:path': pathShim,
       path: pathShim,
+      esbuild: esbuildStub,
     },
   },
   optimizeDeps: {
     ...base.optimizeDeps,
     include: [...(base.optimizeDeps?.include ?? []), '@jacare/compiler', 'source-map-js'],
-    exclude: [...new Set([...(base.optimizeDeps?.exclude ?? []), '@jacare/core'])],
+    exclude: [...new Set([...(base.optimizeDeps?.exclude ?? []), '@jacare/core', 'esbuild'])],
   },
 }

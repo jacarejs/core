@@ -33,13 +33,60 @@ const RUNTIME_IMPORT_ORDER = [
   'mountSlot',
 ] as const
 
+/** Extra user-facing APIs Lab/Studio playgrounds inject beside compiler imports. */
+const PLAYGROUND_USER_RUNTIME = [
+  'signal',
+  'computed',
+  'pulse',
+  'derive',
+  'watch',
+  'batch',
+  'untrack',
+  'flushSync',
+  'enablePatience',
+  'disablePatience',
+  'isPatienceEnabled',
+  'runAsLane',
+  'ReactiveCycleError',
+  'createBag',
+  'ripple',
+  'listBags',
+  'showIf',
+  'createForm',
+  'createLifecycle',
+  'registerScope',
+  'createNav',
+  'lazy',
+  'screen',
+  'createRoute',
+  'routeHref',
+  'routeParam',
+  'routeSearch',
+  'setNavTitle',
+  'getNavTitle',
+  'why',
+  'formatWhyChain',
+] as const
+
 const DECL_RE = /\b(?:const|let|var|function)\s+([\w$]+)/g
 
 export type RuntimeImport = (typeof RUNTIME_IMPORT_ORDER)[number]
 
+export { RUNTIME_IMPORT_ORDER, PLAYGROUND_USER_RUNTIME }
+
 export function orderRuntimeImports(imports: Iterable<string>): string[] {
   const used = new Set(imports)
   return RUNTIME_IMPORT_ORDER.filter((name) => used.has(name))
+}
+
+/** Destructure list for browser playgrounds — keep in sync with compiler emits + demos. */
+export function playgroundRuntimeBindings(extra: Iterable<string> = []): string {
+  const names = new Set<string>([
+    ...RUNTIME_IMPORT_ORDER,
+    ...PLAYGROUND_USER_RUNTIME,
+    ...extra,
+  ])
+  return [...names].join(', ')
 }
 
 export function resolveMountProps(

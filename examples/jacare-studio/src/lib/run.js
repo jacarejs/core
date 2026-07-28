@@ -1,52 +1,7 @@
-import { compile } from '@jacare/compiler'
+import { compile, playgroundRuntimeBindings } from '@jacare/compiler'
 import * as runtime from '@jacare/core'
 
-/** Keep in sync with compiler RUNTIME_IMPORT_ORDER + common user APIs. */
-const RUNTIME_BINDINGS = [
-  'signal',
-  'computed',
-  'pulse',
-  'derive',
-  'effect',
-  'watch',
-  'batch',
-  'untrack',
-  'runUntracked',
-  'flushSync',
-  'enablePatience',
-  'disablePatience',
-  'isPatienceEnabled',
-  'runAsLane',
-  'ReactiveCycleError',
-  'getBag',
-  'createBag',
-  'ripple',
-  'listBags',
-  'bindText',
-  'bindPropText',
-  'bindAttribute',
-  'bindProperty',
-  'bindClass',
-  'bindStyleVar',
-  'bindModel',
-  'bindDebug',
-  'devtoolsBind',
-  'branch',
-  'reconcileKeyedList',
-  'showIf',
-  'resumeBindings',
-  'escapeHtml',
-  'mountSlot',
-  'ensureScopedStyle',
-  'bindStyleSheet',
-  'scopeCss',
-  'createForm',
-  'createLifecycle',
-  'registerScope',
-  'createNav',
-  'lazy',
-  'screen',
-].join(', ')
+const RUNTIME_BINDINGS = playgroundRuntimeBindings()
 
 function stripModuleExports(code) {
   return String(code || '')
