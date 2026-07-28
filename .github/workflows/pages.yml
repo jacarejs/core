@@ -90,29 +90,7 @@ jobs:
         run: yarn build
 
       - name: Prepare Pages site
-        run: |
-          mkdir -p site/todo site/showcase site/bmi site/lab site/studio site/island site/island-react site/island-vue site/island-angular
-          cp scripts/gh-pages-index.html site/index.html
-          cp -r examples/jacare-todo/dist/. site/todo/
-          cp -r examples/jacare-showcase/dist/. site/showcase/
-          cp -r examples/jacare-bmi/dist/. site/bmi/
-          cp -r examples/jacare-lab/dist/. site/lab/
-          cp -r examples/jacare-studio/dist/. site/studio/
-          cp -r examples/jacare-island/dist/. site/island/
-          cp -r examples/jacare-island-react/dist/. site/island-react/
-          cp -r examples/jacare-island-vue/dist/. site/island-vue/
-          cp -r examples/jacare-island-angular/dist/. site/island-angular/
-          cp scripts/gh-pages-404.html site/404.html
-          cp scripts/gh-pages-404.html site/todo/404.html
-          cp scripts/gh-pages-404.html site/showcase/404.html
-          cp scripts/gh-pages-404.html site/bmi/404.html
-          cp scripts/gh-pages-404.html site/lab/404.html
-          cp scripts/gh-pages-404.html site/studio/404.html
-          cp scripts/gh-pages-404.html site/island/404.html
-          cp scripts/gh-pages-404.html site/island-react/404.html
-          cp scripts/gh-pages-404.html site/island-vue/404.html
-          cp scripts/gh-pages-404.html site/island-angular/404.html
-          touch site/.nojekyll site/todo/.nojekyll site/showcase/.nojekyll site/bmi/.nojekyll site/lab/.nojekyll site/studio/.nojekyll site/island/.nojekyll site/island-react/.nojekyll site/island-vue/.nojekyll site/island-angular/.nojekyll
+        run: yarn pages:prepare
 
       - name: Verify Pages artifact
         run: |

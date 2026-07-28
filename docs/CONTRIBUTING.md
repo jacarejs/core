@@ -135,7 +135,7 @@ See [benchmarks/README.md](../benchmarks/README.md) for the local performance su
 
 - **CI** — `.github/workflows/ci.yml` runs on every push/PR to `main`
 - **npm** — `.github/workflows/publish.yml` (`workflow_dispatch`) bumps versions, generates the changelog, publishes packages, tags the release, and creates the GitHub Release
-- GitHub Pages — `.github/workflows/pages.yml` deploys todo / showcase / BMI / **Lab** demos
+- GitHub Pages — `.github/workflows/pages.yml` builds every demo and runs `yarn pages:prepare` (artifact under `site/`, gitignored — see [`site/README.md`](../site/README.md))
 
 ### Commits and automatic changelog
 

@@ -29,6 +29,7 @@
           base = '/core/bmi/'
           target = '/core/bmi/'
         } else if (path.indexOf('/core/') === 0 && path !== '/core/' && path !== '/core/index.html') {
+          // Unknown /core/* deep links default to Lab (primary demo)
           base = '/core/lab/'
           target = '/core/lab/'
           href = '/core/lab' + path.slice('/core'.length) + search + hash
