@@ -10,6 +10,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.1.14](https://github.com/jacarejs/core/compare/v0.1.13...v0.1.14) - 2026-07-28
+
+### Performance
+
+- **devtools:** scope pulse graph to current page and speed mounts ([bd1afa1](https://github.com/jacarejs/core/commit/bd1afa1f99c2853bb9cba1232c9b766c71f5649b))
+
 ## [0.1.13](https://github.com/jacarejs/core/compare/v0.1.12...v0.1.13) - 2026-07-28
 
 ### Added
