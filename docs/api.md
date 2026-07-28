@@ -1858,9 +1858,15 @@ routeHref('/about', {}, { tab: 'feedback' })
 
 routeHref('/item/:id', { id: '7' }, { tab: 'specs' })
 // → '/item/7?tab=specs'
+
+routeHref('/a/:idea/:id', { idea: 'x', id: '1' })
+// → '/a/x/1'  — tokens only (no `:id` substring collision inside `:idea`)
+
+routeHref('/files/:path*', { path: 'a/b' })
+// → '/files/a/b'  — catch-all keeps path segments
 ```
 
-Signature: `routeHref(pattern, params?, search?)`.
+Signature: `routeHref(pattern, params?, search?)`. Replaces each `:name` / `:name*` token; missing keys stay literal.
 
 Wire into templates:
 
@@ -2773,7 +2779,7 @@ Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
 | DevTools registry | `enableDevtools()` + `getPulseGraph()` in tests |
 
 ```bash
-yarn test          # monorepo — 298 tests
+yarn test          # monorepo — 342 tests
 ```
 
 Full guide: [testing.md](testing.md)
@@ -3220,6 +3226,8 @@ import { routeHref } from '@jacare/core'
 routeHref('/item/:id', { id: '7' })                 // → '/item/7'
 routeHref('/about', {}, { tab: 'feedback' })        // → '/about?tab=feedback'
 routeHref('/item/:id', { id: '7' }, { tab: 'specs' }) // → '/item/7?tab=specs'
+routeHref('/a/:idea/:id', { idea: 'x', id: '1' })   // → '/a/x/1'
+routeHref('/files/:path*', { path: 'a/b' })          // → '/files/a/b'
 ```
 
 **`setNavTitle` / `getNavTitle`**

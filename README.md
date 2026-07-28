@@ -253,7 +253,7 @@ Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) sco
 | `@jacare/devtools` | [![npm](https://img.shields.io/npm/v/@jacare/devtools.svg?color=189030)](https://www.npmjs.com/package/@jacare/devtools) [![dm](https://img.shields.io/npm/dm/@jacare/devtools.svg)](https://www.npmjs.com/package/@jacare/devtools) | Pulse Graph inspector panel |
 | `@jacare/meta` | [![npm](https://img.shields.io/npm/v/@jacare/meta.svg?color=189030)](https://www.npmjs.com/package/@jacare/meta) [![dm](https://img.shields.io/npm/dm/@jacare/meta.svg)](https://www.npmjs.com/package/@jacare/meta) | File-based routing conventions |
 | `create-jacare` | [![npm](https://img.shields.io/npm/v/create-jacare.svg?color=189030)](https://www.npmjs.com/package/create-jacare) [![dm](https://img.shields.io/npm/dm/create-jacare.svg)](https://www.npmjs.com/package/create-jacare) | `npm create jacare` — Vite scaffolds |
-| VS Code | [![marketplace](https://vsmarketplacebadges.dev/version-short/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) | `.jcr` syntax highlighting |
+| VS Code | [![marketplace](https://vsmarketplacebadges.dev/version-short/heberalmeida.jacare.svg)](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) | `.jcr` highlighting, snippets, Lab lesson command |
 
 Nav (`createNav`) ships inside `@jacare/core`.
 

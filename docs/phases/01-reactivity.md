@@ -169,11 +169,11 @@ packages/runtime/src/
 
 ### DependencyCell
 
-Each signal and computed owns a `DependencyCell` that stores subscribers in an array (for fast `notify`) and a `Set` (for O(1) duplicate checks during tracking). Unsubscribe uses swap-remove on the array — O(1) amortized.
+Each signal and computed owns a `DependencyCell` that stores subscribers in an array (for fast `notify`) and a `Set` (for O(1) membership). Public `subscribe(fn)` is **idempotent** — a second subscribe with the same function is a no-op. Unsubscribe uses swap-remove on the array — O(1) amortized.
 
 ### DOM bindings
 
-`bindText`, `bindAttribute`, `bindProperty`, and `bindClass` run their first update with `runUntracked()` so the initial DOM write does not create a subscription loop. `bindModel` uses the same pattern for two-way form controls.
+`bindText`, `bindAttribute`, `bindProperty`, and `bindClass` run their first update with `runUntracked()` so the initial DOM write does not create a subscription loop. `bindModel` uses the same pattern for two-way form controls and, under Patience, tags DOM→signal writes as the **input** lane.
 
 **Estimated size (gzip):** ~1.2 KB (core reactivity only, without DOM bindings)
 
@@ -193,13 +193,14 @@ Phase 1 coverage:
 - User cleanup
 - Batch coalescing
 - Untrack
-- `DependencyCell` membership via `Set`
+- `DependencyCell` membership via `Set` (idempotent public `subscribe`)
+- Opt-in Patience coalesce + internal lanes (`scheduler.test.ts`)
 
 ## Not yet implemented
 
 | Area | Detail |
 |------|--------|
-| Priority lanes | High-priority effects (input) vs low-priority (analytics) |
+| Author-facing priority API | No `startTransition` / lane picker — lanes are internal under Patience only |
 | Compile-time graph | Compiler emits static wiring, removes runtime tracking |
 | Structural sharing | Computed arrays/objects with persistent data structures |
 | Async computed | Native suspense with `pending` / `resolved` / `error` states |

@@ -373,6 +373,8 @@ id()
 title: (ctx) => `Item · ${routeParam(ctx, 'id') ?? '…'}`
 
 const link = routeHref('/item/:id', { id: '7' }, { tab: 'specs' })
+// '/item/7?tab=specs'
+routeHref('/a/:idea/:id', { idea: 'x', id: '1' }) // '/a/x/1' — token replace, no prefix collision
 ```
 
 In templates:

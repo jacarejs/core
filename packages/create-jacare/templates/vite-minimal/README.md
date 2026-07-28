@@ -14,7 +14,7 @@ npm run check
 
 ## Editor
 
-Install the [Jacaré VS Code extension](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) for `.jcr` highlighting.
+Install the [Jacaré VS Code extension](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare) for `.jcr` highlighting, snippets, and the Lab lesson command.
 
 ## Layout
 
