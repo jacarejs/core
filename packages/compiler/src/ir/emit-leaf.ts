@@ -110,7 +110,7 @@ function emitTextOp(
   if (mode === 'bindPropText' && (source.kind === 'signal' || source.kind === 'prop')) {
     ctx.pushCleanup(`bindPropText(${textNode}, ${source.name})`)
     if (source.kind === 'signal') {
-      ctx.pushDevtoolsBind(source.name, textNode, 'text')
+      ctx.pushDevtoolsBind(source.name, textNode, 'text', undefined, source.name)
     }
     return
   }

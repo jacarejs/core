@@ -87,6 +87,10 @@ export {
   flashDom,
   pickElement,
   isDevtoolsEnabled,
+  why,
+  whyLast,
+  formatWhyChain,
+  getWrites,
 } from './devtools/index.js'
 export type {
   PulseEdge,
@@ -98,4 +102,8 @@ export type {
   BindingMeta,
   PulseBinding,
   BindingKind,
+  WhyChain,
+  WhyWrite,
+  WhyPulseRef,
+  WhyWriteSite,
 } from './devtools/index.js'

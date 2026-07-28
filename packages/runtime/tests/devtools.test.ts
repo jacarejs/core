@@ -5,11 +5,16 @@ import {
   computed,
   effect,
   enableDevtools,
+  formatWhyChain,
   getBindingsForPulse,
   getPulseGraph,
+  getWrites,
   highlightBinding,
   registerBinding,
+  resolvePulseId,
   signal,
+  why,
+  whyLast,
 } from '../src/index.js'
 
 describe('devtools', () => {
@@ -126,5 +131,59 @@ describe('devtools', () => {
     const node = getPulseGraph().nodes.find((item) => item.kind === 'computed')
     expect(node?.value).toBe(3)
     expect(node?.stale).toBe(false)
+  })
+
+  it('does not record writes while DevTools are disabled', () => {
+    const count = signal(0, { name: 'count' })
+    const id = resolvePulseId(count)!
+    count.set(1)
+    count.set(2)
+    expect(getWrites(id)).toEqual([])
+    expect(whyLast()).toBeNull()
+  })
+
+  it('keeps a ring of the last 10 writes and clears on reset', () => {
+    enableDevtools()
+    const count = signal(0, { name: 'count' })
+    const id = resolvePulseId(count)!
+    for (let i = 1; i <= 12; i++) count.set(i)
+    const writes = getWrites(id)
+    expect(writes).toHaveLength(10)
+    expect(writes[0]?.prev).toBe(2)
+    expect(writes[0]?.value).toBe(3)
+    expect(writes[9]?.value).toBe(12)
+    expect(writes[9]?.prev).toBe(11)
+
+    const chain = why(count)
+    expect(chain.pulse?.name).toBe('count')
+    expect(chain.lastWrites[0]?.value).toBe(12)
+    expect(formatWhyChain(chain)).toMatch(/last write/)
+    expect(whyLast()?.pulse?.id).toBe(id)
+
+    resetDevtoolsForTests()
+    expect(getWrites(id)).toEqual([])
+  })
+
+  it('why() resolves DOM elements via bindings', () => {
+    enableDevtools()
+    const count = signal(3, { name: 'count' })
+    const el = document.createElement('span')
+    el.className = 'badge'
+    document.body.appendChild(el)
+    registerBinding(count, el, {
+      kind: 'text',
+      file: 'Shop.jcr',
+      line: 12,
+      expr: 'count',
+    })
+    count.set(4)
+
+    const chain = why(el)
+    expect(chain.target.kind).toBe('element')
+    expect(chain.binding?.kind).toBe('text')
+    expect(chain.binding?.expr).toBe('count')
+    expect(chain.pulse?.name).toBe('count')
+    expect(chain.lastWrites[0]?.value).toBe(4)
+    el.remove()
   })
 })

@@ -269,6 +269,7 @@ export class CodegenContext {
     target: string,
     kind: string,
     templateLine?: number,
+    expr?: string,
   ): void {
     if (!this.debug) return
     const parts = [`kind: ${JSON.stringify(kind)}`]
@@ -277,6 +278,7 @@ export class CodegenContext {
     if (templateLine != null) {
       parts.push(`line: ${this.viewStartLine + templateLine - 1}`)
     }
+    if (expr) parts.push(`expr: ${JSON.stringify(expr)}`)
     this.pushCleanup(`devtoolsBind(${source}, ${target}, { ${parts.join(', ')} })`)
   }
 

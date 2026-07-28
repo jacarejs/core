@@ -40,6 +40,8 @@ export interface BindingMeta {
   kind?: BindingKind
   file?: string
   line?: number
+  /** Source expression when known (e.g. `${@cart/count}`). */
+  expr?: string
 }
 
 export interface PulseBinding {
@@ -48,4 +50,5 @@ export interface PulseBinding {
   kind: BindingKind
   file?: string
   line?: number
+  expr?: string
 }

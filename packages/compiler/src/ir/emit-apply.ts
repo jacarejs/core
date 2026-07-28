@@ -49,7 +49,7 @@ export function applyText(
 ): void {
   if (mode === 'bind') {
     ctx.pushCleanup(`bindText(${node}, ${signal})`)
-    ctx.pushDevtoolsBind(signal, node, 'text')
+    ctx.pushDevtoolsBind(signal, node, 'text', undefined, signal)
     return
   }
   emitCpwWire(
@@ -73,7 +73,7 @@ export function applyAttribute(
 ): void {
   if (mode === 'bind') {
     ctx.pushCleanup(`bindAttribute(${el}, ${JSON.stringify(name)}, ${signal})`)
-    ctx.pushDevtoolsBind(signal, el, 'attr')
+    ctx.pushDevtoolsBind(signal, el, 'attr', undefined, signal)
     return
   }
   const apply = ctx.nextId('apply')
@@ -103,7 +103,7 @@ export function applyClass(
 ): void {
   if (mode === 'bind') {
     ctx.pushCleanup(`bindClass(${el}, ${JSON.stringify(className)}, ${signal})`)
-    ctx.pushDevtoolsBind(signal, el, 'class')
+    ctx.pushDevtoolsBind(signal, el, 'class', undefined, signal)
     return
   }
   emitCpwWire(
@@ -127,7 +127,7 @@ export function applyStyleVar(
 ): void {
   if (mode === 'bind') {
     ctx.pushCleanup(`bindStyleVar(${el}, ${JSON.stringify(cssVar)}, ${signal})`)
-    ctx.pushDevtoolsBind(signal, el, 'style')
+    ctx.pushDevtoolsBind(signal, el, 'style', undefined, signal)
     return
   }
   emitCpwWire(
@@ -149,7 +149,7 @@ export function applyModel(
   signal: string,
 ): void {
   ctx.pushCleanup(`bindModel(${el}, ${JSON.stringify(prop)}, ${signal})`)
-  ctx.pushDevtoolsBind(signal, el, 'model')
+  ctx.pushDevtoolsBind(signal, el, 'model', undefined, signal)
 }
 
 /** Effect that applies attribute from a read expression (arrow invokes). */
