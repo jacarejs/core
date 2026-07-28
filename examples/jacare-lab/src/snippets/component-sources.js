@@ -80,13 +80,14 @@ export <view>
     <input
       class="input field-input"
       class-invalid=\${() => Boolean(error())}
+      aria-invalid=\${() => Boolean(error())}
       type=\${type}
       placeholder=\${placeholder}
       bind-value=\${value}
       on-blur=\${() => emit('blur')}
     />
     #if error()
-      <span class="field-error">\${error()}</span>
+      <span class="field-error" role="alert">\${error()}</span>
     #end
   </label>
 </view>`

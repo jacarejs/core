@@ -13,13 +13,14 @@ export <view>
   <input
     class="input field-input"
     class-invalid=${!!field.error()}
+    aria-invalid=${() => Boolean(field.error())}
     type=${type}
     placeholder=${placeholder}
     bind-value=${field}
     on-blur=${() => field.blur()}
   />
   #if field.error()
-    <span class="field-error">${field.error()}</span>
+    <span class="field-error" role="alert">${field.error()}</span>
   #end
 </label>
 </view>
