@@ -13,6 +13,7 @@ export type { WriteRecord } from './ledger.js'
 export type { WhyChain, WhyWrite, WhyPulseRef, WhyWriteSite } from './why.js'
 export {
   enableDevtools,
+  disableDevtools,
   getPulseGraph,
   subscribePulseGraph,
   flushPulseGraph,

@@ -73,6 +73,7 @@ export { effect as watch } from './effect.js'
 
 export {
   enableDevtools,
+  disableDevtools,
   getPulseGraph,
   subscribePulseGraph,
   flushPulseGraph,

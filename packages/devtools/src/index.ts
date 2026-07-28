@@ -1,4 +1,5 @@
 import {
+  disableDevtools,
   enableDevtools,
   getMeshSnapshot,
   getPulseGraph,
@@ -134,6 +135,7 @@ export function connectJacareDevtools(options: ConnectOptions = {}): () => void 
     stopScopePulse?.()
     disposeScopeWindow?.()
     panel.dispose()
+    disableDevtools()
   }
 }
 

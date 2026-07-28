@@ -3,6 +3,7 @@ import { resetDevtoolsForTests } from '../src/devtools/registry.js'
 import {
   clearHighlight,
   computed,
+  disableDevtools,
   effect,
   enableDevtools,
   flushPulseGraph,
@@ -12,6 +13,7 @@ import {
   getWrites,
   highlightBinding,
   beginDevtoolsPage,
+  isDevtoolsEnabled,
   registerBinding,
   resolvePulseId,
   signal,
@@ -213,6 +215,22 @@ describe('devtools', () => {
     expect(renders).toBe(2)
 
     unsubscribe()
+  })
+
+  it('disables collection so dispose stops the write ledger', () => {
+    enableDevtools()
+    const count = signal(0, { name: 'count' })
+    count.set(1)
+    const id = resolvePulseId(count)!
+    const writesBefore = getWrites(id).length
+    expect(writesBefore).toBeGreaterThan(0)
+
+    disableDevtools()
+    expect(isDevtoolsEnabled()).toBe(false)
+    expect(getPulseGraph().nodes).toHaveLength(0)
+
+    count.set(2)
+    expect(getWrites(id)).toHaveLength(writesBefore)
   })
 
   it('scopes the pulse graph to the current DevTools page', () => {

@@ -104,6 +104,12 @@ export function enableDevtools(): void {
   emit()
 }
 
+/** Stop graph UI updates and write ledger (overlay dispose / tests). */
+export function disableDevtools(): void {
+  enabled = false
+  emitScheduled = false
+}
+
 export function isDevtoolsEnabled(): boolean {
   return enabled
 }
