@@ -10,6 +10,49 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.1.15](https://github.com/jacarejs/core/compare/v0.1.14...v0.1.15) - 2026-07-28
+
+### Added
+
+- **vscode:** open Lab lesson for symbol under cursor ([a5275e2](https://github.com/jacarejs/core/commit/a5275e24618a685acb584f6c97c6c22d41a183e5))
+- **vscode:** add screen, nav, and a11y field snippets ([8aaa9ac](https://github.com/jacarejs/core/commit/8aaa9ac7ea300dc94a31ff6d2538c0f23bf1b5e5))
+- **core:** mark bindModel writes as Patience input lane ([a2778b7](https://github.com/jacarejs/core/commit/a2778b730f7f38570294a86bca535388dc974c7b))
+- **core:** add Patience internal lanes (input/default/idle) ([d184288](https://github.com/jacarejs/core/commit/d18428899e671e78a33e7eb9f0ae81b6c21445a8))
+- highlight TypeScript in VS Code and document it in Lab ([ccab77f](https://github.com/jacarejs/core/commit/ccab77f19e907d5cf655e4615d0444c48e307890))
+- **compiler:** support // @jacare-ts and sibling .jcr.ts ([6e483b2](https://github.com/jacarejs/core/commit/6e483b2894452f8d51b827a26be59134c109c1f1))
+
+### Fixed
+
+- **compiler:** keep node:fs out of browser compile path ([3895932](https://github.com/jacarejs/core/commit/38959329d8666e34e4ff3e30dbc9a49bac3450e7))
+- **site:** untrack remaining generated Pages HTML ([7dce298](https://github.com/jacarejs/core/commit/7dce298d0f57d0c3a71149ec96ac903815093718))
+- **core:** make DependencyCell.subscribe idempotent ([a1fc4e6](https://github.com/jacarejs/core/commit/a1fc4e66e61c79d060dce8ba14611902063c91d2))
+- **core:** replace routeHref params without prefix collisions ([5c221f5](https://github.com/jacarejs/core/commit/5c221f55c72d054e8fefaafbc2c1dc660dab1183))
+- **site:** generate Pages artifact in CI only ([8a66f0d](https://github.com/jacarejs/core/commit/8a66f0d34f35c471e302c28204be0fa947b01d9e))
+- **vscode:** highlight class: and style: attribute aliases ([4df80c0](https://github.com/jacarejs/core/commit/4df80c0bc279c5ff73c5299bc8fdeb3e491cb71d))
+- **lab:** polish landmarks, focus, motion, and loading live regions ([1a22939](https://github.com/jacarejs/core/commit/1a2293986a959831f3238e24ca01bec16897af1e))
+- **examples:** announce Field errors with role=alert ([4dc8ae6](https://github.com/jacarejs/core/commit/4dc8ae6d5a113ae9a96bed615f9f5eb1681f8d65))
+- **cli:** mirror scaffold a11y defaults in jacare new ([89938f5](https://github.com/jacarejs/core/commit/89938f5f3f22e16d9332926a9864eacfd3d51ea1))
+- **templates:** apply a11y checklist to Vite scaffolds ([f2a8a1f](https://github.com/jacarejs/core/commit/f2a8a1ff6f6132201da72e7a7d7d8d54a7a9871b))
+- **meta:** watch file routes and split vite entry ([9add4f3](https://github.com/jacarejs/core/commit/9add4f34a5a6c994c9234b05bbeabd567441a516))
+- **meta:** make createJacareApp require screens ([3bdbf16](https://github.com/jacarejs/core/commit/3bdbf169b40b2d3c53ef7038966e0e347ed73c58))
+- **nav:** require lazy() marker for screen loaders ([5263195](https://github.com/jacarejs/core/commit/526319590e5193a241356a4d738db3a69e35579b))
+- **devtools:** disable collection when the overlay disposes ([3aeb1d0](https://github.com/jacarejs/core/commit/3aeb1d03f8e9bd2a29e5fa76902413645eb6951d))
+- **chrome-devtools:** inject page bridge on demand and time out RPC ([1997b39](https://github.com/jacarejs/core/commit/1997b39270b586c95a4cabde2532964a68772189))
+- **compiler:** keep reactive call exprs as effects in one-shot path ([89f505b](https://github.com/jacarejs/core/commit/89f505bf48c2137f225f7cf336ec2e20462d60b9))
+
+### Documentation
+
+- **lab:** teach Patience lanes, runAsLane, and VS Code updates ([76c4efb](https://github.com/jacarejs/core/commit/76c4efb1a5501982d498b3f12428fafdb047b520))
+- sync Patience lanes, routeHref, VS Code, and test counts ([dba0854](https://github.com/jacarejs/core/commit/dba08549060e3cc2305f4dee882e7fc009a44f8b))
+- document Patience lanes and runAsLane ([457745f](https://github.com/jacarejs/core/commit/457745f7801f9c1d45e30f8ebb0923f126532b54))
+- document optional TypeScript for .jcr modules ([16e2588](https://github.com/jacarejs/core/commit/16e2588895f1e2b01585bcd668232c50b52592b2))
+- document honest SPA-first SSR hydrate limits ([556a679](https://github.com/jacarejs/core/commit/556a679109ba522a577272b513529ca3236f4478))
+
+### Maintenance
+
+- **vscode:** bump extension to 0.0.19 ([1ebf44c](https://github.com/jacarejs/core/commit/1ebf44c21d4163a715393b1d468c5cafaa0023b1))
+- add Contributor Covenant code of conduct ([a0c6d49](https://github.com/jacarejs/core/commit/a0c6d492dfd1ec2566fbfd2686561a873535c3d0))
+
 ## [0.1.14](https://github.com/jacarejs/core/compare/v0.1.13...v0.1.14) - 2026-07-28
 
 ### Performance
