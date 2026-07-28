@@ -7,9 +7,10 @@ import { restoreSpaPath } from './app-base.js'
 import { pageLoading, pageLoadingLabel } from './page-loading.js'
 import { initPageProgress, initReveal } from './utils/motion.js'
 
+let disposeDevtools = null
 if (import.meta.env.DEV) {
   const { connectJacareDevtools } = await import('@jacare/devtools')
-  connectJacareDevtools({ scope: false })
+  disposeDevtools = connectJacareDevtools({ scope: false })
 }
 
 const root = document.getElementById('app')
@@ -171,6 +172,8 @@ if (import.meta.hot) {
     stopScrollTop?.dispose?.()
     stopReveal?.()
     stopProgress?.()
+    disposeDevtools?.()
+    disposeDevtools = null
     dispose?.()
     dispose = null
   })

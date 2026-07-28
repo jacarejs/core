@@ -39,6 +39,13 @@ export async function toggleDevtools() {
   await syncDevtools()
 }
 
+export function teardownDevtools() {
+  dispose?.()
+  dispose = null
+  disposeHook?.()
+  disposeHook = null
+}
+
 export function devtoolsLabel() {
   return devtoolsEnabled() ? 'DevTools on' : 'DevTools off'
 }

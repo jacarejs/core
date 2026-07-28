@@ -569,9 +569,10 @@ if (import.meta.hot) {
 function bootTodo(): string {
   return `import { nav } from './nav.js'
 
+let disposeDevtools = null
 if (import.meta.env.DEV) {
   const { connectJacareDevtools } = await import('@jacare/devtools')
-  connectJacareDevtools()
+  disposeDevtools = connectJacareDevtools()
 }
 
 const root = document.getElementById('app')
@@ -582,6 +583,8 @@ let dispose = nav.attach(root)
 if (import.meta.hot) {
   import.meta.hot.accept()
   import.meta.hot.dispose(() => {
+    disposeDevtools?.()
+    disposeDevtools = null
     dispose?.()
     dispose = null
   })

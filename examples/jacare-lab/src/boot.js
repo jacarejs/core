@@ -1,7 +1,7 @@
 import './app.css'
 import { nav } from './nav.js'
 import { restoreSpaPath } from './app-base.js'
-import { syncDevtools } from './lab-devtools.js'
+import { syncDevtools, teardownDevtools } from './lab-devtools.js'
 
 const root = document.getElementById('app')
 if (!root) throw new Error('Missing #app')
@@ -20,6 +20,7 @@ void boot()
 if (import.meta.hot) {
   import.meta.hot.accept()
   import.meta.hot.dispose(() => {
+    teardownDevtools()
     dispose?.()
     dispose = null
   })
