@@ -186,7 +186,10 @@ function isNodeInCurrentPage(node: InternalNode): boolean {
   if (node.cell) node.subscribers = node.cell.subscriberCount
   if (node.page === graphPage) return true
   if (node.subscribers > 0) return true
-  return hasConnectedBinding(node.id)
+  if (hasConnectedBinding(node.id)) return true
+  // Layout/shell effects stay alive across screens (page effects are disposed on unmount).
+  if (node.kind === 'effect') return true
+  return false
 }
 
 function removeNode(id: number): void {

@@ -220,33 +220,36 @@ describe('devtools', () => {
     const shell = signal(0, { name: 'shell' })
     effect(() => {
       shell()
-    })
+    }, { name: 'shellEffect' })
 
     beginDevtoolsPage()
     const pageA = signal(1, { name: 'pageA' })
     const stopA = effect(() => {
       pageA()
-    })
+    }, { name: 'pageAEffect' })
 
     const namesAfterA = getPulseGraph()
       .nodes.map((n) => n.name)
       .filter((name): name is string => name != null)
       .sort()
-    expect(namesAfterA).toEqual(['pageA', 'shell'])
+    expect(namesAfterA).toEqual(['pageA', 'pageAEffect', 'shell', 'shellEffect'])
 
     stopA.dispose()
     beginDevtoolsPage()
     const pageB = signal(2, { name: 'pageB' })
     effect(() => {
       pageB()
-    })
+    }, { name: 'pageBEffect' })
 
     const names = getPulseGraph()
       .nodes.map((n) => n.name)
       .filter((name): name is string => name != null)
       .sort()
     expect(names).toContain('shell')
+    expect(names).toContain('shellEffect')
     expect(names).toContain('pageB')
+    expect(names).toContain('pageBEffect')
     expect(names).not.toContain('pageA')
+    expect(names).not.toContain('pageAEffect')
   })
 })

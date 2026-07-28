@@ -370,6 +370,26 @@ export default view\`
     expect(result.code).toContain('items: () => topics')
   })
 
+  it('one-shots plain #for fields but keeps effects for signal call exprs', () => {
+    const list = `import { view } from '@jacare/core'
+const rows = [{ name: 'a' }]
+export default view\`
+  #for rows as row (row.name)
+    <p>\${row.name}</p>
+  #end
+\``
+    const listCode = compile(list, { mode: 'client' }).code
+    expect(listCode).toContain('.data = String((() => { const _v = (row.name)')
+    expect(listCode).not.toMatch(/effect\(\(\) => \{ const _v = \(row\.name\)/)
+
+    const reactive = `import { pulse, view } from '@jacare/core'
+const tab = pulse('a')
+export default view\`<button class-active=\${tab() === 'a'}>A</button>\``
+    const reactiveCode = compile(reactive, { mode: 'client' }).code
+    expect(reactiveCode).toContain('effect(() => { _el1.classList.toggle("active", !!(tab() === \'a\')) })')
+    expect(reactiveCode).not.toContain('_el1.classList.toggle("active", !!(tab() === \'a\'))\n')
+  })
+
   it('binds reactive boolean attributes from signal refs', () => {
     const source = `import { computed, signal, view } from '@jacare/core'
 const count = signal(0)

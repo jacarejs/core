@@ -27,6 +27,16 @@ function noteMeshRuntime(ctx: CodegenContext, source: BindingSource): void {
   }
 }
 
+/**
+ * One-shot DOM write only for plain data reads (e.g. `row.name`).
+ * `rewriteExprForEffect` leaves call forms unchanged (`count() * 2`), so equality alone is unsafe.
+ */
+function isOneShotDomExpr(raw: string, rewritten: string): boolean {
+  if (rewritten !== raw) return false
+  if (/\w\s*\(/.test(raw)) return false
+  return true
+}
+
 /** Emit a leaf binding op onto an element or text node. */
 export function emitLeafOp(
   ctx: CodegenContext,
@@ -121,8 +131,8 @@ function emitTextOp(
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
   const rewritten = ctx.rewriteExprForEffect(raw)
-  // No local signal rewrite → one-shot (avoids OwnerNode + DevTools emit per static #for field).
-  if (rewritten === raw) {
+  // Plain field reads → one-shot (avoids OwnerNode + DevTools emit per static #for field).
+  if (isOneShotDomExpr(raw, rewritten)) {
     ctx.line(
       `${textNode}.data = String((() => { const _v = (${raw}); return typeof _v === 'function' ? _v() : _v })())`,
     )
@@ -182,7 +192,7 @@ function emitAttrOp(
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
   const rewritten = ctx.rewriteExprForEffect(raw)
-  applyAttrEffect(ctx, el, name, rewritten, false, rewritten === raw)
+  applyAttrEffect(ctx, el, name, rewritten, false, isOneShotDomExpr(raw, rewritten))
 }
 
 function emitClassOp(
@@ -212,7 +222,7 @@ function emitClassOp(
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
   const rewritten = ctx.rewriteExprForEffect(raw)
-  if (rewritten === raw) {
+  if (isOneShotDomExpr(raw, rewritten)) {
     ctx.line(`${el}.classList.toggle(${JSON.stringify(className)}, !!(${raw}))`)
     return
   }
@@ -248,7 +258,7 @@ function emitStyleOp(
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
   const rewritten = ctx.rewriteExprForEffect(raw)
-  if (rewritten === raw) {
+  if (isOneShotDomExpr(raw, rewritten)) {
     ctx.line(`${el}.style.setProperty(${JSON.stringify(cssVar)}, String(${raw}))`)
     return
   }
@@ -278,7 +288,7 @@ function emitModelOp(
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
   const rewritten = ctx.rewriteExprForEffect(raw)
-  if (rewritten === raw) {
+  if (isOneShotDomExpr(raw, rewritten)) {
     ctx.line(`${el}[${JSON.stringify(prop)}] = (${raw})`)
     return
   }
