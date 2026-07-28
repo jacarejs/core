@@ -83,6 +83,8 @@ export {
   enablePatience,
   disablePatience,
   isPatienceEnabled,
+  runAsLane,
 } from './context.js'
+export type { PatienceLane } from './context.js'
 
 export { isTracking, runUntracked, startTracking, stopTracking, trackDependency } from './context.js'

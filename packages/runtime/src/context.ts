@@ -9,7 +9,20 @@ let notifyDepth = 0
 let flushDepth = 0
 let patience = false
 let microtaskArmed = false
-const pending = new Set<Subscriber>()
+let idleArmed = false
+let currentLane: PatienceLane = 'default'
+
+const pendingInput = new Set<Subscriber>()
+const pendingDefault = new Set<Subscriber>()
+const pendingIdle = new Set<Subscriber>()
+
+const LANE_RANK: Record<PatienceLane, number> = {
+  input: 0,
+  default: 1,
+  idle: 2,
+}
+
+export type PatienceLane = 'input' | 'default' | 'idle'
 
 const MAX_NOTIFY_DEPTH = 200
 
@@ -142,19 +155,34 @@ export function enablePatience(): void {
 }
 
 export function disablePatience(): void {
-  if (!patience && pending.size === 0) return
+  if (!patience && pendingSize() === 0) return
   flushSync()
   patience = false
 }
 
+/** Mark writes in `fn` as originating from a lane (runtime/compiler — not an author priority API). */
+export function runAsLane<T>(lane: PatienceLane, fn: () => T): T {
+  const prev = currentLane
+  currentLane = lane
+  try {
+    return fn()
+  } finally {
+    currentLane = prev
+  }
+}
+
 export function schedule(subscriber: Subscriber): void {
   if (batchDepth > 0) {
-    pending.add(subscriber)
+    enqueue(subscriber, currentLane)
     return
   }
   if (patience && flushDepth === 0) {
-    pending.add(subscriber)
-    armMicrotask()
+    enqueue(subscriber, currentLane)
+    if (currentLane === 'idle') {
+      armIdle()
+    } else {
+      armMicrotask()
+    }
     return
   }
   runSubscriber(subscriber)
@@ -166,7 +194,7 @@ export function batch<T>(fn: () => T): T {
     return fn()
   } finally {
     batchDepth--
-    if (batchDepth === 0 && pending.size > 0) {
+    if (batchDepth === 0 && pendingSize() > 0) {
       flushPending()
     }
   }
@@ -174,24 +202,62 @@ export function batch<T>(fn: () => T): T {
 
 export function flushSync(): void {
   microtaskArmed = false
-  if (pending.size > 0) {
-    flushPending()
+  idleArmed = false
+  if (pendingSize() > 0) {
+    flushPending({ includeIdle: true })
   }
 }
 
-export function flushPending(): void {
+export function flushPending(options: { includeIdle?: boolean } = {}): void {
+  const includeIdle = options.includeIdle === true
   flushDepth++
   try {
-    while (pending.size > 0) {
-      const queue = Array.from(pending)
-      pending.clear()
-      for (const subscriber of queue) {
-        runSubscriber(subscriber)
+    let guard = 0
+    while (pendingInput.size > 0 || pendingDefault.size > 0 || (includeIdle && pendingIdle.size > 0)) {
+      if (++guard > MAX_NOTIFY_DEPTH) {
+        throw new ReactiveCycleError(MAX_NOTIFY_DEPTH)
       }
+      drainLane(pendingInput)
+      drainLane(pendingDefault)
+      if (includeIdle) {
+        drainLane(pendingIdle)
+      }
+    }
+    if (!includeIdle && pendingIdle.size > 0) {
+      armIdle()
     }
   } finally {
     flushDepth--
   }
+}
+
+function drainLane(queue: Set<Subscriber>): void {
+  if (queue.size === 0) return
+  const batch = Array.from(queue)
+  queue.clear()
+  for (const subscriber of batch) {
+    runSubscriber(subscriber)
+  }
+}
+
+function pendingSize(): number {
+  return pendingInput.size + pendingDefault.size + pendingIdle.size
+}
+
+function enqueue(subscriber: Subscriber, lane: PatienceLane): void {
+  const rank = LANE_RANK[lane]
+  if (pendingInput.has(subscriber)) {
+    if (rank > 0) return
+  } else if (pendingDefault.has(subscriber)) {
+    if (rank > 1) return
+    pendingDefault.delete(subscriber)
+  } else if (pendingIdle.has(subscriber)) {
+    pendingIdle.delete(subscriber)
+  }
+
+  if (lane === 'input') pendingInput.add(subscriber)
+  else if (lane === 'default') pendingDefault.add(subscriber)
+  else pendingIdle.add(subscriber)
 }
 
 function runSubscriber(subscriber: Subscriber): void {
@@ -227,10 +293,27 @@ function armMicrotask(): void {
   microtaskArmed = true
   queueMicrotask(() => {
     microtaskArmed = false
-    if (pending.size > 0) {
-      flushPending()
+    if (pendingInput.size > 0 || pendingDefault.size > 0) {
+      flushPending({ includeIdle: false })
+    } else if (pendingIdle.size > 0) {
+      armIdle()
     }
   })
+}
+
+function armIdle(): void {
+  if (idleArmed || pendingIdle.size === 0) return
+  idleArmed = true
+  const run = (): void => {
+    idleArmed = false
+    if (pendingIdle.size === 0) return
+    flushPending({ includeIdle: true })
+  }
+  if (typeof globalThis.requestIdleCallback === 'function') {
+    globalThis.requestIdleCallback(() => run(), { timeout: 50 })
+    return
+  }
+  setTimeout(run, 1)
 }
 
 export class DependencyCell {

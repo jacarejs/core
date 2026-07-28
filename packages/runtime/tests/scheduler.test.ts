@@ -9,12 +9,14 @@ import {
   isPatienceEnabled,
   resetBagRegistry,
   ripple,
+  runAsLane,
   signal,
 } from '../src/index.js'
 
 afterEach(() => {
   disablePatience()
   resetBagRegistry()
+  vi.useRealTimers()
 })
 
 describe('patience scheduler (Etapa 1)', () => {
@@ -146,5 +148,93 @@ describe('patience scheduler (Etapa 1)', () => {
       ['a', 1],
       ['b', 9],
     ])
+  })
+})
+
+describe('patience lanes (Etapa 2)', () => {
+  it('flushes input before default in the same microtask', async () => {
+    enablePatience()
+    const input = signal(0)
+    const derived = signal(0)
+    const order = []
+
+    effect(() => {
+      order.push(['default', derived()])
+    })
+    effect(() => {
+      order.push(['input', input()])
+    })
+    order.length = 0
+
+    runAsLane('input', () => input.set(1))
+    derived.set(2)
+
+    expect(order).toEqual([])
+    await Promise.resolve()
+    expect(order).toEqual([
+      ['input', 1],
+      ['default', 2],
+    ])
+  })
+
+  it('defers idle work after input/default', async () => {
+    vi.stubGlobal('requestIdleCallback', undefined)
+    vi.useFakeTimers()
+    enablePatience()
+    const urgent = signal(0)
+    const background = signal(0)
+    const order = []
+
+    effect(() => {
+      order.push(['urgent', urgent()])
+    })
+    effect(() => {
+      order.push(['idle', background()])
+    })
+    order.length = 0
+
+    urgent.set(1)
+    runAsLane('idle', () => background.set(9))
+
+    expect(order).toEqual([])
+    await Promise.resolve()
+    expect(order).toEqual([['urgent', 1]])
+
+    await vi.advanceTimersByTimeAsync(5)
+    expect(order).toEqual([
+      ['urgent', 1],
+      ['idle', 9],
+    ])
+  })
+
+  it('flushSync drains idle immediately', () => {
+    enablePatience()
+    const background = signal(0)
+    let seen = 0
+    effect(() => {
+      seen = background()
+    })
+
+    runAsLane('idle', () => background.set(3))
+    expect(seen).toBe(0)
+    flushSync()
+    expect(seen).toBe(3)
+  })
+
+  it('promotes a subscriber from idle to input', async () => {
+    enablePatience()
+    const value = signal(0)
+    const spy = vi.fn()
+    effect(() => {
+      spy(value())
+    })
+    spy.mockClear()
+
+    runAsLane('idle', () => value.set(1))
+    runAsLane('input', () => value.set(2))
+
+    await Promise.resolve()
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledWith(2)
   })
 })
