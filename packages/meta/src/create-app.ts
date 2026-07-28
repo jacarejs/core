@@ -1,12 +1,14 @@
 import { createNav } from '@jacare/core'
 import type { Nav, NavMount, NavOptions } from '@jacare/core'
-import { discoverRoutes, type DiscoveredRoute } from './discover-routes.js'
+import type { DiscoveredRoute } from './discover-routes.js'
 
 export interface JacareAppConfig {
   base?: string
   layout: NavMount
   missing?: NavMount
+  /** Project pages dir — for defineJacareConfig / tooling only; not used at runtime. */
   pagesDir?: string
+  /** Discovered route metadata — for tooling only; not used at runtime. Pass `screens` or use `createJacareAppFromRoutes`. */
   routes?: DiscoveredRoute[]
   screens?: NavOptions['screens']
   beforeGo?: NavOptions['beforeGo']
@@ -26,9 +28,7 @@ export function createJacareAppFromRoutes(config: JacareAppFromRoutesConfig): Na
   })
 }
 
-export function createJacareApp(config: JacareAppConfig & { pagesDir: string }): Nav {
-  const routes = config.routes ?? discoverRoutes({ pagesDir: config.pagesDir, rootDir: config.pagesDir })
-
+export function createJacareApp(config: JacareAppConfig): Nav {
   if (config.screens) {
     return createNav({
       ...(config.base ? { base: config.base } : {}),
@@ -40,7 +40,7 @@ export function createJacareApp(config: JacareAppConfig & { pagesDir: string }):
   }
 
   throw new Error(
-    'createJacareApp requires build-time route discovery. Use jacareMeta() vite plugin with createJacareAppFromRoutes() and virtual:jacare-routes.',
+    'createJacareApp requires `screens`. For file-based routes use jacareMeta() with createJacareAppFromRoutes({ routeLoaders }) from virtual:jacare-routes.',
   )
 }
 
