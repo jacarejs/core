@@ -68,7 +68,7 @@ cd packages/vscode-jacare
 yarn install
 yarn build
 yarn package
-code --install-extension jacare-0.0.18.vsix --force
+code --install-extension jacare-0.0.19.vsix --force
 ```
 
 ### Development mode
