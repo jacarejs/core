@@ -340,6 +340,8 @@ Jacaré intercepts clicks and syncs the `jacare-here` class on the active link.
 
 ```javascript
 await nav.go('/about')
+await nav.go('/settings', { focus: true }) // focus [data-jacare-focus] after mount
+await nav.go('/settings', { focus: '#main-title' })
 await nav.swap('/settings')  // replace history entry
 nav.undo()                   // history.back()
 await nav.warm('/about')     // prefetch lazy screen
@@ -355,11 +357,28 @@ nav.where.peek    // untracked — current place without subscribing
 ### Route helpers
 
 ```javascript
-import { routeParam, routeSearch, routeHref } from '@jacare/core'
+import { createRoute, getRouteParam, routeParam, routeSearch, routeHref } from '@jacare/core'
 
-const userId = routeParam('id')
-const tab = routeSearch('tab')
-const link = routeHref('/about', { tab: 'feedback' })
+// Preferred in screens — reactive helpers from nav.where
+export const route = createRoute(nav.where)
+route.param('id')()
+route.search('q')()
+
+// Template sugar ${@route/id} uses the same active nav:
+const id = getRouteParam('id')
+id()
+
+// One-shot from a NavContext (title / mount), not a subscription:
+title: (ctx) => `Item · ${routeParam(ctx, 'id') ?? '…'}`
+
+const link = routeHref('/item/:id', { id: '7' }, { tab: 'specs' })
+```
+
+In templates:
+
+```html
+<p>${@route/id}</p>
+<h1 data-jacare-focus tabindex="-1">Settings</h1>
 ```
 
 ---
@@ -485,7 +504,7 @@ Docs: [island.md](../../docs/island.md) · demo: [`examples/jacare-island`](../.
 `view`, `bindText`, `bindPropText`, `bindAttribute`, `bindProperty`, `bindClass`, `bindModel`, `branch`, `reconcileKeyedList`, `showIf`, `ensureScopedStyle`, `mountSlot`
 
 ### Nav
-`createNav`, `lazy`, `screen`, `adaptScreen`, `createRoute`, `routeHref`, `routeParam`, `routeSearch`, `screenProps`
+`createNav`, `lazy`, `screen`, `adaptScreen`, `createRoute`, `getRouteParam`, `routeHref`, `routeParam`, `routeSearch`, `screenProps` · type `NavGoOptions`
 
 ### Forms
 `createForm`

@@ -477,6 +477,7 @@ screen(Home)`,
       'Instance methods after createNav. attach(el) mounts the layout and frame and listens to history. go(path) pushes a new history entry; swap replaces; undo goes back; warm(path) preloads a lazy screen without navigating.',
     example: `nav.attach(document.getElementById('app'))
 nav.go('/about')
+nav.go('/settings', { focus: true })  // focus [data-jacare-focus]
 nav.warm('/cart')   // preload
 nav.undo()          // back`,
     path: '/nav',
@@ -493,6 +494,23 @@ nav.undo()          // back`,
 import { nav } from './nav.js'
 
 export const route = createRoute(nav.where)`,
+    path: '/nav',
+  },
+  {
+    pkg: '@jacare/core',
+    group: 'Navigation',
+    name: 'getRouteParam',
+    importLine: "import { getRouteParam } from '@jacare/core'",
+    usage: 'Reactive getter for an active nav path param.',
+    about:
+      'Used by template sugar ${@route/id}. Returns a getter that tracks nav.where. Prefer createRoute(nav.where) in JS for typed helpers and search keys.',
+    example: `import { getRouteParam } from '@jacare/core'
+
+const id = getRouteParam('id')
+id()  // → '42' when path is /orders/42
+
+// template:
+// <p>\${@route/id}</p>`,
     path: '/nav',
   },
   {
@@ -561,7 +579,7 @@ getNavTitle()  // current title string`,
     importLine: '(attributes in view)',
     usage: 'Outlet + SPA links + active match.',
     about:
-      'Template attributes (not JS imports). jacare-frame is the outlet where screens mount. jacare-go intercepts clicks for SPA navigation (keep href for progressive enhancement). jacare-here marks the active link match for styling.',
+      'Template attributes (not JS imports). jacare-frame is the outlet where screens mount. jacare-go intercepts clicks for SPA navigation (keep href for progressive enhancement). jacare-here marks the active link match for styling. jacare-when={cond} is a one-liner #if. data-jacare-focus is the default focus target for nav.go(path, { focus: true }).',
     example: `<main jacare-frame></main>
 <a jacare-go="/about" href="/about">About</a>
 <a jacare-go="/shop" jacare-here class-active>Shop</a>`,

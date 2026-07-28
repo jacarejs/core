@@ -130,6 +130,8 @@ export <view>
 | `jacare-frame` | Layout shell | Mount point for active nav screen |
 | `jacare-go` | Links | Client navigation path |
 | `jacare-here` | Class (runtime) | Active-route marker on `jacare-go` links |
+| `jacare-when={expr}` | Element / component | Same IR as a single `#if…#end` arm |
+| `data-jacare-focus` | Screen content | Focus target for `nav.go(path, { focus: true })` |
 
 ### 1.5 Contract field names
 
@@ -138,7 +140,7 @@ Only these keys are valid inside `export <contract>`:
 | Field | Value shape | Power |
 |-------|-------------|-------|
 | `props` | `{ name: 'type' \| { type, required?, default?, model? } }` | Public one-way / model props |
-| `pulses` | `{ name: 'type' }` | Props that must be signals/pulses |
+| `pulses` | `{ name: 'type' }` | Props that must be signals/pulses — bare names unwrap in `#if` / effects |
 | `slots` | `['default', 'actions', …]` | Allowed slot names (`default` → `children`) |
 | `emits` | `['inc']` or `{ change: { value: 'string' } }` | Child → parent events via `emit` / `on-*` |
 | `forwards` | string array | Reserved for future emit bridging |
@@ -152,8 +154,9 @@ Unknown contract fields fail compile / `jacare check`.
 |------|-------|---------|
 | `${@bag/key}` | Text / attrs / `#if` / `#for` / events | `getBag('bag')?.key` |
 | `@bag/key` inside `${…}` | Same | Same Mesh Port as an imported `bag.key` |
+| `${@route/key}` | Text / attrs / `#if` / events | `getRouteParam('key')` — active nav path param |
 
-Bag / key ids may include hyphens (`@lab-cart/count`).
+Bag / key ids may include hyphens (`@lab-cart/count`). Reserved bag id `route` is for nav params only — keep using `createRoute(nav.where)` in JS.
 
 ### 1.7 Reactivity names (runtime API — not template keywords)
 
@@ -712,6 +715,8 @@ export <view>
 
 `createNav` mounts screens into `[jacare-frame]` and toggles `.jacare-here` on matching `jacare-go` links.
 
+Focus after navigate: `await nav.go('/x', { focus: true })` focuses `[data-jacare-focus]` in the new screen (add `tabindex="-1"` on headings).
+
 Full navigation API, examples, and use cases: [api.md §11](api.md#11-navigation) · Lab [`/nav`](https://jacarejs.github.io/core/lab/#/nav).
 
 ---
@@ -796,11 +801,12 @@ jacare compile src/app.jcr dist/app.js --watch
 
 jacare check
 jacare check --bindings      # print IR binding sites
+jacare check --routes        # static jacare-go vs createNav screens
 jacare check --no-style      # silence style hints
 jacare check --strict-style  # fail CI on style warnings
 ```
 
-`jacare check` compiles every `.jcr` and validates **contracts** + **Mesh links** vs published bags. Exit code `1` on failure — use in CI.
+`jacare check` compiles every `.jcr` and validates **contracts** + **Mesh links** vs published bags. Errors include a **source snippet**. `--routes` is opt-in. Exit code `1` on failure — use in CI.
 
 ### 9.5 Lab (this repo)
 
@@ -875,6 +881,7 @@ export default {
 | Ship | `jacare build` |
 | CI / contracts | `jacare check` |
 | Inspect bindings | `jacare check --bindings` |
+| Check static routes | `jacare check --routes` |
 
 ---
 

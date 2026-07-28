@@ -172,6 +172,16 @@ view`
 `
 ```
 
+Contract **`pulses`** unwrap bare names (`#if open` → `open()`). Attribute form (same IR as a single `#if` arm):
+
+```html
+<p jacare-when={error()} role="alert">${error}</p>
+```
+
+### Route address sugar
+
+`${@route/id}` compiles to `getRouteParam('id')` (active nav params). Keep `createRoute(nav.where)` for JS. Reserved bag id `route` is not collected as a Mesh port.
+
 ### Keyed lists
 
 ```javascript
@@ -220,7 +230,7 @@ export function mount(target, props = {}) {
 
 ### Template contracts
 
-Declare the component surface with `export <contract>` — props (with `type`, `required`, `default`, `model`), pulses, slots, and emits. The compiler emits `emit()` + defaults; `jacare check` / the Vite plugin validate parents:
+Declare the component surface with `export <contract>` — props (with `type`, `required`, `default`, `model`), pulses, slots, and emits. The compiler emits `emit()` + defaults; `jacare check` / the Vite plugin validate parents. Names listed under **`pulses`** are rewritten like local signals in `#if` / effects (bare `open` → `open()`); calling `open()` explicitly still works.
 
 ```javascript
 export <contract>

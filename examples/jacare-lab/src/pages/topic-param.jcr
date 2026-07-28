@@ -15,12 +15,13 @@ export <view>
       <p class="page-lead">Mounted from /topic/:slug — the slug segment is passed as a mount prop. No manual URL parsing.</p>
     </header>
 
-    <Tip :text=${'createNav merges ctx.params and ctx.search into the props object passed to mount() — every :name segment becomes a same-named prop on the screen.'} />
+    <Tip :text=${'createNav merges ctx.params and ctx.search into the props object passed to mount() — every :name segment becomes a same-named prop on the screen. Template sugar ${@route/slug} reads the same param via getRouteParam (createRoute still preferred in JS).'} />
 
     <div class="nav-summary">
       <Badge :text=${slug} />
       <div class="nav-live">
         <div class="nav-live-row"><span>prop slug</span><code>${slug}</code></div>
+        <div class="nav-live-row"><span>@route/slug</span><code>${@route/slug}</code></div>
         <div class="nav-live-row"><span>route.path()</span><code>${pathLabel}</code></div>
       </div>
     </div>

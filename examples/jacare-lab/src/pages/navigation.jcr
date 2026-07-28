@@ -53,6 +53,11 @@ function goHelpers() {
   nav.go('/nav?visited=1')
 }
 
+function goFocus() {
+  mark('nav.go(/nav, { focus: true })')
+  nav.go('/nav', { focus: true })
+}
+
 function swapHelpers() {
   mark('nav.swap(/nav?visited=swap)')
   nav.swap('/nav?visited=swap')
@@ -356,15 +361,17 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'nav.go / swap / undo / warm'} :lead=${'go() pushes history, swap() replaces it, undo() goes back, warm() preloads a lazy screen.'} :code=${navApiCode}>
+      <Demo :title=${'nav.go / swap / undo / warm'} :lead=${'go() pushes history, swap() replaces it, undo() goes back, warm() preloads a lazy screen. Pass { focus: true } to focus [data-jacare-focus] after mount.'} :code=${navApiCode}>
         <div class="stack">
+          <h2 data-jacare-focus tabindex="-1" class="page-title" style="font-size:1.1rem;margin:0">Focus target</h2>
           <div class="row">
             <button type="button" class="btn" on-click=${goHelpers}>nav.go</button>
+            <button type="button" class="btn btn-outline" on-click=${goFocus}>go + focus</button>
             <button type="button" class="btn btn-outline" on-click=${swapHelpers}>nav.swap</button>
             <button type="button" class="btn btn-outline" on-click=${undoHelpers}>nav.undo</button>
             <button type="button" class="btn btn-ghost" on-click=${warmForms}>nav.warm('/forms')</button>
           </div>
-          <p class="muted">Try go, then undo — history restores the previous query string.</p>
+          <p class="muted">Try go, then undo — history restores the previous query string. “go + focus” moves keyboard focus to the heading above.</p>
         </div>
       </Demo>
 

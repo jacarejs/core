@@ -91,6 +91,10 @@ export const navApiCode = viewSnippet(
   nav.go('/nav?visited=1')
 }
 
+function goFocus() {
+  nav.go('/nav', { focus: true })
+}
+
 function swapHelpers() {
   nav.swap('/nav?visited=swap')
 }
@@ -103,8 +107,10 @@ function warmForms() {
   nav.warm('/forms')
 }`,
   `  <div class="stack">
+    <h2 data-jacare-focus tabindex="-1" class="page-title" style="font-size:1.1rem;margin:0">Focus target</h2>
     <div class="row">
       <button type="button" class="btn" on-click=\${goHelpers}>nav.go</button>
+      <button type="button" class="btn btn-outline" on-click=\${goFocus}>go + focus</button>
       <button type="button" class="btn btn-outline" on-click=\${swapHelpers}>nav.swap</button>
       <button type="button" class="btn btn-outline" on-click=\${undoHelpers}>nav.undo</button>
       <button type="button" class="btn btn-ghost" on-click=\${warmForms}>nav.warm('/forms')</button>

@@ -10,6 +10,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+
+- **core:** `nav.go` / `swap` focus grip (`{ focus }`, `data-jacare-focus`); `getRouteParam` + `${@route/id}` template sugar
+- **compiler:** contract `pulses` bare unwrap; `jacare-when={cond}`; route-scan helpers for `jacare check --routes`
+- **cli:** `jacare check --routes`; compile errors print source snippets via `formatCompileError`
+
+### Fixed
+
+- **examples:** dispose `connectJacareDevtools()` on HMR (todo, showcase, bmi, studio, lab, scaffolds)
+
 ## [0.1.12](https://github.com/jacarejs/core/compare/v0.1.11...v0.1.12) - 2026-07-25
 
 ### Added

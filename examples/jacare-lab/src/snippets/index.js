@@ -64,6 +64,7 @@ export {
   gradeCode,
   emptyResultsCode,
   themeBgCode,
+  jacareWhenCode,
 } from './conditionals.js'
 
 export { roleCode, statusCode, themeCode, numericCode } from './case.js'
@@ -125,6 +126,7 @@ export {
 export {
   cliCode,
   checkBindingsCode,
+  checkRoutesCode,
   expressionStyleCode,
   bindingIrCode,
   vitePluginCode,
@@ -191,6 +193,7 @@ import {
   gradeCode,
   emptyResultsCode,
   themeBgCode,
+  jacareWhenCode,
 } from './conditionals.js'
 import { keyedCode, indexCode, emptyPatternCode, catalogCode, filterCode, moveTopCode } from './lists.js'
 import {
@@ -240,6 +243,7 @@ import {
 import {
   cliCode,
   checkBindingsCode,
+  checkRoutesCode,
   expressionStyleCode,
   bindingIrCode,
   vitePluginCode,
@@ -319,6 +323,7 @@ export const SNIPPET_CATALOG = [
   { id: 'conditionals.grade', title: '#elif chain: grade tiers', lesson: '/if', code: gradeCode },
   { id: 'conditionals.empty-results', title: 'Empty-state pattern: search results', lesson: '/if', code: emptyResultsCode },
   { id: 'conditionals.theme-bg', title: 'Swap backgrounds with if', lesson: '/if', code: themeBgCode },
+  { id: 'conditionals.jacare-when', title: 'jacare-when one-liner', lesson: '/if', code: jacareWhenCode },
 
   { id: 'lists.keyed', title: 'Keyed add / remove / reorder', lesson: '/for', code: keyedCode },
   { id: 'lists.index', title: 'Index binding', lesson: '/for', code: indexCode },
@@ -387,6 +392,7 @@ export const SNIPPET_CATALOG = [
 
   { id: 'tooling.cli', title: 'CLI commands', lesson: '/tooling', code: cliCode },
   { id: 'tooling.check-bindings', title: 'jacare check --bindings', lesson: '/tooling', code: checkBindingsCode },
+  { id: 'tooling.check-routes', title: 'jacare check --routes', lesson: '/tooling', code: checkRoutesCode },
   { id: 'tooling.expression-style', title: 'Expression style', lesson: '/tooling', code: expressionStyleCode },
   { id: 'tooling.binding-ir', title: 'Binding IR (compiler)', lesson: '/binding-ir', code: bindingIrCode },
   { id: 'tooling.vite-plugin', title: 'Vite plugin options', lesson: '/tooling', code: vitePluginCode },

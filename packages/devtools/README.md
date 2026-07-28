@@ -46,8 +46,16 @@ Add to your app entry (e.g. `boot.js`) and guard with a dev check:
 ```javascript
 import { connectJacareDevtools } from '@jacare/devtools'
 
+let disposeDevtools = null
 if (import.meta.env.DEV) {
-  connectJacareDevtools()
+  disposeDevtools = connectJacareDevtools()
+}
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    disposeDevtools?.()
+    disposeDevtools = null
+  })
 }
 ```
 

@@ -61,8 +61,8 @@ Full CLI tables: [language-reference.md §9](../../docs/language-reference.md#9-
 |------|--------|
 | **Blocks** | `export <view>` · `export <style>` · `export <contract>` |
 | **Directives** | `#if` `#elif` `#else` `#end` · `#case` `#when` · `#for` / `@each` |
-| **Prefixes** | `on-*` / `@*` · `bind-*` · `:*` · `class-*` · `style---*` · `${@bag/key}` |
-| **Special** | `<slot>` · `<debug>` · `jacare-frame` · `jacare-go` · `jacare-here` |
+| **Prefixes** | `on-*` / `@*` · `bind-*` · `:*` · `class-*` · `style---*` · `${@bag/key}` · `${@route/key}` |
+| **Special** | `<slot>` · `<debug>` · `jacare-frame` · `jacare-go` · `jacare-here` · `jacare-when` · `data-jacare-focus` |
 | **Contract keys** | `props` · `pulses` · `slots` · `emits` · `forwards` · `links` |
 
 Live tables + demos: **Lab → Language reference** (`/language`).
@@ -104,7 +104,7 @@ Complete catalog: [language-reference.md §3](../../docs/language-reference.md#3
 | `/cookbook` | Tasks screen combining the pieces |
 | `/ssr` | `render` / `resume` via shared MountPlan |
 | `/island` | `mountIsland`, shadow, React/Vue/Angular hosts |
-| `/tooling` | CLI (`check --bindings`), Vite, Binding IR, DevTools |
+| `/tooling` | CLI (`check --bindings` / `--routes`), Vite, Binding IR, DevTools |
 | `/helpers` | Import catalog — detailed English explanation per symbol |
 
 Each `Demo` card explains the idea, runs a live example, and opens the source in a modal.

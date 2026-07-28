@@ -3,7 +3,8 @@ jacare dev --port=4000
 jacare build
 jacare compile src/app.jcr dist/app.js --watch
 jacare check
-jacare check --bindings`
+jacare check --bindings
+jacare check --routes`
 
 export const checkBindingsCode = `$ jacare check --bindings
 ok …/Card.jcr
@@ -18,6 +19,13 @@ ok …/Field.jcr
     - model · value · bindModel · signal
 
 102 file(s) ok`
+
+export const checkRoutesCode = `$ jacare check --routes
+ok src/pages/home.jcr
+ok src/pages/about.jcr
+src/shell.jcr: jacare-go "/settngs" does not match any createNav screen
+
+1 issue(s) found`
 
 export const expressionStyleCode = `import { pulse, derive } from '@jacare/core'
 import { cart } from '../bags/cart.js'

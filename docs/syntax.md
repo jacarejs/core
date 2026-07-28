@@ -243,6 +243,14 @@ export <view>
 </view>
 ```
 
+One-liner (same IR as a single `#if` arm):
+
+```html
+<p jacare-when={error()} role="alert">${error}</p>
+```
+
+Contract **`pulses`** unwrap bare names in `#if` / effects; local pulses still prefer `name()` for clarity.
+
 Siblings inside the active branch keep source order at runtime (`branch` insertion cursor).
 
 ### Match (`#case`)
@@ -477,16 +485,19 @@ nav.warm('/about')
 | Member | Role |
 |--------|------|
 | `attach(target)` | Mount layout + active screen |
-| `go(path)` | Navigate forward (queued if another navigation is in progress) |
-| `swap(path)` | Replace current history entry |
+| `go(path, options?)` | Navigate forward (queued). `{ focus?: boolean \| string }` |
+| `swap(path, options?)` | Replace current history entry (same focus options) |
 | `undo()` | `history.back()` |
 | `warm(path)` | Preload lazy screen modules |
 | `missing` | 404 screen when no URL matches |
 | `where` | `Signal<NavPlace>` — reactive current place (`.peek` for untracked read) |
 | `createRoute(nav.where)` | `route.path` / `route.param(name)` / `route.search(name)` |
+| `getRouteParam(name)` | Getter for `${@route/name}` sugar |
 | `routeHref(pattern, params?, search?)` | Build paths for `jacare-go` / `href` |
 
 `createNav({ base: '/app' })` sets the URL prefix for all screens.
+
+Template sugar: `${@route/id}` · focus: `data-jacare-focus` + `nav.go(path, { focus: true })`.
 
 Full guide and use cases: [api.md §11](api.md#11-navigation). Lab: [`/nav`](https://jacarejs.github.io/core/lab/#/nav).
 
@@ -581,6 +592,7 @@ jacare compile src/app.jcr
 jacare compile src/app.jcr --watch
 jacare check
 jacare check --bindings   # list IR sites: text · count · bindText · signal
+jacare check --routes     # static jacare-go vs createNav screens
 jacare check --strict-style   # fail on redundant ${() => …} style warnings
 ```
 

@@ -248,7 +248,10 @@ Jacaré modules are JavaScript. The tokens below are reserved by the **compiler*
 | `<slot>` / `slot="name"` | Content projection |
 | `<debug>` | Dev JSON inspector (stripped in prod) |
 | `jacare-frame` / `jacare-go` / `jacare-here` | Navigation shell + links |
+| `jacare-when={expr}` | One-liner conditional — same IR as `#if…#end` |
+| `data-jacare-focus` | Focus target after `nav.go(path, { focus: true })` |
 | `${@bag/key}` | Pulse Mesh address |
+| `${@route/key}` | Active nav path param (`getRouteParam`) |
 | Contract fields `props` · `pulses` · `slots` · `emits` · `forwards` · `links` | Only valid `<contract>` keys |
 
 ---
@@ -622,6 +625,7 @@ Runtime helpers imported only when the compiler needs them. **Complete catalog w
 | `${signal}` / `${pulse}` | `bindText` / CPW | Reactive text |
 | `${prop}` | `bindPropText` | Component prop (signal or string) |
 | `${@bag/key}` | Mesh Port (`getBag` + bind) | Shared bag without local import |
+| `${@route/key}` | Route param (`getRouteParam`) | Active nav path param |
 | `bind-href=${url}` / `:href=${url}` | `bindAttribute` | One-way DOM attribute |
 | `:disabled=${busy}` | Attr bind (falsy removes attr) | Boolean attributes |
 | `bind-value=${draft}` | `bindModel(…, 'value')` | Two-way text / number / select |
@@ -926,7 +930,25 @@ export <view>
 </view>
 ```
 
-Bare signal refs may work when the compiler rewrites them inside effects; **prefer `name()`** in `#if` for clarity.
+Bare signal refs may work when the compiler rewrites them inside effects; **prefer `name()`** in `#if` for local pulses. **Contract `pulses`** are also rewritten (bare `#if open` / `${open}` → call the pulse prop). Plain `props` stay non-calling.
+
+### Attribute one-liner — `jacare-when`
+
+Same branch IR as a single-arm `#if…#end`. The attribute is stripped from the DOM:
+
+```html
+<p jacare-when={error()} role="alert">${error}</p>
+```
+
+Equivalent to:
+
+```
+#if error()
+  <p role="alert">${error}</p>
+#end
+```
+
+Keep multi-branch `#if` / `#elif` / `#else` for anything beyond a single guard.
 
 ### Nested `#if`
 
@@ -1375,7 +1397,7 @@ export <view>
 | Field | Meaning |
 |-------|---------|
 | `props` | Accepted props (`'string'` or `{ type, required, default, model }`) |
-| `pulses` | Props expected to be pulses/signals |
+| `pulses` | Props expected to be pulses/signals — bare names unwrap in `#if` / effects |
 | `slots` | Slot names (`default` → `children`) |
 | `emits` | Events the child may `emit('name')` — parent listens with `on-name` |
 | `forwards` | Parsed for future emit bridging (not validated yet) |
@@ -1614,12 +1636,14 @@ import {
   lazy,
   screen,
   createRoute,
+  getRouteParam,
   routeHref,
   routeParam,
   routeSearch,
   setNavTitle,
   getNavTitle,
 } from '@jacare/core'
+import type { NavGoOptions } from '@jacare/core'
 ```
 
 ### Step 1 — Shell (`shell.jcr`)
@@ -1641,6 +1665,7 @@ export <view>
 | `jacare-frame` | Outlet where the active screen mounts |
 | `jacare-go` | In-app path (or expression). Prefer also setting `href` for accessibility / open-in-new-tab |
 | `jacare-here` | Applied automatically to the active `jacare-go` link |
+| `data-jacare-focus` | Element focused after `nav.go(path, { focus: true })` (add `tabindex="-1"` on non-focusable hosts) |
 
 ### Step 2 — Screen map (`nav.js`)
 
@@ -1702,20 +1727,51 @@ Dynamic segments use `:name` (e.g. `/topic/:slug`). Catch-all segments use `:nam
 ```javascript
 import { nav } from './nav.js'
 
-nav.attach(document.getElementById('app'))
-// optional: nav.warm('/about') after attach to preload lazy chunks
+let disposeDevtools = null
+if (import.meta.env.DEV) {
+  const { connectJacareDevtools } = await import('@jacare/devtools')
+  disposeDevtools = connectJacareDevtools({ scope: false })
+}
+
+const root = document.getElementById('app')
+let dispose = nav.attach(root)
+
+if (import.meta.hot) {
+  import.meta.hot.accept()
+  import.meta.hot.dispose(() => {
+    disposeDevtools?.()
+    disposeDevtools = null
+    dispose?.()
+    dispose = null
+  })
+}
 ```
+
+`connectJacareDevtools()` returns a dispose function — call it on HMR teardown so the overlay does not leak across reloads.
 
 ### Nav API
 
 | Member | Description |
 |--------|-------------|
 | `attach(target)` | Mount layout; sync to the current URL; returns a dispose function |
-| `go(path)` | Push history and mount the matching screen (queued) |
-| `swap(path)` | Replace the current history entry (queued) |
+| `go(path, options?)` | Push history and mount the matching screen (queued). Options: `{ focus?: boolean \| string }` |
+| `swap(path, options?)` | Replace the current history entry (queued). Same focus options as `go` |
 | `undo()` | `history.back()` |
 | `warm(path)` | Preload a lazy / loader screen without navigating |
 | `where` | `Signal<NavPlace>` — `{ path, params, search, hash }` |
+
+#### Focus grip
+
+After the screen mounts, optionally move keyboard focus:
+
+```javascript
+await nav.go('/settings', { focus: true })           // → [data-jacare-focus]
+await nav.go('/settings', { focus: '#main-title' })  // CSS selector inside the screen host
+```
+
+```html
+<h1 id="main-title" data-jacare-focus tabindex="-1">Settings</h1>
+```
 
 `NavPlace` / `NavContext` fields:
 
@@ -1757,6 +1813,25 @@ routeSearch(ctx, 'tab') // → 'feedback' when ?tab=feedback
 ```
 
 These are **not** reactive subscriptions — they read the context object you pass. For live UI updates in a mounted screen, use `createRoute(nav.where)`.
+
+### Template sugar — `${@route/id}`
+
+When a nav is attached (exposes `__JACARE_NAV__`), templates can read path params without importing `route`:
+
+```html
+<p>Pedido ${@route/id}</p>
+```
+
+Compiles to `getRouteParam('id')` (tracks `nav.where`). **`createRoute` remains the preferred JS API** for typed helpers and search keys.
+
+```javascript
+import { getRouteParam } from '@jacare/core'
+
+const id = getRouteParam('id')
+id() // string | undefined — reactive when used in effects / bindings
+```
+
+Reserved Mesh bag id `route` — do not publish a bag named `route` if you use this sugar.
 
 ### Building links — `routeHref`
 
@@ -2258,7 +2333,18 @@ Returns a dispose function. Full guide: [island.md](island.md). Demos: static [`
 ```javascript
 import { connectJacareDevtools } from '@jacare/devtools'
 
-connectJacareDevtools()
+let disposeDevtools = null
+if (import.meta.env.DEV) {
+  disposeDevtools = connectJacareDevtools()
+}
+
+// HMR — always dispose the overlay with nav.attach
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    disposeDevtools?.()
+    disposeDevtools = null
+  })
+}
 ```
 
 Panels (dev only — only when you call `connectJacareDevtools()`):
@@ -2470,14 +2556,16 @@ jacare build
 | Command | Description |
 |---------|-------------|
 | `jacare compile <file> [out] [--watch]` | Compile one `.jcr` |
-| `jacare check` | Compile-check all `.jcr` (contracts + Mesh `links` vs published bags) |
+| `jacare check` | Compile-check all `.jcr` (contracts + Mesh `links` vs published bags). Errors include a source snippet |
 | `jacare check --bindings` | Same + IR binding sites per file |
+| `jacare check --routes` | Also verify static `jacare-go="/…"` targets against `createNav` screens |
 | `jacare check --no-style` | Skip soft style hints (redundant `${() => …}`) |
 | `jacare check --strict-style` | Fail when style warnings are present |
 
 ```bash
 jacare compile src/app.jcr --watch
 jacare check --bindings
+jacare check --routes
 ```
 
 ### `jacare.config.js`
@@ -2950,7 +3038,7 @@ You write `.jcr` syntax; the compiler imports `bindText`, `bindAttribute`, `bind
 ```javascript
 import {
   createNav, lazy, screen,
-  createRoute, routeHref, routeParam, routeSearch,
+  createRoute, getRouteParam, routeHref, routeParam, routeSearch,
   setNavTitle, getNavTitle,
 } from '@jacare/core'
 ```
@@ -2986,6 +3074,7 @@ export const nav = createNav({
 ```javascript
 nav.attach(document.getElementById('app'))
 nav.go('/about')
+nav.go('/settings', { focus: true })
 nav.swap('/about?tab=bio')
 nav.warm('/cart')
 nav.undo()
@@ -3003,6 +3092,18 @@ export const route = createRoute(nav.where)
 route.path()
 route.param('id')()
 route.search('q')()
+```
+
+**`${@route/id}` / `getRouteParam`** — template sugar (nav must be attached)
+
+```html
+<p>${@route/id}</p>
+```
+
+```javascript
+import { getRouteParam } from '@jacare/core'
+const id = getRouteParam('id')
+id()
 ```
 
 **`routeParam` / `routeSearch`** — one-shot reads from a `NavContext`
@@ -3413,7 +3514,7 @@ export <contract>
 |---------|--------|
 | State in a page | `pulse`, `derive`, `effect` / `watch`, `batch` (and opt-in `enablePatience` / `flushSync`) from `@jacare/core` |
 | Shared cart / theme | `createBag`, `getBag`, `ripple` |
-| Router | `createNav`, `lazy`, `createRoute`, `setNavTitle` |
+| Router | `createNav`, `lazy`, `createRoute`, `getRouteParam`, `setNavTitle` |
 | Form | `createForm` |
 | Screen hooks + DevTools Scope | `createLifecycle`, `registerScope` |
 | Overlay UI | `connectJacareDevtools` from `@jacare/devtools` |

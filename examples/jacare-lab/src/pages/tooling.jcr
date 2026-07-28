@@ -7,6 +7,7 @@ import {
   vitePluginCode,
   compileApiCode,
   checkBindingsCode,
+  checkRoutesCode,
   expressionStyleCode,
   bindingIrCode,
   devtoolsCode,
@@ -60,7 +61,7 @@ export <view>
         </div>
       </a>
 
-      <Demo :title=${'CLI commands'} :lead=${'jacare new / dev / build / compile / check wrap Vite and the compiler. Pass --bindings to list IR sites.'} :code=${cliCode}>
+      <Demo :title=${'CLI commands'} :lead=${'jacare new / dev / build / compile / check wrap Vite and the compiler. Pass --bindings for IR sites, --routes for static jacare-go vs createNav screens.'} :code=${cliCode}>
         <pre class="log">${cliCode}</pre>
       </Demo>
 
@@ -68,6 +69,12 @@ export <view>
         <h3>jacare check --bindings</h3>
         <p class="muted">Prints every lowered binding site from the Binding IR — the same classification used for client and SSR emit.</p>
         <pre><code>${checkBindingsCode}</code></pre>
+      </div>
+
+      <div class="ref-card">
+        <h3>jacare check --routes</h3>
+        <p class="muted">Opt-in: compares static jacare-go="/…" targets to createNav screen patterns. Dynamic links are skipped.</p>
+        <pre><code>${checkRoutesCode}</code></pre>
       </div>
 
       <div class="ref-card">

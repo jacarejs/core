@@ -93,6 +93,7 @@ Open `http://localhost:3000` — the dev server starts with hot reload for `.jcr
 | `jacare build` | Production build to `dist/` |
 | `jacare compile <file>` | Compile one `.jcr` file to JS |
 | `jacare check` | Compile-check all `.jcr` files |
+| `jacare check --routes` | Same + static `jacare-go` vs `createNav` screens |
 | `jacare help` | Show help |
 
 ### Vite-based templates
@@ -230,6 +231,8 @@ Validate every `.jcr` file in the project without building:
 
 ```bash
 jacare check
+jacare check --bindings
+jacare check --routes
 ```
 
 ```
@@ -240,6 +243,8 @@ ok src/pages/home.jcr
 3 file(s) ok
 ```
 
+Compile errors print **file:line:column** plus a source snippet (`^` under the bad token).
+
 `jacare check` compiles each module **and** cross-checks parents against child **template contracts**:
 
 - unknown props / emits
@@ -247,11 +252,14 @@ ok src/pages/home.jcr
 - `model: true` props must use `bind-name` (not `:name`)
 - soft static type checks (`boolean` / `number` / `object`)
 
-Exit code `1` if any compile or contract issue is found — ready for CI:
+`jacare check --routes` (opt-in) also scans `createNav({ screens })` keys and static `jacare-go="/…"` targets. Dynamic links are skipped; unmatched literals fail CI.
+
+Exit code `1` if any compile, contract, or (with `--routes`) route issue is found — ready for CI:
 
 ```yaml
 - run: npm install
 - run: npx jacare check
+- run: npx jacare check --routes
 ```
 
 ---
@@ -297,7 +305,24 @@ App(root)
 ```javascript
 import { nav } from './nav.js'
 
-nav.attach(document.getElementById('app'))
+let disposeDevtools = null
+if (import.meta.env.DEV) {
+  const { connectJacareDevtools } = await import('@jacare/devtools')
+  disposeDevtools = connectJacareDevtools()
+}
+
+const root = document.getElementById('app')
+let dispose = nav.attach(root)
+
+if (import.meta.hot) {
+  import.meta.hot.accept()
+  import.meta.hot.dispose(() => {
+    disposeDevtools?.()
+    disposeDevtools = null
+    dispose?.()
+    dispose = null
+  })
+}
 ```
 
 ---

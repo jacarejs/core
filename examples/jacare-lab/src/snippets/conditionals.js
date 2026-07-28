@@ -208,3 +208,19 @@ function setTheme(next) {
   color: #e8f8dc;
 }`,
 )
+
+export const jacareWhenCode = viewSnippet(
+  `const showHint = pulse(true)
+
+function toggleHint() {
+  showHint.update((v) => !v)
+}`,
+  `  <div class="stack">
+    <button type="button" class="btn btn-outline" on-click=\${toggleHint}>
+      Toggle hint
+    </button>
+    <p jacare-when=\${showHint} class="muted" role="status">
+      jacare-when mounts this node only while the condition is truthy — same IR as #if…#end.
+    </p>
+  </div>`,
+)
