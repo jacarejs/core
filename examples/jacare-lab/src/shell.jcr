@@ -33,7 +33,7 @@ export <view>
           </span>
         </a>
 
-        <nav class="side-nav">
+        <nav class="side-nav" aria-label="Lessons">
           #for LESSONS as lesson (lesson.path)
             <a
               class="side-link"

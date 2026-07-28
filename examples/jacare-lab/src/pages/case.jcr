@@ -73,7 +73,7 @@ export <view>
           </div>
           #case status()
             #when 'loading'
-              <p class="muted">Loading…</p>
+              <p class="muted" role="status" aria-live="polite">Loading…</p>
             #when 'error'
               <p class="muted">Something went wrong.</p>
             #when 'empty'

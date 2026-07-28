@@ -271,7 +271,10 @@ body {
 .page-lead a:focus-visible,
 .muted a:focus-visible,
 .ref-card a:focus-visible,
-.text-link:focus-visible {
+.text-link:focus-visible,
+.btn:focus-visible,
+.input:focus-visible,
+.side-link:focus-visible {
   outline: 2px solid #78c018;
   outline-offset: 2px;
   border-radius: 0.2rem;
@@ -1931,4 +1934,19 @@ body {
 .bag-depth-body {
   display: grid;
   gap: 0.35rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .btn:hover,
+  .side-link:hover {
+    transform: none;
+  }
 }

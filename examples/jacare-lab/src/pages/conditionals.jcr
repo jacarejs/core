@@ -84,7 +84,7 @@ export <view>
             #end
           </div>
           #if state() === 'loading'
-            <p class="muted">Loading…</p>
+            <p class="muted" role="status" aria-live="polite">Loading…</p>
           #elif state() === 'error'
             <p class="muted">Something went wrong.</p>
           #elif state() === 'empty'
