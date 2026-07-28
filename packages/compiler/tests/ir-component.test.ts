@@ -42,6 +42,30 @@ describe('lower component', () => {
     expect(count?.source).toEqual({ kind: 'signal', name: 'count', local: true })
   })
 
+  it('passes dotted member paths eagerly (form.fields.name)', () => {
+    const ast = parseTemplate(`<Field :field={form.fields.name} :label={'Name'} />`)
+    const node = ast.children[0]!
+    expect(node.type).toBe('component')
+    if (node.type !== 'component') return
+    const plan = lowerComponent(node, { signals: new Set() })
+    const field = plan.props.find((p) => p.name === 'field')
+    expect(field?.lazy).toBe(false)
+    expect(field?.raw).toBe('form.fields.name')
+  })
+
+  it('emits form field refs without a lazy thunk', () => {
+    const result = compile(
+      `import Field from './Field.jcr'
+       import { createForm } from '@jacare/core'
+       const form = createForm({ name: { value: '' } })
+       export <view>
+         <Field :label=\${'Name'} :field=\${form.fields.name} />
+       </view>`,
+    )
+    expect(result.code).toContain('field: form.fields.name')
+    expect(result.code).not.toContain('field: () => (form.fields.name)')
+  })
+
   it('emits lazy thunk for reactive call props', () => {
     const result = compile(
       `import Badge from './Badge.jcr'

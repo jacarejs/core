@@ -98,6 +98,9 @@ function shouldLazyOneWay(source: BindingSource): boolean {
 function isSimplePassThrough(code: string): boolean {
   const t = code.trim()
   if (/^[A-Za-z_$][\w$]*$/.test(t)) return true
+  // Stable member paths (form.fields.name, cart.count) — pass the cell/object ref eagerly.
+  // Call exprs like t('key') stay lazy so the child re-reads.
+  if (/^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)+$/.test(t)) return true
   if (/^(['"]).*\1$/.test(t) || /^`[^${}]*`$/.test(t)) return true
   if (/^\d+(\.\d+)?$/.test(t)) return true
   if (t === 'true' || t === 'false' || t === 'null' || t === 'undefined') return true
