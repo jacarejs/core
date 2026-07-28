@@ -43,6 +43,7 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | **Scoped CSS** | `style` tagged templates and `export <style>` highlighted as CSS |
 | **File icons** | Jacaré logo for `.jcr` files in the Explorer |
 | **Editor helpers** | Auto-closing brackets, quotes, and template literals |
+| **Lab command** | **Jacaré: Open Lab Lesson for Symbol** — opens the matching Lab lesson (or a picker) |
 
 ---
 
@@ -133,6 +134,15 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 | `jcr-create-nav` | `createNav` | Full `createNav` + `createRoute` scaffold |
 
 Pair `jcr-screen` in the `.jcr` page with `jcr-nav-lazy` in `nav.js`.
+
+### Lab command
+
+Command Palette → **Jacaré: Open Lab Lesson for Symbol**
+
+- Cursor on a known symbol (`pulse`, `#if`, `createNav`, `bind-value`, …) → opens that Lab lesson
+- Otherwise → QuickPick of all lessons
+
+Live Lab: [https://jacarejs.github.io/core/lab/](https://jacarejs.github.io/core/lab/)
 
 ### Template expression style
 

@@ -109,7 +109,13 @@
       "files.associations": {
         "*.jcr.ts": "typescript"
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "jacare.openLabLesson",
+        "title": "Jacaré: Open Lab Lesson for Symbol"
+      }
+    ]
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
