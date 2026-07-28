@@ -5,7 +5,10 @@
 [![npm](https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030)](https://www.npmjs.com/package/@jacare/core)
 [![license](https://img.shields.io/github/license/jacarejs/core.svg?color=189030)](https://github.com/jacarejs/core/blob/main/LICENSE)
 
-## Monorepo setup
+## Code of Conduct
+
+This project follows the [Contributor Covenant](../CODE_OF_CONDUCT.md). By
+participating, you are expected to uphold that code.
 
 ```bash
 git clone https://github.com/jacarejs/core.git
