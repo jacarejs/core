@@ -73,6 +73,13 @@ function sendToPage(message) {
   })
 }
 
+async function ensurePageBridge() {
+  return chrome.runtime.sendMessage({
+    type: 'jacare-ensure-page',
+    tabId: chrome.devtools.inspectedWindow.tabId,
+  })
+}
+
 function renderHint() {
   if (!hello) {
     hintEl.hidden = false
@@ -536,6 +543,16 @@ async function selectPulse(pulseId, options = {}) {
 async function refresh() {
   setStatus('…', false)
   try {
+    const bridge = await ensurePageBridge()
+    if (bridge && bridge.ok === false) {
+      hello = null
+      inspect = null
+      setStatus('offline', false)
+      hintEl.hidden = false
+      hintEl.textContent = bridge.error || 'Could not attach to this tab.'
+      renderAll()
+      return
+    }
     const res = await sendToPage({ type: 'hello' })
     hello = res?.hello ?? null
     if (hello && !hello.enabled) {

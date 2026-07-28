@@ -1,6 +1,6 @@
 # Privacy Policy — Jacaré Devtools
 
-**Last updated:** July 24, 2026
+**Last updated:** July 28, 2026
 
 This Privacy Policy applies to the **Jacaré Devtools** Chrome extension (the “Extension”), published for use with apps built on the Jacaré front-end framework.
 
@@ -34,9 +34,9 @@ The Extension does **not** use analytics, accounts, advertising, or remote telem
 
 ## How data is handled on your device
 
-When DevTools is open on a Jacaré page:
+When DevTools is open on a Jacaré page and you use the Jacaré panel:
 
-1. A content script may run on the inspected page (subject to the Extension’s host permissions).
+1. The Extension injects a content script **into the inspected tab only** (via `chrome.scripting`, when the panel needs a bridge).
 2. A page hook bundled with the Extension may bridge messages to `window.__JACARE_DEVTOOLS_HOOK__` (or equivalent) when that hook is present in the page.
 3. The DevTools panel reads and displays inspect snapshots via Chrome extension messaging and `postMessage`.
 
@@ -46,9 +46,10 @@ Inspect data stays in memory for the DevTools session. It is **not** uploaded to
 
 | Permission | Purpose |
 |------------|---------|
-| Host permissions (`http://*/*`, `https://*/*`, `localhost`) | Allow the content script on pages where a Jacaré app may run (local and remote development) |
+| `scripting` | Inject the page bridge **only** into the inspected tab when the Jacaré panel needs it |
+| Host permissions (`http://*/*`, `https://*/*`, `localhost`) | Allow that on-demand inject on local and remote DEV Jacaré apps |
 
-These permissions are used only for the Extension’s single purpose: inspecting Jacaré apps in DevTools.
+These permissions are used only for the Extension’s single purpose: inspecting Jacaré apps in DevTools. The Extension does **not** run a content script on every page at `document_start`.
 
 ## Remote code
 

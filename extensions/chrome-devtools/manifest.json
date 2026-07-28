@@ -14,14 +14,7 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "content_scripts": [
-    {
-      "matches": ["http://localhost/*", "http://127.0.0.1/*", "https://*/*", "http://*/*"],
-      "js": ["content-script.js"],
-      "run_at": "document_start",
-      "all_frames": false
-    }
-  ],
+  "permissions": ["scripting"],
   "web_accessible_resources": [
     {
       "resources": ["page-hook.js"],

@@ -1,35 +1,48 @@
 const SOURCE_PAGE = 'jacare-devtools-page'
 const SOURCE_CONTENT = 'jacare-devtools-content'
 
-function injectHook() {
-  const script = document.createElement('script')
-  script.src = chrome.runtime.getURL('page-hook.js')
-  script.async = false
-  ;(document.documentElement || document.head || document.body).appendChild(script)
-  script.addEventListener('load', () => script.remove())
-}
+if (!window.__JACARE_CONTENT_INJECTED__) {
+  window.__JACARE_CONTENT_INJECTED__ = true
 
-injectHook()
-
-const port = chrome.runtime.connect({ name: 'jacare-page' })
-
-window.addEventListener('message', (event) => {
-  if (event.source !== window) return
-  const data = event.data
-  if (!data || data.source !== SOURCE_PAGE) return
-  if (data.kind === 'response') {
-    port.postMessage({ requestId: data.requestId, payload: data.payload })
+  function injectHook() {
+    const script = document.createElement('script')
+    script.src = chrome.runtime.getURL('page-hook.js')
+    script.async = false
+    ;(document.documentElement || document.head || document.body).appendChild(script)
+    script.addEventListener('load', () => script.remove())
   }
-})
 
-port.onMessage.addListener((msg) => {
-  window.postMessage(
-    {
-      source: SOURCE_CONTENT,
-      kind: 'request',
-      requestId: msg.requestId,
-      message: msg.message,
-    },
-    '*',
-  )
-})
+  injectHook()
+
+  let port = null
+
+  function connectPort() {
+    port = chrome.runtime.connect({ name: 'jacare-page' })
+    port.onMessage.addListener((msg) => {
+      window.postMessage(
+        {
+          source: SOURCE_CONTENT,
+          kind: 'request',
+          requestId: msg.requestId,
+          message: msg.message,
+        },
+        '*',
+      )
+    })
+    port.onDisconnect.addListener(() => {
+      port = null
+      setTimeout(connectPort, 400)
+    })
+  }
+
+  connectPort()
+
+  window.addEventListener('message', (event) => {
+    if (event.source !== window) return
+    const data = event.data
+    if (!data || data.source !== SOURCE_PAGE) return
+    if (data.kind === 'response' && port) {
+      port.postMessage({ requestId: data.requestId, payload: data.payload })
+    }
+  })
+}

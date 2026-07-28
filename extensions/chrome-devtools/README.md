@@ -13,6 +13,8 @@ Plus a compact **Route** bar from `createNav`.
 
 In DEV, `@jacare/vite-plugin` installs the page hook when `@jacare/devtools` is present (`devtoolsHook: false` to disable).
 
+The Extension injects its content bridge **on demand** when you open the Jacaré DevTools panel (not on every site at page load). RPC to the page times out after a few seconds if the tab bridge is gone — reload the tab and Refresh.
+
 ## Load unpacked (local)
 
 1. Open `chrome://extensions`
