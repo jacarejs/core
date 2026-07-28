@@ -525,7 +525,7 @@
     "html-attrs": {
       "patterns": [
         {
-          "match": "\\b(bind-[\\w-]+|class-[\\w-]+|on-[\\w-]+|jacare-[\\w-]+|data-jacare-[\\w-]+|@[\\w-]+|:?[\\w-]+)\\s*(=)",
+          "match": "\\b(bind-[\\w-]+|class-[\\w-]+|class:[\\w-]+|style---[\\w-]+|style:[\\w-]+|on-[\\w-]+|jacare-[\\w-]+|data-jacare-[\\w-]+|@[\\w-]+|:?[\\w-]+)\\s*(=)",
           "captures": {
             "1": {
               "name": "entity.other.attribute-name.html entity.other.attribute-name"
