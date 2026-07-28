@@ -479,7 +479,7 @@ Docs: [island.md](../../docs/island.md) · demo: [`examples/jacare-island`](../.
 ## API reference
 
 ### Reactivity
-`signal`, `pulse`, `computed`, `derive`, `effect`, `watch`, `untrack`, `batch`, `runUntracked`, `isTracking`
+`signal`, `pulse`, `computed`, `derive`, `effect`, `watch`, `untrack`, `batch`, `flushSync`, `enablePatience`, `disablePatience`, `isPatienceEnabled`, `runUntracked`, `isTracking`
 
 ### DOM
 `view`, `bindText`, `bindPropText`, `bindAttribute`, `bindProperty`, `bindClass`, `bindModel`, `branch`, `reconcileKeyedList`, `showIf`, `ensureScopedStyle`, `mountSlot`

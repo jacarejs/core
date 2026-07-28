@@ -27,7 +27,7 @@ export const LESSONS = [
   {
     path: '/reactivity',
     title: 'Reactivity',
-    blurb: 'signal, computed, effect, batch, untrack, aliases',
+    blurb: 'signal, computed, effect, batch, Patience, untrack, aliases',
   },
   {
     path: '/bag',

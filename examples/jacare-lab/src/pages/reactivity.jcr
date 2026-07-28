@@ -1,4 +1,4 @@
-import { signal, computed, effect, watch, batch, untrack, pulse, derive, ReactiveCycleError } from '@jacare/core'
+import { signal, computed, effect, watch, batch, untrack, pulse, derive, ReactiveCycleError, enablePatience, disablePatience, flushSync, isPatienceEnabled } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import {
@@ -6,6 +6,7 @@ import {
   computedCode,
   effectCode,
   batchCode,
+  patienceCode,
   untrackCode,
   cycleGuardCode,
   aliasCode,
@@ -66,6 +67,36 @@ function bumpBatched() {
     batchA.update((n) => n + 1)
     batchB.update((n) => n + 1)
   })
+}
+
+const patienceA = signal(0)
+const patienceB = signal(0)
+const patienceRuns = signal(0)
+const patienceOn = signal(false)
+
+effect(() => {
+  patienceA()
+  patienceB()
+  patienceRuns.update((n) => n + 1)
+})
+
+function togglePatience() {
+  if (isPatienceEnabled()) {
+    disablePatience()
+    patienceOn.set(false)
+  } else {
+    enablePatience()
+    patienceOn.set(true)
+  }
+}
+
+function bumpPatienceBurst() {
+  patienceA.update((n) => n + 1)
+  patienceB.update((n) => n + 1)
+}
+
+function flushPatienceNow() {
+  flushSync()
 }
 
 const tracked = signal(0)
@@ -163,6 +194,7 @@ export <view>
     </header>
 
     <Tip :text=${'signal is the canonical name. pulse is an identical alias for the exact same function — this lab mixes both on purpose so you recognize either style.'} />
+    <Tip :text=${'Prefer batch/ripple for grouped writes. Patience (enablePatience) is an opt-in safety net for bursts; default schedule stays synchronous.'} />
 
     <div class="lesson-grid">
       <Demo :title=${'signal: set, update, peek'} :lead=${'set() replaces the value, update() derives the next one, peek reads without subscribing.'} :code=${signalCode}>
@@ -209,6 +241,17 @@ export <view>
             <button type="button" class="btn" on-click=${bumpBatched}>Bump a + b in batch()</button>
           </div>
           <p class="muted">a: ${batchA} · b: ${batchB} · effect runs: ${batchRuns}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${'Patience: microtask coalesce (opt-in)'} :lead=${'Default stays sync. enablePatience() queues writes outside batch into one microtask; flushSync() drains now. Prefer batch for explicit groups.'} :code=${patienceCode}>
+        <div class="stack">
+          <div class="row">
+            <button type="button" class="btn" on-click=${togglePatience}>Toggle Patience</button>
+            <button type="button" class="btn btn-outline" on-click=${bumpPatienceBurst}>Burst a + b</button>
+            <button type="button" class="btn btn-ghost" on-click=${flushPatienceNow}>flushSync()</button>
+          </div>
+          <p class="muted">Patience: ${() => (patienceOn() ? 'on' : 'off')} · a: ${patienceA} · b: ${patienceB} · effect runs: ${patienceRuns}</p>
         </div>
       </Demo>
 

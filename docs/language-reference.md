@@ -163,7 +163,8 @@ Bag / key ids may include hyphens (`@lab-cart/count`).
 | `computed` | `derive` | Derived cell |
 | `effect` | `watch` | Side effect |
 | `untrack` | `runUntracked` | Read without tracking |
-| `batch` | `ripple` (bags) | Coalesce writes |
+| `batch` | `ripple` (bags) | Coalesce writes (sync) |
+| `enablePatience` / `flushSync` | — | Opt-in microtask coalesce + drain |
 
 These are **imports**, not reserved identifiers in templates — but `${count}` vs `${count()}` is a style convention the checker understands.
 

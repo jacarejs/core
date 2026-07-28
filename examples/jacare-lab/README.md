@@ -89,7 +89,7 @@ Complete catalog: [language-reference.md §3](../../docs/language-reference.md#3
 | `/module` | API §2 — `.jcr` layout, view/style syntax, compiled exports |
 | `/language` | Reserved words, runtime map, all binds, contract, CLI |
 | `/binding-ir` | Binding IR · MountPlan · `check --bindings` · CPW |
-| `/reactivity` | `signal` / `pulse`, `computed` / `derive`, `effect`, `batch`, `untrack` |
+| `/reactivity` | `signal` / `pulse`, `computed` / `derive`, `effect`, `batch`, Patience (`enablePatience` / `flushSync`), `untrack` |
 | `/bag` | `createBag`, `ripple`, shared cart across views |
 | `/templates` | Text, attrs, `style---` |
 | `/bindings` | `bind-value`, `bind-checked`, `class-*`, Binding IR + CPW |

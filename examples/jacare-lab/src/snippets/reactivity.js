@@ -98,6 +98,48 @@ function bumpBatched() {
   </div>`,
 )
 
+export const patienceCode = viewSnippet(
+  `import { signal, effect, enablePatience, disablePatience, flushSync, isPatienceEnabled } from '@jacare/core'
+
+const patienceA = signal(0)
+const patienceB = signal(0)
+const patienceRuns = signal(0)
+const patienceOn = signal(false)
+
+effect(() => {
+  patienceA()
+  patienceB()
+  patienceRuns.update((n) => n + 1)
+})
+
+function togglePatience() {
+  if (isPatienceEnabled()) {
+    disablePatience()
+    patienceOn.set(false)
+  } else {
+    enablePatience()
+    patienceOn.set(true)
+  }
+}
+
+function bumpPatienceBurst() {
+  patienceA.update((n) => n + 1)
+  patienceB.update((n) => n + 1)
+}
+
+function flushPatienceNow() {
+  flushSync()
+}`,
+  `  <div class="stack">
+    <div class="row">
+      <button type="button" class="btn" on-click=\${togglePatience}>Toggle Patience</button>
+      <button type="button" class="btn btn-outline" on-click=\${bumpPatienceBurst}>Burst a + b</button>
+      <button type="button" class="btn btn-ghost" on-click=\${flushPatienceNow}>flushSync()</button>
+    </div>
+    <p class="muted">Patience: \${() => (patienceOn() ? 'on' : 'off')} · a: \${patienceA} · b: \${patienceB} · effect runs: \${patienceRuns}</p>
+  </div>`,
+)
+
 export const untrackCode = viewSnippet(
   `const tracked = signal(0)
 const untrackedSource = signal(0)

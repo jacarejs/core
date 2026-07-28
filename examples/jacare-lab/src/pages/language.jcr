@@ -60,7 +60,7 @@ const cliRows = [
 
 const runtimeRows = [
   { area: 'State', mechanism: 'signal / pulse · computed / derive' },
-  { area: 'Effects', mechanism: 'effect / watch · batch · untrack' },
+  { area: 'Effects', mechanism: 'effect / watch · batch · Patience (opt-in) · untrack' },
   { area: 'Shared', mechanism: 'createBag / getBag · ripple · snap / hydrate' },
   { area: 'Text / attrs', mechanism: 'bindText · bindAttribute · bindClass · bindStyleVar' },
   { area: 'Model', mechanism: 'bindModel (bind-value / bind-checked)' },

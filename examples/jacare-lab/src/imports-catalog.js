@@ -119,6 +119,69 @@ batch(() => {
   {
     pkg: '@jacare/core',
     group: 'Reactivity',
+    name: 'enablePatience',
+    importLine: "import { enablePatience, flushSync, disablePatience } from '@jacare/core'",
+    usage: 'Opt-in: coalesce writes outside batch into one microtask.',
+    about:
+      'Default schedule is synchronous — set() updates effects on the same turn. enablePatience() turns on Patience: writes outside batch queue and flush once in a microtask (safety net for bursty sockets/timers). Prefer batch/ripple for explicit groups. flushSync() drains pending now (tests and escape hatch). disablePatience() flushes and restores sync. No priority lanes or startTransition.',
+    example: `import { pulse, effect, enablePatience, flushSync } from '@jacare/core'
+
+enablePatience()
+const count = pulse(0)
+effect(() => console.log(count()))
+
+count.set(1)
+count.set(2)
+count.set(3)
+// log not yet — pending microtask
+flushSync()  // logs 3 once`,
+    path: '/reactivity',
+  },
+  {
+    pkg: '@jacare/core',
+    group: 'Reactivity',
+    name: 'flushSync',
+    importLine: "import { flushSync } from '@jacare/core'",
+    usage: 'Drain pending reactive updates immediately.',
+    about:
+      'flushSync runs any queued subscribers now. Required after enablePatience() when tests or UI need the DOM on the same turn. Harmless when the queue is empty. batch/ripple already flush synchronously at the end of their callback.',
+    example: `import { flushSync } from '@jacare/core'
+
+count.set(1)
+flushSync()
+expect(label.textContent).toBe('1')`,
+    path: '/reactivity',
+  },
+  {
+    pkg: '@jacare/core',
+    group: 'Reactivity',
+    name: 'disablePatience',
+    importLine: "import { disablePatience } from '@jacare/core'",
+    usage: 'Turn off Patience and restore sync schedule.',
+    about:
+      'disablePatience drains any pending updates with flushSync semantics, then sets the scheduler back to synchronous default. Use when leaving a demo or tearing down a test that called enablePatience().',
+    example: `import { disablePatience } from '@jacare/core'
+
+disablePatience()`,
+    path: '/reactivity',
+  },
+  {
+    pkg: '@jacare/core',
+    group: 'Reactivity',
+    name: 'isPatienceEnabled',
+    importLine: "import { isPatienceEnabled } from '@jacare/core'",
+    usage: 'Read whether Patience coalesce is on.',
+    about:
+      'isPatienceEnabled() returns true after enablePatience() and false after disablePatience() (or by default). Useful in demos and tests — not needed in most apps.',
+    example: `import { isPatienceEnabled, enablePatience } from '@jacare/core'
+
+enablePatience()
+isPatienceEnabled() // true`,
+    path: '/reactivity',
+  },
+  {
+    pkg: '@jacare/core',
+    group: 'Reactivity',
     name: 'untrack',
     importLine: "import { untrack } from '@jacare/core'",
     usage: 'Read pulses without subscribing the current effect.',
@@ -141,7 +204,7 @@ effect(() => {
     importLine: "import { ReactiveCycleError } from '@jacare/core'",
     usage: 'Error thrown when updates never settle.',
     about:
-      'Updates are delivered synchronously, so two effects that write to each other would recurse forever. Jacaré stops the cascade after 200 nested levels and throws ReactiveCycleError instead of a stack overflow. error.depth carries the limit that was hit. Break the loop with pulse.peek, pulse.update(fn) or untrack.',
+      'Updates are delivered synchronously by default, so two effects that write to each other would recurse forever. Jacaré stops the cascade after 200 nested levels and throws ReactiveCycleError instead of a stack overflow. error.depth carries the limit that was hit. Break the loop with pulse.peek, pulse.update(fn) or untrack.',
     example: `import { pulse, effect, ReactiveCycleError } from '@jacare/core'
 
 const a = pulse(0)

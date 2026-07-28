@@ -2567,7 +2567,7 @@ Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
 | DevTools registry | `enableDevtools()` + `getPulseGraph()` in tests |
 
 ```bash
-yarn test          # monorepo — 287 tests
+yarn test          # monorepo — 290 tests
 ```
 
 Full guide: [testing.md](testing.md)
@@ -3355,7 +3355,7 @@ export <contract>
 
 | I want… | Import |
 |---------|--------|
-| State in a page | `pulse`, `derive`, `effect` / `watch`, `batch` from `@jacare/core` |
+| State in a page | `pulse`, `derive`, `effect` / `watch`, `batch` (and opt-in `enablePatience` / `flushSync`) from `@jacare/core` |
 | Shared cart / theme | `createBag`, `getBag`, `ripple` |
 | Router | `createNav`, `lazy`, `createRoute`, `setNavTitle` |
 | Form | `createForm` |

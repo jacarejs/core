@@ -1,16 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   batch,
+  createBag,
   disablePatience,
   effect,
   enablePatience,
   flushSync,
   isPatienceEnabled,
+  resetBagRegistry,
+  ripple,
   signal,
 } from '../src/index.js'
 
 afterEach(() => {
   disablePatience()
+  resetBagRegistry()
 })
 
 describe('patience scheduler (Etapa 1)', () => {
@@ -80,6 +84,23 @@ describe('patience scheduler (Etapa 1)', () => {
     expect(spy).toHaveBeenCalledWith(3)
   })
 
+  it('ripple still flushes synchronously with patience on', () => {
+    enablePatience()
+    const bag = createBag('sched-cart', () => ({ n: signal(0) }))
+    const spy = vi.fn()
+    effect(() => {
+      spy(bag.n())
+    })
+    spy.mockClear()
+
+    ripple(() => {
+      bag.n.set(1)
+      bag.n.set(2)
+    })
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledWith(2)
+  })
+
   it('disablePatience flushes and restores sync', () => {
     enablePatience()
     const count = signal(0)
@@ -96,5 +117,34 @@ describe('patience scheduler (Etapa 1)', () => {
 
     count.set(5)
     expect(seen).toBe(5)
+  })
+
+  it('flushSync is a no-op when the queue is empty', () => {
+    expect(() => flushSync()).not.toThrow()
+    enablePatience()
+    expect(() => flushSync()).not.toThrow()
+  })
+
+  it('nested writes during flush run in the same turn', () => {
+    enablePatience()
+    const a = signal(0)
+    const b = signal(0)
+    const log = []
+    effect(() => {
+      log.push(['a', a()])
+      if (a() === 1) b.set(9)
+    })
+    effect(() => {
+      log.push(['b', b()])
+    })
+    log.length = 0
+
+    a.set(1)
+    expect(log).toEqual([])
+    flushSync()
+    expect(log).toEqual([
+      ['a', 1],
+      ['b', 9],
+    ])
   })
 })
