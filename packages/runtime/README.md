@@ -144,6 +144,8 @@ Jacaré does not diff a virtual tree. The compiler emits precise DOM operations 
 | `effect(fn)` | `watch(fn)` | Side effect |
 | `untrack(fn)` | — | Run without tracking |
 | `batch(fn)` | — | Batch multiple writes |
+| `flushSync()` | — | Drain pending updates now |
+| `enablePatience()` / `disablePatience()` | — | Opt-in microtask coalesce (default stays sync) |
 | `runUntracked(fn)` | — | Untracked execution (used by DOM bindings) |
 
 ### Untracked reads

@@ -1,7 +1,7 @@
 export type { Cleanup, Computed, Effect, EffectOptions, ReadonlySignal, Signal, Subscriber } from './types.js'
 export { signal, untrack } from './signal.js'
 export { computed } from './computed.js'
-export { effect, batch, isTracking, runUntracked } from './effect.js'
+export { effect, batch, isTracking, runUntracked, flushSync, enablePatience, disablePatience, isPatienceEnabled } from './effect.js'
 export { ReactiveCycleError } from './context.js'
 export { view } from './view.js'
 export { bindText, bindPropText, bindAttribute, bindProperty, bindClass, bindStyleVar, bindModel } from './dom/bind.js'

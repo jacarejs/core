@@ -2567,7 +2567,7 @@ Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
 | DevTools registry | `enableDevtools()` + `getPulseGraph()` in tests |
 
 ```bash
-yarn test          # monorepo — 282 tests
+yarn test          # monorepo — 287 tests
 ```
 
 Full guide: [testing.md](testing.md)
@@ -2593,7 +2593,7 @@ Compiler-emitted helpers (`bindText`, `branch`, …) are still public — you ra
 ### 20.1 `@jacare/core` — reactivity
 
 ```javascript
-import { pulse, signal, derive, computed, effect, watch, batch, untrack, ReactiveCycleError } from '@jacare/core'
+import { pulse, signal, derive, computed, effect, watch, batch, untrack, flushSync, enablePatience, disablePatience, ReactiveCycleError } from '@jacare/core'
 ```
 
 Aliases: `pulse` ≡ `signal`, `derive` ≡ `computed`, `watch` ≡ `effect`. Prefer **pulse / derive / watch** in new code. Details: [§3](#3-reactivity).
@@ -2686,6 +2686,32 @@ batch(() => {
   b.set(2)
 })  // effect runs once → 3
 ```
+
+**`flushSync` / Patience (opt-in)**
+
+Default schedule is **synchronous** (DOM updates run on the same turn as `set`).  
+For bursty writers that forget `batch`, call `enablePatience()` once: writes outside `batch` coalesce into one microtask. Use `flushSync()` in tests or when you need the DOM immediately.
+
+```javascript
+import { pulse, effect, enablePatience, flushSync } from '@jacare/core'
+
+enablePatience()
+
+const count = pulse(0)
+const label = document.createElement('span')
+effect(() => {
+  label.textContent = String(count())
+})
+
+count.set(1)
+count.set(2)
+count.set(3)
+// label still "0" until the microtask (or flushSync)
+flushSync()
+// label.textContent === "3"
+```
+
+`batch` / `ripple` stay synchronous even with Patience on. `disablePatience()` drains pending and restores sync.
 
 **`untrack`**
 

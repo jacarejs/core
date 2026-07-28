@@ -5,6 +5,9 @@ let tracking = false
 let currentOwner: OwnerNode | null = null
 let batchDepth = 0
 let notifyDepth = 0
+let flushDepth = 0
+let patience = false
+let microtaskArmed = false
 const pending = new Set<Subscriber>()
 
 const MAX_NOTIFY_DEPTH = 200
@@ -125,20 +128,31 @@ export function trackDependency(cell: DependencyCell): void {
   devtools.linkDependency(cell, currentOwner)
 }
 
+export function isPatienceEnabled(): boolean {
+  return patience
+}
+
+export function enablePatience(): void {
+  patience = true
+}
+
+export function disablePatience(): void {
+  if (!patience && pending.size === 0) return
+  flushSync()
+  patience = false
+}
+
 export function schedule(subscriber: Subscriber): void {
   if (batchDepth > 0) {
     pending.add(subscriber)
     return
   }
-  if (notifyDepth >= MAX_NOTIFY_DEPTH) {
-    throw new ReactiveCycleError(MAX_NOTIFY_DEPTH)
+  if (patience && flushDepth === 0) {
+    pending.add(subscriber)
+    armMicrotask()
+    return
   }
-  notifyDepth++
-  try {
-    subscriber()
-  } finally {
-    notifyDepth--
-  }
+  runSubscriber(subscriber)
 }
 
 export function batch<T>(fn: () => T): T {
@@ -153,12 +167,49 @@ export function batch<T>(fn: () => T): T {
   }
 }
 
-export function flushPending(): void {
-  const queue = Array.from(pending)
-  pending.clear()
-  for (const subscriber of queue) {
-    subscriber()
+export function flushSync(): void {
+  microtaskArmed = false
+  if (pending.size > 0) {
+    flushPending()
   }
+}
+
+export function flushPending(): void {
+  flushDepth++
+  try {
+    while (pending.size > 0) {
+      const queue = Array.from(pending)
+      pending.clear()
+      for (const subscriber of queue) {
+        runSubscriber(subscriber)
+      }
+    }
+  } finally {
+    flushDepth--
+  }
+}
+
+function runSubscriber(subscriber: Subscriber): void {
+  if (notifyDepth >= MAX_NOTIFY_DEPTH) {
+    throw new ReactiveCycleError(MAX_NOTIFY_DEPTH)
+  }
+  notifyDepth++
+  try {
+    subscriber()
+  } finally {
+    notifyDepth--
+  }
+}
+
+function armMicrotask(): void {
+  if (microtaskArmed) return
+  microtaskArmed = true
+  queueMicrotask(() => {
+    microtaskArmed = false
+    if (pending.size > 0) {
+      flushPending()
+    }
+  })
 }
 
 export class DependencyCell {

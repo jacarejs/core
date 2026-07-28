@@ -78,4 +78,11 @@ export function batch<T>(fn: () => T): T {
   return runBatch(fn)
 }
 
+export {
+  flushSync,
+  enablePatience,
+  disablePatience,
+  isPatienceEnabled,
+} from './context.js'
+
 export { isTracking, runUntracked, startTracking, stopTracking, trackDependency } from './context.js'
