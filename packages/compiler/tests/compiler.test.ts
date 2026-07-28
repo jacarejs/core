@@ -518,6 +518,18 @@ export default view\`<span>\${flag ? on : off}</span>\``
     expect(result.code).not.toMatch(/flag\(\) \? on :/)
   })
 
+  it('rewrites signals inside class-* expressions', () => {
+    const source = `import { signal, view } from '@jacare/core'
+const flag = signal(true)
+const a = signal(true)
+const b = signal(false)
+export default view\`<div class-active=\${flag ? a : b}></div>\``
+    const result = compile(source, { mode: 'client' })
+    expect(result.code).toContain('classList.toggle')
+    expect(result.code).toContain('flag() ? a() : b()')
+    expect(result.code).not.toMatch(/!!\(flag \? a : b\)/)
+  })
+
   it('does not treat reserved words in braced text as mount props', () => {
     const source = `import { view } from '@jacare/core'
 export default view\`<pre>.x { width: var(--pct); }</pre>\``

@@ -2598,7 +2598,7 @@ Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
 | DevTools registry | `enableDevtools()` + `getPulseGraph()` in tests |
 
 ```bash
-yarn test          # monorepo — 293 tests
+yarn test          # monorepo — 294 tests
 ```
 
 Full guide: [testing.md](testing.md)

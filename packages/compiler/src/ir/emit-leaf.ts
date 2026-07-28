@@ -196,7 +196,7 @@ function emitClassOp(
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
   ctx.pushCleanup(
-    `effect(() => { ${el}.classList.toggle(${JSON.stringify(className)}, !!(${raw})) }).dispose`,
+    `effect(() => { ${el}.classList.toggle(${JSON.stringify(className)}, !!(${ctx.rewriteExprForEffect(raw)})) }).dispose`,
   )
 }
 
