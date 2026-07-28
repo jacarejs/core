@@ -41,6 +41,11 @@ export <view>
 
       <footer class="footer">
         <span>Fine-grained reactivity · zero VDOM · v${JACARE_VERSION}</span>
+        <nav class="footer-nav" aria-label="Learn">
+          <a class="footer-link" jacare-go="/tutorial" href=${appHref('/tutorial')}>Tutorial</a>
+          <a class="footer-link" jacare-go="/about" href=${appHref('/about')}>About</a>
+          <a class="footer-link" jacare-go="/playground" href=${appHref('/playground')}>Playground</a>
+        </nav>
         <a
           class="footer-repo"
           href="https://github.com/jacarejs/core"

@@ -15,6 +15,9 @@ A focused demo app with creative surfaces showing Jacaré’s fine-grained react
 | `/seats` | **Seats** — venue map selection |
 | `/league` | **League** — football simulator with crests and standings |
 | `/shop` | **Shop** — shared cart bag, totals, and Mesh state |
+| `/tutorial` | **Tutorial** — getting started → lifecycle lessons |
+| `/about` | **About** — overview + feedback form (`?tab=`) |
+| `/playground` | **Playground** — live Scope / DevTools sandbox |
 
 Tasks and Kanban share one store (`src/store.js`), so moving a card updates the list and vice versa.
 
