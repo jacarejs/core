@@ -95,6 +95,7 @@ Complete catalog: [language-reference.md §3](../../docs/language-reference.md#3
 | `/bindings` | `bind-value`, `bind-checked`, `class-*`, Binding IR + CPW |
 | `/events` | `on-*`, `@*`, keyboard, pointer, stopPropagation |
 | `/debug` | `<debug>` inspector |
+| `/why` | `$why`, Why card, cycle errors, `jacare why file:line` |
 | `/if` | Branches, `jacare-when`, nested conditions, empty states |
 | `/case` | `#case` / `#when` |
 | `/for` | Keyed lists, reorder, stable parents |

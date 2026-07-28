@@ -4,7 +4,8 @@ jacare build
 jacare compile src/app.jcr dist/app.js --watch
 jacare check
 jacare check --bindings
-jacare check --routes`
+jacare check --routes
+jacare why src/Shop.jcr:12`
 
 export const checkBindingsCode = `$ jacare check --bindings
 ok …/Card.jcr

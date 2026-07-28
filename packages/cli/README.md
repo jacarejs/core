@@ -94,6 +94,7 @@ Open `http://localhost:3000` — the dev server starts with hot reload for `.jcr
 | `jacare compile <file>` | Compile one `.jcr` file to JS |
 | `jacare check` | Compile-check all `.jcr` files |
 | `jacare check --routes` | Same + static `jacare-go` vs `createNav` screens |
+| `jacare why <file.jcr:line>` | Static Binding IR sites for a template line |
 | `jacare help` | Show help |
 
 ### Vite-based templates
@@ -233,6 +234,7 @@ Validate every `.jcr` file in the project without building:
 jacare check
 jacare check --bindings
 jacare check --routes
+jacare why src/Shop.jcr:12
 ```
 
 ```

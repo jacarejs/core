@@ -20,6 +20,7 @@ export const nav = createNav({
     '/bindings': { use: lazy(() => import('./pages/bindings.jcr')), title: 'Jacaré Lab · Bindings' },
     '/events': { use: lazy(() => import('./pages/events.jcr')), title: 'Jacaré Lab · Events' },
     '/debug': { use: lazy(() => import('./pages/debug.jcr')), title: 'Jacaré Lab · Debug' },
+    '/why': { use: lazy(() => import('./pages/why.jcr')), title: 'Jacaré Lab · Why' },
     '/if': { use: lazy(() => import('./pages/conditionals.jcr')), title: 'Jacaré Lab · If' },
     '/case': { use: lazy(() => import('./pages/case.jcr')), title: 'Jacaré Lab · Case' },
     '/for': { use: lazy(() => import('./pages/lists.jcr')), title: 'Jacaré Lab · For' },

@@ -2441,6 +2441,31 @@ const el = await pickElement()
 
 See [Phase 6 — DevTools](phases/06-devtools.md).
 
+### `why()` — causal chain (DEV)
+
+Ask **why this UI looks like this**. Same `WhyChain` object in the console, overlay Why card, `ReactiveCycleError`, and `jacare why file:line`.
+
+```javascript
+import { why, whyLast, formatWhyChain } from '@jacare/core'
+
+// After connectJacareDevtools() (or enableDevtools):
+$why($0)            // selected DOM node
+$why(count)         // pulse
+$why('@cart/count') // mesh address named via namePulse
+$why.last()         // last recorded write
+
+console.log(formatWhyChain(why(el)))
+```
+
+| Surface | Gesture |
+|---------|---------|
+| Console | `$why` / `$why.last` (installed by the page hook) |
+| Overlay | Click a State or Mesh value · pick element (`◎`) → Why card + Flash DOM |
+| Errors | `ReactiveCycleError.why` / `.whyText` when DevTools are enabled |
+| CLI | `jacare why src/Shop.jcr:12` — static Binding IR sites for that line |
+
+Writes are ledgered only while DevTools are enabled (ring of 10 per pulse). Production builds do not install `$why` or the ledger.
+
 ---
 
 ## 16. Compiler API
@@ -3266,6 +3291,16 @@ Apps normally call **`connectJacareDevtools`** from `@jacare/devtools`. Low-leve
 import { enableDevtools } from '@jacare/core'
 
 enableDevtools()
+```
+
+**`why` / `whyLast` / `formatWhyChain`** — [§15 why()](#why--causal-chain-dev)
+
+```javascript
+import { why, whyLast, formatWhyChain } from '@jacare/core'
+
+const chain = why(document.querySelector('.badge'))
+console.log(formatWhyChain(chain))
+whyLast()
 ```
 
 **`namePulse`**

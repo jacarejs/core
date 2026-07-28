@@ -777,6 +777,21 @@ enableDevtools()
   {
     pkg: '@jacare/core',
     group: 'DevTools (core)',
+    name: 'why',
+    importLine: "import { why, whyLast, formatWhyChain } from '@jacare/core'",
+    usage: 'Causal chain: element → binding → pulse → last write.',
+    about:
+      'why(target) builds a WhyChain from the DevTools registry and write ledger. Targets: Element/Node, pulse, pulse id, or mesh name (@bag/key). whyLast() uses the last recorded write. formatWhyChain prints the tree used by $why, the overlay Why card, and ReactiveCycleError. Requires enableDevtools / connectJacareDevtools so writes are ledgered.',
+    example: `import { why, formatWhyChain } from '@jacare/core'
+
+const chain = why(document.querySelector('.badge'))
+console.log(formatWhyChain(chain))
+// With the page hook: $why($0) · $why.last()`,
+    path: '/why',
+  },
+  {
+    pkg: '@jacare/core',
+    group: 'DevTools (core)',
     name: 'namePulse',
     importLine: "import { namePulse } from '@jacare/core'",
     usage: 'Label a pulse in the graph.',

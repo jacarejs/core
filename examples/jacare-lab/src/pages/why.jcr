@@ -1,0 +1,71 @@
+import { pulse } from '@jacare/core'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import {
+  consoleWhyCode,
+  cliWhyCode,
+  cycleWhyCode,
+} from '../snippets/why.js'
+
+const count = pulse(0, { name: 'count' })
+const label = pulse('idle', { name: 'label' })
+
+function bump() {
+  count.update((n) => n + 1)
+  label.set(count() === 1 ? 'once' : `×${count()}`)
+}
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">API §15 · why()</p>
+      <h1 class="page-title">Why</h1>
+      <p class="page-lead">
+        One question — why is this UI like this? — answered the same way in the console,
+        overlay, cycle errors, and <code>jacare why file:line</code>.
+      </p>
+    </header>
+
+    <Tip :text=${'Enable DevTools (Lab toggle or connectJacareDevtools). Then $why($0) on a selected element, click a State/Mesh value for the Why card, or run jacare why src/pages/why.jcr:NN in the terminal.'} />
+
+    <Demo :title=${'$why in the console'} :lead=${'Select the badge below in DevTools Elements, then run $why($0). Same chain as the overlay Why card.'} :code=${consoleWhyCode}>
+      <div class="stack">
+        <div class="row">
+          <button type="button" class="btn" on-click=${bump}>bump</button>
+          <span class="badge why-demo-badge">${count}</span>
+          <span class="muted">${label}</span>
+        </div>
+      </div>
+    </Demo>
+
+    <div class="ref-card">
+      <h3>Console · overlay · error</h3>
+      <pre><code>${consoleWhyCode}</code></pre>
+    </div>
+
+    <div class="ref-card">
+      <h3>jacare why (static IR)</h3>
+      <p class="muted">No browser — Binding IR sites for a file:line (sibling of check --bindings).</p>
+      <pre><code>${cliWhyCode}</code></pre>
+    </div>
+
+    <div class="ref-card">
+      <h3>ReactiveCycleError includes why</h3>
+      <p class="muted">With DevTools enabled, cycle errors append the same WhyChain text.</p>
+      <pre><code>${cycleWhyCode}</code></pre>
+    </div>
+  </section>
+</view>
+
+export <style>
+.why-demo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent, #2f6b4f) 18%, transparent);
+  font-weight: 600;
+}
+</style>

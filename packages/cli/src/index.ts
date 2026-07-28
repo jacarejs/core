@@ -15,6 +15,7 @@ import {
   type ScaffoldTemplate,
 } from './templates.js'
 import { getJacareVersion } from './version.js'
+import { runWhy } from './why-cmd.js'
 
 const help = `
 Jacaré — fine-grained UI, zero virtual DOM
@@ -25,11 +26,13 @@ Usage:
   jacare build
   jacare compile <file.jcr> [output.js] [--watch]
   jacare check [--bindings] [--routes] [--no-style] [--strict-style]
+  jacare why <file.jcr:line>
 
 Examples:
   jacare new my-shop --template=todo
   jacare dev --port=4000 --open=false
   jacare compile src/app.jcr --watch
+  jacare why src/Shop.jcr:12
 `
 
 async function main(): Promise<void> {
@@ -82,6 +85,15 @@ async function main(): Promise<void> {
         strictStyle: flagBool(flags, 'strict-style'),
       })
       process.exit(code)
+      return
+    }
+    case 'why': {
+      const target = positional[1]
+      if (!target) {
+        console.error('Usage: jacare why <file.jcr:line>')
+        process.exit(1)
+      }
+      process.exit(runWhy(process.cwd(), target))
       return
     }
     default:

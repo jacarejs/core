@@ -161,7 +161,8 @@ function printBindings(file: string, source: string): void {
       if (site.mode) bits.push(site.mode)
       if (site.sourceKind) bits.push(site.sourceKind)
       if (site.lazy) bits.push('lazy')
-      console.log(`    - ${bits.join(' · ')}`)
+      const loc = site.line != null ? ` · L${site.line}` : ''
+      console.log(`    - ${bits.join(' · ')}${loc}`)
     }
   } catch {
     // bindings dump is best-effort

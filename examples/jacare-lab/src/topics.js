@@ -55,6 +55,11 @@ export const LESSONS = [
     blurb: '<debug> syntax — JSON panels, label, copy, shorthand',
   },
   {
+    path: '/why',
+    title: 'Why',
+    blurb: '$why · Why card · ReactiveCycleError · jacare why file:line',
+  },
+  {
     path: '/if',
     title: '#if',
     blurb: 'Branches, jacare-when, nested conditions, empty states',
@@ -117,7 +122,7 @@ export const LESSONS = [
   {
     path: '/tooling',
     title: 'Tooling',
-    blurb: 'CLI, check --bindings/--routes, Binding IR, DevTools',
+    blurb: 'CLI, check --bindings/--routes, why file:line, Binding IR, DevTools',
   },
   {
     path: '/helpers',

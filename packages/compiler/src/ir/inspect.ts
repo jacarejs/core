@@ -21,18 +21,20 @@ export type BindingSiteInfo = {
   mode?: string
   sourceKind?: string
   lazy?: boolean
+  /** Absolute source line when known (viewStartLine + template offset). */
+  line?: number
 }
 
 /**
  * Walk a template AST and summarize reactive / control-flow sites from IR.
- * Intended for `jacare check` enrichment and future LSP hover.
+ * Intended for `jacare check` enrichment, `jacare why file:line`, and LSP hover.
  */
 export function inspectTemplateBindings(
   ast: TemplateAST,
   ctx: LowerSourceContext = {},
 ): BindingSiteInfo[] {
   const sites: BindingSiteInfo[] = []
-  walk(ast.children, ctx, sites)
+  walk(ast.children, ctx, sites, undefined)
   return sites
 }
 
@@ -40,6 +42,7 @@ function walk(
   nodes: TemplateNode[],
   ctx: LowerSourceContext,
   sites: BindingSiteInfo[],
+  parentLine: number | undefined,
 ): void {
   for (const node of nodes) {
     switch (node.type) {
@@ -47,19 +50,23 @@ function walk(
         const lowered = lowerTextParts(node.parts, { ...ctx, cpw: false })
         if (lowered.kind === 'binding') {
           const op = lowered.op
-          sites.push({
+          const site: BindingSiteInfo = {
             kind: 'text',
             label: op.mixed ? '(mixed)' : sourceLabel(op.source),
             mode: op.mode,
             sourceKind: op.mixed ? 'mixed' : op.source.kind,
-          })
+          }
+          if (parentLine != null) site.line = parentLine
+          sites.push(site)
         }
         break
       }
-      case 'element':
-        for (const info of inspectAttrs(node.attrs, ctx)) sites.push(info)
-        walk(node.children, ctx, sites)
+      case 'element': {
+        const line = node.sourceLine ?? parentLine
+        for (const info of inspectAttrs(node.attrs, ctx, line)) sites.push(info)
+        walk(node.children, ctx, sites, line)
         break
+      }
       case 'component': {
         const plan = lowerComponent(node, ctx)
         for (const prop of plan.props) {
@@ -69,6 +76,7 @@ function walk(
             mode: prop.mode,
             sourceKind: prop.source.kind,
             ...(prop.lazy ? { lazy: true } : {}),
+            ...(parentLine != null ? { line: parentLine } : {}),
           })
         }
         if (plan.hasSlots) {
@@ -76,39 +84,48 @@ function walk(
             kind: 'component',
             label: `${plan.name}.children`,
             mode: 'slot',
+            ...(parentLine != null ? { line: parentLine } : {}),
           })
         }
-        walk(plan.children, ctx, sites)
+        walk(plan.children, ctx, sites, parentLine)
         break
       }
       case 'if': {
         const plan = lowerIf(node)
+        const line = node.sourceLine ?? parentLine
         for (const branch of plan.branches) {
-          sites.push({ kind: 'if', label: branch.test })
-          walk(branch.children, ctx, sites)
+          const site: BindingSiteInfo = { kind: 'if', label: branch.test }
+          if (line != null) site.line = line
+          sites.push(site)
+          walk(branch.children, ctx, sites, line)
         }
-        walk(plan.elseChildren, ctx, sites)
+        walk(plan.elseChildren, ctx, sites, line)
         break
       }
       case 'case': {
         const plan = lowerCase(node)
-        sites.push({ kind: 'case', label: plan.scrutinee })
+        const line = node.sourceLine ?? parentLine
+        const site: BindingSiteInfo = { kind: 'case', label: plan.scrutinee }
+        if (line != null) site.line = line
+        sites.push(site)
         for (const branch of plan.branches) {
-          walk(branch.children, ctx, sites)
+          walk(branch.children, ctx, sites, line)
         }
-        walk(plan.elseChildren, ctx, sites)
+        walk(plan.elseChildren, ctx, sites, line)
         break
       }
       case 'each': {
         const plan = lowerEach(node, ctx)
+        const line = node.sourceLine ?? parentLine
         const site: BindingSiteInfo = {
           kind: 'list',
           label: plan.sourceExpr,
           mode: plan.keyExpr ? `key:${plan.keyExpr}` : 'key:index',
         }
         if (plan.sourceBinding) site.sourceKind = plan.sourceBinding.kind
+        if (line != null) site.line = line
         sites.push(site)
-        walk(plan.children, ctx, sites)
+        walk(plan.children, ctx, sites, line)
         break
       }
       case 'slot':
@@ -118,45 +135,57 @@ function walk(
   }
 }
 
-function inspectAttrs(attrs: TemplateAttr[], ctx: LowerSourceContext): BindingSiteInfo[] {
+function inspectAttrs(
+  attrs: TemplateAttr[],
+  ctx: LowerSourceContext,
+  line: number | undefined,
+): BindingSiteInfo[] {
   const leafCtx = { ...ctx, cpw: false }
   return lowerElementBindings(attrs, leafCtx)
     .filter((op) => op.op !== 'staticAttr' && op.op !== 'setClassName')
     .map((op) => {
+      let site: BindingSiteInfo
       switch (op.op) {
         case 'attr':
-          return {
-            kind: 'attr' as const,
+          site = {
+            kind: 'attr',
             label: op.name,
             mode: op.mode,
             sourceKind: op.source.kind,
           }
+          break
         case 'classToggle':
-          return {
-            kind: 'class' as const,
+          site = {
+            kind: 'class',
             label: op.className,
             mode: op.mode,
             sourceKind: op.source.kind,
           }
+          break
         case 'styleVar':
-          return {
-            kind: 'style' as const,
+          site = {
+            kind: 'style',
             label: op.cssVar,
             mode: op.mode,
             sourceKind: op.source.kind,
           }
+          break
         case 'model':
-          return {
-            kind: 'model' as const,
+          site = {
+            kind: 'model',
             label: op.prop,
             mode: op.mode,
             sourceKind: op.source.kind,
           }
+          break
         case 'event':
-          return { kind: 'event' as const, label: op.name }
+          site = { kind: 'event', label: op.name }
+          break
         default:
-          return { kind: 'attr' as const, label: '?' }
+          site = { kind: 'attr', label: '?' }
       }
+      if (line != null) site.line = line
+      return site
     })
 }
 

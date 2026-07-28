@@ -1,6 +1,10 @@
+import { mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import { describe, expect, it } from 'vitest'
 import { flagBool, flagNumber, flagString, parseArgv } from '../src/args.js'
 import { buildScaffold, isViteScaffoldTemplate } from '../src/templates.js'
+import { parseWhyTarget, runWhy } from '../src/why-cmd.js'
 
 describe('parseArgv', () => {
   it('parses positional and flag arguments', () => {
@@ -43,5 +47,45 @@ describe('buildScaffold', () => {
     expect(isViteScaffoldTemplate('vite-minimal')).toBe(true)
     expect(isViteScaffoldTemplate('vite-nav')).toBe(true)
     expect(isViteScaffoldTemplate('minimal')).toBe(false)
+  })
+})
+
+describe('jacare why', () => {
+  it('parses file:line targets', () => {
+    const target = parseWhyTarget('src/Shop.jcr:12', '/app')
+    expect(target?.file).toBe(join('/app', 'src/Shop.jcr'))
+    expect(target?.line).toBe(12)
+    expect(parseWhyTarget('bad', '/app')).toBeNull()
+  })
+
+  it('prints binding sites for a template line', () => {
+    const dir = join(tmpdir(), `jacare-why-${Date.now()}`)
+    mkdirSync(dir, { recursive: true })
+    const file = join(dir, 'Demo.jcr')
+    writeFileSync(
+      file,
+      `const count = pulse(0)
+
+export <view>
+  <p class="badge">\${count}</p>
+</view>
+`,
+      'utf-8',
+    )
+    const logs: string[] = []
+    const original = console.log
+    console.log = (...args: unknown[]) => {
+      logs.push(args.map(String).join(' '))
+    }
+    try {
+      const code = runWhy(dir, `${file}:4`)
+      expect(code).toBe(0)
+      const out = logs.join('\n')
+      expect(out).toMatch(/why /)
+      expect(out).toMatch(/bind text/)
+    } finally {
+      console.log = original
+      rmSync(dir, { recursive: true, force: true })
+    }
   })
 })
