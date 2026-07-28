@@ -153,6 +153,7 @@ export const scriptsCode = `{
     "build": "jacare build",
     "check": "jacare check",
     "check:bindings": "jacare check --bindings",
+    "check:routes": "jacare check --routes",
     "test": "vitest run"
   }
 }`

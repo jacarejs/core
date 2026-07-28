@@ -87,24 +87,27 @@ Complete catalog: [language-reference.md §3](../../docs/language-reference.md#3
 | `/` | Lab overview, install notes, lesson index |
 | `/quick-start` | API §1 — scaffold, `app.jcr`, `boot.js`, HTML shell |
 | `/module` | API §2 — `.jcr` layout, view/style syntax, compiled exports |
-| `/language` | Reserved words, runtime map, all binds, contract, CLI |
+| `/language` | Reserved words, `@route`, `jacare-when`, runtime map, CLI |
 | `/binding-ir` | Binding IR · MountPlan · `check --bindings` · CPW |
-| `/reactivity` | `signal` / `pulse`, `computed` / `derive`, `effect`, `batch`, Patience (`enablePatience` / `flushSync`), `untrack` |
+| `/reactivity` | `signal` / `pulse`, `computed` / `derive`, `effect`, `batch`, Patience, `untrack` |
 | `/bag` | `createBag`, `ripple`, shared cart across views |
 | `/templates` | Text, attrs, `style---` |
 | `/bindings` | `bind-value`, `bind-checked`, `class-*`, Binding IR + CPW |
 | `/events` | `on-*`, `@*`, keyboard, pointer, stopPropagation |
-| `/if` | Branches, nested conditions, empty states |
+| `/debug` | `<debug>` inspector |
+| `/if` | Branches, `jacare-when`, nested conditions, empty states |
+| `/case` | `#case` / `#when` |
 | `/for` | Keyed lists, reorder, stable parents |
 | `/components` | Props, slots, contracts, `emit`, model `bind-*` |
 | `/css` | Scoped styles + isolation |
-| `/nav` | `createNav`, `createRoute`, params, search, guards, `routeHref`, use cases |
+| `/nav` | `createNav`, `createRoute`, `@route`, focus grip, guards, `routeHref` |
 | `/forms` | `createForm`, Field, validate, submit, reset |
 | `/lifecycle` | `createLifecycle`, `registerScope` |
 | `/cookbook` | Tasks screen combining the pieces |
+| `/playground` | Live `.jcr` editor |
 | `/ssr` | `render` / `resume` via shared MountPlan |
 | `/island` | `mountIsland`, shadow, React/Vue/Angular hosts |
-| `/tooling` | CLI (`check --bindings` / `--routes`), Vite, Binding IR, DevTools |
+| `/tooling` | CLI (`check --bindings` / `--routes`), Vite, Binding IR, DevTools, VS Code |
 | `/helpers` | Import catalog — detailed English explanation per symbol |
 
 Each `Demo` card explains the idea, runs a live example, and opens the source in a modal.

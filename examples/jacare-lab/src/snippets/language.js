@@ -121,5 +121,6 @@ jacare build
 # Check / inspect
 jacare check
 jacare check --bindings
+jacare check --routes
 jacare check --strict-style
 jacare compile src/app.jcr --watch`

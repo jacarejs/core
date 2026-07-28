@@ -42,12 +42,15 @@ const prefixRows = [
   { token: 'class-* / class:*', role: 'Toggle class' },
   { token: 'style---* / style:*', role: 'CSS var --*' },
   { token: '${@bag/key}', role: 'Pulse Mesh address' },
+  { token: '${@route/key}', role: 'Active nav path param (getRouteParam)' },
 ]
 
 const specialRows = [
   { token: '<slot> / slot="name"', role: 'Content projection' },
   { token: '<debug>', role: 'Dev JSON inspector (prod-stripped)' },
   { token: 'jacare-frame / jacare-go', role: 'Nav mount + client links' },
+  { token: 'jacare-when={expr}', role: 'One-liner #if (same IR)' },
+  { token: 'data-jacare-focus', role: 'Focus target after nav.go({ focus })' },
 ]
 
 const cliRows = [
@@ -55,6 +58,7 @@ const cliRows = [
   { token: 'jacare dev', role: 'Dev server + HMR' },
   { token: 'jacare build', role: 'Production → dist/' },
   { token: 'jacare check [--bindings]', role: 'Contracts + Mesh links + IR' },
+  { token: 'jacare check --routes', role: 'Static jacare-go vs createNav screens' },
   { token: 'jacare compile', role: 'Single-file compile' },
 ]
 
@@ -64,12 +68,12 @@ const runtimeRows = [
   { area: 'Shared', mechanism: 'createBag / getBag · ripple · snap / hydrate' },
   { area: 'Text / attrs', mechanism: 'bindText · bindAttribute · bindClass · bindStyleVar' },
   { area: 'Model', mechanism: 'bindModel (bind-value / bind-checked)' },
-  { area: 'Conditional', mechanism: 'branch / showIf (#if / #elif / #else / #case)' },
+  { area: 'Conditional', mechanism: 'branch / showIf (#if · jacare-when · #case)' },
   { area: 'List', mechanism: 'reconcileKeyedList (#for … (key))' },
-  { area: 'App', mechanism: 'createNav · createForm · createLifecycle' },
+  { area: 'App', mechanism: 'createNav · getRouteParam · createForm · createLifecycle' },
   { area: 'SSR', mechanism: 'renderToString · renderToStream · resumeBindings' },
   { area: 'DevTools', mechanism: 'devtoolsBind · registerScope · Pulse / Mesh / Scope' },
-  { area: 'Compiler', mechanism: 'Binding IR · MountPlan · CPW · jacare check' },
+  { area: 'Compiler', mechanism: 'Binding IR · MountPlan · CPW · jacare check [--routes]' },
 ]
 
 export <view>

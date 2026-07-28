@@ -56,7 +56,7 @@ export <view>
         />
         <div class="vscode-card-copy">
           <strong>Jacaré for VS Code</strong>
-          <span>Syntax highlighting, file icons, and contracts for .jcr — install from the Marketplace.</span>
+          <span>Syntax highlighting, snippets (@route · jacare-when · focus), file icons, and contracts for .jcr — install from the Marketplace.</span>
           <span class="vscode-card-link">marketplace.visualstudio.com/items?itemName=heberalmeida.jacare</span>
         </div>
       </a>

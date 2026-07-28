@@ -17,7 +17,7 @@ export const LESSONS = [
   {
     path: '/language',
     title: 'Language reference',
-    blurb: 'Reserved words, runtime map, all binds, CLI',
+    blurb: 'Reserved words, @route, jacare-when, runtime map, CLI',
   },
   {
     path: '/binding-ir',
@@ -57,7 +57,7 @@ export const LESSONS = [
   {
     path: '/if',
     title: '#if',
-    blurb: 'Branches, nested conditions, empty states',
+    blurb: 'Branches, jacare-when, nested conditions, empty states',
   },
   {
     path: '/case',
@@ -82,7 +82,7 @@ export const LESSONS = [
   {
     path: '/nav',
     title: 'Navigation',
-    blurb: 'createNav, createRoute, params, search, guards, use cases',
+    blurb: 'createNav, createRoute, @route, focus grip, guards',
   },
   {
     path: '/forms',
@@ -117,7 +117,7 @@ export const LESSONS = [
   {
     path: '/tooling',
     title: 'Tooling',
-    blurb: 'CLI, check --bindings, Binding IR, DevTools',
+    blurb: 'CLI, check --bindings/--routes, Binding IR, DevTools',
   },
   {
     path: '/helpers',
