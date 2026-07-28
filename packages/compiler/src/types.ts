@@ -6,6 +6,13 @@ export interface CompileOptions {
   scopeId?: string
   cpw?: boolean
   debug?: boolean
+  /** Force TypeScript strip on the `.jcr` script region. Also enabled by `// @jacare-ts`. */
+  scriptLang?: 'js' | 'ts'
+  /**
+   * Sibling logic file contents (`Foo.jcr.ts`), or `false` to skip auto-load.
+   * When omitted and `filename` ends with `.jcr`, the compiler loads `filename + '.ts'` if present.
+   */
+  siblingScript?: string | false
 }
 
 export interface CompileResult {

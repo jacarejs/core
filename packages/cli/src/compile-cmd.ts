@@ -1,5 +1,5 @@
-import { readFileSync, watch, writeFileSync } from 'node:fs'
-import { basename, resolve } from 'node:path'
+import { existsSync, readFileSync, watch, writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { compile } from '@jacare/compiler'
 
 export function compileOnce(inputPath: string, outputPath?: string): void {
@@ -9,7 +9,7 @@ export function compileOnce(inputPath: string, outputPath?: string): void {
     throw new Error('Refusing to overwrite the input file; use a .jcr input or pass an output path')
   }
   const source = readFileSync(input, 'utf-8')
-  const result = compile(source, { filename: basename(input) })
+  const result = compile(source, { filename: input })
   writeFileSync(output, result.code, 'utf-8')
   console.log(`Compiled ${input} → ${output}`)
 }
@@ -28,5 +28,9 @@ export function compileWatch(inputPath: string, outputPath?: string): void {
 
   run()
   watch(input, run)
+  const sibling = `${input}.ts`
+  if (existsSync(sibling)) {
+    watch(sibling, run)
+  }
   console.log(`Watching ${input}`)
 }

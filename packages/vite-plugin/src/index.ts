@@ -202,6 +202,11 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
       if (!hasViewSource(code)) return
 
       try {
+        const siblingTs = `${fileId}.ts`
+        if (existsSync(siblingTs)) {
+          this.addWatchFile(siblingTs)
+        }
+
         const mode = resolveCompileMode(options, transformOptions?.ssr)
         const cpw =
           options.cpw === true

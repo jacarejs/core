@@ -1,4 +1,12 @@
 export { compile } from './compile.js'
+export {
+  hasJacareTsPragma,
+  prepareModuleScript,
+  readSiblingJcrTs,
+  siblingJcrTsPath,
+  stripJacareTsPragma,
+  stripTypeScript,
+} from './typescript.js'
 export { JacareCompileError, formatCompileError } from './errors.js'
 export { parseModule, findViewTemplates, hasViewSource } from './parse-module.js'
 export { flattenViewLiteral } from './flatten-literal.js'

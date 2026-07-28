@@ -9,11 +9,18 @@ import { hasContractSurface } from './parse-contract.js'
 import { isReactiveStyle, parseStyle } from './parse-style.js'
 import { scopeCss, scopeIdFromFilename } from './scope-css.js'
 import { collectMeshPorts } from './ir/mesh-ports.js'
+import { prepareModuleScript } from './typescript.js'
 import type { CompileOptions, CompileResult } from './types.js'
 
 export function compile(source: string, options: CompileOptions = {}): CompileResult {
   const filename = options.filename
   const parsed = parseModule(source, filename)
+  const script = prepareModuleScript(parsed.code, {
+    source,
+    ...(filename ? { filename } : {}),
+    ...(options.scriptLang ? { scriptLang: options.scriptLang } : {}),
+    ...(options.siblingScript !== undefined ? { siblingScript: options.siblingScript } : {}),
+  })
   const ast = parseTemplate(parsed.viewHtml!, {
     ...(filename ? { filename } : {}),
     baseLine: parsed.viewStartLine,
@@ -28,10 +35,10 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     parsed.styleCss && scopeId && !reactiveStyle ? scopeCss(parsed.styleCss, scopeId) : undefined
   const contract =
     parsed.contract && hasContractSurface(parsed.contract) ? parsed.contract : undefined
-  const signals = detectSignals(parsed.code)
-  const importedNames = detectImportedNames(parsed.code)
+  const signals = detectSignals(script)
+  const importedNames = detectImportedNames(script)
   const meshPorts = collectMeshPorts(ast, { signals, importedNames }, contract)
-  const generated = generate(ast, parsed.code, {
+  const generated = generate(ast, script, {
     ...(options.runtimeImport ? { runtimeImport: options.runtimeImport } : {}),
     viewStartLine: parsed.viewStartLine,
     mode: options.mode ?? 'full',
@@ -50,11 +57,11 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     ? buildSourceMap(filename, source, generated.code, parsed.moduleLineMap, generated.mappings)
     : undefined
 
-  const props = resolveMountProps(parsed.code, ast, contract)
+  const props = resolveMountProps(script, ast, contract)
 
   return {
     code: generated.code,
-    script: parsed.code,
+    script,
     template: parsed.viewHtml!,
     props,
     ...(contract ? { contract } : {}),

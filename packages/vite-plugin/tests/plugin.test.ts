@@ -75,6 +75,23 @@ export default view\`<p>\${count}</p>\``
     expect(result.code).not.toContain('export function mount')
   })
 
+  it('strips TypeScript when // @jacare-ts is present', () => {
+    const plugin = jacare()
+    const source = `// @jacare-ts
+import { signal } from '@jacare/core'
+const count: number = 0
+const value = signal(count)
+export <view>
+  <p>\${value}</p>
+</view>`
+
+    const result = plugin.transform!(source, '/src/typed.jcr')
+    if (!result || typeof result === 'string') throw new Error('expected transform object')
+    expect(result.code).toContain('export function mount')
+    expect(result.code).toContain('const count = 0')
+    expect(result.code).not.toContain(': number')
+  })
+
   it('writes inspect output when enabled', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'jacare-inspect-'))
     const plugin = jacare({ inspect: true })
