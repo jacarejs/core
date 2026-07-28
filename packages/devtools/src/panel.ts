@@ -2,6 +2,8 @@ import type { MeshSnapshot, PulseGraphSnapshot, PulseNode, PulseNodeKind, ScopeS
 import {
   clearHighlight,
   clearScope,
+  flashDom,
+  formatWhyChain,
   getBag,
   getBindingsForPulse,
   getPulsesForElement,
@@ -9,6 +11,7 @@ import {
   listBags,
   pickElement,
   setPulseValue,
+  why,
 } from '@jacare/core'
 import { downloadMesh, importMeshFromFile } from './mesh-io.js'
 import {
@@ -848,6 +851,16 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       onSetCell: (bagId, key, value) => {
         getBag(bagId)?.hydrate({ [key]: value })
       },
+      onSelectCell: (address) => {
+        setActiveTab('graph')
+        const chain = why(address)
+        if (chain.pulse?.id != null) {
+          selectedId = chain.pulse.id
+          highlightBinding(selectedId)
+          render(latest)
+        }
+        showWhyCard(chain)
+      },
     })
   }
 
@@ -1068,6 +1081,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       highlightBinding(selectedId)
       render(latest)
     }
+    showWhyCard(why(el))
   })
 
   launcher.addEventListener('click', () => {
@@ -1245,6 +1259,13 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
           }
         </ul>
       </div>
+      <div class="jacare-devtools__section" data-why-section>
+        <h4>Why</h4>
+        <pre class="jacare-devtools__value" data-why-text></pre>
+        <p style="margin:0.35rem 0 0">
+          <button type="button" class="jacare-devtools__chip" data-why-flash>Flash DOM</button>
+        </p>
+      </div>
     `
 
     const openLink = detail.querySelector('[data-open-source]')
@@ -1253,11 +1274,29 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
       openSource(node)
     })
 
+    const whyChain = why(node.id)
+    const whyText = detail.querySelector('[data-why-text]')
+    if (whyText) whyText.textContent = formatWhyChain(whyChain)
+    detail.querySelector('[data-why-flash]')?.addEventListener('click', () => {
+      const binding = getBindingsForPulse(node.id)[0]
+      if (binding) flashDom(binding.target)
+    })
+
     if (editable) {
       const stepper = detail.querySelector('[data-stepper]') as HTMLElement | null
       wireStepper(stepper, node.value as number, (next) => {
         setPulseValue(node.id, next)
       })
+    }
+  }
+
+  function showWhyCard(chain: ReturnType<typeof why>): void {
+    setMode('open')
+    setActiveTab('graph')
+    const whyText = detail.querySelector('[data-why-text]')
+    if (whyText) {
+      whyText.textContent = formatWhyChain(chain)
+      whyText.scrollIntoView({ block: 'nearest' })
     }
   }
 
@@ -1309,6 +1348,7 @@ export function createPanel(host: HTMLElement, options: PanelOptions = {}): Pane
         selectedId = node.id
         highlightBinding(node.id)
         render(latest)
+        showWhyCard(why(node.id))
       })
       list.appendChild(item)
     }

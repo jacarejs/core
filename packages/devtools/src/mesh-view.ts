@@ -180,6 +180,7 @@ export function meshSummary(snapshot: MeshSnapshot): string {
 
 export interface MeshViewOptions {
   onSetCell?: (bagId: string, key: string, value: number) => void
+  onSelectCell?: (address: string) => void
 }
 
 export function renderMeshView(
@@ -271,6 +272,18 @@ export function renderMeshView(
       .join('')
 
   const onSetCell = options.onSetCell
+  const onSelectCell = options.onSelectCell
+  if (onSelectCell) {
+    for (const cell of target.querySelectorAll<HTMLElement>('[data-cell-key]')) {
+      cell.addEventListener('click', (event) => {
+        if ((event.target as Element | null)?.closest('[data-stepper]')) return
+        const bagId = cell.dataset['bagId'] ?? ''
+        const key = cell.dataset['cellKey'] ?? ''
+        if (!bagId || !key) return
+        onSelectCell(`@${bagId}/${key}`)
+      })
+    }
+  }
   if (!onSetCell) return
   for (const stepper of target.querySelectorAll<HTMLElement>('[data-cell-key] [data-stepper]')) {
     const cell = stepper.closest('[data-cell-key]') as HTMLElement | null

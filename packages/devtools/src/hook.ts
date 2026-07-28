@@ -2,6 +2,7 @@ import {
   clearHighlight,
   enableDevtools,
   flashDom,
+  formatWhyChain,
   getBag,
   getBindingsForPulse,
   getMeshSnapshot,
@@ -13,6 +14,8 @@ import {
   listBags,
   pickElement,
   setPulseValue,
+  why,
+  whyLast,
 } from '@jacare/core'
 
 const PROTOCOL = 3
@@ -119,6 +122,7 @@ type GlobalWithJacare = typeof globalThis & {
   __JACARE_DEVTOOLS_HOOK__?: JacareDevtoolsHook
   __JACARE__?: Record<string, unknown>
   __JACARE_NAV__?: NavLike | { nav: NavLike; base?: string; screens?: string[] }
+  $why?: unknown
 }
 
 export interface JacareDevtoolsHook {
@@ -490,9 +494,30 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
     listBags,
     getMeshSnapshot,
     getScopeSnapshot,
+    why,
+    whyLast,
+    formatWhyChain,
   }
+
+  const whyFn = Object.assign(
+    ((target: Parameters<typeof why>[0]) => {
+      const chain = why(target)
+      const text = formatWhyChain(chain)
+      console.log(text)
+      return chain
+    }) as typeof why & { last: () => ReturnType<typeof whyLast> },
+    {
+      last: () => {
+        const chain = whyLast()
+        if (chain) console.log(formatWhyChain(chain))
+        return chain
+      },
+    },
+  )
+
   g.__JACARE_DEVTOOLS_HOOK__ = hook
   g.__JACARE__ = bridge
+  g.$why = whyFn
 
   return () => {
     if (g.__JACARE_DEVTOOLS_HOOK__ === hook) {
@@ -500,6 +525,9 @@ export function installPageHook(options: InstallPageHookOptions = {}): () => voi
     }
     if (g.__JACARE__ === bridge) {
       delete g.__JACARE__
+    }
+    if (g.$why === whyFn) {
+      delete g.$why
     }
   }
 }
