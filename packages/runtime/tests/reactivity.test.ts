@@ -296,10 +296,22 @@ describe('DependencyCell', () => {
       spy()
     }
 
-    cell.subscribe(run)
+    const stopA = cell.subscribe(run)
+    const stopB = cell.subscribe(run)
     expect(cell.has(run)).toBe(true)
     expect(cell.subscriberCount).toBe(1)
 
+    cell.notify()
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    stopA()
+    expect(cell.subscriberCount).toBe(0)
+    expect(cell.has(run)).toBe(false)
+
+    cell.notify()
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    stopB()
     cell.notify()
     expect(spy).toHaveBeenCalledTimes(1)
   })

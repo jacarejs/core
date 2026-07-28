@@ -339,6 +339,9 @@ export class DependencyCell {
   }
 
   subscribe(fn: Subscriber): () => void {
+    if (this.subSet.has(fn)) {
+      return () => this.unlink(fn)
+    }
     this.subs.push(fn)
     this.subSet.add(fn)
     this.subCount++
