@@ -191,16 +191,18 @@ export <view>
       </div>
     </header>
 
-    <section class="card counter-card">
-      <p class="eyebrow">Live signal</p>
-      <p class="count">\${label}</p>
-      <p class="hint">\${mood}</p>
-      <div class="actions">
-        <button class="btn btn-ghost" type="button" on-click=\${decrement}>−1</button>
-        <button class="btn btn-primary" type="button" on-click=\${increment}>+1</button>
-        <button class="btn btn-ghost" type="button" on-click=\${reset}>Reset</button>
-      </div>
-    </section>
+    <main>
+      <section class="card counter-card">
+        <p class="eyebrow">Live signal</p>
+        <p class="count">\${label}</p>
+        <p class="hint">\${mood}</p>
+        <div class="actions">
+          <button class="btn btn-ghost" type="button" on-click=\${decrement}>−1</button>
+          <button class="btn btn-primary" type="button" on-click=\${increment}>+1</button>
+          <button class="btn btn-ghost" type="button" on-click=\${reset}>Reset</button>
+        </div>
+      </section>
+    </main>
 
     <footer class="footer">
       <a class="footer-link" href="https://github.com/jacarejs/core" target="_blank" rel="noreferrer">Docs</a>
@@ -310,6 +312,12 @@ export <style>
 
 .btn:hover { transform: translateY(-1px); }
 
+.btn:focus-visible,
+.footer-link:focus-visible {
+  outline: 2px solid var(--j-lime);
+  outline-offset: 2px;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--j-primary), var(--j-bright));
   color: #fff;
@@ -343,6 +351,16 @@ export <style>
 .footer-link:hover {
   color: var(--j-primary);
   text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+
+  .btn:hover {
+    transform: none;
+  }
 }
 </style>
 `,
@@ -378,7 +396,7 @@ export default view\`
         <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
         <span class="title">${name}</span>
       </div>
-      <nav class="nav">
+      <nav class="nav" aria-label="Primary">
         <a class="nav-link" jacare-go="/" href="/">Home</a>
         <a class="nav-link" jacare-go="/about" href="/about">About</a>
       </nav>
@@ -391,7 +409,7 @@ export default view\`
 
 export default view\`
   <section class="page">
-    <h2 class="page-title">Home</h2>
+    <h1 class="page-title">Home</h1>
     <p class="lead">Jacaré nav with layout, lazy screens, and warm preload.</p>
   </section>
 \`
@@ -400,7 +418,7 @@ export default view\`
 
 export default view\`
   <section class="page">
-    <h2 class="page-title">About</h2>
+    <h1 class="page-title">About</h1>
     <p class="lead">This screen was lazy-loaded.</p>
   </section>
 \`
@@ -409,7 +427,7 @@ export default view\`
 
 export default view\`
   <section class="page">
-    <h2 class="page-title">404</h2>
+    <h1 class="page-title">404</h1>
     <p class="lead">Screen not found.</p>
     <a class="nav-link" jacare-go="/" href="/">Back home</a>
   </section>
@@ -448,7 +466,7 @@ export default view\`
           <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
           <span class="title">${name}</span>
         </div>
-        <nav class="nav">
+        <nav class="nav" aria-label="Primary">
           <a class="nav-link" jacare-go="/" href="/">Tasks</a>
           <a class="nav-link" jacare-go="/about" href="/about">About</a>
         </nav>
@@ -487,21 +505,34 @@ function removeItem(id) {
 export default view\`
   <section class="page">
     <div class="add-row">
-      <input
-        type="text"
-        class="input add-input"
-        placeholder="What needs to be done?"
-        bind-value=\${draft}
-      />
-      <button class="btn btn-primary" on-click=\${addItem}>Add</button>
+      <label class="add-field">
+        <span class="field-label">New task</span>
+        <input
+          type="text"
+          class="input add-input"
+          placeholder="What needs to be done?"
+          bind-value=\${draft}
+        />
+      </label>
+      <button type="button" class="btn btn-primary" on-click=\${addItem}>Add</button>
     </div>
 
     <ul class="list">
       #for items() as item (item.id)
         <li class-done=\${item.done}>
-          <button class="check" on-click=\${() => toggleItem(item.id)}></button>
+          <button
+            type="button"
+            class="check"
+            aria-label="Toggle done"
+            on-click=\${() => toggleItem(item.id)}
+          ></button>
           <span class="label">\${item.label}</span>
-          <button class="remove" on-click=\${() => removeItem(item.id)}>×</button>
+          <button
+            type="button"
+            class="remove"
+            aria-label="Remove"
+            on-click=\${() => removeItem(item.id)}
+          >×</button>
         </li>
       #end
     </ul>
@@ -512,7 +543,7 @@ export default view\`
 
 export default view\`
   <section class="page about">
-    <h2 class="page-title">About Jacaré</h2>
+    <h1 class="page-title">About Jacaré</h1>
     <p class="lead">Fine-grained reactivity with direct DOM updates.</p>
   </section>
 \`
@@ -521,7 +552,7 @@ export default view\`
 
 export default view\`
   <section class="page missing">
-    <h2 class="page-title">404</h2>
+    <h1 class="page-title">404</h1>
     <p class="lead">This screen does not exist.</p>
     <a class="btn btn-primary" jacare-go="/" href="/">Back to tasks</a>
   </section>
@@ -656,7 +687,9 @@ function lightIndexHtml(title: string): string {
       .page { display: grid; gap: 1rem; }
       .page-title { margin: 0; font-size: 1.125rem; }
       .lead { margin: 0; color: var(--text-muted); }
-      .add-row { display: flex; gap: 0.5rem; }
+      .add-row { display: flex; gap: 0.5rem; align-items: end; }
+      .add-field { flex: 1; display: grid; gap: 0.35rem; }
+      .field-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
       .input {
         flex: 1;
         padding: 0.6rem 0.75rem;
@@ -684,6 +717,21 @@ function lightIndexHtml(title: string): string {
       .list li.done .label { text-decoration: line-through; color: var(--text-muted); }
       .label { flex: 1; }
       .check, .remove { border: none; background: transparent; cursor: pointer; }
+      .btn:focus-visible,
+      .nav-link:focus-visible,
+      .input:focus-visible,
+      .check:focus-visible,
+      .remove:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
     </style>
   </head>
   <body>
