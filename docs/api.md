@@ -1695,7 +1695,7 @@ screens: {
 }
 ```
 
-Dynamic segments use `:name` (e.g. `/topic/:slug`). Matched params (and search keys) are merged into the props passed to the screen mount — see Lab `/topic/:slug`.
+Dynamic segments use `:name` (e.g. `/topic/:slug`). Catch-all segments use `:name*` (e.g. `/docs/:slug*` from `[...slug].jcr`) and capture the rest of the path as one param (`a/b`). Matched params (and search keys) are merged into the props passed to the screen mount — see Lab `/topic/:slug`.
 
 ### Step 3 — Boot
 
@@ -2598,7 +2598,7 @@ Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
 | DevTools registry | `enableDevtools()` + `getPulseGraph()` in tests |
 
 ```bash
-yarn test          # monorepo — 294 tests
+yarn test          # monorepo — 298 tests
 ```
 
 Full guide: [testing.md](testing.md)

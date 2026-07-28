@@ -46,27 +46,37 @@ export function normalizeScreens(
 export function matchPath(pattern: string, path: string): Record<string, string> | null {
   const patternParts = splitSegments(pattern)
   const pathParts = splitSegments(path)
-
-  if (patternParts.length !== pathParts.length) {
-    return null
-  }
-
   const params: Record<string, string> = {}
 
+  let pathIndex = 0
   for (let i = 0; i < patternParts.length; i++) {
     const token = patternParts[i]!
-    const value = pathParts[i]!
+
+    if (token.startsWith(':') && token.endsWith('*')) {
+      if (i !== patternParts.length - 1) return null
+      if (pathIndex >= pathParts.length) return null
+      const name = token.slice(1, -1)
+      params[name] = pathParts
+        .slice(pathIndex)
+        .map((part) => decodeURIComponent(part))
+        .join('/')
+      return params
+    }
+
+    if (pathIndex >= pathParts.length) return null
+    const value = pathParts[pathIndex]!
 
     if (token.startsWith(':')) {
       params[token.slice(1)] = decodeURIComponent(value)
+      pathIndex++
       continue
     }
 
-    if (token !== value) {
-      return null
-    }
+    if (token !== value) return null
+    pathIndex++
   }
 
+  if (pathIndex !== pathParts.length) return null
   return params
 }
 

@@ -23,6 +23,23 @@ describe('matchPath', () => {
     expect(matchPath('/tasks', '/about')).toBeNull()
     expect(matchPath('/tasks/:id', '/tasks')).toBeNull()
   })
+
+  it('captures catch-all :param* across remaining segments', () => {
+    expect(matchPath('/:slug*', '/a')).toEqual({ slug: 'a' })
+    expect(matchPath('/:slug*', '/a/b')).toEqual({ slug: 'a/b' })
+    expect(matchPath('/docs/:slug*', '/docs/a')).toEqual({ slug: 'a' })
+    expect(matchPath('/docs/:slug*', '/docs/a/b')).toEqual({ slug: 'a/b' })
+    expect(matchPath('/docs/:slug*', '/docs/a/b/c')).toEqual({ slug: 'a/b/c' })
+  })
+
+  it('rejects catch-all without remaining segments', () => {
+    expect(matchPath('/docs/:slug*', '/docs')).toBeNull()
+    expect(matchPath('/:slug*', '/')).toBeNull()
+  })
+
+  it('rejects catch-all when a static prefix does not match', () => {
+    expect(matchPath('/docs/:slug*', '/other/a')).toBeNull()
+  })
 })
 
 describe('normalizeScreens', () => {
@@ -83,6 +100,18 @@ describe('matchScreen', () => {
     expect(matchScreen(screens, '/users/settings')?.entry.pattern).toBe('/users/settings')
     expect(matchScreen(screens, '/users/42')?.entry.pattern).toBe('/users/:id')
     expect(matchScreen(screens, '/users/42')?.params).toEqual({ id: '42' })
+  })
+
+  it('prefers a single param over catch-all when both match', () => {
+    const screens = normalizeScreens({
+      '/docs/:slug*': vi.fn(),
+      '/docs/:id': vi.fn(),
+    })
+
+    expect(matchScreen(screens, '/docs/intro')?.entry.pattern).toBe('/docs/:id')
+    expect(matchScreen(screens, '/docs/intro')?.params).toEqual({ id: 'intro' })
+    expect(matchScreen(screens, '/docs/a/b')?.entry.pattern).toBe('/docs/:slug*')
+    expect(matchScreen(screens, '/docs/a/b')?.params).toEqual({ slug: 'a/b' })
   })
 })
 

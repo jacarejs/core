@@ -101,7 +101,7 @@ public/
 
 ```bash
 yarn build          # build all packages
-yarn test           # run tests (294 tests)
+yarn test           # run tests (298 tests)
 yarn bench          # CPW vs runtime microbenchmarks
 yarn typecheck      # TypeScript check
 yarn changelog      # preview unreleased notes from commits

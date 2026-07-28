@@ -437,6 +437,7 @@ export const nav = createJacareAppFromRoutes({
 | `src/pages/index.jcr` | `/` |
 | `src/pages/about.jcr` | `/about` |
 | `src/pages/tutorial/[slug].jcr` | `/tutorial/:slug` |
+| `src/pages/docs/[...slug].jcr` | `/docs/:slug*` (catch-all) |
 
 ## Nav
 
