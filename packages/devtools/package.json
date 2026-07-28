@@ -1,6 +1,6 @@
 {
   "name": "@jacare/devtools",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Jacaré DevTools — State inspector (overlay + Chrome extension hook)",
   "license": "MIT",
   "repository": {
@@ -35,7 +35,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@jacare/core": "0.1.12"
+    "@jacare/core": "0.1.13"
   },
   "sideEffects": false
 }

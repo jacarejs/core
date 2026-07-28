@@ -10,6 +10,41 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.1.13](https://github.com/jacarejs/core/compare/v0.1.12...v0.1.13) - 2026-07-28
+
+### Added
+
+- **cli:** add jacare why and Lab /why lesson ([e9dc46b](https://github.com/jacarejs/core/commit/e9dc46beb3e18c9963cb49b46e93befc24dfc6ac))
+- **core:** attach WhyChain to ReactiveCycleError ([999776b](https://github.com/jacarejs/core/commit/999776bc1b6b10ad46eaba6d3e64743244aaf1b3))
+- **devtools:** install $why and Why card ([5c8934c](https://github.com/jacarejs/core/commit/5c8934c33585b38e7a02cf7d82b72893940fa46e))
+- **core:** add why() and formatWhyChain ([7a85e58](https://github.com/jacarejs/core/commit/7a85e58bb0b3c7f00eacfab99838e2d1efbf0234))
+- **core:** DEV write ledger for why() ([61322d1](https://github.com/jacarejs/core/commit/61322d10b011ba3864793a919e77554c5543d1bf))
+- **vscode:** add snippets for @route, jacare-when, and focus grip ([28bee8a](https://github.com/jacarejs/core/commit/28bee8a367f5171955ebb3674b30e2279bb9ffc5))
+- ship DX facilities for focus, @route, jacare-when, and check --routes ([634fcbb](https://github.com/jacarejs/core/commit/634fcbbc795863d8d026a52023804bb7f9509760))
+- **core:** add opt-in Patience scheduler with flushSync ([e08939f](https://github.com/jacarejs/core/commit/e08939f6392f78c927861ecfa276d6b80ab45127))
+- **vscode:** add mountIsland snippet ([40aff0a](https://github.com/jacarejs/core/commit/40aff0a2dbd1f86610acefeecac5e11e20e84bed))
+
+### Fixed
+
+- dispose DevTools overlay on HMR reload ([cf35878](https://github.com/jacarejs/core/commit/cf35878cba3551d7ae9dce913cb3364c7a763ddf))
+- **todo:** register orphan tutorial about and playground routes ([fe80252](https://github.com/jacarejs/core/commit/fe802528a78093a1caaf2d41dc7dc945660cc7f9))
+- **core:** support catch-all :param* in matchPath ([d278966](https://github.com/jacarejs/core/commit/d278966961995685eb62af6d49a5c8a7cf9591ec))
+- **compiler:** rewrite signals in class-* expressions ([7fc1c42](https://github.com/jacarejs/core/commit/7fc1c421266178df3cc8ad9fe8fed272488cef53))
+- **compiler:** rewrite ternary consequent signals ([aadd736](https://github.com/jacarejs/core/commit/aadd7365fc6dc6a001fd3fb2ddfd1571e023bd82))
+- **compiler:** skip string literals in rewriteSignalsInExpr ([5b7e271](https://github.com/jacarejs/core/commit/5b7e271776728dd57d9cba4f3852de57963a0069))
+- **core:** prefer static segments in matchScreen scoring ([8f9c2bb](https://github.com/jacarejs/core/commit/8f9c2bb5eefc56ae025f627f3a60af1ff5d4e51c))
+- **compiler:** emit SSR mixed text via string concat ([c262217](https://github.com/jacarejs/core/commit/c262217d6e839f9d89713a0c17cb629ef2b1ee16))
+- **compiler:** ignore string literals when collecting expression refs ([a64c687](https://github.com/jacarejs/core/commit/a64c6872233247bb2786f1a9c65f5fb1c3177816))
+- **examples:** bump island demos to 0.1.12 and sync in releases ([385e3af](https://github.com/jacarejs/core/commit/385e3aff34c7204d0ab745c9f2198a0f074cf3c1))
+
+### Documentation
+
+- **lab:** surface @route, jacare-when, focus, and check --routes ([d5d47f7](https://github.com/jacarejs/core/commit/d5d47f7b0b0ced06104876fceb4668db79e687e0))
+- document DX facilities, imports, and Lab demos ([3ac52e6](https://github.com/jacarejs/core/commit/3ac52e68c0c6a9d70f8cff4dd7bcdc789125d66a))
+- **api:** add Patience symbols to import catalog ([20b1584](https://github.com/jacarejs/core/commit/20b1584a6e08be4c120e5931f87bb8970a5e1088))
+- **lab:** teach Patience scheduler and expand suite to 290 ([354319b](https://github.com/jacarejs/core/commit/354319b00ffc4594015fd3142c45d3ace1ac7d08))
+- link Chrome Web Store listing for Jacaré Devtools ([d146e47](https://github.com/jacarejs/core/commit/d146e4754901c9aae377d024fb320d90621e2b82))
+
 ### Added
 
 - **core:** `nav.go` / `swap` focus grip (`{ focus }`, `data-jacare-focus`); `getRouteParam` + `${@route/id}` template sugar
