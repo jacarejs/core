@@ -7,7 +7,7 @@ export default view`
         <img class="logo" src="/jacare-logo.png" alt="Jacaré" />
         <span class="title">vite-nav</span>
       </div>
-      <nav class="nav">
+      <nav class="nav" aria-label="Primary">
         <a class="nav-link" jacare-go="/" href="/">Home</a>
         <a class="nav-link" jacare-go="/about" href="/about">About</a>
       </nav>

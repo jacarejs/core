@@ -3,7 +3,7 @@ import { route } from '../nav.js'
 
 export default view`
   <section class="page">
-    <h2 class="page-title">Home</h2>
+    <h1 class="page-title">Home</h1>
     <p class="lead">
       Jacaré nav with layout, lazy screens, titles, and
       <code>createRoute(nav.where)</code>.

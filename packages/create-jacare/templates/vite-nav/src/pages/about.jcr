@@ -3,7 +3,7 @@ import { route } from '../nav.js'
 
 export default view`
   <section class="page">
-    <h2 class="page-title">About</h2>
+    <h1 class="page-title">About</h1>
     <p class="lead">This screen was lazy-loaded with <code>lazy(() => import(...))</code>.</p>
     <p class="lead">Current path: <code>${route.path()}</code></p>
   </section>

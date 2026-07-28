@@ -27,21 +27,34 @@ function removeItem(id) {
 export default view`
   <section class="page">
     <div class="add-row">
-      <input
-        type="text"
-        class="input add-input"
-        placeholder="What needs to be done?"
-        bind-value=${draft}
-      />
-      <button class="btn btn-primary" on-click=${addItem}>Add</button>
+      <label class="add-field">
+        <span class="field-label">New task</span>
+        <input
+          type="text"
+          class="input add-input"
+          placeholder="What needs to be done?"
+          bind-value=${draft}
+        />
+      </label>
+      <button type="button" class="btn btn-primary" on-click=${addItem}>Add</button>
     </div>
 
     <ul class="list">
       #for items() as item (item.id)
         <li class-done=${item.done}>
-          <button class="check" on-click=${() => toggleItem(item.id)}></button>
+          <button
+            type="button"
+            class="check"
+            aria-label="Toggle done"
+            on-click=${() => toggleItem(item.id)}
+          ></button>
           <span class="label">${item.label}</span>
-          <button class="remove" on-click=${() => removeItem(item.id)}>×</button>
+          <button
+            type="button"
+            class="remove"
+            aria-label="Remove"
+            on-click=${() => removeItem(item.id)}
+          >×</button>
         </li>
       #end
     </ul>

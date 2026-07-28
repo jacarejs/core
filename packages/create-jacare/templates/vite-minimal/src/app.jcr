@@ -32,16 +32,18 @@ export <view>
       </div>
     </header>
 
-    <section class="card counter-card">
-      <p class="eyebrow">Live signal</p>
-      <p class="count">${label}</p>
-      <p class="hint">${mood}</p>
-      <div class="actions">
-        <button class="btn btn-ghost" type="button" on-click=${decrement}>−1</button>
-        <button class="btn btn-primary" type="button" on-click=${increment}>+1</button>
-        <button class="btn btn-ghost" type="button" on-click=${reset}>Reset</button>
-      </div>
-    </section>
+    <main>
+      <section class="card counter-card">
+        <p class="eyebrow">Live signal</p>
+        <p class="count">${label}</p>
+        <p class="hint">${mood}</p>
+        <div class="actions">
+          <button class="btn btn-ghost" type="button" on-click=${decrement}>−1</button>
+          <button class="btn btn-primary" type="button" on-click=${increment}>+1</button>
+          <button class="btn btn-ghost" type="button" on-click=${reset}>Reset</button>
+        </div>
+      </section>
+    </main>
 
     <footer class="footer">
       <a class="footer-link" href="https://github.com/jacarejs/core" target="_blank" rel="noreferrer">Docs</a>
@@ -151,6 +153,12 @@ export <style>
 
 .btn:hover { transform: translateY(-1px); }
 
+.btn:focus-visible,
+.footer-link:focus-visible {
+  outline: 2px solid var(--j-lime);
+  outline-offset: 2px;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--j-primary), var(--j-bright));
   color: #fff;
@@ -184,5 +192,15 @@ export <style>
 .footer-link:hover {
   color: var(--j-primary);
   text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+
+  .btn:hover {
+    transform: none;
+  }
 }
 </style>
