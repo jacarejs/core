@@ -1,4 +1,5 @@
 import { effect, runUntracked } from '../effect.js'
+import { runAsLane } from '../context.js'
 import type { Signal } from '../types.js'
 
 type ModelProperty = 'value' | 'checked'
@@ -54,12 +55,14 @@ export function bindModel(
 
   const eventName = modelEvent(node, prop)
   const handler = (): void => {
-    const next = readModelValue(node, prop)
-    if (prop === 'checked') {
-      source.set(next as boolean)
-      return
-    }
-    source.set(next as string)
+    runAsLane('input', () => {
+      const next = readModelValue(node, prop)
+      if (prop === 'checked') {
+        source.set(next as boolean)
+        return
+      }
+      source.set(next as string)
+    })
   }
 
   node.addEventListener(eventName, handler)
@@ -67,7 +70,9 @@ export function bindModel(
 
   if (prop === 'value') {
     const onChange = (): void => {
-      source.set(readModelValue(node, prop) as string)
+      runAsLane('input', () => {
+        source.set(readModelValue(node, prop) as string)
+      })
     }
     node.addEventListener('change', onChange)
     cleanups.push(() => node.removeEventListener('change', onChange))
