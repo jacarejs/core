@@ -31,18 +31,22 @@ export function signal<T>(initial: T, options?: DevtoolsMeta): Signal<T> {
     set: {
       value: (next: T) => {
         if (Object.is(value, next)) return
+        const prev = value
         value = next
-        cell.notify()
         devtools.recordValue(cell, value)
+        devtools.recordWrite(cell, prev, value)
+        cell.notify()
       },
     },
     update: {
       value: (fn: (prev: T) => T) => {
+        const prev = value
         const next = fn(value)
         if (Object.is(value, next)) return
         value = next
-        cell.notify()
         devtools.recordValue(cell, value)
+        devtools.recordWrite(cell, prev, value)
+        cell.notify()
       },
     },
     subscribe: {

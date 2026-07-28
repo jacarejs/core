@@ -9,6 +9,12 @@ import type {
   PulseNode,
   PulseNodeKind,
 } from './types.js'
+import {
+  clearLedger,
+  getLastWritePulseId,
+  getWrites,
+  recordWrite as ledgerRecordWrite,
+} from './ledger.js'
 
 interface InternalNode {
   id: number
@@ -30,6 +36,7 @@ interface InternalBinding {
   kind: BindingKind
   file?: string
   line?: number
+  expr?: string
 }
 
 let enabled = false
@@ -193,6 +200,14 @@ export function recordValue(cell: DependencyCell, value: unknown): void {
   emit()
 }
 
+/** Record a pulse write into the DEV ledger (only while DevTools are enabled). */
+export function recordWrite(cell: DependencyCell, prev: unknown, next: unknown): void {
+  if (!enabled) return
+  const id = cellToId.get(cell)
+  if (id == null) return
+  ledgerRecordWrite(id, prev, next)
+}
+
 export function recordStale(cell: DependencyCell): void {
   const id = cellToId.get(cell)
   if (id == null) return
@@ -244,6 +259,7 @@ export function registerBinding(
     kind: meta.kind ?? 'bind',
     ...(meta.file ? { file: meta.file } : {}),
     ...(meta.line != null ? { line: meta.line } : {}),
+    ...(meta.expr ? { expr: meta.expr } : {}),
   }
   bindings.set(id, entry)
   let set = bindingsByPulse.get(pulseId)
@@ -285,6 +301,7 @@ export function getBindingsForPulse(pulseId: number): PulseBinding[] {
       kind: entry.kind,
       ...(entry.file ? { file: entry.file } : {}),
       ...(entry.line != null ? { line: entry.line } : {}),
+      ...(entry.expr ? { expr: entry.expr } : {}),
     })
   }
   return out
@@ -479,4 +496,7 @@ export function resetDevtoolsForTests(): void {
   bindings.clear()
   bindingsByPulse.clear()
   clearHighlight()
+  clearLedger()
 }
+
+export { getWrites, getLastWritePulseId }
