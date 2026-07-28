@@ -28,6 +28,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Sync with remote
+        run: git pull --rebase origin main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,7 +44,7 @@ jobs:
         run: |
           VERSION=$(node scripts/sync-versions.mjs vscode bump "${{ inputs.bump }}")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Bumping extension to v$VERSION"
+          echo "Bumping extension to v$VERSION (from package.json, git tags, and Marketplace)"
 
       - name: Install dependencies
         run: yarn install

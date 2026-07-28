@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -28,6 +29,9 @@ const EXAMPLE_PACKAGES = [
 ]
 
 const VERSION_SOURCE = join(ROOT, 'packages/runtime/package.json')
+const VSCODE_PKG = join(ROOT, 'packages/vscode-jacare/package.json')
+const VSCODE_PUBLISHER = 'heberalmeida'
+const VSCODE_NAME = 'jacare'
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'))
@@ -51,6 +55,22 @@ function parseVersion(version) {
 
 function formatVersion(parts) {
   return `${parts.major}.${parts.minor}.${parts.patch}`
+}
+
+function compareVersion(a, b) {
+  const left = parseVersion(a)
+  const right = parseVersion(b)
+  if (left.major !== right.major) return left.major - right.major
+  if (left.minor !== right.minor) return left.minor - right.minor
+  return left.patch - right.patch
+}
+
+function maxVersion(versions) {
+  const valid = versions.filter((version) => typeof version === 'string' && /^\d+\.\d+\.\d+$/.test(version))
+  if (valid.length === 0) {
+    throw new Error('No versions available to compare')
+  }
+  return valid.reduce((best, version) => (compareVersion(version, best) > 0 ? version : best))
 }
 
 function bumpVersion(version, level) {
@@ -105,10 +125,79 @@ function syncNpmVersion(version) {
 }
 
 function syncVscodeVersion(version) {
-  const path = join(ROOT, 'packages/vscode-jacare/package.json')
-  const pkg = readJson(path)
+  const pkg = readJson(VSCODE_PKG)
   pkg.version = version
-  writeJson(path, pkg)
+  writeJson(VSCODE_PKG, pkg)
+}
+
+function listVscodeTagVersions() {
+  try {
+    const out = execSync('git tag -l "vscode-v*"', {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+    return out
+      .split('\n')
+      .map((tag) => tag.trim().replace(/^vscode-v/, ''))
+      .filter((version) => /^\d+\.\d+\.\d+$/.test(version))
+  } catch {
+    return []
+  }
+}
+
+async function fetchMarketplaceVscodeVersion() {
+  const response = await fetch(
+    'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery?api-version=7.2-preview.1',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json;api-version=7.2-preview.1',
+      },
+      body: JSON.stringify({
+        filters: [
+          {
+            criteria: [{ filterType: 7, value: `${VSCODE_PUBLISHER}.${VSCODE_NAME}` }],
+            pageNumber: 1,
+            pageSize: 1,
+            sortBy: 0,
+            sortOrder: 0,
+          },
+        ],
+        assetTypes: [],
+        flags: 914,
+      }),
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(`Marketplace query failed: HTTP ${response.status}`)
+  }
+
+  const payload = await response.json()
+  const extension = payload?.results?.[0]?.extensions?.[0]
+  const version = extension?.versions?.[0]?.version
+  if (typeof version !== 'string' || !/^\d+\.\d+\.\d+$/.test(version)) {
+    return null
+  }
+  return version
+}
+
+async function resolveVscodeBaseVersion() {
+  const pkgVersion = readJson(VSCODE_PKG).version
+  const tagVersions = listVscodeTagVersions()
+  let marketVersion = null
+  try {
+    marketVersion = await fetchMarketplaceVscodeVersion()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`warning: could not read Marketplace version (${message})`)
+  }
+
+  const sources = [pkgVersion, ...tagVersions]
+  if (marketVersion) sources.push(marketVersion)
+  return maxVersion(sources)
 }
 
 function usage() {
@@ -117,6 +206,7 @@ function usage() {
   node scripts/sync-versions.mjs bump <patch|minor|major>
   node scripts/sync-versions.mjs set <version>
   node scripts/sync-versions.mjs from-tag <v0.0.0>
+  node scripts/sync-versions.mjs vscode read
   node scripts/sync-versions.mjs vscode bump <patch|minor|major>
   node scripts/sync-versions.mjs vscode set <version>
   node scripts/sync-versions.mjs vscode from-tag <vscode-v0.0.0>`)
@@ -124,10 +214,10 @@ function usage() {
 
 const [scope, command, arg] = process.argv.slice(2)
 
-try {
+async function main() {
   if (!scope || scope === 'read') {
     console.log(readCurrentVersion())
-    process.exit(0)
+    return
   }
 
   if (scope === 'bump') {
@@ -135,14 +225,14 @@ try {
     const next = bumpVersion(readCurrentVersion(), level)
     syncNpmVersion(next)
     console.log(next)
-    process.exit(0)
+    return
   }
 
   if (scope === 'set') {
     parseVersion(command)
     syncNpmVersion(command)
     console.log(command)
-    process.exit(0)
+    return
   }
 
   if (scope === 'from-tag') {
@@ -150,30 +240,29 @@ try {
     parseVersion(version)
     syncNpmVersion(version)
     console.log(version)
-    process.exit(0)
+    return
   }
 
   if (scope === 'vscode') {
-    const vscodePkg = join(ROOT, 'packages/vscode-jacare/package.json')
-    const current = readJson(vscodePkg).version
-
     if (command === 'read') {
-      console.log(current)
-      process.exit(0)
+      const base = await resolveVscodeBaseVersion()
+      console.log(base)
+      return
     }
 
     if (command === 'bump') {
-      const next = bumpVersion(current, arg ?? 'patch')
+      const base = await resolveVscodeBaseVersion()
+      const next = bumpVersion(base, arg ?? 'patch')
       syncVscodeVersion(next)
       console.log(next)
-      process.exit(0)
+      return
     }
 
     if (command === 'set') {
       parseVersion(arg)
       syncVscodeVersion(arg)
       console.log(arg)
-      process.exit(0)
+      return
     }
 
     if (command === 'from-tag') {
@@ -181,13 +270,15 @@ try {
       parseVersion(version)
       syncVscodeVersion(version)
       console.log(version)
-      process.exit(0)
+      return
     }
   }
 
   usage()
-  process.exit(1)
-} catch (error) {
-  console.error(error instanceof Error ? error.message : error)
-  process.exit(1)
+  process.exitCode = 1
 }
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : error)
+  process.exitCode = 1
+})
