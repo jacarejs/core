@@ -15,6 +15,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - **core:** `nav.go` / `swap` focus grip (`{ focus }`, `data-jacare-focus`); `getRouteParam` + `${@route/id}` template sugar
 - **compiler:** contract `pulses` bare unwrap; `jacare-when={cond}`; route-scan helpers for `jacare check --routes`
 - **cli:** `jacare check --routes`; compile errors print source snippets via `formatCompileError`
+- **vscode:** snippets for `@route`, `jacare-when`, focus grip; highlight `data-jacare-*` (v0.0.16)
 
 ### Fixed
 

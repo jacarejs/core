@@ -32,10 +32,10 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | Feature | Description |
 |---------|-------------|
 | **Syntax highlighting** | JavaScript module body, `view` / `style` / `contract` blocks, directives, HTML, and bindings |
-| **Pulse Mesh** | Highlight `${@bag/key}` addresses; snippets for `createBag`, contract `links`, and mesh sugar |
-| **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) |
+| **Pulse Mesh** | Highlight `${@bag/key}` / `${@route/key}`; snippets for bags, links, and route sugar |
+| **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) · `jacare-when` |
 | **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` (`from` / `mode`) |
-| **Snippets** | Component scaffold, contracts, Pulse bags, Mesh addresses, islands (`mountIsland`), signals, control flow |
+| **Snippets** | Component scaffold, contracts, Mesh/`@route`, `jacare-when`, focus grip, islands, signals, control flow |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
 | **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `class-active`, `${expr}` — prefer bare calls over `${() => …}` when no local is captured |
 | **Scoped CSS** | `style` tagged templates and `export <style>` highlighted as CSS |
@@ -85,9 +85,10 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 | `jcr-bag` | `createBag` | Pulse Bag factory + `ripple` (lazy publish) |
 | `jcr-bag-read` | — | `${cart.count()}` — Mesh Port via import |
 | `jcr-mesh` | `jcr-at`, `@bag` | `${@cart/count}` — address sugar via `getBag` |
+| `jcr-route` | `@route` | `${@route/id}` — active nav param via `getRouteParam` |
 | `jcr-mesh-click` | `@bag-click` | `on-click=${@cart/clear}` |
 | `jcr-links` | `contract-links` | Contract `links` + view alias (no bag import) |
-| `jcr-import` | `import-jacare` | `import { … }` including `createBag` / `getBag` / `ripple` |
+| `jcr-import` | `import-jacare` | `import { … }` including `createBag` / `getBag` / `getRouteParam` / `ripple` |
 | `jcr-island` | `mountIsland` | `mountIsland` from `@jacare/core/island` + dispose |
 | `jcr-component` | `jacare-component` | Full scaffold: `export <contract>` + `<view>` + `<style>` |
 | `jcr-contract` | `export-contract` | Contract with `props`, `pulses`, `slots`, and `emits` |
@@ -102,6 +103,9 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 | `jcr-text-arrow` | `jcr-expr-arrow` | `${() => label(item.id)}` — when capturing a `#for` local |
 | `jcr-class` | `class-active` | `class-active=${open()}` |
 | `jcr-if` | `#if` | `#if` / `#end` |
+| `jcr-when` | `jacare-when` | `<p jacare-when=${cond}>…</p>` — same IR as single `#if` |
+| `jcr-focus` | `data-jacare-focus` | `data-jacare-focus tabindex="-1"` |
+| `jcr-go-focus` | `nav.go.focus` | `await nav.go('/x', { focus: true })` |
 | `jcr-ifelse` | `#ifelse` | `#if` / `#else` / `#end` |
 | `jcr-case` | `#case` | `#case` / `#when` / `#else` / `#end` |
 | `jcr-for` | `#for` | `#for items() as item (item.id)` / `#end` |
@@ -378,10 +382,10 @@ export <style>
 | `entity.name.tag.jacare` | `view`, `style`, and `contract` block tags |
 | `entity.name.tag.jacare.contract` | `<contract>` / `</contract>` specifically |
 | `keyword.other.contract.jacare` | Contract fields: `props`, `pulses`, `slots`, `emits`, `forwards`, `links`, `from`, `mode` |
-| `variable.other.mesh-address.jacare` | Mesh address sugar `${@bag/key}` |
+| `variable.other.mesh-address.jacare` | Mesh / route address sugar `${@bag/key}` · `${@route/id}` |
 | `entity.name.type.tag.jacare` | PascalCase components |
 | `entity.name.tag` | HTML elements (`div`, `slot`, `button`, `view`, `style`, …) |
-| `entity.other.attribute-name` | `bind-*`, `on-*`, `class-*`, `:prop` |
+| `entity.other.attribute-name` | `bind-*`, `on-*`, `class-*`, `jacare-*`, `data-jacare-*`, `:prop` |
 | `meta.embedded.expression.jacare` | `${expression}` inside templates |
 | `meta.contract.jacare` | Entire `export <contract>…</contract>` block |
 | `source.css` | Content inside `style` blocks |

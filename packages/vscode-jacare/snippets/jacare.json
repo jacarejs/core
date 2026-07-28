@@ -132,7 +132,7 @@
   "Import core": {
     "prefix": ["jcr-import", "import-jacare"],
     "body": [
-      "import { ${1|pulse,signal,derive,computed,effect,batch,untrack,createBag,ripple,getBag,createForm,createNav|} } from '@jacare/core'"
+      "import { ${1|pulse,signal,derive,computed,effect,batch,untrack,createBag,ripple,getBag,getRouteParam,createRoute,createForm,createNav|} } from '@jacare/core'"
     ],
     "description": "Import helpers from @jacare/core"
   },
@@ -215,6 +215,34 @@
       "#end"
     ],
     "description": "Template #if / #end conditional"
+  },
+  "jacare-when one-liner": {
+    "prefix": ["jcr-when", "jacare-when"],
+    "body": [
+      "<${1:p} jacare-when=\\${${2:condition}}>$0</${1:p}>"
+    ],
+    "description": "Attribute one-liner — same IR as a single #if…#end arm"
+  },
+  "Route param sugar": {
+    "prefix": ["jcr-route", "@route"],
+    "body": [
+      "\\${@route/${1:id}}"
+    ],
+    "description": "Active nav path param — ${@route/id} via getRouteParam (createRoute still preferred in JS)"
+  },
+  "Focus target": {
+    "prefix": ["jcr-focus", "data-jacare-focus"],
+    "body": [
+      "data-jacare-focus tabindex=\"-1\""
+    ],
+    "description": "Focus target for nav.go(path, { focus: true })"
+  },
+  "Nav go with focus": {
+    "prefix": ["jcr-go-focus", "nav.go.focus"],
+    "body": [
+      "await nav.go('${1:/settings}', { focus: ${2|true,'#main-title'|} })"
+    ],
+    "description": "Navigate and focus [data-jacare-focus] or a CSS selector after mount"
   },
   "If / else block": {
     "prefix": ["jcr-ifelse", "#ifelse"],
