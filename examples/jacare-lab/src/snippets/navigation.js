@@ -145,7 +145,7 @@ function topicHref(slug) {
         </a>
       #end
     </div>
-    <p class="muted">routeHref('/topic/:slug', { slug: 'alpha' }) → /topic/alpha</p>
+    <p class="muted">routeHref('/topic/:slug', { slug: 'alpha' }) → /topic/alpha · also safe with multiple tokens (/a/:idea/:id)</p>
   </div>`,
 )
 

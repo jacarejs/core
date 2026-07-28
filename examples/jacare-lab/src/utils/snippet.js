@@ -17,6 +17,7 @@ const CORE_EXPORTS = [
   'enablePatience',
   'disablePatience',
   'isPatienceEnabled',
+  'runAsLane',
   'createBag',
   'ripple',
   'getBag',

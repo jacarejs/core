@@ -16,6 +16,7 @@ const RUNTIME_BINDINGS = [
   'enablePatience',
   'disablePatience',
   'isPatienceEnabled',
+  'runAsLane',
   'ReactiveCycleError',
   'getBag',
   'createBag',

@@ -123,7 +123,7 @@ batch(() => {
     importLine: "import { enablePatience, flushSync, disablePatience } from '@jacare/core'",
     usage: 'Opt-in: coalesce writes outside batch into one microtask.',
     about:
-      'Default schedule is synchronous — set() updates effects on the same turn. enablePatience() turns on Patience: writes outside batch queue and flush once in a microtask (safety net for bursty sockets/timers). Prefer batch/ripple for explicit groups. flushSync() drains pending now (tests and escape hatch). disablePatience() flushes and restores sync. No priority lanes or startTransition.',
+      'Default schedule is synchronous — set() updates effects on the same turn. enablePatience() turns on Patience: writes outside batch queue and flush once in a microtask (safety net for bursty sockets/timers). With Patience on, the runtime uses internal lanes (input → default → idle): bindModel marks input; idle uses requestIdleCallback. Authors do not pick lanes — no startTransition API. Prefer batch/ripple for explicit groups. flushSync() drains every lane now (tests and escape hatch). disablePatience() flushes and restores sync.',
     example: `import { pulse, effect, enablePatience, flushSync } from '@jacare/core'
 
 enablePatience()
@@ -144,7 +144,7 @@ flushSync()  // logs 3 once`,
     importLine: "import { flushSync } from '@jacare/core'",
     usage: 'Drain pending reactive updates immediately.',
     about:
-      'flushSync runs any queued subscribers now. Required after enablePatience() when tests or UI need the DOM on the same turn. Harmless when the queue is empty. batch/ripple already flush synchronously at the end of their callback.',
+      'flushSync runs any queued subscribers now (every Patience lane: input, default, idle). Required after enablePatience() when tests or UI need the DOM on the same turn. Harmless when the queue is empty. batch/ripple already flush synchronously at the end of their callback.',
     example: `import { flushSync } from '@jacare/core'
 
 count.set(1)
@@ -177,6 +177,22 @@ disablePatience()`,
 
 enablePatience()
 isPatienceEnabled() // true`,
+    path: '/reactivity',
+  },
+  {
+    pkg: '@jacare/core',
+    group: 'Reactivity',
+    name: 'runAsLane',
+    importLine: "import { runAsLane } from '@jacare/core'",
+    usage: 'Runtime/tooling: mark write origin for Patience lanes.',
+    about:
+      'runAsLane(lane, fn) runs fn while tagging writes as input, default, or idle. bindModel already uses input. Apps should not pick lanes — this is for the runtime and rare tooling. Without enablePatience(), schedule stays synchronous and the lane tag is ignored for flush timing.',
+    example: `import { pulse, runAsLane, enablePatience, flushSync } from '@jacare/core'
+
+enablePatience()
+const bg = pulse(0)
+runAsLane('idle', () => bg.set(1))
+flushSync()  // drains idle too`,
     path: '/reactivity',
   },
   {
@@ -550,10 +566,12 @@ q()  // → 'tea' when URL has ?q=tea`,
     importLine: "import { routeHref } from '@jacare/core'",
     usage: 'Build an href from path + params/search.',
     about:
-      'Pure helper that builds a path string from a pattern and params or search. Useful for jacare-go targets and tests. It does not navigate by itself.',
+      'Pure helper that builds a path string from a pattern and params or search. Replaces each :name / :name* token (no substring collisions such as :id inside :idea). Useful for jacare-go targets and tests. It does not navigate by itself.',
     example: `import { routeHref } from '@jacare/core'
 
-routeHref('/item/:id', { id: 7 })  // → '/item/7'`,
+routeHref('/item/:id', { id: '7' })              // → '/item/7'
+routeHref('/a/:idea/:id', { idea: 'x', id: '1' }) // → '/a/x/1'
+routeHref('/files/:path*', { path: 'a/b' })       // → '/files/a/b'`,
     path: '/nav',
   },
   {
