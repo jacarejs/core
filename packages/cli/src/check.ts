@@ -21,6 +21,13 @@ import {
   type TemplateStyleWarning,
 } from '@jacare/compiler'
 
+function readSiblingJcrTs(jcrFilename: string): string | null {
+  if (!jcrFilename.endsWith('.jcr')) return null
+  const path = `${jcrFilename}.ts`
+  if (!existsSync(path)) return null
+  return readFileSync(path, 'utf8')
+}
+
 export type CheckOptions = {
   bindings?: boolean
   /** Soft style hints (default true). */
@@ -48,7 +55,10 @@ export function runCheck(cwd: string, options: CheckOptions = {}): number {
   for (const file of files) {
     const source = readFileSync(file, 'utf-8')
     try {
-      const result = compile(source, { filename: file })
+      const result = compile(source, {
+        filename: file,
+        siblingScript: readSiblingJcrTs(file) ?? false,
+      })
       compiled.set(file, result)
       console.log(`ok ${file}`)
       if (options.bindings) {
@@ -193,7 +203,10 @@ function checkContracts(
     let child = compiled.get(childFile)
     if (!child) {
       try {
-        child = compile(readFileSync(childFile, 'utf-8'), { filename: childFile })
+        child = compile(readFileSync(childFile, 'utf-8'), {
+          filename: childFile,
+          siblingScript: readSiblingJcrTs(childFile) ?? false,
+        })
         compiled.set(childFile, child)
       } catch (error) {
         const detail = error instanceof Error ? error.message : 'compile failed'

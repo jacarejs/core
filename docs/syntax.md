@@ -494,7 +494,7 @@ nav.warm('/about')
 | `where` | `Signal<NavPlace>` — reactive current place (`.peek` for untracked read) |
 | `createRoute(nav.where)` | `route.path` / `route.param(name)` / `route.search(name)` |
 | `getRouteParam(name)` | Getter for `${@route/name}` sugar |
-| `routeHref(pattern, params?, search?)` | Build paths for `jacare-go` / `href` |
+| `routeHref(pattern, params?, search?)` | Build paths for `jacare-go` / `href` (`:name` / `:name*` tokens) |
 
 `createNav({ base: '/app' })` sets the URL prefix for all screens.
 
@@ -552,7 +552,7 @@ Jacaré stays **JS-first**. TypeScript is optional and never required for scaffo
 
 | Approach | When to use |
 |----------|-------------|
-| **Sibling `Foo.jcr.ts`** | Typed logic next to a clean view-only `.jcr` — auto-merged at compile |
+| **Sibling `Foo.jcr.ts`** | Typed logic next to a clean view-only `.jcr` — tooling loads via `siblingScript` / `@jacare/compiler/fs` |
 | **`// @jacare-ts`** | Type annotations inside the `.jcr` script region |
 | **`import` from `.ts`** | Share domain code (`bags`, helpers) — Vite compiles the `.ts` as usual |
 | **`jacare.d.ts`** | Type `import App from './app.jcr'` in a TS host app |
@@ -582,6 +582,8 @@ export <view>
 Rules:
 
 - Sibling path is always **`filename.jcr` + `.ts`** → `filename.jcr.ts`
+- Vite plugin / `jacare compile` / `jacare check` load the sibling from disk (`@jacare/compiler/fs` or equivalent) and pass `siblingScript` into `compile()`
+- Browser playgrounds (Lab / Studio) compile in-memory — pass `siblingScript` yourself if you need a sibling; there is no filesystem auto-read in the browser bundle
 - The sibling must be **logic only** (no `export <view>`)
 - Types are stripped with esbuild before codegen; JS apps without a sibling are unchanged
 

@@ -73,17 +73,22 @@ The compiler imports only the runtime helpers each file actually uses (`bindText
 
 ```javascript
 import { compile } from '@jacare/compiler'
+import { readSiblingJcrTs } from '@jacare/compiler/fs'
 import { readFileSync, writeFileSync } from 'node:fs'
 
-const source = readFileSync('src/app.jcr', 'utf-8')
+const filename = 'src/app.jcr'
+const source = readFileSync(filename, 'utf-8')
 
 const result = compile(source, {
-  filename: 'src/app.jcr',
+  filename,
   mode: 'client',
+  siblingScript: readSiblingJcrTs(filename) ?? false,
 })
 
 writeFileSync('dist/app.js', result.code)
 ```
+
+Node tooling that needs sibling `.jcr.ts` files should import `@jacare/compiler/fs` (keeps `node:fs` out of browser bundles such as Lab / Studio).
 
 ### Options
 
@@ -92,6 +97,8 @@ writeFileSync('dist/app.js', result.code)
 | `filename` | `string` | — | Source path for error messages and source maps |
 | `mode` | `'client' \| 'server' \| 'full'` | `'full'` | Output mode |
 | `runtimeImport` | `string` | `'@jacare/core'` | Import path for runtime helpers |
+| `scriptLang` | `'js' \| 'ts'` | — | Force TypeScript strip (also enabled by `// @jacare-ts`) |
+| `siblingScript` | `string \| false` | — | Sibling `.jcr.ts` contents, or `false` to skip |
 
 ### Return value
 

@@ -2,7 +2,6 @@ export { compile } from './compile.js'
 export {
   hasJacareTsPragma,
   prepareModuleScript,
-  readSiblingJcrTs,
   siblingJcrTsPath,
   stripJacareTsPragma,
   stripTypeScript,

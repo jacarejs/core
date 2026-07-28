@@ -16,6 +16,13 @@ import {
 import type { IndexHtmlTransformResult, Plugin, UserConfig } from 'vite'
 import type { SourceMapInput } from 'rollup'
 
+function readSiblingJcrTs(jcrFilename: string): string | null {
+  if (!jcrFilename.endsWith('.jcr')) return null
+  const path = `${jcrFilename}.ts`
+  if (!existsSync(path)) return null
+  return readFileSync(path, 'utf8')
+}
+
 export interface JacareConfig {
   title?: string
   port?: number
@@ -219,6 +226,7 @@ export function jacare(options: JacarePluginOptions = {}): Plugin {
           mode,
           cpw,
           debug: !isProduction,
+          siblingScript: readSiblingJcrTs(fileId) ?? false,
           ...(options.runtimeImport ? { runtimeImport: options.runtimeImport } : {}),
         })
 
@@ -304,7 +312,10 @@ function validateContractsInModule(source: string, filename: string, root: strin
 
     let child
     try {
-      child = compile(readFileSync(childFile, 'utf-8'), { filename: childFile })
+      child = compile(readFileSync(childFile, 'utf-8'), {
+        filename: childFile,
+        siblingScript: readSiblingJcrTs(childFile) ?? false,
+      })
     } catch {
       continue
     }

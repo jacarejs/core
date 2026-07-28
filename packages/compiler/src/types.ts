@@ -9,8 +9,9 @@ export interface CompileOptions {
   /** Force TypeScript strip on the `.jcr` script region. Also enabled by `// @jacare-ts`. */
   scriptLang?: 'js' | 'ts'
   /**
-   * Sibling logic file contents (`Foo.jcr.ts`), or `false` to skip auto-load.
-   * When omitted and `filename` ends with `.jcr`, the compiler loads `filename + '.ts'` if present.
+   * Sibling logic file contents (`Foo.jcr.ts`), or `false` to skip.
+   * Tooling (Vite / CLI) should load disk via `@jacare/compiler/fs` `readSiblingJcrTs`.
+   * Browser playgrounds omit this — no auto filesystem read.
    */
   siblingScript?: string | false
 }

@@ -1,4 +1,3 @@
-import { existsSync, readFileSync } from 'node:fs'
 import { transformSync } from 'esbuild'
 import { JacareCompileError } from './errors.js'
 import { hasViewSource } from './parse-module.js'
@@ -15,13 +14,6 @@ export function stripJacareTsPragma(source: string): string {
 
 export function siblingJcrTsPath(jcrFilename: string): string {
   return `${jcrFilename}.ts`
-}
-
-export function readSiblingJcrTs(jcrFilename: string): string | null {
-  if (!jcrFilename.endsWith('.jcr')) return null
-  const path = siblingJcrTsPath(jcrFilename)
-  if (!existsSync(path)) return null
-  return readFileSync(path, 'utf8')
 }
 
 export function stripTypeScript(code: string, filename = 'module.ts'): string {
@@ -57,8 +49,6 @@ export function prepareModuleScript(
     sibling = null
   } else if (typeof options.siblingScript === 'string') {
     sibling = options.siblingScript
-  } else if (options.filename) {
-    sibling = readSiblingJcrTs(options.filename)
   }
 
   if (sibling != null) {

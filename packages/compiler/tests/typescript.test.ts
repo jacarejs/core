@@ -8,6 +8,7 @@ import {
   prepareModuleScript,
   stripTypeScript,
 } from '../src/index.js'
+import { readSiblingJcrTs } from '../src/typescript-fs.js'
 
 describe('TypeScript in .jcr', () => {
   it('detects // @jacare-ts pragma', () => {
@@ -70,12 +71,15 @@ export function increment(): void {
         'utf8',
       )
 
+      const sibling = readSiblingJcrTs(jcrPath)
+      expect(sibling).toBeTruthy()
+
       const result = compile(
         `export <view>
   <button type="button" on-click={increment}>\${count}</button>
 </view>
 `,
-        { filename: jcrPath },
+        { filename: jcrPath, siblingScript: sibling ?? false },
       )
 
       expect(result.script).toContain('pulse(0)')

@@ -2,6 +2,13 @@ import { existsSync, readFileSync, watch, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { compile } from '@jacare/compiler'
 
+function readSiblingJcrTs(jcrFilename: string): string | null {
+  if (!jcrFilename.endsWith('.jcr')) return null
+  const path = `${jcrFilename}.ts`
+  if (!existsSync(path)) return null
+  return readFileSync(path, 'utf8')
+}
+
 export function compileOnce(inputPath: string, outputPath?: string): void {
   const input = resolve(inputPath)
   const output = resolve(outputPath ?? input.replace(/\.jcr$/, '.js'))
@@ -9,7 +16,10 @@ export function compileOnce(inputPath: string, outputPath?: string): void {
     throw new Error('Refusing to overwrite the input file; use a .jcr input or pass an output path')
   }
   const source = readFileSync(input, 'utf-8')
-  const result = compile(source, { filename: input })
+  const result = compile(source, {
+    filename: input,
+    siblingScript: readSiblingJcrTs(input) ?? false,
+  })
   writeFileSync(output, result.code, 'utf-8')
   console.log(`Compiled ${input} → ${output}`)
 }
