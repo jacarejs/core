@@ -1,0 +1,45 @@
+{
+  "Lazy nav screen entry": {
+    "prefix": ["jcr-nav-lazy", "jacare-nav-lazy", "lazy-screen"],
+    "body": [
+      "'/${1:about}': {",
+      "  use: lazy(() => import('./pages/${2:about}.jcr')),",
+      "  title: '${3:About} · Jacaré',",
+      "},"
+    ],
+    "description": "createNav lazy screen entry — pair with jcr-screen in the .jcr page"
+  },
+  "Eager nav screen entry": {
+    "prefix": ["jcr-nav-screen", "jacare-nav-screen", "screen-entry"],
+    "body": [
+      "import ${1:Home} from './pages/${2:home}.jcr'",
+      "",
+      "'/${3:}': { use: screen(${1:Home}), title: '${4:Home} · Jacaré' },"
+    ],
+    "description": "createNav eager screen() entry — import + screens map line"
+  },
+  "createNav scaffold": {
+    "prefix": ["jcr-create-nav", "createNav"],
+    "body": [
+      "import { createNav, createRoute, lazy, screen } from '@jacare/core'",
+      "import Shell from './shell.jcr'",
+      "import ${1:Home} from './pages/${2:home}.jcr'",
+      "import NotFound from './pages/not-found.jcr'",
+      "",
+      "export const nav = createNav({",
+      "  layout: Shell,",
+      "  screens: {",
+      "    '/': { use: screen(${1:Home}), title: '${3:Home} · Jacaré' },",
+      "    '/${4:about}': {",
+      "      use: lazy(() => import('./pages/${4:about}.jcr')),",
+      "      title: '${5:About} · Jacaré',",
+      "    },",
+      "  },",
+      "  missing: NotFound,",
+      "})",
+      "",
+      "export const route = createRoute(nav.where)"
+    ],
+    "description": "Full createNav + createRoute scaffold with screen + lazy entry"
+  }
+}

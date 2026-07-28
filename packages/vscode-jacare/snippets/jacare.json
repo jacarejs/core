@@ -187,6 +187,64 @@
     ],
     "description": "class-* toggle — prefer bare open() unless capturing a loop local"
   },
+  "Class toggle (colon alias)": {
+    "prefix": ["jcr-class-colon", "class:"],
+    "body": [
+      "class:${1:active}=\\${${2:open()}}"
+    ],
+    "description": "class:name alias — same as class-name=${…}"
+  },
+  "Style CSS variable": {
+    "prefix": ["jcr-style-var", "style---"],
+    "body": [
+      "style---${1:pct}=\\${${2:pct()}}"
+    ],
+    "description": "Bind CSS custom property — style---pct=${pct} → --pct"
+  },
+  "Style CSS variable (colon alias)": {
+    "prefix": ["jcr-style-colon", "style:"],
+    "body": [
+      "style:${1:pct}=\\${${2:pct()}}"
+    ],
+    "description": "style:name alias — same as style---name=${…}"
+  },
+  "Screen page": {
+    "prefix": ["jcr-screen", "jacare-screen"],
+    "body": [
+      "export <view>",
+      "  <section class=\"${1:page}\" data-jacare-focus tabindex=\"-1\">",
+      "    <h1 id=\"${1:page}-title\">${2:Title}</h1>",
+      "    $0",
+      "  </section>",
+      "</view>",
+      "",
+      "export <style>",
+      ".${1:page} {",
+      "  padding: 1rem;",
+      "}",
+      "</style>"
+    ],
+    "description": "Nav screen page scaffold — pair with jcr-nav-lazy in nav.js"
+  },
+  "A11y field (label + alert)": {
+    "prefix": ["jcr-field-a11y", "jcr-a11y-field", "a11y-field"],
+    "body": [
+      "<label class=\"field\">",
+      "  <span class=\"field-label\">${1:Label}</span>",
+      "  <input",
+      "    class=\"input\"",
+      "    class-invalid=\\${() => Boolean(${2:error}())}",
+      "    aria-invalid=\\${() => Boolean(${2:error}())}",
+      "    type=\"${3:text}\"",
+      "    bind-value=\\${${4:value}}",
+      "  />",
+      "  #if ${2:error}()",
+      "    <span class=\"field-error\" role=\"alert\">\\${${2:error}()}</span>",
+      "  #end",
+      "</label>"
+    ],
+    "description": "Accessible field — label, aria-invalid, error with role=alert"
+  },
   "On click (with capture)": {
     "prefix": ["jcr-click-arrow"],
     "body": [

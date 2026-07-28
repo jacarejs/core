@@ -95,6 +95,14 @@
       {
         "language": "typescript",
         "path": "./snippets/jacare-ts.json"
+      },
+      {
+        "language": "javascript",
+        "path": "./snippets/jacare-js.json"
+      },
+      {
+        "language": "typescript",
+        "path": "./snippets/jacare-js.json"
       }
     ],
     "configurationDefaults": {

@@ -37,9 +37,9 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | **Pulse Mesh** | Highlight `${@bag/key}` / `${@route/key}`; snippets for bags, links, and route sugar |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) · `jacare-when` |
 | **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` (`from` / `mode`) |
-| **Snippets** | Component scaffold, contracts, Mesh/`@route`, `jacare-when`, focus grip, islands, signals, control flow |
+| **Snippets** | Component scaffold, screen/nav, a11y field, Mesh/`@route`, `jacare-when`, focus grip, islands, signals, control flow |
 | **Component tags** | PascalCase components such as `<Field />` and `<Card>` |
-| **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `class-active`, `${expr}` — prefer bare calls over `${() => …}` when no local is captured |
+| **Bindings** | `bind-value`, `on-click`, `@click`, `:prop`, `class-active` / `class:active`, `style---pct` / `style:pct`, `${expr}` — prefer bare calls over `${() => …}` when no local is captured |
 | **Scoped CSS** | `style` tagged templates and `export <style>` highlighted as CSS |
 | **File icons** | Jacaré logo for `.jcr` files in the Explorer |
 | **Editor helpers** | Auto-closing brackets, quotes, and template literals |
@@ -67,7 +67,7 @@ cd packages/vscode-jacare
 yarn install
 yarn build
 yarn package
-code --install-extension jacare-0.0.14.vsix --force
+code --install-extension jacare-0.0.18.vsix --force
 ```
 
 ### Development mode
@@ -104,6 +104,11 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 | `jcr-text` | `jcr-expr` | `${count()}` — prefer bare (no redundant arrow) |
 | `jcr-text-arrow` | `jcr-expr-arrow` | `${() => label(item.id)}` — when capturing a `#for` local |
 | `jcr-class` | `class-active` | `class-active=${open()}` |
+| `jcr-class-colon` | `class:` | `class:active=${open()}` — colon alias |
+| `jcr-style-var` | `style---` | `style---pct=${pct()}` |
+| `jcr-style-colon` | `style:` | `style:pct=${pct()}` — colon alias |
+| `jcr-screen` | `jacare-screen` | Nav screen page scaffold (`data-jacare-focus`) |
+| `jcr-field-a11y` | `a11y-field` | Label + input + `role="alert"` error |
 | `jcr-if` | `#if` | `#if` / `#end` |
 | `jcr-when` | `jacare-when` | `<p jacare-when=${cond}>…</p>` — same IR as single `#if` |
 | `jcr-focus` | `data-jacare-focus` | `data-jacare-focus tabindex="-1"` |
@@ -118,6 +123,16 @@ In a `.jcr` file, type a prefix and accept the suggestion (`Tab` / `Enter`). Sni
 | `jcr-slot` | `slot` | `<slot name="…" />` |
 | `jcr-use` | `component-tag` | `<Component :prop=${value}>…</Component>` |
 | `jcr-debug` | `debug` | `<debug copy label="…">${value}</debug>` |
+
+### Navigation snippets (`.js` / `.ts`)
+
+| Prefix | Aliases | Inserts |
+|--------|---------|---------|
+| `jcr-nav-lazy` | `lazy-screen` | Lazy `createNav` screen entry |
+| `jcr-nav-screen` | `screen-entry` | Eager `screen()` entry + import |
+| `jcr-create-nav` | `createNav` | Full `createNav` + `createRoute` scaffold |
+
+Pair `jcr-screen` in the `.jcr` page with `jcr-nav-lazy` in `nav.js`.
 
 ### Template expression style
 
