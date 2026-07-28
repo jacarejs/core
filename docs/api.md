@@ -265,6 +265,12 @@ Jacaré uses **fine-grained reactivity**: signals track dependencies at read tim
 | `computed(fn)` | `derive` | Derived read-only value |
 | `effect(fn)` | `watch` | Side effect on dependency change |
 | `untrack(fn)` | `runUntracked` | Run without tracking |
+| `batch(fn)` | — | Coalesce writes (sync flush) |
+| `enablePatience()` | — | Opt-in microtask coalesce |
+| `flushSync()` | — | Drain pending updates now |
+| `disablePatience()` | — | Restore sync schedule |
+| `isPatienceEnabled()` | — | Whether Patience is on |
+| `ReactiveCycleError` | — | Thrown on nested update cycles |
 
 ### Step 1 — Create a signal
 
@@ -319,6 +325,31 @@ batch(() => {
   b.set(2)
 }) // effects run once after both writes
 ```
+
+### Step 4b — Patience (opt-in)
+
+Default schedule is **synchronous**. For bursty writers without `batch`, turn on Patience once:
+
+```javascript
+import { signal, effect, enablePatience, flushSync, disablePatience, isPatienceEnabled } from '@jacare/core'
+
+enablePatience()
+isPatienceEnabled() // true
+
+const count = signal(0)
+effect(() => {
+  document.title = String(count())
+})
+
+count.set(1)
+count.set(2)
+count.set(3)
+flushSync() // title is "3" now (or wait one microtask)
+
+disablePatience() // back to sync
+```
+
+Prefer `batch` / `ripple` for explicit groups. Patience is a safety net, not the default.
 
 ### Step 5 — Untrack reads
 
@@ -2593,7 +2624,21 @@ Compiler-emitted helpers (`bindText`, `branch`, …) are still public — you ra
 ### 20.1 `@jacare/core` — reactivity
 
 ```javascript
-import { pulse, signal, derive, computed, effect, watch, batch, untrack, flushSync, enablePatience, disablePatience, ReactiveCycleError } from '@jacare/core'
+import {
+  pulse,
+  signal,
+  derive,
+  computed,
+  effect,
+  watch,
+  batch,
+  untrack,
+  enablePatience,
+  flushSync,
+  disablePatience,
+  isPatienceEnabled,
+  ReactiveCycleError,
+} from '@jacare/core'
 ```
 
 Aliases: `pulse` ≡ `signal`, `derive` ≡ `computed`, `watch` ≡ `effect`. Prefer **pulse / derive / watch** in new code. Details: [§3](#3-reactivity).
@@ -2687,31 +2732,42 @@ batch(() => {
 })  // effect runs once → 3
 ```
 
-**`flushSync` / Patience (opt-in)**
-
-Default schedule is **synchronous** (DOM updates run on the same turn as `set`).  
-For bursty writers that forget `batch`, call `enablePatience()` once: writes outside `batch` coalesce into one microtask. Use `flushSync()` in tests or when you need the DOM immediately.
+**`enablePatience`**
 
 ```javascript
-import { pulse, effect, enablePatience, flushSync } from '@jacare/core'
+import { enablePatience } from '@jacare/core'
 
 enablePatience()
-
-const count = pulse(0)
-const label = document.createElement('span')
-effect(() => {
-  label.textContent = String(count())
-})
-
-count.set(1)
-count.set(2)
-count.set(3)
-// label still "0" until the microtask (or flushSync)
-flushSync()
-// label.textContent === "3"
+// writes outside batch coalesce into one microtask flush
 ```
 
-`batch` / `ripple` stay synchronous even with Patience on. `disablePatience()` drains pending and restores sync.
+**`flushSync`**
+
+```javascript
+import { flushSync } from '@jacare/core'
+
+count.set(1)
+flushSync()  // drain pending now (tests / escape hatch)
+```
+
+**`disablePatience`**
+
+```javascript
+import { disablePatience } from '@jacare/core'
+
+disablePatience()  // flush pending + restore sync default
+```
+
+**`isPatienceEnabled`**
+
+```javascript
+import { isPatienceEnabled, enablePatience } from '@jacare/core'
+
+enablePatience()
+isPatienceEnabled()  // → true
+```
+
+Default schedule stays **synchronous**. Prefer `batch` / `ripple` for grouped writes; Patience is an opt-in safety net for bursts. Lab demo: [`/reactivity`](https://jacarejs.github.io/core/lab/#/reactivity).
 
 **`untrack`**
 
