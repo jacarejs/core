@@ -75,6 +75,8 @@ export {
   enableDevtools,
   getPulseGraph,
   subscribePulseGraph,
+  flushPulseGraph,
+  beginDevtoolsPage,
   namePulse,
   setPulseValue,
   resolvePulseId,

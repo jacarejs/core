@@ -152,18 +152,29 @@ export function applyModel(
   ctx.pushDevtoolsBind(signal, el, 'model', undefined, signal)
 }
 
-/** Effect that applies attribute from a read expression (arrow invokes). */
+/** Apply attribute from a read expression (arrow invokes). One-shot when non-reactive. */
 export function applyAttrEffect(
   ctx: CodegenContext,
   el: string,
   name: string,
   readExpr: string,
   invokeArrow: boolean,
+  once = false,
 ): void {
+  const read = invokeArrow ? `(${readExpr})()` : readExpr
+  if (once) {
+    ctx.line(`{`)
+    ctx.indent()
+    ctx.line(`const _v = ${read}`)
+    emitAttrApplyLines(ctx, el, name, '_v')
+    ctx.dedent()
+    ctx.line('}')
+    return
+  }
   ctx.useRuntime('effect')
   ctx.line(`${ctx.cleanupVar}.push(effect(() => {`)
   ctx.indent()
-  ctx.line(`const _v = ${invokeArrow ? `(${readExpr})()` : readExpr}`)
+  ctx.line(`const _v = ${read}`)
   emitAttrApplyLines(ctx, el, name, '_v')
   ctx.dedent()
   ctx.line('}).dispose)')

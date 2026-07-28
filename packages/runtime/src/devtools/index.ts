@@ -15,6 +15,8 @@ export {
   enableDevtools,
   getPulseGraph,
   subscribePulseGraph,
+  flushPulseGraph,
+  beginDevtoolsPage,
   resetDevtoolsForTests,
   namePulse,
   setPulseValue,

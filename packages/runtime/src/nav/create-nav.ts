@@ -1,3 +1,4 @@
+import { beginDevtoolsPage } from '../devtools/registry.js'
 import { effect } from '../effect.js'
 import { signal } from '../signal.js'
 import { isLoader } from './lazy.js'
@@ -246,6 +247,9 @@ export function createNav(options: NavOptions): Nav {
         target.replaceChildren()
         host = target
       }
+
+      // After layout (kept alive) and previous screen dispose — scope DevTools to this page.
+      beginDevtoolsPage()
 
       syncGoLinks(current, base)
 

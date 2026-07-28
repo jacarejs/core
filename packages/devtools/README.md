@@ -129,7 +129,7 @@ Pulses created **before** `connectJacareDevtools()` are still tracked (registrat
 
 ### How it works
 
-`connectJacareDevtools()` calls `enableDevtools()` from `@jacare/core`, which instruments the pulse graph. The panel subscribes via `subscribePulseGraph()` and re-renders on every change.
+`connectJacareDevtools()` calls `enableDevtools()` from `@jacare/core`, which instruments the pulse graph. The panel subscribes via `subscribePulseGraph()` and re-renders when the graph changes (notifications are coalesced to a microtask so large mounts do not re-render the overlay on every effect). `createNav` calls `beginDevtoolsPage()` on each screen swap so the graph shows the current page plus live shell pulses, not every visited route.
 
 ---
 

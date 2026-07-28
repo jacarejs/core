@@ -5,14 +5,17 @@ import {
   computed,
   effect,
   enableDevtools,
+  flushPulseGraph,
   formatWhyChain,
   getBindingsForPulse,
   getPulseGraph,
   getWrites,
   highlightBinding,
+  beginDevtoolsPage,
   registerBinding,
   resolvePulseId,
   signal,
+  subscribePulseGraph,
   why,
   whyLast,
 } from '../src/index.js'
@@ -185,5 +188,65 @@ describe('devtools', () => {
     expect(chain.pulse?.name).toBe('count')
     expect(chain.lastWrites[0]?.value).toBe(4)
     el.remove()
+  })
+
+  it('coalesces pulse graph listener notifications to a microtask', async () => {
+    enableDevtools()
+    let renders = 0
+    const unsubscribe = subscribePulseGraph(() => {
+      renders += 1
+    })
+
+    for (let i = 0; i < 40; i++) {
+      effect(() => {})
+    }
+
+    expect(renders).toBe(0)
+    await Promise.resolve()
+    expect(renders).toBe(1)
+
+    flushPulseGraph()
+    expect(renders).toBe(1)
+
+    effect(() => {})
+    flushPulseGraph()
+    expect(renders).toBe(2)
+
+    unsubscribe()
+  })
+
+  it('scopes the pulse graph to the current DevTools page', () => {
+    enableDevtools()
+    const shell = signal(0, { name: 'shell' })
+    effect(() => {
+      shell()
+    })
+
+    beginDevtoolsPage()
+    const pageA = signal(1, { name: 'pageA' })
+    const stopA = effect(() => {
+      pageA()
+    })
+
+    const namesAfterA = getPulseGraph()
+      .nodes.map((n) => n.name)
+      .filter((name): name is string => name != null)
+      .sort()
+    expect(namesAfterA).toEqual(['pageA', 'shell'])
+
+    stopA.dispose()
+    beginDevtoolsPage()
+    const pageB = signal(2, { name: 'pageB' })
+    effect(() => {
+      pageB()
+    })
+
+    const names = getPulseGraph()
+      .nodes.map((n) => n.name)
+      .filter((name): name is string => name != null)
+      .sort()
+    expect(names).toContain('shell')
+    expect(names).toContain('pageB')
+    expect(names).not.toContain('pageA')
   })
 })

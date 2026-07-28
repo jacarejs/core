@@ -10,6 +10,7 @@ export interface KeyedListOptions<T> {
 
 interface ListEntry<T> {
   item: T
+  key: string | number
   nodes: Node[]
   dispose: () => void
 }
@@ -54,16 +55,36 @@ function insertNodes(parent: Node, nodes: Node[], before: Node | null): Node | n
   return insertNode(parent, frag, before)
 }
 
+function renderEntry<T>(
+  options: KeyedListOptions<T>,
+  item: T,
+  index: number,
+  key: string | number,
+): ListEntry<T> {
+  const nodes: Node[] = []
+  const mount = (node: Node): void => {
+    collectMountNode(nodes, node)
+  }
+  const dispose = options.render(item, index, mount)
+  return { item, key, nodes, dispose }
+}
+
 export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void {
   const entries = new Map<string | number, ListEntry<T>>()
+  /** Reused across runs to avoid allocating a new Map/Set every update. */
+  const next = new Map<string | number, ListEntry<T>>()
+  const seen = new Set<string | number>()
+  const order: ListEntry<T>[] = []
 
   const run = effect(() => {
     const parent = options.anchor?.parentNode ?? options.parent
     if (!parent) return
 
     const items = options.items()
-    const next = new Map<string | number, ListEntry<T>>()
-    const seen = new Set<string | number>()
+    const cold = entries.size === 0
+    next.clear()
+    seen.clear()
+    order.length = 0
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i]!
@@ -72,26 +93,19 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
 
       let entry = entries.get(key)
       if (!entry) {
-        const nodes: Node[] = []
-        const mount = (node: Node): void => {
-          collectMountNode(nodes, node)
-        }
-        const dispose = options.render(item, i, mount)
-        entry = { item, nodes, dispose }
+        entry = renderEntry(options, item, i, key)
       } else if (entry.item !== item) {
         entry.dispose()
         for (const node of entry.nodes) {
           node.parentNode?.removeChild(node)
         }
-        const nodes: Node[] = []
-        const mount = (node: Node): void => {
-          collectMountNode(nodes, node)
-        }
-        const dispose = options.render(item, i, mount)
-        entry = { item, nodes, dispose }
+        entry = renderEntry(options, item, i, key)
+      } else {
+        entry.key = key
       }
 
       next.set(key, entry)
+      order.push(entry)
     }
 
     for (const [key, entry] of entries) {
@@ -103,14 +117,23 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
       }
     }
 
-    let before: Node | null = options.anchor?.nextSibling ?? null
-    for (let i = items.length - 1; i >= 0; i--) {
-      const item = items[i]!
-      const key = options.getKey(item, i)
-      const entry = next.get(key)!
-      const inserted = insertNodes(parent, entry.nodes, before)
-      if (inserted) {
-        before = inserted
+    const beforeAnchor: Node | null = options.anchor?.nextSibling ?? null
+
+    if (cold && order.length > 0) {
+      // One insert for the whole list — avoids N layout touches on first paint.
+      const frag = document.createDocumentFragment()
+      for (const entry of order) {
+        for (const node of entry.nodes) {
+          frag.appendChild(node)
+        }
+      }
+      parent.insertBefore(frag, beforeAnchor)
+    } else {
+      let before: Node | null = beforeAnchor
+      for (let i = order.length - 1; i >= 0; i--) {
+        const entry = order[i]!
+        const inserted = insertNodes(parent, entry.nodes, before)
+        if (inserted) before = inserted
       }
     }
 
@@ -129,5 +152,8 @@ export function reconcileKeyedList<T>(options: KeyedListOptions<T>): () => void 
       }
     }
     entries.clear()
+    next.clear()
+    seen.clear()
+    order.length = 0
   }
 }

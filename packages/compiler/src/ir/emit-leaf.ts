@@ -120,8 +120,16 @@ function emitTextOp(
       : source.kind === 'static'
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
+  const rewritten = ctx.rewriteExprForEffect(raw)
+  // No local signal rewrite → one-shot (avoids OwnerNode + DevTools emit per static #for field).
+  if (rewritten === raw) {
+    ctx.line(
+      `${textNode}.data = String((() => { const _v = (${raw}); return typeof _v === 'function' ? _v() : _v })())`,
+    )
+    return
+  }
   ctx.pushCleanup(
-    `effect(() => { const _v = (${ctx.rewriteExprForEffect(raw)}); ${textNode}.data = String(typeof _v === 'function' ? _v() : _v) }).dispose`,
+    `effect(() => { const _v = (${rewritten}); ${textNode}.data = String(typeof _v === 'function' ? _v() : _v) }).dispose`,
   )
 }
 
@@ -173,7 +181,8 @@ function emitAttrOp(
       : source.kind === 'static'
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
-  applyAttrEffect(ctx, el, name, ctx.rewriteExprForEffect(raw), false)
+  const rewritten = ctx.rewriteExprForEffect(raw)
+  applyAttrEffect(ctx, el, name, rewritten, false, rewritten === raw)
 }
 
 function emitClassOp(
@@ -202,8 +211,13 @@ function emitClassOp(
       : source.kind === 'static'
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
+  const rewritten = ctx.rewriteExprForEffect(raw)
+  if (rewritten === raw) {
+    ctx.line(`${el}.classList.toggle(${JSON.stringify(className)}, !!(${raw}))`)
+    return
+  }
   ctx.pushCleanup(
-    `effect(() => { ${el}.classList.toggle(${JSON.stringify(className)}, !!(${ctx.rewriteExprForEffect(raw)})) }).dispose`,
+    `effect(() => { ${el}.classList.toggle(${JSON.stringify(className)}, !!(${rewritten})) }).dispose`,
   )
 }
 
@@ -233,8 +247,13 @@ function emitStyleOp(
       : source.kind === 'static'
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
+  const rewritten = ctx.rewriteExprForEffect(raw)
+  if (rewritten === raw) {
+    ctx.line(`${el}.style.setProperty(${JSON.stringify(cssVar)}, String(${raw}))`)
+    return
+  }
   ctx.pushCleanup(
-    `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String(${raw})) }).dispose`,
+    `effect(() => { ${el}.style.setProperty(${JSON.stringify(cssVar)}, String(${rewritten})) }).dispose`,
   )
 }
 
@@ -258,7 +277,12 @@ function emitModelOp(
       : source.kind === 'static'
         ? JSON.stringify(source.value)
         : cellExpr(source) ?? 'undefined'
+  const rewritten = ctx.rewriteExprForEffect(raw)
+  if (rewritten === raw) {
+    ctx.line(`${el}[${JSON.stringify(prop)}] = (${raw})`)
+    return
+  }
   ctx.pushCleanup(
-    `effect(() => { ${el}[${JSON.stringify(prop)}] = (${ctx.rewriteExprForEffect(raw)}) }).dispose`,
+    `effect(() => { ${el}[${JSON.stringify(prop)}] = (${rewritten}) }).dispose`,
   )
 }

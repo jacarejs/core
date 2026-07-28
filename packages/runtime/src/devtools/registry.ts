@@ -26,6 +26,8 @@ interface InternalNode {
   stale?: boolean
   disposed: boolean
   subscribers: number
+  /** DevTools page epoch — used to hide pulses from previous screens. */
+  page: number
   cell?: DependencyCell
 }
 
@@ -52,12 +54,37 @@ const bindings = new Map<number, InternalBinding>()
 const bindingsByPulse = new Map<number, Set<number>>()
 let highlightStyleInjected = false
 const highlighted = new Set<Element>()
+let emitScheduled = false
+/** Bumped on each nav screen swap so the panel shows the current page (+ live shell). */
+let graphPage = 0
 
+/** Coalesce graph UI updates — sync emit on every effect/bind made large mounts O(n²) with the overlay. */
 function emit(): void {
-  if (!enabled) return
+  if (!enabled || listeners.size === 0) return
+  if (emitScheduled) return
+  emitScheduled = true
+  queueMicrotask(() => {
+    if (!emitScheduled) return
+    emitScheduled = false
+    if (!enabled) return
+    for (const listener of listeners) {
+      listener()
+    }
+  })
+}
+
+function notifyListeners(): void {
   for (const listener of listeners) {
     listener()
   }
+}
+
+/** Flush pending graph notifications (tests / urgent UI). */
+export function flushPulseGraph(): void {
+  if (!emitScheduled) return
+  emitScheduled = false
+  if (!enabled) return
+  notifyListeners()
 }
 
 function edgeKey(from: number, to: number): string {
@@ -93,6 +120,7 @@ export function registerSignal(
     value: initial,
     disposed: false,
     subscribers: 0,
+    page: graphPage,
     cell,
   }
   applyMeta(node, meta)
@@ -116,6 +144,7 @@ export function registerComputed(
     stale: false,
     disposed: false,
     subscribers: 0,
+    page: graphPage,
     cell,
   }
   applyMeta(node, meta)
@@ -133,12 +162,65 @@ export function registerEffect(owner: OwnerNode, meta?: DevtoolsMeta): number {
     kind: 'effect',
     disposed: false,
     subscribers: 0,
+    page: graphPage,
   }
   applyMeta(node, meta)
   nodes.set(id, node)
   ownerToId.set(owner, id)
   emit()
   return id
+}
+
+function hasConnectedBinding(pulseId: number): boolean {
+  const ids = bindingsByPulse.get(pulseId)
+  if (!ids) return false
+  for (const id of ids) {
+    const entry = bindings.get(id)
+    if (entry?.target.isConnected) return true
+  }
+  return false
+}
+
+function isNodeInCurrentPage(node: InternalNode): boolean {
+  if (node.disposed) return false
+  if (node.cell) node.subscribers = node.cell.subscriberCount
+  if (node.page === graphPage) return true
+  if (node.subscribers > 0) return true
+  return hasConnectedBinding(node.id)
+}
+
+function removeNode(id: number): void {
+  nodes.delete(id)
+  const group = bindingsByPulse.get(id)
+  if (group) {
+    for (const bindingId of group) bindings.delete(bindingId)
+    bindingsByPulse.delete(id)
+  }
+  for (const key of [...edges]) {
+    const [from, to] = key.split(':')
+    if (Number(from) === id || Number(to) === id) edges.delete(key)
+  }
+}
+
+/**
+ * Start a new DevTools page epoch (call on nav screen swap).
+ * Snapshot then only includes the new page plus live shell pulses.
+ */
+export function beginDevtoolsPage(): void {
+  graphPage++
+  for (const [id, node] of [...nodes]) {
+    if (node.disposed) removeNode(id)
+  }
+  for (const [bindingId, entry] of [...bindings]) {
+    if (!entry.target.isConnected) {
+      bindings.delete(bindingId)
+      const group = bindingsByPulse.get(entry.pulseId)
+      group?.delete(bindingId)
+      if (group && group.size === 0) bindingsByPulse.delete(entry.pulseId)
+    }
+  }
+  clearLedger()
+  emit()
 }
 
 export function attachPulseSource(source: object, id: number): void {
@@ -447,11 +529,11 @@ export function getPulseGraph(): PulseGraphSnapshot {
     }
   }
 
+  const visible = new Set<number>()
   const snapshotNodes: PulseNode[] = []
   for (const node of nodes.values()) {
-    if (node.cell) {
-      node.subscribers = node.cell.subscriberCount
-    }
+    if (!isNodeInCurrentPage(node)) continue
+    visible.add(node.id)
     snapshotNodes.push({
       id: node.id,
       kind: node.kind,
@@ -469,6 +551,7 @@ export function getPulseGraph(): PulseGraphSnapshot {
   for (const key of edges) {
     const [from, to] = key.split(':').map(Number)
     if (from == null || to == null) continue
+    if (!visible.has(from) || !visible.has(to)) continue
     snapshotEdges.push({ from, to })
   }
 
@@ -490,6 +573,8 @@ export function resetDevtoolsForTests(): void {
   enabled = false
   nextId = 1
   nextBindingId = 1
+  emitScheduled = false
+  graphPage = 0
   nodes.clear()
   edges.clear()
   listeners.clear()

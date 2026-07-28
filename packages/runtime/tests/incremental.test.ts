@@ -287,4 +287,31 @@ describe('reconcileKeyedList', () => {
     const updated = parent.querySelector('li')!
     expect(updated.classList.contains('done')).toBe(true)
   })
+
+  it('cold-mounts the whole list with a single document fragment', () => {
+    const parent = document.createElement('ul')
+    const anchor = document.createComment('each')
+    parent.appendChild(anchor)
+
+    const createFrag = vi.spyOn(document, 'createDocumentFragment')
+    const items = Array.from({ length: 40 }, (_, i) => ({ id: `i${i}` }))
+
+    reconcileKeyedList({
+      parent,
+      anchor,
+      items: () => items,
+      getKey: (item) => item.id,
+      render: (item, _index, mount) => {
+        const li = document.createElement('li')
+        li.dataset.id = item.id
+        mount(li)
+        return () => {}
+      },
+    })
+
+    expect(parent.querySelectorAll('li')).toHaveLength(40)
+    // Single-node rows normally skip fragments; cold path batches via one fragment.
+    expect(createFrag).toHaveBeenCalledTimes(1)
+    createFrag.mockRestore()
+  })
 })
