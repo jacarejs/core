@@ -44,3 +44,20 @@ export function routeParam(ctx: NavContext, name: string): string | undefined {
 export function routeSearch(ctx: NavContext, name: string): string | undefined {
   return ctx.search[name]
 }
+
+/**
+ * Template sugar `${@route/id}` — returns a getter that tracks the active nav place.
+ * Compatible with createRoute(nav.where); does not replace it.
+ */
+export function getRouteParam(name: string): () => string | undefined {
+  return () => {
+    try {
+      const g = globalThis as typeof globalThis & {
+        __JACARE_NAV__?: { nav: { where: () => NavPlace } }
+      }
+      return g.__JACARE_NAV__?.nav.where().params[name]
+    } catch {
+      return undefined
+    }
+  }
+}

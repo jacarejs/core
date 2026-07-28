@@ -51,11 +51,16 @@ export interface ScreenMatch {
   params: Record<string, string>
 }
 
+export interface NavGoOptions {
+  /** Focus after mount. `true` → `[data-jacare-focus]`; string → CSS selector. */
+  focus?: boolean | string
+}
+
 export interface Nav {
   readonly where: Signal<NavPlace>
   attach(target: HTMLElement): () => void
-  go(path: string): Promise<void>
-  swap(path: string): Promise<void>
+  go(path: string, options?: NavGoOptions): Promise<void>
+  swap(path: string, options?: NavGoOptions): Promise<void>
   undo(): void
   warm(path: string): Promise<void>
 }

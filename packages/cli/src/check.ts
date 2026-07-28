@@ -7,12 +7,16 @@ import {
   inspectTemplateBindings,
   lintRedundantArrows,
   JacareCompileError,
+  formatCompileError,
   linkAddress,
   mergePublishedBags,
   parseLinkFrom,
   parseModule,
   parseTemplate,
   scanPublishedBags,
+  scanNavScreenPatterns,
+  scanStaticGoLinks,
+  matchScreenPattern,
   validateContractUsage,
   type TemplateStyleWarning,
 } from '@jacare/compiler'
@@ -23,6 +27,8 @@ export type CheckOptions = {
   style?: boolean
   /** Fail the process when style warnings are present. */
   strictStyle?: boolean
+  /** Verify static jacare-go targets against createNav screens. */
+  routes?: boolean
 }
 
 export function runCheck(cwd: string, options: CheckOptions = {}): number {
@@ -58,7 +64,7 @@ export function runCheck(cwd: string, options: CheckOptions = {}): number {
     } catch (error) {
       errors++
       if (error instanceof JacareCompileError) {
-        console.error(error.message)
+        console.error(formatCompileError(error))
       } else if (error instanceof Error) {
         console.error(`${file}: ${error.message}`)
       } else {
@@ -91,6 +97,14 @@ export function runCheck(cwd: string, options: CheckOptions = {}): number {
   for (const message of linkErrors) {
     errors++
     console.error(message)
+  }
+
+  if (options.routes) {
+    const routeErrors = checkRoutes(root)
+    for (const message of routeErrors) {
+      errors++
+      console.error(message)
+    }
   }
 
   if (errors > 0) {
@@ -245,6 +259,39 @@ function collectPublishedBags(root: string) {
     maps.push(scanPublishedBags(readFileSync(file, 'utf-8')))
   }
   return mergePublishedBags(...maps)
+}
+
+function checkRoutes(root: string): string[] {
+  const patterns = new Set<string>()
+  const links: Array<{ file: string; path: string }> = []
+
+  for (const file of findSourceFiles(root)) {
+    const source = readFileSync(file, 'utf-8')
+    for (const pattern of scanNavScreenPatterns(source)) {
+      patterns.add(pattern)
+    }
+    for (const path of scanStaticGoLinks(source)) {
+      links.push({ file, path })
+    }
+  }
+
+  if (patterns.size === 0) {
+    return ['check --routes: no createNav screens found']
+  }
+
+  const messages: string[] = []
+  const seen = new Set<string>()
+  for (const link of links) {
+    const key = `${link.file}:${link.path}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    if (![...patterns].some((pattern) => matchScreenPattern(pattern, link.path))) {
+      messages.push(
+        `${link.file}: jacare-go "${link.path}" does not match any createNav screen`,
+      )
+    }
+  }
+  return messages
 }
 
 function collectJacareImports(source: string, file: string): Map<string, string> {

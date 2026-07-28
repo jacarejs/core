@@ -13,6 +13,7 @@ const RUNTIME_IMPORT_ORDER = [
   'effect',
   'runUntracked',
   'getBag',
+  'getRouteParam',
   'bindText',
   'bindPropText',
   'bindAttribute',
@@ -110,6 +111,9 @@ export function generate(
   const props = resolveMountProps(moduleCode, ast, options.contract)
   const signals = detectSignals(moduleCode)
   for (const name of Object.keys(options.contract?.links ?? {})) {
+    signals.add(name)
+  }
+  for (const name of Object.keys(options.contract?.pulses ?? {})) {
     signals.add(name)
   }
   const importedNames = detectImportedNames(moduleCode)

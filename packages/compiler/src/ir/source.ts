@@ -70,15 +70,25 @@ export function matchMeshAddress(expr: string): BindingSource | null {
 
 /**
  * Rewrite `@bag/key` / `@bag/key(...)` inside an expression to `getBag('bag')?.key`.
+ * Reserved `@route/key` → `getRouteParam('key')()` (active nav params).
  * Used for events, `#if`, and mixed exprs.
  */
-export function desugarMeshAddresses(expr: string): { code: string; usesGetBag: boolean } {
+export function desugarMeshAddresses(expr: string): {
+  code: string
+  usesGetBag: boolean
+  usesGetRouteParam: boolean
+} {
   let usesGetBag = false
+  let usesGetRouteParam = false
   const code = expr.replace(MESH_ADDRESS_IN_EXPR_RE, (_m, bag: string, key: string) => {
+    if (bag === 'route') {
+      usesGetRouteParam = true
+      return `getRouteParam(${JSON.stringify(key)})()`
+    }
     usesGetBag = true
     return `getBag(${JSON.stringify(bag)})?.${key}`
   })
-  return { code, usesGetBag }
+  return { code, usesGetBag, usesGetRouteParam }
 }
 
 /** Local signal name — same rules as resolveSignalExpr. */
@@ -157,8 +167,12 @@ export function bindingSignalName(source: BindingSource): string | null {
 /**
  * Cell capture expression for Mesh Port emit.
  * Import form: `cart.count` — address sugar: `getBag("cart")?.count`.
+ * Route sugar: `getRouteParam("id")`.
  */
 export function meshPortExpr(source: Extract<BindingSource, { kind: 'mesh' }>): string {
+  if (source.address && source.bag === 'route') {
+    return `getRouteParam(${JSON.stringify(source.key)})`
+  }
   if (source.address) {
     return `getBag(${JSON.stringify(source.bag)})?.${source.key}`
   }
@@ -172,5 +186,8 @@ export function isLocalSignalSource(source: BindingSource): boolean {
 
 /** True when hot path can capture a DependencyCell once (local pulse or Mesh Port). */
 export function isDirectCellSource(source: BindingSource): boolean {
-  return isLocalSignalSource(source) || source.kind === 'mesh'
+  if (isLocalSignalSource(source)) return true
+  if (source.kind !== 'mesh') return false
+  if (source.address && source.bag === 'route') return false
+  return true
 }

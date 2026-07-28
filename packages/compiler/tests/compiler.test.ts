@@ -644,6 +644,46 @@ export <view>
     expect(cpw.code).toMatch(/getBag\("lab-cart"\)\?\.count\.peek/)
   })
 
+  it('binds @route/id via getRouteParam without mesh port collection', () => {
+    const source = `export <view>
+  <p>\${@route/id}</p>
+</view>`
+    const client = compile(source, { mode: 'client', debug: false, cpw: false })
+    expect(client.code).toContain('getRouteParam')
+    expect(client.code).toMatch(/bindText\([^,]+, getRouteParam\("id"\)\)/)
+    expect(client.meshPorts ?? []).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ bag: 'route' })]),
+    )
+    const cpw = compile(source, { mode: 'client', debug: false, cpw: true })
+    expect(cpw.code).toMatch(/bindText\([^,]+, getRouteParam\("id"\)\)/)
+    expect(cpw.code).not.toContain('getRouteParam("id").peek')
+  })
+
+  it('desugars jacare-when to the same #if IR', () => {
+    const withAttr = compile(
+      `import { pulse } from '@jacare/core'
+const open = pulse(true)
+export <view>
+  <p jacare-when={open}>Hi</p>
+</view>`,
+      { mode: 'client', debug: false },
+    )
+    const withIf = compile(
+      `import { pulse } from '@jacare/core'
+const open = pulse(true)
+export <view>
+#if open
+  <p>Hi</p>
+#end
+</view>`,
+      { mode: 'client', debug: false },
+    )
+    expect(withAttr.code).toContain('branch(')
+    expect(withAttr.code).toContain('open()')
+    expect(withAttr.code).toContain('Hi')
+    expect(withIf.code).toContain('branch(')
+  })
+
   it('binds imported plain values with bindPropText (snippet strings)', () => {
     const source = `import { scaffoldCode } from './snippets.js'
 export <view>

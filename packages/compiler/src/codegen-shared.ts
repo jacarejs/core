@@ -318,8 +318,9 @@ export class CodegenContext {
   rewriteExprForEffect(expr: string): string {
     // Only rewrite known local signals. Imported names may be plain values
     // (snippet strings, helpers) — forcing `name()` would break those.
-    const { code, usesGetBag } = desugarMeshAddresses(expr)
+    const { code, usesGetBag, usesGetRouteParam } = desugarMeshAddresses(expr)
     if (usesGetBag) this.useRuntime('getBag')
+    if (usesGetRouteParam) this.useRuntime('getRouteParam')
     return rewriteSignalsInExpr(code, this.signals)
   }
 

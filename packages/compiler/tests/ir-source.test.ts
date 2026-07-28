@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { lowerBindingSource, bindingSignalName, isLocalSignalSource } from '../src/ir/source.js'
+import { lowerBindingSource, bindingSignalName, desugarMeshAddresses, isLocalSignalSource } from '../src/ir/source.js'
 
 describe('lowerBindingSource', () => {
   const signals = new Set(['count', 'open'])
@@ -76,6 +76,23 @@ describe('lowerBindingSource', () => {
       kind: 'expr',
       code: 'getBag("cart")?.total() + 1',
       arrow: false,
+    })
+  })
+
+  it('classifies @route/id as reserved mesh address', () => {
+    expect(lowerBindingSource('@route/id')).toEqual({
+      kind: 'mesh',
+      bag: 'route',
+      key: 'id',
+      address: true,
+    })
+    expect(bindingSignalName(lowerBindingSource('@route/id')!)).toBe(
+      'getRouteParam("id")',
+    )
+    expect(desugarMeshAddresses('@route/id === "1"')).toEqual({
+      code: 'getRouteParam("id")() === "1"',
+      usesGetBag: false,
+      usesGetRouteParam: true,
     })
   })
 

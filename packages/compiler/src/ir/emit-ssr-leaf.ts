@@ -4,8 +4,14 @@ import { meshPortExpr } from './source.js'
 import type { BindingSource, LeafBindingOp, LoweredText } from './types.js'
 
 function noteMeshRuntime(ctx: CodegenContext, source: BindingSource): void {
-  if (source.kind === 'mesh' && source.address) ctx.useRuntime('getBag')
-  if (source.kind === 'expr' && source.code.includes('getBag(')) ctx.useRuntime('getBag')
+  if (source.kind === 'mesh' && source.address) {
+    if (source.bag === 'route') ctx.useRuntime('getRouteParam')
+    else ctx.useRuntime('getBag')
+  }
+  if (source.kind === 'expr') {
+    if (source.code.includes('getBag(')) ctx.useRuntime('getBag')
+    if (source.code.includes('getRouteParam(')) ctx.useRuntime('getRouteParam')
+  }
 }
 
 /** Emit SSR text from lowered IR (same classification as client). */

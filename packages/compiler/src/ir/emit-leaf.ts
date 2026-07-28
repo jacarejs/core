@@ -17,8 +17,14 @@ function cellExpr(source: BindingSource): string | null {
 }
 
 function noteMeshRuntime(ctx: CodegenContext, source: BindingSource): void {
-  if (source.kind === 'mesh' && source.address) ctx.useRuntime('getBag')
-  if (source.kind === 'expr' && source.code.includes('getBag(')) ctx.useRuntime('getBag')
+  if (source.kind === 'mesh' && source.address) {
+    if (source.bag === 'route') ctx.useRuntime('getRouteParam')
+    else ctx.useRuntime('getBag')
+  }
+  if (source.kind === 'expr') {
+    if (source.code.includes('getBag(')) ctx.useRuntime('getBag')
+    if (source.code.includes('getRouteParam(')) ctx.useRuntime('getRouteParam')
+  }
 }
 
 /** Emit a leaf binding op onto an element or text node. */
@@ -43,8 +49,9 @@ export function emitLeafOp(
       return
 
     case 'event': {
-      const { code, usesGetBag } = desugarMeshAddresses(op.handler)
+      const { code, usesGetBag, usesGetRouteParam } = desugarMeshAddresses(op.handler)
       if (usesGetBag) ctx.useRuntime('getBag')
+      if (usesGetRouteParam) ctx.useRuntime('getRouteParam')
       const handler = ctx.nextId('handler')
       ctx.line(`const ${handler} = ${code}`)
       ctx.line(`${ctx.cleanupVar}.push((() => {`)

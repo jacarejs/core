@@ -229,4 +229,20 @@ export <view>
     expect(result.code).toContain('props["label"]')
     expect(result.code).toContain('props["value"]')
   })
+
+  it('unwraps contract pulses in #if and text without forcing ()', () => {
+    const source = `export <contract>
+  pulses: { open: 'boolean' }
+</contract>
+
+export <view>
+#if open
+  <span>\${open}</span>
+#end
+</view>`
+    const result = compile(source, { mode: 'client', debug: false })
+    expect(result.code).toContain('open()')
+    expect(result.code).toContain('props["open"]')
+    expect(result.code).toContain('branch(')
+  })
 })

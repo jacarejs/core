@@ -1,6 +1,7 @@
 export type {
   Nav,
   NavContext,
+  NavGoOptions,
   NavGuard,
   NavLoader,
   NavMount,
@@ -19,6 +20,7 @@ export { setNavTitle, getNavTitle } from './title.js'
 
 export {
   createRoute,
+  getRouteParam,
   routeHref,
   routeParam,
   routeSearch,

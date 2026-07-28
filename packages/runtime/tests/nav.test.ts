@@ -150,6 +150,36 @@ describe('createNav', () => {
     dispose()
   })
 
+  it('focuses data-jacare-focus after go({ focus: true })', async () => {
+    const Home = vi.fn((target: HTMLElement) => {
+      target.innerHTML = '<h1>home</h1>'
+      return () => {}
+    })
+    const About = vi.fn((target: HTMLElement) => {
+      target.innerHTML = '<h1 data-jacare-focus tabindex="-1">about</h1>'
+      return () => {}
+    })
+
+    const nav = createNav({
+      screens: {
+        '/': Home,
+        '/about': About,
+      },
+    })
+
+    const target = document.createElement('div')
+    document.body.appendChild(target)
+    nav.attach(target)
+
+    await nav.go('/about', { focus: true })
+    await flush()
+
+    const heading = target.querySelector('h1')
+    expect(document.activeElement).toBe(heading)
+
+    target.remove()
+  })
+
   it('runs beforeGo guards', async () => {
     const Home = vi.fn((target: HTMLElement) => {
       target.textContent = 'home'
@@ -569,6 +599,34 @@ describe('createNav', () => {
     dispose()
     document.title = previous
     window.history.pushState({}, '', '/')
+  })
+
+  it('getRouteParam tracks active nav params for @route sugar', async () => {
+    const { getRouteParam } = await import('../src/nav/route.js')
+    const Home = vi.fn((target: HTMLElement) => {
+      target.textContent = 'home'
+      return () => {}
+    })
+    const Order = vi.fn((target: HTMLElement, ctx) => {
+      target.textContent = `order:${ctx.params.id}`
+      return () => {}
+    })
+
+    const nav = createNav({
+      screens: {
+        '/': Home,
+        '/orders/:id': Order,
+      },
+    })
+
+    const target = document.createElement('div')
+    nav.attach(target)
+    const id = getRouteParam('id')
+    expect(id()).toBeUndefined()
+
+    await nav.go('/orders/42')
+    await flush()
+    expect(id()).toBe('42')
   })
 })
 

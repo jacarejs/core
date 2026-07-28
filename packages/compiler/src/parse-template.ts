@@ -28,6 +28,30 @@ function directiveCondition(match: RegExpMatchArray): string {
   return (match[1] ?? match[2] ?? '').trim()
 }
 
+/** `jacare-when={cond}` → same IR as `#if cond` … `#end` (attr stripped). */
+function wrapJacareWhen(node: TemplateNode, pos: number): TemplateNode {
+  if (node.type !== 'element' && node.type !== 'component') return node
+  const index = node.attrs.findIndex((attr) => attr.name === 'jacare-when')
+  if (index < 0) return node
+  const attr = node.attrs[index]!
+  if (attr.kind === 'static' && !attr.value.trim()) {
+    fail('jacare-when requires a condition', pos)
+  }
+  const condition = attr.value.trim()
+  if (!condition) fail('jacare-when requires a condition', pos)
+  const attrs = node.attrs.filter((_, i) => i !== index)
+  const child =
+    node.type === 'element'
+      ? { ...node, attrs }
+      : { ...node, attrs }
+  return {
+    type: 'if',
+    branches: [{ condition, children: [child] }],
+    elseChildren: [],
+    sourceLine: 'sourceLine' in node ? node.sourceLine : templateLineAt(pos),
+  }
+}
+
 function eachGroups(match: RegExpMatchArray): {
   source: string
   itemName: string
@@ -223,7 +247,10 @@ function parseElement(source: string, pos: number): { node: TemplateNode; pos: n
   if (isComponent) {
     if (selfClosing) {
       return {
-        node: { type: 'component', name: tagName, attrs, children: [], selfClosing: true },
+        node: wrapJacareWhen(
+          { type: 'component', name: tagName, attrs, children: [], selfClosing: true },
+          pos,
+        ),
         pos: afterOpen,
       }
     }
@@ -235,13 +262,16 @@ function parseElement(source: string, pos: number): { node: TemplateNode; pos: n
     }
 
     return {
-      node: {
-        type: 'component',
-        name: tagName,
-        attrs,
-        children: inner.nodes,
-        selfClosing: false,
-      },
+      node: wrapJacareWhen(
+        {
+          type: 'component',
+          name: tagName,
+          attrs,
+          children: inner.nodes,
+          selfClosing: false,
+        },
+        pos,
+      ),
       pos: inner.pos + closeTag.length,
     }
   }
@@ -283,14 +313,17 @@ function parseElement(source: string, pos: number): { node: TemplateNode; pos: n
 
   if (isVoid) {
     return {
-      node: {
-        type: 'element',
-        tag: tagName,
-        attrs,
-        children: [],
-        selfClosing: true,
-        sourceLine: templateLineAt(pos),
-      },
+      node: wrapJacareWhen(
+        {
+          type: 'element',
+          tag: tagName,
+          attrs,
+          children: [],
+          selfClosing: true,
+          sourceLine: templateLineAt(pos),
+        },
+        pos,
+      ),
       pos: afterOpen,
     }
   }
@@ -302,14 +335,17 @@ function parseElement(source: string, pos: number): { node: TemplateNode; pos: n
   }
 
   return {
-    node: {
-      type: 'element',
-      tag: tagName,
-      attrs,
-      children: inner.nodes,
-      selfClosing: false,
-      sourceLine: templateLineAt(pos),
-    },
+    node: wrapJacareWhen(
+      {
+        type: 'element',
+        tag: tagName,
+        attrs,
+        children: inner.nodes,
+        selfClosing: false,
+        sourceLine: templateLineAt(pos),
+      },
+      pos,
+    ),
     pos: inner.pos + closeTag.length,
   }
 }

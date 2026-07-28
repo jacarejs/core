@@ -12,6 +12,7 @@ import {
 import type {
   Nav,
   NavContext,
+  NavGoOptions,
   NavGuard,
   NavLoader,
   NavMount,
@@ -24,6 +25,7 @@ import type {
 type NavRequest = {
   path: string
   mode: 'go' | 'swap'
+  focus?: boolean | string
   resolve: () => void
 }
 
@@ -37,6 +39,7 @@ export function createNav(options: NavOptions): Nav {
   const warmed = new Map<string, Promise<NavMount>>()
   const navigateQueue: NavRequest[] = []
   let drainingNavigate = false
+  let pendingFocus: boolean | string | undefined
 
   let renderDispose: (() => void) | null = null
   let onPopState: (() => void) | null = null
@@ -141,6 +144,7 @@ export function createNav(options: NavOptions): Nav {
       while (navigateQueue.length > 0) {
         const request = navigateQueue.shift()!
         try {
+          pendingFocus = request.focus
           await navigateOnce(request.path, request.mode)
         } finally {
           request.resolve()
@@ -151,9 +155,18 @@ export function createNav(options: NavOptions): Nav {
     }
   }
 
-  function navigate(path: string, mode: 'go' | 'swap'): Promise<void> {
+  function navigate(
+    path: string,
+    mode: 'go' | 'swap',
+    options?: NavGoOptions,
+  ): Promise<void> {
     return new Promise((resolve) => {
-      navigateQueue.push({ path, mode, resolve })
+      navigateQueue.push({
+        path,
+        mode,
+        ...(options?.focus !== undefined ? { focus: options.focus } : {}),
+        resolve,
+      })
       void drainNavigateQueue()
     })
   }
@@ -244,6 +257,7 @@ export function createNav(options: NavOptions): Nav {
               return
             }
             screenDispose = dispose
+            applyPendingFocus(host)
           })
           .catch((error) => {
             console.error(error)
@@ -259,6 +273,7 @@ export function createNav(options: NavOptions): Nav {
             return
           }
           screenDispose = dispose
+          applyPendingFocus(host)
         })
         .catch((error) => {
           console.error(error)
@@ -273,6 +288,19 @@ export function createNav(options: NavOptions): Nav {
       layoutDispose?.()
       layoutHost = null
       target.replaceChildren()
+    }
+  }
+
+  function applyPendingFocus(host: HTMLElement): void {
+    const focus = pendingFocus
+    pendingFocus = undefined
+    if (focus == null || focus === false) return
+    const selector = typeof focus === 'string' ? focus : '[data-jacare-focus]'
+    try {
+      const el = host.querySelector(selector)
+      if (el instanceof HTMLElement) el.focus()
+    } catch {
+      console.warn(`Jacaré nav: invalid focus selector ${JSON.stringify(selector)}`)
     }
   }
 
@@ -321,14 +349,13 @@ export function createNav(options: NavOptions): Nav {
       }
     },
 
-    go(path: string): Promise<void> {
-      return navigate(path, 'go')
+    go(path: string, options?: NavGoOptions): Promise<void> {
+      return navigate(path, 'go', options)
     },
 
-    swap(path: string): Promise<void> {
-      return navigate(path, 'swap')
+    swap(path: string, options?: NavGoOptions): Promise<void> {
+      return navigate(path, 'swap', options)
     },
-
     undo(): void {
       history.back()
     },

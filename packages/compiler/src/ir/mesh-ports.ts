@@ -124,6 +124,7 @@ function scanExpr(
   add: (usage: MeshPortUsage) => void,
 ): void {
   for (const match of expr.matchAll(/@([A-Za-z_$][\w$-]*)\/([A-Za-z_$][\w$]*)/g)) {
+    if (match[1] === 'route') continue
     add({
       bag: match[1]!,
       key: match[2]!,
@@ -147,6 +148,7 @@ function noteSource(
   add: (usage: MeshPortUsage) => void,
 ): void {
   if (source.kind !== 'mesh' || !source.bag || !source.key) return
+  if (source.bag === 'route') return
   if (source.address) {
     add({
       bag: source.bag,

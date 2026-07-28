@@ -6,6 +6,7 @@ export type BindingSource =
   /**
    * Mesh Port — imported member (`cart.count`) or address sugar (`@cart/count`).
    * `address: true` → resolve via `getBag(bag)?.key` (no bag import required).
+   * Reserved bag `route` → `@route/id` via `getRouteParam('id')` (nav params).
    */
   | { kind: 'mesh'; bag: string; key: string; address?: boolean }
   | { kind: 'prop'; name: string }

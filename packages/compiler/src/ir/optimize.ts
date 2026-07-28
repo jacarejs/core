@@ -21,25 +21,29 @@ function markCpwOp(op: LeafBindingOp): LeafBindingOp {
   if (
     op.op === 'classToggle' &&
     op.mode === 'bindClass' &&
-    (op.source.kind === 'signal' || op.source.kind === 'mesh')
+    (op.source.kind === 'signal' || isCpwMesh(op.source))
   ) {
     return { ...op, mode: 'cpw' }
   }
   if (
     op.op === 'styleVar' &&
     op.mode === 'bindStyleVar' &&
-    (op.source.kind === 'signal' || op.source.kind === 'mesh')
+    (op.source.kind === 'signal' || isCpwMesh(op.source))
   ) {
     return { ...op, mode: 'cpw' }
   }
   if (
     op.op === 'attr' &&
     op.mode === 'bindAttribute' &&
-    (op.source.kind === 'signal' || op.source.kind === 'prop' || op.source.kind === 'mesh')
+    (op.source.kind === 'signal' || op.source.kind === 'prop' || isCpwMesh(op.source))
   ) {
     return { ...op, mode: 'cpw' }
   }
   return op
+}
+
+function isCpwMesh(source: { kind: string; bag?: string; address?: boolean }): boolean {
+  return source.kind === 'mesh' && !(source.address === true && source.bag === 'route')
 }
 
 export type OptimizedIf =

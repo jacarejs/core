@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compile, JacareCompileError } from '@jacare/compiler'
+import { compile, JacareCompileError, formatCompileError } from '@jacare/compiler'
 
 describe('JacareCompileError', () => {
   it('includes filename and line for template errors', () => {
@@ -18,6 +18,8 @@ export default view\`
       expect(compileError.filename).toBe('/app/tasks.jcr')
       expect(compileError.line).toBeGreaterThan(1)
       expect(compileError.message).toContain('/app/tasks.jcr')
+      expect(compileError.snippet).toBeTruthy()
+      expect(formatCompileError(compileError)).toContain('^')
     }
   })
 })

@@ -25,6 +25,12 @@ export {
 export { scanPublishedBags, mergePublishedBags } from './scan-bags.js'
 export type { PublishedBags } from './scan-bags.js'
 export {
+  scanNavScreenPatterns,
+  scanStaticGoLinks,
+  matchScreenPattern,
+  normalizeRoutePath,
+} from './scan-routes.js'
+export {
   collectComponents,
   collectProvidedProps,
   formatContractIssue,
