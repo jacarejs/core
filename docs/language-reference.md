@@ -27,7 +27,7 @@ Companion docs: [api.md](api.md) (API walkthrough) · [syntax.md](syntax.md) (ch
 
 ## 1. What Jacaré reserves
 
-Jacaré files are **plain JavaScript**. Reserved names below are meaningful to the **compiler** or **runtime** when they appear in the positions described. They are not all JS keywords — some are template directives, attribute prefixes, or HTML-like tags inside `.jcr` blocks.
+Jacaré files are **plain JavaScript** by default (optional TypeScript via `// @jacare-ts` or a sibling `*.jcr.ts` — see [syntax.md § TypeScript](syntax.md#typescript)). Reserved names below are meaningful to the **compiler** or **runtime** when they appear in the positions described. They are not all JS keywords — some are template directives, attribute prefixes, or HTML-like tags inside `.jcr` blocks.
 
 ### 1.1 Exported module blocks
 

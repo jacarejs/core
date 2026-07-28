@@ -251,6 +251,37 @@ Useful when debugging what the compiler emits for a specific `.jcr` file.
 
 ## TypeScript
 
+Jacaré is JS-first. Optional TypeScript:
+
+### Sibling `*.jcr.ts`
+
+Place typed logic next to the view. The Vite plugin watches the sibling and the compiler merges it automatically:
+
+```ts
+// src/Counter.jcr.ts
+import { pulse } from '@jacare/core'
+export const count = pulse(0)
+```
+
+```js
+// src/Counter.jcr
+export <view>
+  <p>${count}</p>
+</view>
+```
+
+### Pragma `// @jacare-ts`
+
+```js
+// @jacare-ts
+const title: string = 'Hi'
+export <view>
+  <h1>${title}</h1>
+</view>
+```
+
+### Typing `.jcr` imports
+
 Add `jacare.d.ts` to your project:
 
 ```typescript
@@ -271,6 +302,8 @@ declare module '*.jcr' {
   export default _default
 }
 ```
+
+See [docs/syntax.md § TypeScript](../../docs/syntax.md#typescript).
 
 ---
 

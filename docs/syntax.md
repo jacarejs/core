@@ -4,7 +4,7 @@
   <img src="../packages/cli/assets/jacare-logo.png" width="120" alt="Jacaré logo" />
 </p>
 
-Jacaré files are plain JavaScript modules. Markup lives in an `export <view>` block (recommended) or a `view` tagged template.
+Jacaré files are plain JavaScript modules by default. Markup lives in an `export <view>` block (recommended) or a `view` tagged template. TypeScript is optional — see [TypeScript](#typescript) below.
 
 **Full API walkthrough:** [api.md](api.md) · **Complete language reference** (reserved words, all binds, `<view>` / `<style>` / `<contract>`, CLI): [language-reference.md](language-reference.md) · [testing.md](testing.md)
 
@@ -12,12 +12,13 @@ Jacaré files are plain JavaScript modules. Markup lives in an `export <view>` b
 
 ```
 src/
-  app.jcr       UI + state
+  app.jcr       UI + state (JS by default)
+  app.jcr.ts    optional typed logic sibling
   boot.js        entry — calls mount()
 index.html       page shell
 public/          static assets
 jacare.config.js   optional config
-jacare.d.ts        TypeScript module types
+jacare.d.ts        TypeScript module types for `import … from '*.jcr'`
 ```
 
 **Recommended module structure:**
@@ -544,6 +545,89 @@ Layout shells expose a frame slot:
 ```
 
 Props are inferred from `:name=${expr}` attributes.
+
+## TypeScript
+
+Jacaré stays **JS-first**. TypeScript is optional and never required for scaffolds or Lab examples.
+
+| Approach | When to use |
+|----------|-------------|
+| **Sibling `Foo.jcr.ts`** | Typed logic next to a clean view-only `.jcr` — auto-merged at compile |
+| **`// @jacare-ts`** | Type annotations inside the `.jcr` script region |
+| **`import` from `.ts`** | Share domain code (`bags`, helpers) — Vite compiles the `.ts` as usual |
+| **`jacare.d.ts`** | Type `import App from './app.jcr'` in a TS host app |
+
+#### Sibling `.jcr.ts` (recommended for typed components)
+
+```ts
+// counter.jcr.ts
+import { pulse } from '@jacare/core'
+
+export const count = pulse(0)
+
+export function increment(): void {
+  count.set(count() + 1)
+}
+```
+
+```js
+// counter.jcr — view only; compiler prepends the stripped sibling script
+export <view>
+  <button type="button" on-click={increment}>
+    ${count}
+  </button>
+</view>
+```
+
+Rules:
+
+- Sibling path is always **`filename.jcr` + `.ts`** → `filename.jcr.ts`
+- The sibling must be **logic only** (no `export <view>`)
+- Types are stripped with esbuild before codegen; JS apps without a sibling are unchanged
+
+You can also keep an explicit import (no auto-merge) from any `.ts` file:
+
+```js
+import { count, increment } from './counter.logic.ts'
+```
+
+#### Pragma `// @jacare-ts`
+
+Put the marker on its own line in the `.jcr` (usually at the top). The script region is treated as TypeScript and stripped before emit:
+
+```js
+// @jacare-ts
+import { pulse } from '@jacare/core'
+
+const count: number = 0
+const value = pulse(count)
+
+function bump(delta: number): void {
+  value.set(value() + delta)
+}
+
+export <view>
+  <button type="button" on-click={() => bump(1)}>${value}</button>
+</view>
+```
+
+Without the pragma (and without a `.jcr.ts` sibling), the script stays plain JavaScript — type syntax would fail to parse.
+
+#### Typing imports of `.jcr`
+
+```typescript
+// jacare.d.ts
+declare module '*.jcr' {
+  import type { Cleanup } from '@jacare/core'
+  export function mount(target: ParentNode, props?: Record<string, unknown>): Cleanup
+  export function render(props?: Record<string, unknown>): { html: string; state: unknown }
+  export function resume(target: ParentNode, state: unknown, props?: Record<string, unknown>): Cleanup
+  const _default: typeof mount
+  export default _default
+}
+```
+
+---
 
 ## Compiler
 

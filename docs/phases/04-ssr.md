@@ -165,9 +165,10 @@ yarn build && yarn test
 |------|--------|
 | Nested streaming | Yield HTML per nested node (top-level chunks work) |
 | Islands | `resume` per component region |
-| TypeScript in `.jcr` | SWC transform for module script |
 | Serialized signal graph | Full state transfer for resumability |
 | SSR component composition | Nested `render()` chaining |
+
+**Done elsewhere:** TypeScript in `.jcr` via `// @jacare-ts` + sibling `*.jcr.ts` (esbuild strip) — see [02-compiler.md](02-compiler.md) / [syntax.md](../syntax.md#typescript).
 
 ---
 

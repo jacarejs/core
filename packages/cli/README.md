@@ -380,7 +380,13 @@ Everything in `nav`, plus:
 
 ## TypeScript support
 
-Scaffolded projects include `jacare.d.ts` for `.jcr` module imports:
+Scaffolded projects include `jacare.d.ts` for `.jcr` module imports.
+
+You can also write TypeScript **for Jacaré modules**:
+
+- Sibling **`Foo.jcr.ts`** — typed logic auto-merged into `Foo.jcr`
+- Pragma **`// @jacare-ts`** — type annotations inside the `.jcr` script (stripped at compile)
+- Normal **`import` from `.ts`** files (Vite)
 
 ```typescript
 declare module '*.jcr' {
@@ -400,7 +406,7 @@ declare module '*.jcr' {
 }
 ```
 
-Add `"checkJs": true` in `jsconfig.json` for type checking in `.js` files.
+Add `"checkJs": true` in `jsconfig.json` for type checking in `.js` files. Details: [docs/syntax.md § TypeScript](../../docs/syntax.md#typescript).
 
 ---
 

@@ -2664,6 +2664,39 @@ export default {
 
 ### TypeScript
 
+Jacaré is **JS-first**. Optional TypeScript support:
+
+1. **Sibling logic** — `counter.jcr.ts` next to `counter.jcr` (view stays clean; compiler merges + strips types)
+2. **Pragma** — `// @jacare-ts` at the top of a `.jcr` script region
+3. **Normal Vite `.ts` imports** — `import { cart } from './cart.ts'` from any `.jcr`
+4. **Module typings** — `jacare.d.ts` for `import … from '*.jcr'`
+
+```ts
+// counter.jcr.ts
+import { pulse } from '@jacare/core'
+export const count = pulse(0)
+export function increment(): void {
+  count.set(count() + 1)
+}
+```
+
+```js
+// counter.jcr
+export <view>
+  <button type="button" on-click={increment}>${count}</button>
+</view>
+```
+
+```js
+// @jacare-ts
+import { pulse } from '@jacare/core'
+const n: number = 1
+const value = pulse(n)
+export <view>
+  <p>${value}</p>
+</view>
+```
+
 ```typescript
 // jacare.d.ts
 declare module '*.jcr' {
@@ -2675,6 +2708,8 @@ declare module '*.jcr' {
   export default _default
 }
 ```
+
+Full detail: [syntax.md § TypeScript](syntax.md#typescript).
 
 ---
 

@@ -8,7 +8,7 @@
 
 The Jacaré compiler transforms `.jcr` modules into optimized JavaScript for the client, server, or both.
 
-A `.jcr` file is plain JavaScript with `export <view>` / `export <style>` / `export <contract>` blocks (recommended), or `view\`...\`` / `style\`...\`` tagged templates. The compiler parses the template, detects reactive bindings, and emits fine-grained DOM code that uses `@jacare/core`.
+A `.jcr` file is plain JavaScript by default, with `export <view>` / `export <style>` / `export <contract>` blocks (recommended), or `view\`...\`` / `style\`...\`` tagged templates. Optional TypeScript: sibling `*.jcr.ts` logic files and/or a `// @jacare-ts` pragma (types stripped with esbuild). The compiler parses the template, detects reactive bindings, and emits fine-grained DOM code that uses `@jacare/core`.
 
 ---
 

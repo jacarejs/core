@@ -335,7 +335,6 @@ packages/vite-plugin/src/
 | `detectProps` heuristic | Props from `:attr` and free identifiers in template |
 | No fragments | No `<>...</>` |
 | No HTML validation | Unclosed tags may produce invalid output |
-| No TypeScript in `.jcr` | Type annotations in module script are not stripped |
 | CPW v1 scope | `bindModel` and dynamic expressions stay on runtime helpers |
 
 ## Not yet implemented
@@ -344,7 +343,7 @@ packages/vite-plugin/src/
 |------|--------|
 | ~~Compile-time dependency graph~~ | **CPW v1** — inline wiring in production for static bindings |
 | CPW for `bindModel` | Two-way inputs still use runtime helper |
-| TypeScript in `.jcr` | SWC transform for type annotations |
+| ~~TypeScript in `.jcr`~~ | **Done:** `// @jacare-ts` pragma + sibling `*.jcr.ts` (esbuild strip) |
 | Component prop types | **Done (1a/1b):** `export <contract>` + defaults + `model`/`bind-*` validation (`jacare check` + Vite) |
 | HTML validation | Actionable errors for unclosed tags |
 | Pluggable directives | Custom attribute transforms via plugin API |
