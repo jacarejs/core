@@ -167,10 +167,11 @@ Bag / key ids may include hyphens (`@lab-cart/count`). Reserved bag id `route` i
 | `effect` | `watch` | Side effect |
 | `untrack` | `runUntracked` | Read without tracking |
 | `batch` | `ripple` (bags) | Coalesce writes (sync) |
-| `enablePatience` | — | Opt-in microtask coalesce |
+| `enablePatience` | — | Opt-in microtask coalesce + lanes |
 | `flushSync` | — | Drain pending now |
 | `disablePatience` | — | Restore sync schedule |
 | `isPatienceEnabled` | — | Patience flag |
+| `runAsLane` | — | Runtime lane tag (`input` / `default` / `idle`) |
 
 These are **imports**, not reserved identifiers in templates — but `${count}` vs `${count()}` is a style convention the checker understands.
 

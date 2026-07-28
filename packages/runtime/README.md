@@ -145,7 +145,8 @@ Jacaré does not diff a virtual tree. The compiler emits precise DOM operations 
 | `untrack(fn)` | — | Run without tracking |
 | `batch(fn)` | — | Batch multiple writes |
 | `flushSync()` | — | Drain pending updates now |
-| `enablePatience()` / `disablePatience()` | — | Opt-in microtask coalesce (default stays sync) |
+| `enablePatience()` / `disablePatience()` | — | Opt-in microtask coalesce + internal lanes (default stays sync) |
+| `runAsLane(lane, fn)` | — | Runtime/tooling write origin (`input` / `default` / `idle`) |
 | `runUntracked(fn)` | — | Untracked execution (used by DOM bindings) |
 
 ### Untracked reads
@@ -498,7 +499,7 @@ Docs: [island.md](../../docs/island.md) · demo: [`examples/jacare-island`](../.
 ## API reference
 
 ### Reactivity
-`signal`, `pulse`, `computed`, `derive`, `effect`, `watch`, `untrack`, `batch`, `flushSync`, `enablePatience`, `disablePatience`, `isPatienceEnabled`, `runUntracked`, `isTracking`
+`signal`, `pulse`, `computed`, `derive`, `effect`, `watch`, `untrack`, `batch`, `flushSync`, `enablePatience`, `disablePatience`, `isPatienceEnabled`, `runAsLane`, `runUntracked`, `isTracking`
 
 ### DOM
 `view`, `bindText`, `bindPropText`, `bindAttribute`, `bindProperty`, `bindClass`, `bindModel`, `branch`, `reconcileKeyedList`, `showIf`, `ensureScopedStyle`, `mountSlot`

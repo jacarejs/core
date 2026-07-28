@@ -110,7 +110,7 @@ signal ──► computed ──► effect ──► DOM binding
 2. **`computed<T>`** — Derived cell with memoization. Recomputes only when stale.
 3. **`effect(fn)`** — Side effect with auto-tracking and cleanup.
 4. **`batch(fn)`** — Coalesces notifications into a single flush.
-5. **`enablePatience()` / `flushSync()`** — Opt-in microtask coalesce for writes outside `batch` (default stays sync).
+5. **`enablePatience()` / `flushSync()`** — Opt-in microtask coalesce for writes outside `batch` (default stays sync). With Patience on, internal lanes flush **input → default → idle** (`bindModel` marks input; idle uses `requestIdleCallback`).
 
 Public aliases: `pulse` (signal), `derive` (computed), `watch` (effect).
 
@@ -133,7 +133,7 @@ This prevents memory leaks without `WeakRef` (which has its own overhead).
 | Equality check | `===` | `Object.is` (NaN-safe) |
 | Owner cleanup | Manual `onCleanup` | Automatic via owner tree |
 | Batch | Global `batch()` | `batch()` coalesces pending notifications |
-| Patience | — | Opt-in microtask coalesce (`enablePatience`) |
+| Patience | — | Opt-in microtask coalesce + lanes (`enablePatience`) |
 | Callable signals | Yes | Yes (the function is the signal) |
 | Untracked reads | Manual | `untrack()`, `runUntracked()`, `.peek` |
 

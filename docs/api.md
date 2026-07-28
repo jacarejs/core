@@ -269,10 +269,11 @@ Jacaré uses **fine-grained reactivity**: signals track dependencies at read tim
 | `effect(fn)` | `watch` | Side effect on dependency change |
 | `untrack(fn)` | `runUntracked` | Run without tracking |
 | `batch(fn)` | — | Coalesce writes (sync flush) |
-| `enablePatience()` | — | Opt-in microtask coalesce |
+| `enablePatience()` | — | Opt-in microtask coalesce + internal lanes |
 | `flushSync()` | — | Drain pending updates now |
 | `disablePatience()` | — | Restore sync schedule |
 | `isPatienceEnabled()` | — | Whether Patience is on |
+| `runAsLane(lane, fn)` | — | Runtime/tooling only — mark write origin (`input` / `default` / `idle`) |
 | `ReactiveCycleError` | — | Thrown on nested update cycles |
 
 ### Step 1 — Create a signal
@@ -353,6 +354,16 @@ disablePatience() // back to sync
 ```
 
 Prefer `batch` / `ripple` for explicit groups. Patience is a safety net, not the default.
+
+With Patience on, the runtime uses **internal lanes** (no author priority API):
+
+| Lane | Origin (examples) | Timing |
+|------|-------------------|--------|
+| `input` | `bindModel` DOM → signal writes | microtask, flushed first |
+| `default` | normal `set` / derives | microtask |
+| `idle` | `runAsLane('idle', …)` (tooling) | `requestIdleCallback` / timeout |
+
+`runAsLane` is for the runtime (and rare tooling) — apps should not pick lanes. `flushSync()` drains every lane immediately.
 
 ### Step 5 — Untrack reads
 
@@ -2801,6 +2812,7 @@ import {
   flushSync,
   disablePatience,
   isPatienceEnabled,
+  runAsLane,
   ReactiveCycleError,
 } from '@jacare/core'
 ```
@@ -2931,7 +2943,16 @@ enablePatience()
 isPatienceEnabled()  // → true
 ```
 
-Default schedule stays **synchronous**. Prefer `batch` / `ripple` for grouped writes; Patience is an opt-in safety net for bursts. Lab demo: [`/reactivity`](https://jacarejs.github.io/core/lab/#/reactivity).
+**`runAsLane`**
+
+```javascript
+import { runAsLane } from '@jacare/core'
+
+runAsLane('idle', () => background.set(1))
+// runtime/tooling only — apps should not pick lanes
+```
+
+Default schedule stays **synchronous**. Prefer `batch` / `ripple` for grouped writes; Patience is an opt-in safety net for bursts (with internal input → default → idle lanes). Lab demo: [`/reactivity`](https://jacarejs.github.io/core/lab/#/reactivity).
 
 **`untrack`**
 
