@@ -242,7 +242,7 @@ No provider. No props drilling. Open **Lab → Pulse bags** for the architecture
 
 ## Packages
 
-Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) scope on npm (**v0.1.12**):
+Published under the [`@jacare`](https://www.npmjs.com/search?q=scope:jacare) scope on npm (**v0.1.15**):
 
 | Package | Badges | Description |
 |---------|--------|-------------|
