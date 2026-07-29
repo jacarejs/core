@@ -20,7 +20,7 @@ function reset() {
 export <view>
   <section class="lab-island-counter" data-jacare-island>
     <p class="lab-island-label">${label}</p>
-    <p class="lab-island-value">${() => (Number(start) || 0) + clicks()}</p>
+    <p class="lab-island-value">${() => (Number(typeof start === 'function' ? start() : start) || 0) + clicks()}</p>
     <div class="lab-island-actions">
       <button type="button" class="btn" on-click=${bump}>+1</button>
       <button type="button" class="btn btn-outline" on-click=${reset}>Reset</button>

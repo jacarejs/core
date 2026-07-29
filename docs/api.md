@@ -2382,20 +2382,24 @@ Embed a `.jcr` widget into an existing static page without a Jacaré SPA shell. 
 import { mountIsland } from '@jacare/core/island'
 import Widget from './Widget.jcr'
 
-const dispose = mountIsland('#widget', Widget, {
+const island = mountIsland('#widget', Widget, {
   props: { unit: 'metric' },
   shadow: true, // optional — isolate island CSS from the host page
 })
+
+island.update({ unit: 'imperial' }) // live props — no remount
+island() // dispose
 ```
 
 | Option | Default | Role |
 |--------|---------|------|
-| `props` | `{}` | Passed to compiled `mount(root, props)` |
+| `props` | `{}` | Passed to compiled `mount` — plain values become live pulses |
+| `live` | `true` | Wrap plain props as pulses; `false` = one-shot plain object |
 | `shadow` | off | `true` / `'open'` / `'closed'` — mount inside a shadow root |
 | `clear` | `true` | Remove host children (e.g. “Loading…”) before mount |
 | `mark` | `'data-jacare-island'` | Attribute set on the host; pass `false` to skip |
 
-Returns a dispose function. Full guide: [island.md](island.md). Demos: static [`jacare-island`](../examples/jacare-island) · React [`jacare-island-react`](../examples/jacare-island-react) · Vue [`jacare-island-vue`](../examples/jacare-island-vue) · Angular [`jacare-island-angular`](../examples/jacare-island-angular).
+Returns `IslandDispose`: call to tear down, or `.update(next)` to push prop values without remounting. Full guide: [island.md](island.md). Demos: static [`jacare-island`](../examples/jacare-island) · React [`jacare-island-react`](../examples/jacare-island-react) · Vue [`jacare-island-vue`](../examples/jacare-island-vue) · Angular [`jacare-island-angular`](../examples/jacare-island-angular).
 
 ---
 

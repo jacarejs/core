@@ -48,18 +48,25 @@ export <view>
 |----------|------|-------------|
 | `target` | `string \| Element` | CSS selector or host element |
 | `app` | mount fn \| `{ mount }` \| `{ default }` | Compiled `.jcr` module (default export is `mount`) |
-| `options.props` | `object` | Passed to `mount(root, props)` |
+| `options.props` | `object` | Passed to `mount(root, props)` — plain values become **live pulses** by default |
+| `options.live` | `boolean` | Wrap plain props as pulses (default `true`). `false` = one-shot plain object |
 | `options.shadow` | `boolean \| 'open' \| 'closed'` | Mount inside a shadow root (isolates CSS from the host) |
 | `options.clear` | `boolean` | Clear host children before mount (default `true`) |
 | `options.mark` | `string \| false` | Attribute set on the host after mount (default `data-jacare-island`) |
 
-Returns a **dispose** function (same contract as `mount`): removes bindings, clears the mark, and clears the root when `clear` was used.
+Returns an **`IslandDispose`**: call it to tear down; call **`dispose.update(nextProps)`** to push new values into the live prop pulses **without remounting** (keeps focus / internal island state).
 
 ```js
-const dispose = mountIsland('#widget', App, { shadow: true })
-// later
-dispose()
+const island = mountIsland('#widget', App, {
+  props: { start: 0, label: 'Clicks' },
+  shadow: true,
+})
+
+island.update({ start: 2, label: 'Score' }) // same mount, new prop values
+island() // dispose
 ```
+
+Callback props and values that are already pulses are passed through unchanged.
 
 ## Why a subpath?
 
@@ -78,31 +85,50 @@ All four mount the same counter + tip `.jcr` islands. Host frameworks wrap `moun
 
 ### React wrapper
 
+Mount once; push prop changes with `update` (no remount → focus/state kept):
+
 ```jsx
+const islandRef = useRef(null)
 useEffect(() => {
   if (!hostRef.current) return
-  return mountIsland(hostRef.current, CounterIsland, { props: { start, label } })
+  const island = mountIsland(hostRef.current, CounterIsland, {
+    props: { start, label },
+  })
+  islandRef.current = island
+  return () => island()
+}, [])
+useEffect(() => {
+  islandRef.current?.update({ start, label })
 }, [start, label])
 ```
 
 ### Vue wrapper
 
 ```js
-onMounted(remount)
-watch(() => [props.start, props.label], remount)
-onBeforeUnmount(() => dispose?.())
+onMounted(() => {
+  island = mountIsland(host.value, CounterIsland, {
+    props: { start: props.start, label: props.label },
+  })
+})
+watch(() => [props.start, props.label], ([start, label]) => {
+  island?.update({ start, label })
+})
+onBeforeUnmount(() => island?.())
 ```
 
 ### Angular wrapper
 
 ```ts
 ngAfterViewInit() {
-  this.dispose = mountIsland(this.host.nativeElement, CounterIsland, {
+  this.island = mountIsland(this.host.nativeElement, CounterIsland, {
     props: { start: this.start, label: this.label },
   })
 }
+ngOnChanges() {
+  this.island?.update({ start: this.start, label: this.label })
+}
 ngOnDestroy() {
-  this.dispose?.()
+  this.island?.()
 }
 ```
 

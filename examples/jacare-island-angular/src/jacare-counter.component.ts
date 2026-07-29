@@ -5,9 +5,10 @@ import {
   Input,
   OnChanges,
   OnDestroy,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core'
-import { mountIsland } from '@jacare/core/island'
+import { mountIsland, type IslandDispose } from '@jacare/core/island'
 import CounterIsland from './islands/CounterIsland.jcr'
 
 @Component({
@@ -22,27 +23,23 @@ export class JacareCounterComponent implements AfterViewInit, OnChanges, OnDestr
   @ViewChild('host', { static: true })
   host!: ElementRef<HTMLDivElement>
 
-  private dispose?: () => void
-  private ready = false
+  private island?: IslandDispose
 
   ngAfterViewInit(): void {
-    this.ready = true
-    this.remount()
+    this.island = mountIsland(this.host.nativeElement, CounterIsland, {
+      props: { start: this.start, label: this.label },
+    })
   }
 
-  ngOnChanges(): void {
-    if (this.ready) this.remount()
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!this.island) return
+    if (changes['start'] || changes['label']) {
+      this.island.update({ start: this.start, label: this.label })
+    }
   }
 
   ngOnDestroy(): void {
-    this.dispose?.()
-    this.dispose = undefined
-  }
-
-  private remount(): void {
-    this.dispose?.()
-    this.dispose = mountIsland(this.host.nativeElement, CounterIsland, {
-      props: { start: this.start, label: this.label },
-    })
+    this.island?.()
+    this.island = undefined
   }
 }

@@ -9,22 +9,25 @@ const props = defineProps({
 })
 
 const host = ref(null)
-let dispose
+let island
 
-function remount() {
-  dispose?.()
-  dispose = undefined
+onMounted(() => {
   if (!host.value) return
-  dispose = mountIsland(host.value, CounterIsland, {
+  island = mountIsland(host.value, CounterIsland, {
     props: { start: props.start, label: props.label },
   })
-}
+})
 
-onMounted(remount)
-watch(() => [props.start, props.label], remount)
+watch(
+  () => [props.start, props.label],
+  ([start, label]) => {
+    island?.update({ start, label })
+  },
+)
+
 onBeforeUnmount(() => {
-  dispose?.()
-  dispose = undefined
+  island?.()
+  island = undefined
 })
 </script>
 

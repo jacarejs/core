@@ -5,9 +5,10 @@ import {
   Input,
   OnChanges,
   OnDestroy,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core'
-import { mountIsland } from '@jacare/core/island'
+import { mountIsland, type IslandDispose } from '@jacare/core/island'
 import TipIsland from './islands/TipIsland.jcr'
 
 @Component({
@@ -21,28 +22,24 @@ export class JacareTipComponent implements AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('host', { static: true })
   host!: ElementRef<HTMLDivElement>
 
-  private dispose?: () => void
-  private ready = false
+  private island?: IslandDispose
 
   ngAfterViewInit(): void {
-    this.ready = true
-    this.remount()
-  }
-
-  ngOnChanges(): void {
-    if (this.ready) this.remount()
-  }
-
-  ngOnDestroy(): void {
-    this.dispose?.()
-    this.dispose = undefined
-  }
-
-  private remount(): void {
-    this.dispose?.()
-    this.dispose = mountIsland(this.host.nativeElement, TipIsland, {
+    this.island = mountIsland(this.host.nativeElement, TipIsland, {
       props: { topic: this.topic },
       shadow: true,
     })
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!this.island) return
+    if (changes['topic']) {
+      this.island.update({ topic: this.topic })
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.island?.()
+    this.island = undefined
   }
 }

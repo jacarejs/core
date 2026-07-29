@@ -714,17 +714,17 @@ resumeBindings(rootEl, state)
     importLine: "import { mountIsland } from '@jacare/core/island'",
     usage: 'Embed a compiled .jcr widget into a host element (static/React/Vue/Angular).',
     about:
-      'Thin island entry: resolve a host (selector or Element), optionally attach a shadow root, call the widget’s mount, mark the host with data-jacare-island, and return dispose. Does not pull nav/forms/DevTools. Prefer shadow: true when the host has aggressive global CSS. Remount when host props change — there is no live prop bridge yet.',
+      'Thin island entry: resolve a host (selector or Element), optionally attach a shadow root, call the widget’s mount, mark the host with data-jacare-island, and return dispose. Plain props become live pulses by default — call dispose.update(next) without remounting. Does not pull nav/forms/DevTools. Prefer shadow: true when the host has aggressive global CSS.',
     example: `import { mountIsland } from '@jacare/core/island'
 import Widget from './Widget.jcr'
 
-const dispose = mountIsland('#slot', Widget, {
+const island = mountIsland('#slot', Widget, {
   props: { start: 2 },
   shadow: true,
 })
 
-// later
-dispose()`,
+island.update({ start: 5 })
+island()`,
     path: '/island',
   },
   {

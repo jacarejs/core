@@ -30,7 +30,7 @@ function bump() {
 }`,
   `  <section data-jacare-island>
     <p>\${label}</p>
-    <p>\${() => (Number(start) || 0) + clicks()}</p>
+    <p>\${() => (Number(typeof start === 'function' ? start() : start) || 0) + clicks()}</p>
     <button type="button" on-click=\${bump}>+1</button>
   </section>`,
 )
@@ -39,17 +39,12 @@ export const propsRemountCode = moduleSnippet(
   `import { mountIsland } from '@jacare/core/island'
 import Widget from './Widget.jcr'
 
-let dispose
+const island = mountIsland('#slot', Widget, {
+  props: { start: 0, label: 'Clicks' },
+})
 
-function remount(start, label) {
-  dispose?.()
-  dispose = mountIsland('#slot', Widget, {
-    props: { start, label },
-  })
-}
-
-// Host state changed → remount with new props
-remount(5, 'From host')`,
+// Host state changed → push live props (no remount)
+island.update({ start: 5, label: 'From host' })`,
 )
 
 export const shadowCode = moduleSnippet(
@@ -67,12 +62,14 @@ mountIsland('#tip', Tip, {
 
 export const optionsCode = moduleSnippet(
   `mountIsland(target, app, {
-  props: { unit: 'metric' }, // → mount(root, props)
+  props: { unit: 'metric' }, // plain values → live pulses (default)
+  live: true,                // false = one-shot plain object
   shadow: true,              // true | 'open' | 'closed'
   clear: true,               // default — wipe host children / loading text
   mark: 'data-jacare-island', // host attribute after mount; false to skip
 })
 
+// island.update({ unit: 'imperial' }) — no remount
 // App shapes accepted:
 //   mount function
 //   { mount }
@@ -131,12 +128,19 @@ import Counter from './Counter.jcr'
 
 export function JacareCounter({ start, label }) {
   const ref = useRef(null)
+  const islandRef = useRef(null)
 
   useEffect(() => {
     if (!ref.current) return
-    return mountIsland(ref.current, Counter, {
+    const island = mountIsland(ref.current, Counter, {
       props: { start, label },
     })
+    islandRef.current = island
+    return () => island()
+  }, [])
+
+  useEffect(() => {
+    islandRef.current?.update({ start, label })
   }, [start, label])
 
   return <div ref={ref} />
@@ -151,19 +155,18 @@ import Counter from './Counter.jcr'
 
 const props = defineProps({ start: Number, label: String })
 const host = ref(null)
-let dispose
+let island
 
-function remount() {
-  dispose?.()
+onMounted(() => {
   if (!host.value) return
-  dispose = mountIsland(host.value, Counter, {
+  island = mountIsland(host.value, Counter, {
     props: { start: props.start, label: props.label },
   })
-}
-
-onMounted(remount)
-watch(() => [props.start, props.label], remount)
-onBeforeUnmount(() => dispose?.())
+})
+watch(() => [props.start, props.label], ([start, label]) => {
+  island?.update({ start, label })
+})
+onBeforeUnmount(() => island?.())
 </script>
 
 <template>
@@ -189,24 +192,18 @@ export class JacareCounterComponent
   @Input() start = 0
   @Input() label = 'Clicks'
   @ViewChild('host', { static: true }) host!: ElementRef<HTMLDivElement>
-  private dispose?: () => void
-  private ready = false
+  private island?: ReturnType<typeof mountIsland>
 
   ngAfterViewInit() {
-    this.ready = true
-    this.remount()
-  }
-  ngOnChanges() {
-    if (this.ready) this.remount()
-  }
-  ngOnDestroy() {
-    this.dispose?.()
-  }
-  private remount() {
-    this.dispose?.()
-    this.dispose = mountIsland(this.host.nativeElement, Counter, {
+    this.island = mountIsland(this.host.nativeElement, Counter, {
       props: { start: this.start, label: this.label },
     })
+  }
+  ngOnChanges() {
+    this.island?.update({ start: this.start, label: this.label })
+  }
+  ngOnDestroy() {
+    this.island?.()
   }
 }`,
 )

@@ -46,11 +46,44 @@ describe('mountIsland', () => {
           return () => label.remove()
         },
       },
-      { props: { unit: 'metric' } },
+      { props: { unit: 'metric' }, live: false },
     )
 
     expect(host.querySelector('button')?.textContent).toBe('metric')
     dispose()
+    host.remove()
+  })
+
+  it('updates live props without remounting', () => {
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    let mounts = 0
+
+    const island = mountIsland(
+      host,
+      {
+        mount(target, props = {}) {
+          mounts += 1
+          const label = document.createElement('p')
+          target.appendChild(label)
+          const unit = props.unit as { (): unknown; set: (v: unknown) => void }
+          const stop = effect(() => {
+            label.textContent = String(unit())
+          })
+          return stop.dispose
+        },
+      },
+      { props: { unit: 'metric' } },
+    )
+
+    expect(mounts).toBe(1)
+    expect(host.querySelector('p')?.textContent).toBe('metric')
+
+    island.update({ unit: 'imperial' })
+    expect(mounts).toBe(1)
+    expect(host.querySelector('p')?.textContent).toBe('imperial')
+
+    island()
     host.remove()
   })
 

@@ -63,6 +63,10 @@ function remountProps() {
 
 function bumpStart() {
   propsStart.update((n) => n + 1)
+  if (disposeProps?.update) {
+    disposeProps.update({ start: propsStart(), label: propsLabel() })
+    return
+  }
   remountProps()
 }
 
