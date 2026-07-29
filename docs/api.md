@@ -428,7 +428,7 @@ The error is a normal exception: it propagates out of the write that started the
 
 ## 3b. Pulse bags (shared state)
 
-Jacaré’s **own** shared-state model — not a port of another store library. The pulse / `DependencyCell` graph already existed; **Pulse Mesh** makes those cells addressable (`@cart/total`), and **Pulse Bag** is the DX that publishes a named group with `createBag`. Any `.jcr` plugs in via import, contract `links`, or address sugar — same cell, O(1) update. No provider tree, no store proxy, no dispatcher.
+Jacaré’s **own** shared-state model. The pulse / `DependencyCell` graph already existed; **Pulse Mesh** makes those cells addressable (`@cart/total`), and **Pulse Bag** is the DX that publishes a named group with `createBag`. Any `.jcr` plugs in via import, contract `links`, or address sugar — same cell, O(1) update.
 
 | | |
 |--|--|
@@ -437,7 +437,18 @@ Jacaré’s **own** shared-state model — not a port of another store library. 
 | **Mesh Port** | Compile wires `cart.count` / `@cart/count` to `bindText` / CPW on that cell |
 | **Why light** | Thin registry + lazy factory; hot path matches a local pulse; unused bag modules tree-shake |
 
+### Architecture
+
 ```
+     createBag('cart', …)          ← publish the group
+            │
+            ▼
+   ┌──── PULSE MESH ────┐
+   │ @cart/count         │◄── Catalog.jcr   (import or @)
+   │ @cart/total         │◄── MiniCart.jcr  (contract links)
+   │ @cart/add()         │◄── Header.jcr    (${@cart/count})
+   └─────────────────────┘
+
 ┌─────────────────────────────────────────────────────────┐
 │                     PULSE MESH                          │
 │  @cart/items  @cart/total  @session/user  @prefs/locale │
@@ -448,7 +459,25 @@ Jacaré’s **own** shared-state model — not a port of another store library. 
    import | links | @bag/key  —  same cell, no Provider
 ```
 
-Live walkthrough: **Lab → Pulse bags** (architecture panel + demos).
+Live walkthrough: **Lab → Pulse bags** ([Mesh 30s](https://jacarejs.github.io/core/lab/#/bag) + architecture panel + demos).
+
+### What Mesh is / is not
+
+| Mesh is | Mesh is not |
+|---------|-------------|
+| Named `DependencyCell`s with stable `@id/key` addresses | A second reactivity system beside pulses |
+| A module + compile wiring (`createBag` → Mesh Port) | A provider / context tree around the UI |
+| Mutations via `ripple()` (one flush wave) | A dispatcher / action layer |
+| Shared UI state in memory (+ optional `snap` / `hydrate`) | A database or a replacement for local props |
+
+### Anti-patterns
+
+| Avoid | Do instead |
+|-------|------------|
+| `useCart()` / store hooks | `import { cart } from '../bags/cart.js'` or `${@cart/count}` |
+| Mutating bag fields like plain objects | `pulse` / `derive` + `ripple(() => …)` |
+| Props-drilling shared chrome state | Bag import, `@bag/key`, or contract `links` |
+| Replacing every prop with a bag | Keep local props; bags are for **shared** ports |
 
 | API | Role |
 |-----|------|
@@ -495,7 +524,15 @@ export const cart = createBag('cart', () => {
 
 Published cells are named `@cart/items`, `@cart/count`, `@cart/total` for DevTools.
 
-### Use in any component
+### Three ways to read a port
+
+| | When | Syntax |
+|--|------|--------|
+| **A · Import** | App owns the bag | `import { cart }` → `${cart.count}` |
+| **B · Address** | Shared chrome, few files | `${@cart/count}` (no import in the view) |
+| **C · Contract links** | Reusable UI package | `links: { count: { from: 'cart.count' } }` |
+
+#### A — Import
 
 ```javascript
 import { cart } from '../bags/cart.js'
@@ -515,7 +552,20 @@ export <view>
 
 Prefer bare `${cart.count()}` when there is no loop local to capture. The compiler treats imported bag members as **Mesh Ports**: `${cart.count()}` / `${cart.count}` emit `bindText(node, cart.count)` (or CPW peek/subscribe in production) — the cell is captured once at mount.
 
-### Contract links (reusable leaves)
+#### B — Address sugar (`@bag/key`)
+
+When the bag id is known, skip the import and write the mesh address directly:
+
+```javascript
+export <view>
+  <span class="badge">${@cart/count}</span>
+  <button type="button" on-click=${@cart/add(product)}>+</button>
+</view>
+```
+
+Compiles to `getBag('cart')?.count` / `getBag('cart')?.add(product)` — the same Mesh Port hot path as an import. The bag module must still be loaded somewhere so `createBag` has registered the id.
+
+#### C — Contract links (reusable leaves)
 
 Library components can declare Mesh ports without importing a concrete bag:
 
@@ -539,7 +589,7 @@ export <view>
 | `write` | Intent function (`add`) |
 | `mirror` | Two-way if the published key is a writable pulse |
 
-Compile injects `const count = getBag('cart')?.count`. The app must still register the bag somewhere (`import '../bags/cart.js'` or use it on a page). `jacare check` fails if `@cart/count` is not published by any `createBag`.
+Compile injects `const count = getBag('cart')?.count`. The app must still register the bag somewhere (`import '../bags/cart.js'` or use it on a page). `jacare check` fails if a contract `links` target is not published by any `createBag`.
 
 ### Lazy publish + mesh port slice hints
 
@@ -553,20 +603,7 @@ Compiled `.jcr` modules that touch Mesh Ports emit a slice hint:
 
 Contract `links` appear as real mesh addresses (`@lab-cart/count`). With `inspect: true` on the Vite plugin, the same list is written under `.jacare/mesh-ports/`.
 
-Live demos: **Lab → Pulse bags** (including a four-level component tree, contract links, lazy publish, and `@bag/key` sugar) and **Todo → Shop**.
-
-### Address sugar (`@bag/key`)
-
-When the bag id is known, skip the import and write the mesh address directly:
-
-```javascript
-export <view>
-  <span class="badge">${@cart/count}</span>
-  <button type="button" on-click=${@cart/add(product)}>+</button>
-</view>
-```
-
-Compiles to `getBag('cart')?.count` / `getBag('cart')?.add(product)` — the same Mesh Port hot path as an import. The bag module must still be loaded somewhere so `createBag` has registered the id.
+Live demos: **Lab → Pulse bags** (Mesh 30s, four-level component tree, contract links, lazy publish, and `@bag/key` sugar) and **Todo → Shop**.
 
 ---
 
