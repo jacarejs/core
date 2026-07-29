@@ -2150,7 +2150,8 @@ export <view>
 | `dirty()` | Any field dirty |
 | `validate()` | Validate all fields |
 | `reset()` | Reset to initial values |
-| `handleSubmit(onValid)` | Event handler for `<form on-submit>` |
+| `handleSubmit(onValid)` | Event handler for `<form on-submit>` (safe to destructure) |
+| `dispose()` | Stop field effects / form computeds (dynamic forms / remount) |
 
 ---
 

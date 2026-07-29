@@ -33,6 +33,7 @@ export interface Form<T extends Record<string, FieldDef<unknown>>> {
   readonly dirty: Computed<boolean>
   validate(): boolean
   reset(): void
+  dispose(): void
   handleSubmit(
     onValid: (values: FormValues<T>) => void | Promise<void>,
   ): (event: Event) => void
@@ -43,7 +44,11 @@ function normalizeValidators<T>(validate: FieldDef<T>['validate']): FormValidato
   return Array.isArray(validate) ? validate : [validate]
 }
 
-function createField<T>(def: FieldDef<T>): { field: FormField<T>; reset: () => void } {
+function createField<T>(def: FieldDef<T>): {
+  field: FormField<T>
+  reset: () => void
+  dispose: () => void
+} {
   const value = signal(def.value)
   let initial = def.value
   const touched = signal(false)
@@ -58,7 +63,7 @@ function createField<T>(def: FieldDef<T>): { field: FormField<T>; reset: () => v
     return undefined
   }
 
-  effect(() => {
+  const stopValidate = effect(() => {
     if (!touched()) {
       touched()
       return
@@ -96,17 +101,23 @@ function createField<T>(def: FieldDef<T>): { field: FormField<T>; reset: () => v
       touched.set(false)
       error.set(undefined)
     },
+    dispose: () => {
+      stopValidate.dispose()
+      dirty.dispose()
+    },
   }
 }
 
 export function createForm<T extends Record<string, FieldDef<unknown>>>(schema: T): Form<T> {
   const fields = {} as FormFields<T>
   const resets: Array<() => void> = []
+  const fieldDisposes: Array<() => void> = []
 
   for (const name of Object.keys(schema) as Array<keyof T>) {
     const created = createField(schema[name]!)
     fields[name] = created.field
     resets.push(created.reset)
+    fieldDisposes.push(created.dispose)
   }
 
   const values = computed(() => {
@@ -141,6 +152,12 @@ export function createForm<T extends Record<string, FieldDef<unknown>>>(schema: 
     validate,
     reset() {
       for (const reset of resets) reset()
+    },
+    dispose() {
+      for (const dispose of fieldDisposes) dispose()
+      values.dispose()
+      valid.dispose()
+      dirty.dispose()
     },
     handleSubmit(onValid) {
       return (event: Event) => {

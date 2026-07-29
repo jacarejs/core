@@ -307,6 +307,25 @@ describe('createForm', () => {
     expect(submitted).toBe('ok')
   })
 
+  it('dispose stops field effects and form computeds (#61)', async () => {
+    const form = createForm({
+      name: {
+        value: 'ok',
+        validate: (value) => (value.trim() ? undefined : 'Required'),
+      },
+    })
+
+    form.fields.name.blur()
+    await Promise.resolve()
+    expect(form.fields.name.error()).toBeUndefined()
+
+    form.dispose()
+
+    form.fields.name.set('')
+    await Promise.resolve()
+    expect(form.fields.name.error()).toBeUndefined()
+  })
+
   it('resets fields to initial values', () => {
     const form = createForm({
       title: { value: 'Draft' },
