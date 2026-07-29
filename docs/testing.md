@@ -15,7 +15,7 @@ For API details see [api.md](api.md). For compiler internals see [phases/02-comp
 | `@jacare/compiler` | Compile `.jcr` source in integration tests |
 | `@jacare/core` | Runtime APIs under test |
 
-The monorepo runs **380 tests** across runtime, compiler, vite-plugin, cli, meta, create-jacare, and vscode helpers (`yarn test`).
+The monorepo runs **383 tests** across runtime, compiler, vite-plugin, cli, meta, create-jacare, and vscode helpers (`yarn test`).
 
 ---
 
