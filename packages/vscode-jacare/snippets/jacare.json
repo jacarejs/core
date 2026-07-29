@@ -255,16 +255,16 @@
   "Signal": {
     "prefix": ["jcr-signal", "signal"],
     "body": [
-      "const ${1:count} = signal(${2:0})"
+      "const ${1:count} = pulse(${2:0})"
     ],
-    "description": "Create a Jacaré signal (reactive state)"
+    "description": "Create a Jacaré pulse (canonical; signal is an alias)"
   },
   "Pulse": {
     "prefix": ["jcr-pulse", "pulse"],
     "body": [
       "const ${1:count} = pulse(${2:0})"
     ],
-    "description": "Create a Jacaré pulse (alias of signal)"
+    "description": "Create a Jacaré pulse (canonical reactive state)"
   },
   "Computed": {
     "prefix": ["jcr-computed", "computed"],

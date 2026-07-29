@@ -376,7 +376,7 @@ view`
 #end
 
 #for items() as item (item.id)
-  <li>{item.label}</li>
+  <li>${item.label}</li>
 #end
 `
 ```
