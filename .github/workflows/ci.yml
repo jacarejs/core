@@ -34,3 +34,6 @@ jobs:
 
       - name: Build example
         run: yarn example:build
+
+      - name: Build Lab
+        run: yarn lab:build
