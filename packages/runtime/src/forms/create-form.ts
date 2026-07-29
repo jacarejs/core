@@ -125,18 +125,20 @@ export function createForm<T extends Record<string, FieldDef<unknown>>>(schema: 
     (Object.keys(schema) as Array<keyof T>).some((name) => fields[name].dirty()),
   )
 
+  function validate(): boolean {
+    let ok = true
+    for (const name of Object.keys(schema) as Array<keyof T>) {
+      if (!fields[name].validate()) ok = false
+    }
+    return ok
+  }
+
   return {
     fields,
     values,
     valid,
     dirty,
-    validate() {
-      let ok = true
-      for (const name of Object.keys(schema) as Array<keyof T>) {
-        if (!fields[name].validate()) ok = false
-      }
-      return ok
-    },
+    validate,
     reset() {
       for (const reset of resets) reset()
     },
@@ -146,8 +148,8 @@ export function createForm<T extends Record<string, FieldDef<unknown>>>(schema: 
         for (const name of Object.keys(schema) as Array<keyof T>) {
           fields[name].blur()
         }
-        if (!this.validate()) return
-        void onValid(this.values())
+        if (!validate()) return
+        void onValid(values())
       }
     },
   }

@@ -289,6 +289,24 @@ describe('createForm', () => {
     expect(submitted).toBe('Jacaré')
   })
 
+  it('handleSubmit works when destructured (#62)', () => {
+    const form = createForm({
+      name: {
+        value: 'ok',
+        validate: (value) => (value.trim() ? undefined : 'Required'),
+      },
+    })
+
+    let submitted: string | undefined
+    const { handleSubmit } = form
+    const handler = handleSubmit((values) => {
+      submitted = values.name
+    })
+
+    handler({ preventDefault: vi.fn() } as unknown as Event)
+    expect(submitted).toBe('ok')
+  })
+
   it('resets fields to initial values', () => {
     const form = createForm({
       title: { value: 'Draft' },
