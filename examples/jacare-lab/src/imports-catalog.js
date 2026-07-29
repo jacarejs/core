@@ -1068,7 +1068,7 @@ export <view>
     usage: 'Inline debug panel for selected values.',
     about:
       'Dev-only template tag that shows a small panel of selected values. Stripped or no-op in production builds. Handy while teaching reactivity on a page.',
-    example: `<debug { count, cart } />`,
+    example: `<debug count=\${count} cart=\${cart}></debug>`,
     path: '/debug',
   },
 ]

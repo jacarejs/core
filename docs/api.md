@@ -2817,7 +2817,7 @@ Jacaré apps and packages are tested with **Vitest** and **happy-dom**.
 | DevTools registry | `enableDevtools()` + `getPulseGraph()` in tests |
 
 ```bash
-yarn test          # monorepo — 342 tests
+yarn test          # monorepo — 380 tests
 ```
 
 Full guide: [testing.md](testing.md)
@@ -3445,6 +3445,16 @@ const graph = getPulseGraph()
 console.log(graph.pulses)
 ```
 
+**DevTools / internal-ish** — exported for overlays, tests, and the compiler emit path. Prefer `@jacare/devtools` / Lab UI in apps; treat these as unstable unless documented above:
+
+| Symbol | Role |
+|--------|------|
+| `beginDevtoolsPage` / `flushPulseGraph` | Page-scoped Pulse Graph (nav + overlay) |
+| `registerBinding` / `resolvePulseId` / `setPulseValue` | Binding ↔ cell wiring for DevTools |
+| `getWrites` / `startMeshPulse` | Write ledger / Mesh ripple probes |
+| `applyScreenTitle` | Title helper used by `createNav` |
+| `resetBagRegistry` | Tests only — clear published bags |
+
 ---
 
 ### 20.10 `@jacare/devtools`
@@ -3671,7 +3681,8 @@ export <contract>
 **`<debug>`** (stripped in prod)
 
 ```javascript
-<debug { count, cart } />
+<debug count=${count} cart=${cart}></debug>
+<!-- or: <debug>${count()}</debug> -->
 ```
 
 ---
