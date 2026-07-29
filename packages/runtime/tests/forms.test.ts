@@ -24,6 +24,27 @@ describe('bindModel', () => {
     document.body.removeChild(input)
   })
 
+  it('keeps number pulses as numbers (#60)', async () => {
+    const count = signal(5)
+    const input = document.createElement('input')
+    input.type = 'number'
+    document.body.appendChild(input)
+
+    const dispose = bindModel(input, 'value', count)
+    input.value = '51'
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    expect(count()).toBe(51)
+    expect(typeof count()).toBe('number')
+    expect(count() + 1).toBe(52)
+
+    count.set(7)
+    await Promise.resolve()
+    expect(input.value).toBe('7')
+
+    dispose()
+    document.body.removeChild(input)
+  })
+
   it('syncs checkbox checked state', async () => {
     const done = signal(false)
     const input = document.createElement('input')

@@ -61,6 +61,12 @@ export function bindModel(
         source.set(next as boolean)
         return
       }
+      const current = source()
+      if (typeof current === 'number') {
+        const n = Number(next)
+        source.set((Number.isFinite(n) ? n : current) as never)
+        return
+      }
       source.set(next as string)
     })
   }
@@ -71,7 +77,14 @@ export function bindModel(
   if (prop === 'value') {
     const onChange = (): void => {
       runAsLane('input', () => {
-        source.set(readModelValue(node, prop) as string)
+        const next = readModelValue(node, prop)
+        const current = source()
+        if (typeof current === 'number') {
+          const n = Number(next)
+          source.set((Number.isFinite(n) ? n : current) as never)
+          return
+        }
+        source.set(next as string)
       })
     }
     node.addEventListener('change', onChange)
