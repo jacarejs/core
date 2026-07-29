@@ -4,7 +4,6 @@ import './styles/highlight.css'
 import { effect } from '@jacare/core'
 import { nav } from './nav.js'
 import { restoreSpaPath } from './app-base.js'
-import { pageLoading, pageLoadingLabel } from './page-loading.js'
 import { initPageProgress, initReveal } from './utils/motion.js'
 
 let disposeDevtools = null
@@ -18,89 +17,7 @@ if (!root) throw new Error('Missing #app')
 
 restoreSpaPath()
 
-const LAZY_LABELS = {
-  '/game': 'Booting Jacaré Arcade…',
-  '/tutorial': 'Opening tutorial…',
-  '/playground': 'Loading playground…',
-  '/components': 'Loading components…',
-}
-
-const MIN_LOADER_MS = 420
-
-let frameObserver = null
-let loadingTimer = null
-let loadingPath = null
-
-function clearFrameObserver() {
-  frameObserver?.disconnect()
-  frameObserver = null
-  if (loadingTimer) {
-    window.clearTimeout(loadingTimer)
-    loadingTimer = null
-  }
-}
-
-function hideLoader(path) {
-  if (loadingPath !== path) return
-  if (nav.where().path !== path) return
-  pageLoading.set(false)
-  loadingPath = null
-  clearFrameObserver()
-}
-
-function finishLoader(path, startedAt) {
-  if (loadingPath !== path) return
-  const wait = Math.max(0, MIN_LOADER_MS - (performance.now() - startedAt))
-  if (loadingTimer) {
-    window.clearTimeout(loadingTimer)
-    loadingTimer = null
-  }
-  loadingTimer = window.setTimeout(() => {
-    hideLoader(path)
-  }, wait)
-}
-
-function watchFrameUntilReady(path) {
-  clearFrameObserver()
-  loadingPath = path
-  const startedAt = performance.now()
-  const frame = root.querySelector('[jacare-frame]')
-  if (!(frame instanceof HTMLElement)) {
-    hideLoader(path)
-    return
-  }
-
-  const previous = frame.firstElementChild
-  let ready = false
-
-  function onReady() {
-    if (ready) return
-    ready = true
-    frameObserver?.disconnect()
-    frameObserver = null
-    finishLoader(path, startedAt)
-  }
-
-  frameObserver = new MutationObserver(() => {
-    if (nav.where().path !== path) return
-    if (frame.childElementCount === 0) return
-    if (previous && frame.firstElementChild === previous) return
-    onReady()
-  })
-  frameObserver.observe(frame, { childList: true, subtree: false })
-
-  // Already swapped to the new screen (warm/cache can be instant).
-  queueMicrotask(() => {
-    if (nav.where().path !== path) return
-    if (frame.childElementCount === 0) return
-    if (previous && frame.firstElementChild === previous) return
-    onReady()
-  })
-
-  loadingTimer = window.setTimeout(() => {
-    onReady()
-  }, 10000)
-}
+const LAZY_ROUTES = new Set(['/game', '/tutorial', '/playground', '/components'])
 
 let dispose = nav.attach(root)
 let stopReveal = initReveal()
@@ -121,20 +38,6 @@ const stopScrollTop = effect(() => {
   lastPath = path
 })
 
-const stopLoading = effect(() => {
-  const path = nav.where().path
-  const label = LAZY_LABELS[path]
-  if (!label) {
-    loadingPath = null
-    pageLoading.set(false)
-    clearFrameObserver()
-    return
-  }
-  pageLoadingLabel.set(label)
-  pageLoading.set(true)
-  queueMicrotask(() => watchFrameUntilReady(path))
-})
-
 function warmRoute(path) {
   void nav.warm(path)
 }
@@ -145,7 +48,7 @@ function onPointerPrefetch(event) {
   const link = target.closest('[jacare-go]')
   if (!(link instanceof HTMLElement)) return
   const href = link.getAttribute('jacare-go')
-  if (href && LAZY_LABELS[href]) warmRoute(href)
+  if (href && LAZY_ROUTES.has(href)) warmRoute(href)
 }
 
 document.addEventListener('pointerenter', onPointerPrefetch, true)
@@ -165,10 +68,8 @@ if (import.meta.hot) {
   import.meta.hot.accept()
   import.meta.hot.dispose(() => {
     window.clearTimeout(revealTimer)
-    clearFrameObserver()
     document.removeEventListener('pointerenter', onPointerPrefetch, true)
     document.removeEventListener('focusin', onPointerPrefetch, true)
-    stopLoading?.dispose?.()
     stopScrollTop?.dispose?.()
     stopReveal?.()
     stopProgress?.()

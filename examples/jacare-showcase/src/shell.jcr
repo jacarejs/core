@@ -1,7 +1,6 @@
 import { derive, pulse } from '@jacare/core'
 import { appHref, assetUrl } from './app-base.js'
 import { activeCode, hideCode } from './code-viewer.js'
-import { pageLoading, pageLoadingLabel } from './page-loading.js'
 import CodeModal from './components/CodeModal.jcr'
 
 const JACARE_VERSION = import.meta.env.JACARE_VERSION
@@ -170,23 +169,7 @@ export <view>
         </nav>
       </header>
 
-      <div class="main-stage">
-        <div
-          class="page-loader"
-          class-is-on=${pageLoading}
-          aria-live="polite"
-          aria-busy=${pageLoading}
-          aria-hidden=${!pageLoading()}
-        >
-          <div class="page-loader-card">
-            <span class="page-loader-orb" aria-hidden="true"></span>
-            <p class="page-loader-kicker">Jacaré</p>
-            <strong class="page-loader-title">${pageLoadingLabel}</strong>
-            <p class="page-loader-hint">Fine-grained chunks · almost there</p>
-          </div>
-        </div>
-        <main class="main" jacare-frame></main>
-      </div>
+      <main class="main" jacare-frame></main>
     </div>
 
     <footer class="footer-dock">
