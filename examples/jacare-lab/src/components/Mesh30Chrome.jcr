@@ -1,0 +1,16 @@
+export <view>
+  <div class="mesh30-screen" data-screen="chrome">
+    <header class="mesh30-screen-head">
+      <span class="mesh30-screen-label">Screen B · Chrome</span>
+      <span class="mesh30-badge mesh30-badge-address" title="Address sugar — no bag import">
+        ${@lab-mesh30/count} in cart
+      </span>
+    </header>
+    <p class="mesh30-screen-lead">
+      Same cells via address sugar — no <code>import</code> in this file.
+    </p>
+    <button type="button" class="btn btn-ghost" on-click=${@lab-mesh30/clear}>
+      Clear via @lab-mesh30/clear
+    </button>
+  </div>
+</view>

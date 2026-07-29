@@ -1,0 +1,22 @@
+import { mesh30 } from '../bags/mesh30.js'
+
+const ITEMS = ['Tea', 'Cap', 'Zine']
+
+export <view>
+  <div class="mesh30-screen" data-screen="catalog">
+    <header class="mesh30-screen-head">
+      <span class="mesh30-screen-label">Screen A · Catalog</span>
+      <span class="mesh30-badge" title="Import path: mesh30.count">
+        cart · ${mesh30.count}
+      </span>
+    </header>
+    <p class="mesh30-screen-lead">Import the bag and call <code>ripple</code> via <code>add</code>.</p>
+    <div class="row">
+      #for ITEMS as label (label)
+        <button type="button" class="btn btn-outline" on-click=${() => mesh30.add(label)}>
+          Add ${label}
+        </button>
+      #end
+    </div>
+  </div>
+</view>

@@ -2,8 +2,12 @@ import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import BagTreeParent from '../components/BagTreeParent.jcr'
 import CartLinkBadge from '../components/CartLinkBadge.jcr'
+import Mesh30Catalog from '../components/Mesh30Catalog.jcr'
+import Mesh30Chrome from '../components/Mesh30Chrome.jcr'
 import { demoCart } from '../bags/cart.js'
+import '../bags/mesh30.js'
 import { lazyBag, lazyFactoryRuns } from '../bags/lazy.js'
+import { appHref } from '../app-base.js'
 import {
   defineBagCode,
   useBagCode,
@@ -13,6 +17,7 @@ import {
   lazyPublishCode,
   addressSugarCode,
   meshArchDiagram,
+  mesh30LessonCode,
 } from '../snippets/bag.js'
 
 const PRODUCTS = [
@@ -31,6 +36,32 @@ export <view>
         light, native, and built on the same cells as local reactivity.
       </p>
     </header>
+
+    <Demo
+      :title=${'Mesh 30s — no useStore()'}
+      :lead=${'One bag, two screens, one address. Read this card (~30s), tap Add, watch both badges move — then open the real checkout screen.'}
+      :code=${mesh30LessonCode}
+    >
+      <div class="mesh30">
+        <ol class="mesh30-steps">
+          <li><strong>createBag</strong> — publish ports on the Mesh</li>
+          <li><strong>Screen A</strong> — import + <code>ripple</code> via <code>add</code></li>
+          <li><strong>Screen B</strong> — <code>${'@lab-mesh30/count'}</code> (no import)</li>
+        </ol>
+
+        <div class="mesh30-screens" aria-label="Two screens sharing one bag">
+          <Mesh30Catalog />
+          <Mesh30Chrome />
+        </div>
+
+        <p class="mesh30-foot">
+          <a class="btn" jacare-go="/bag/checkout" href=${appHref('/bag/checkout')}>
+            Open real Screen B · /bag/checkout
+          </a>
+          <span class="muted">Same bag id <code>lab-mesh30</code> — bookmarkable URL.</span>
+        </p>
+      </div>
+    </Demo>
 
     <Tip :text=${'Prefer bare cart.count() or ${@cart/count} when there is no loop local. Factory stays lazy until first property read — unused bag modules tree-shake out. Compiled views emit /* jacare-mesh-ports: … */ for ports they touch.'} />
 

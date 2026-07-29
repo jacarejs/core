@@ -104,6 +104,38 @@ export const addressSugarCode = `export <view>
 // bindText(node, getBag("lab-cart")?.count)
 // The bag must still be registered somewhere (this page imports demoCart).`
 
+export const mesh30LessonCode = `// bags/mesh30.js
+import { createBag, pulse, derive, ripple } from '@jacare/core'
+
+export const mesh30 = createBag('lab-mesh30', () => {
+  const items = pulse([])
+  const count = derive(() => items().length)
+  function add(label) {
+    ripple(() => {
+      items.update((list) => [...list, { id: String(Date.now()), label }])
+    })
+  }
+  function clear() {
+    ripple(() => items.set([]))
+  }
+  return { items, count, add, clear }
+})
+
+// Screen A — import the bag
+import { mesh30 } from '../bags/mesh30.js'
+export <view>
+  <span>cart · \${mesh30.count}</span>
+  <button type="button" on-click=\${() => mesh30.add('Tea')}>Add Tea</button>
+</view>
+
+// Screen B — no bag import in the view; address sugar only
+export <view>
+  <span>\${@lab-mesh30/count} in cart</span>
+  <button type="button" on-click=\${@lab-mesh30/clear}>Clear</button>
+</view>
+
+// No useStore(). Same DependencyCell — Mesh Port at compile time.`
+
 export const meshArchDiagram = `┌─────────────────────────────────────────────────────────┐
 │                     PULSE MESH                          │
 │  @cart/items  @cart/total  @session/user  @prefs/locale │
@@ -118,4 +150,5 @@ export const meshArchDiagram = `┌───────────────
 │  ripple(fn)  →  one flush wave                          │
 │  Mesh Port compile  →  bindText / CPW on the cell       │
 └─────────────────────────────────────────────────────────┘`
+
 

@@ -17,6 +17,10 @@ export const nav = createNav({
     '/binding-ir': { use: lazy(() => import('./pages/binding-ir.jcr')), title: 'Jacaré Lab · Binding IR' },
     '/reactivity': { use: lazy(() => import('./pages/reactivity.jcr')), title: 'Jacaré Lab · Reactivity' },
     '/bag': { use: lazy(() => import('./pages/bag.jcr')), title: 'Jacaré Lab · Pulse bags' },
+    '/bag/checkout': {
+      use: lazy(() => import('./pages/bag-checkout.jcr')),
+      title: 'Jacaré Lab · Mesh 30s · Checkout',
+    },
     '/templates': { use: lazy(() => import('./pages/templates.jcr')), title: 'Jacaré Lab · Templates' },
     '/bindings': { use: lazy(() => import('./pages/bindings.jcr')), title: 'Jacaré Lab · Bindings' },
     '/events': { use: lazy(() => import('./pages/events.jcr')), title: 'Jacaré Lab · Events' },
@@ -62,6 +66,7 @@ for (const path of [
   '/binding-ir',
   '/reactivity',
   '/bag',
+  '/bag/checkout',
   '/templates',
   '/bindings',
   '/events',

@@ -1,0 +1,28 @@
+import '../bags/mesh30.js'
+import Tip from '../components/Tip.jcr'
+import { appHref } from '../app-base.js'
+
+export <view>
+  <section class="page page-mesh30-checkout">
+    <header class="page-hero">
+      <p class="page-kicker">Mesh 30s · Screen B</p>
+      <h1 class="page-title">Checkout chrome</h1>
+      <p class="page-lead">
+        This screen never imports the bag module for reads — only the address sugar.
+        Add items on <a jacare-go="/bag" href=${appHref('/bag')}>Pulse bags</a>, then come back: the badge stays in sync.
+      </p>
+    </header>
+
+    <Tip :text=${'Side-effect import registers the bag once. The template only uses address sugar — same Mesh Port as Screen A on /bag.'} />
+
+    <div class="mesh30-checkout-card">
+      <p class="mesh30-badge mesh30-badge-lg">
+        Shared badge · <strong>${@lab-mesh30/count}</strong>
+      </p>
+      <div class="row">
+        <button type="button" class="btn btn-ghost" on-click=${@lab-mesh30/clear}>Clear cart</button>
+        <a class="btn" jacare-go="/bag" href=${appHref('/bag')}>Back to Mesh 30s</a>
+      </div>
+    </div>
+  </section>
+</view>
