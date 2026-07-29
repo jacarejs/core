@@ -20,6 +20,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./scan-bags": {
+      "types": "./dist/scan-bags.d.ts",
+      "import": "./dist/scan-bags.js"
+    },
+    "./mesh-address": {
+      "types": "./dist/mesh-address.d.ts",
+      "import": "./dist/mesh-address.js"
+    },
     "./fs": {
       "types": "./dist/typescript-fs.d.ts",
       "import": "./dist/typescript-fs.js"

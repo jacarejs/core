@@ -39,8 +39,15 @@ export {
   parseLinkFrom,
   linkAddress,
 } from './parse-contract.js'
-export { scanPublishedBags, mergePublishedBags } from './scan-bags.js'
-export type { PublishedBags } from './scan-bags.js'
+export { scanPublishedBags, scanBagPublishSites, mergePublishedBags } from './scan-bags.js'
+export type { PublishedBags, BagPublishSite } from './scan-bags.js'
+export {
+  findMeshAddressAt,
+  meshAddressResolveExpr,
+  offsetToLineCharacter,
+  MESH_ADDRESS_IN_TEXT_RE,
+} from './mesh-address.js'
+export type { MeshAddressHit } from './mesh-address.js'
 export {
   scanNavScreenPatterns,
   scanStaticGoLinks,

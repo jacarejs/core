@@ -1,4 +1,7 @@
 import * as vscode from 'vscode'
+import { createMeshDefinitionProvider } from './mesh/definition.js'
+import { createMeshHoverProvider } from './mesh/hover.js'
+import { WorkspaceBagIndex } from './mesh/workspace-index.js'
 
 const LAB_BASE = 'https://jacarejs.github.io/core/lab/#'
 
@@ -66,7 +69,10 @@ function lessonForToken(token: string): LabLesson | undefined {
 
 function wordAtCursor(editor: vscode.TextEditor): string {
   const position = editor.selection.active
-  const range = editor.document.getWordRangeAtPosition(position, /[#@]?[\w:-]+/)
+  const range = editor.document.getWordRangeAtPosition(
+    position,
+    /@[A-Za-z_$][\w$-]*\/[A-Za-z_$][\w$]*|[#@]?[\w:-]+/,
+  )
   return range ? editor.document.getText(range) : ''
 }
 
@@ -99,8 +105,19 @@ async function openLabLesson(): Promise<void> {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
+  const bags = new WorkspaceBagIndex()
+  bags.watch(context)
+  void bags.refresh()
+
+  const selector: vscode.DocumentSelector = { language: 'jacare' }
+
   context.subscriptions.push(
     vscode.commands.registerCommand('jacare.openLabLesson', openLabLesson),
+    vscode.languages.registerHoverProvider(selector, createMeshHoverProvider(() => bags.get())),
+    vscode.languages.registerDefinitionProvider(
+      selector,
+      createMeshDefinitionProvider(() => bags.get()),
+    ),
   )
 }
 

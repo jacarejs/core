@@ -34,7 +34,7 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | **Syntax highlighting** | JavaScript module body, `view` / `style` / `contract` blocks, directives, HTML, and bindings |
 | **TypeScript** | `// @jacare-ts` turns the script region into `source.ts`; sibling `*.jcr.ts` uses full TypeScript mode |
 | **Jacaré scope themes** | Optional dark/light themes that color `@jacare-ts`, `#if`/`#for`, `<view>`/`<contract>`, and mesh addresses |
-| **Pulse Mesh** | Highlight `${@bag/key}` / `${@route/key}`; snippets for bags, links, and route sugar |
+| **Pulse Mesh** | Highlight `${@bag/key}` / `${@route/key}`; **hover** shows bag / key / `createBag` file; **Go to Definition** jumps to the bag; snippets for bags, links, and route sugar |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) · `jacare-when` |
 | **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` (`from` / `mode`) |
 | **Snippets** | Component scaffold, screen/nav, a11y field, Mesh/`@route`, `jacare-when`, focus grip, islands, signals, control flow |
@@ -68,7 +68,7 @@ cd packages/vscode-jacare
 yarn install
 yarn build
 yarn package
-code --install-extension jacare-0.0.19.vsix --force
+code --install-extension jacare-0.0.22.vsix --force
 ```
 
 ### Development mode
@@ -483,7 +483,6 @@ Optional `settings.json` for Jacaré projects:
 | Not included | Alternative |
 |--------------|-------------|
 | IntelliSense / autocomplete | Use snippets (`jcr-*`) plus TypeScript with `jacare.d.ts` in your project |
-| Go to definition in templates | Planned for a future release |
 | Formatting | Format the JavaScript parts with your Prettier/ESLint setup |
 | Contract / template diagnostics | Use `jacare check` from `@jacare/cli` (contracts, Mesh `links` vs published bags, soft style warnings) |
 

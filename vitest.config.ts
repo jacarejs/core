@@ -4,8 +4,13 @@ import { resolve } from 'node:path'
 export default defineConfig({
   resolve: {
     alias: {
-      '@jacare/core': resolve(__dirname, 'packages/runtime/dist/index.js'),
       '@jacare/core/island': resolve(__dirname, 'packages/runtime/dist/island.js'),
+      '@jacare/core': resolve(__dirname, 'packages/runtime/dist/index.js'),
+      '@jacare/compiler/scan-bags': resolve(__dirname, 'packages/compiler/dist/scan-bags.js'),
+      '@jacare/compiler/mesh-address': resolve(
+        __dirname,
+        'packages/compiler/dist/mesh-address.js',
+      ),
       '@jacare/compiler': resolve(__dirname, 'packages/compiler/dist/index.js'),
       '@jacare/vite-plugin': resolve(__dirname, 'packages/vite-plugin/dist/index.js'),
       '@jacare/meta': resolve(__dirname, 'packages/meta/dist/index.js'),

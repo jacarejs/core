@@ -1,29 +1,45 @@
 /**
  * Scan JS/TS sources for `createBag('id', …)` and published return keys.
- * Used by `jacare check` to verify contract `links` against the mesh.
+ * Used by `jacare check` and the VS Code Mesh hover / go-to-definition.
  */
 
 export type PublishedBags = Map<string, Set<string>>
 
-export function scanPublishedBags(source: string): PublishedBags {
-  const bags: PublishedBags = new Map()
+/** One `createBag('id', …)` site in a source string. */
+export type BagPublishSite = {
+  id: string
+  keys: string[]
+  /** Index of `createBag` in `source`. */
+  index: number
+}
+
+export function scanBagPublishSites(source: string): BagPublishSite[] {
+  const sites: BagPublishSite[] = []
   const re = /\bcreateBag\s*\(\s*(['"])([^'"]+)\1/g
   for (const match of source.matchAll(re)) {
     const id = match[2]!
-    const from = match.index ?? 0
+    const index = match.index ?? 0
+    const from = index
     const factoryStart = source.indexOf('{', from + match[0].length)
     if (factoryStart < 0) {
-      ensureBag(bags, id)
+      sites.push({ id, keys: [], index })
       continue
     }
     const body = sliceBalanced(source, factoryStart)
     if (!body) {
-      ensureBag(bags, id)
+      sites.push({ id, keys: [], index })
       continue
     }
-    const keys = extractReturnKeys(body)
-    const set = ensureBag(bags, id)
-    for (const key of keys) set.add(key)
+    sites.push({ id, keys: extractReturnKeys(body), index })
+  }
+  return sites
+}
+
+export function scanPublishedBags(source: string): PublishedBags {
+  const bags: PublishedBags = new Map()
+  for (const site of scanBagPublishSites(source)) {
+    const set = ensureBag(bags, site.id)
+    for (const key of site.keys) set.add(key)
   }
   return bags
 }
