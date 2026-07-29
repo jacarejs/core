@@ -2,7 +2,7 @@
 
 Chrome DevTools panel for Jacaré apps (Manifest V3).
 
-The panel is called **Jacaré** in DevTools. Inside it, debug with three simple tabs:
+The panel is called **Jacaré** in DevTools. Inside it, debug with four simple tabs:
 
 - **State** — live values that matter (named, DOM-bound, `.jcr`, signals). Internal watches stay behind **Show noise**.
 - **Screens** — `.jcr` files linked to state
