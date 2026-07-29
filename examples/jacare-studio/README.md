@@ -2,6 +2,8 @@
 
 Live playground for Jacaré: edit a `.jcr` module, compile in the browser, mount a preview, and share via URL.
 
+Preview runs compiled source with `new Function` in your tab — only paste code you trust (local sandbox, not a remote eval service).
+
 - Live: [jacarejs.github.io/core/studio](https://jacarejs.github.io/core/studio/)
 - Presets: counter, derive, keyed list, `#if`, `#case`, bindings, form, timer
 - Share: the current source is gzip + base64 encoded into the URL hash — copy the link and send it

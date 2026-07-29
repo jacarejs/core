@@ -96,7 +96,7 @@ export <view>
       <p class="page-lead">Type Jacaré source on the left — it compiles and mounts on the right as you type.</p>
     </header>
 
-    <Tip :text=${'Use a full module: imports, pulses, functions, then an export view block. Presets below are complete starting points. For a full-viewport shareable editor, open Jacaré Studio.'} />
+    <Tip :text=${'Sandbox: the preview runs your source with new Function in this browser tab — only paste code you trust. Use a full module: imports, pulses, functions, then an export view block. Presets below are complete starting points. For a full-viewport shareable editor, open Jacaré Studio.'} />
 
     <div class="row" style="margin-bottom: 0.75rem">
       <a class="btn" href="https://jacarejs.github.io/core/studio/" target="_blank" rel="noopener noreferrer">Open Jacaré Studio</a>

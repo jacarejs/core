@@ -14,6 +14,8 @@
 
 Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) · Studio: [jacarejs.github.io/core/studio](https://jacarejs.github.io/core/studio/)
 
+**Playground note:** Lab `/playground` and Studio compile and run editor source with `new Function` in the browser. Treat that as a local sandbox — only paste code you trust.
+
 ## Run
 
 ```bash
