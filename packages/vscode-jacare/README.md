@@ -17,7 +17,7 @@
   </a>
 </p>
 
-Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr` files — syntax highlighting, snippets, file icons, and editor ergonomics for the Jacaré reactive UI framework.
+Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr` files — syntax highlighting, compile diagnostics, Mesh hover, snippets, file icons, and editor ergonomics for the Jacaré reactive UI framework.
 
 **Publisher:** [heberalmeida](https://marketplace.visualstudio.com/publishers/heberalmeida)  
 **Extension ID:** [`heberalmeida.jacare`](https://marketplace.visualstudio.com/items?itemName=heberalmeida.jacare)  
@@ -35,6 +35,7 @@ Official language support for [Jacaré](https://github.com/jacarejs/core) `.jcr`
 | **TypeScript** | `// @jacare-ts` turns the script region into `source.ts`; sibling `*.jcr.ts` uses full TypeScript mode |
 | **Jacaré scope themes** | Optional dark/light themes that color `@jacare-ts`, `#if`/`#for`, `<view>`/`<contract>`, and mesh addresses |
 | **Pulse Mesh** | Highlight `${@bag/key}` / `${@route/key}`; **hover** shows bag / key / `createBag` file; **Go to Definition** jumps to the bag; snippets for bags, links, and route sugar |
+| **Compile diagnostics** | On open/edit/save, `compile()` errors appear in the Problems panel (click to jump to the line) |
 | **Template directives** | `#if`, `#elif`, `#else`, `#end`, `#case`, `#when`, `#for` (and `@if` / `@each` aliases) · `jacare-when` |
 | **Template contracts** | Colored `export <contract>` tags plus `props` / `pulses` / `slots` / `emits` / `forwards` / `links` (`from` / `mode`) |
 | **Snippets** | Component scaffold, screen/nav, a11y field, Mesh/`@route`, `jacare-when`, focus grip, islands, signals, control flow |
@@ -68,7 +69,7 @@ cd packages/vscode-jacare
 yarn install
 yarn build
 yarn package
-code --install-extension jacare-0.0.22.vsix --force
+code --install-extension jacare-0.0.23.vsix --force
 ```
 
 ### Development mode
@@ -484,7 +485,7 @@ Optional `settings.json` for Jacaré projects:
 |--------------|-------------|
 | IntelliSense / autocomplete | Use snippets (`jcr-*`) plus TypeScript with `jacare.d.ts` in your project |
 | Formatting | Format the JavaScript parts with your Prettier/ESLint setup |
-| Contract / template diagnostics | Use `jacare check` from `@jacare/cli` (contracts, Mesh `links` vs published bags, soft style warnings) |
+| Cross-file contract / Mesh `links` check | Use `jacare check` from `@jacare/cli` for workspace-wide validation |
 
 ---
 

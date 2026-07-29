@@ -10,7 +10,7 @@ await esbuild.build({
   entryPoints: [join(root, 'src/extension.ts')],
   bundle: true,
   outfile: join(root, 'dist/extension.js'),
-  external: ['vscode'],
+  external: ['vscode', 'esbuild'],
   format: 'cjs',
   platform: 'node',
   target: 'node20',

@@ -1,8 +1,8 @@
 {
   "name": "jacare",
   "displayName": "Jacaré",
-  "description": "Syntax highlighting, Mesh hover, snippets, and icons for Jacaré .jcr files",
-  "version": "0.0.22",
+  "description": "Syntax highlighting, Mesh hover, compile diagnostics, snippets, and icons for Jacaré .jcr files",
+  "version": "0.0.23",
   "publisher": "heberalmeida",
   "author": {
     "name": "Heber Almeida"
@@ -120,18 +120,18 @@
   "scripts": {
     "prebuild": "yarn --cwd ../compiler build",
     "build": "node scripts/build.mjs",
-    "package": "yarn build && vsce package --no-dependencies",
-    "publish": "yarn build && vsce publish --no-dependencies",
+    "package": "yarn build && vsce package",
+    "publish": "yarn build && vsce publish",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@jacare/compiler": "0.1.15"
+    "@jacare/compiler": "0.1.15",
+    "esbuild": "^0.25.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.2.1",
-    "esbuild": "^0.25.0",
     "typescript": "^5.7.2"
   }
 }

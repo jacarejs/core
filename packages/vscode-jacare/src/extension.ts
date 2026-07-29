@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { JacareDiagnostics } from './diagnostics/diagnostics.js'
 import { createMeshDefinitionProvider } from './mesh/definition.js'
 import { createMeshHoverProvider } from './mesh/hover.js'
 import { WorkspaceBagIndex } from './mesh/workspace-index.js'
@@ -108,6 +109,9 @@ export function activate(context: vscode.ExtensionContext): void {
   const bags = new WorkspaceBagIndex()
   bags.watch(context)
   void bags.refresh()
+
+  const diagnostics = new JacareDiagnostics()
+  diagnostics.activate(context)
 
   const selector: vscode.DocumentSelector = { language: 'jacare' }
 
