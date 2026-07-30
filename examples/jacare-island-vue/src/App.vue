@@ -24,12 +24,14 @@ const version = import.meta.env.JACARE_VERSION
         This page is a normal Vue 3 app (<code>createApp</code>, Composition API).
         The widgets below are compiled <code>.jcr</code> modules mounted with
         <code>@jacare/core/island</code> — Vue owns the shell; Jacaré owns the island.
+        Look for the green <strong>Jacaré · .jcr</strong> frames: they name the
+        source file so you can tell host Vue markup apart from the compiled widget.
       </p>
     </article>
 
-    <aside class="host-aside">
+    <aside class="host-aside host-aside--panel">
       <h2>Host controls (Vue state → island props)</h2>
-      <p class="host-hint">Changing these remounts the counter island with new props.</p>
+      <p class="host-hint">Changing these updates the counter island props without remounting the shell.</p>
       <div class="host-controls">
         <label>
           Start
@@ -43,17 +45,41 @@ const version = import.meta.env.JACARE_VERSION
     </aside>
 
     <aside class="host-aside">
-      <h2>Island: counter</h2>
-      <p class="host-hint">Light mount — shares the host document.</p>
-      <JacareCounter :start="start" :label="label" />
+      <div class="island-mark">
+        <div class="island-mark-head">
+          <span class="island-mark-badge">
+            <img class="island-mark-logo" src="/jacare-logo.png" alt="" width="20" height="20" />
+            Jacaré · .jcr
+          </span>
+          <code class="island-mark-file">CounterIsland.jcr</code>
+        </div>
+        <h2>Island: counter</h2>
+        <p class="host-hint">Light mount — shares the host document.</p>
+        <div class="island-mark-slot">
+          <JacareCounter :start="start" :label="label" />
+        </div>
+      </div>
     </aside>
 
     <aside class="host-aside">
-      <h2>Island: tip (shadow)</h2>
-      <p class="host-hint">
-        <code>shadow: true</code> — island CSS stays inside the shadow root.
-      </p>
-      <JacareTip topic="vue + jacaré" />
+      <div class="island-mark island-mark-shadow">
+        <div class="island-mark-head">
+          <span class="island-mark-badge">
+            <img class="island-mark-logo" src="/jacare-logo.png" alt="" width="20" height="20" />
+            Jacaré · .jcr
+          </span>
+          <code class="island-mark-file">TipIsland.jcr</code>
+          <span class="island-mark-tag">shadow</span>
+        </div>
+        <h2>Island: tip (shadow)</h2>
+        <p class="host-hint">
+          Same kit with <code>shadow: true</code> — island CSS stays inside the
+          shadow root and does not leak into this Vue host.
+        </p>
+        <div class="island-mark-slot">
+          <JacareTip topic="vue + jacaré" />
+        </div>
+      </div>
     </aside>
   </main>
 

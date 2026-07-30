@@ -20,9 +20,13 @@ yarn island:build
 | Piece | Role |
 |-------|------|
 | `index.html` + `public/host.css` | Ordinary host site (blog-like markup) |
-| `#counter-island` | Light island — mounts into the host document |
-| `#tip-island` | Same kit with `shadow: true` — CSS stays in the shadow root |
+| Mount target | What it shows |
+|--------------|---------------|
+| `#counter-island` | Light island — mounts into the host document · marked as `CounterIsland.jcr` |
+| `#tip-island` | Same kit with `shadow: true` — CSS stays in the shadow root · marked as `TipIsland.jcr` |
 | `src/boot.js` | `mountIsland(selector, App, options)` |
+
+On the live page, each island sits inside a **Jacaré · .jcr** frame with the source filename so you can tell host HTML apart from the compiled widget.
 
 ```js
 import { mountIsland } from '@jacare/core/island'

@@ -27,6 +27,9 @@
           This page is ordinary markup: header, article, footer. The widgets below
           are Jacaré islands — each mounts into a host element with
           <code>mountIsland</code> from <code>@jacare/core/island</code>.
+          Look for the green <strong>Jacaré · .jcr</strong> frames: they name the
+          source file (<code>CounterIsland.jcr</code>, <code>TipIsland.jcr</code>)
+          so you can tell host HTML apart from the compiled widget.
         </p>
         <p>
           Use this pattern on WordPress, Rails, or any static site where you want
@@ -35,21 +38,40 @@
       </article>
 
       <aside class="host-aside">
-        <h2>Island: counter</h2>
-        <p class="host-hint">Light mount — shares the host document.</p>
-        <div id="counter-island">
-          <p class="host-loading">Loading counter…</p>
+        <div class="island-mark">
+          <div class="island-mark-head">
+            <span class="island-mark-badge">
+              <img class="island-mark-logo" src="/jacare-logo.png" alt="" width="20" height="20" />
+              Jacaré · .jcr
+            </span>
+            <code class="island-mark-file">CounterIsland.jcr</code>
+          </div>
+          <h2>Island: counter</h2>
+          <p class="host-hint">Light mount — shares the host document.</p>
+          <div class="island-mark-slot" id="counter-island">
+            <p class="host-loading">Loading counter…</p>
+          </div>
         </div>
       </aside>
 
       <aside class="host-aside">
-        <h2>Island: tip (shadow)</h2>
-        <p class="host-hint">
-          Same kit with <code>shadow: true</code> — island CSS stays inside the
-          shadow root and does not leak into this host page.
-        </p>
-        <div id="tip-island">
-          <p class="host-loading">Loading tip…</p>
+        <div class="island-mark island-mark-shadow">
+          <div class="island-mark-head">
+            <span class="island-mark-badge">
+              <img class="island-mark-logo" src="/jacare-logo.png" alt="" width="20" height="20" />
+              Jacaré · .jcr
+            </span>
+            <code class="island-mark-file">TipIsland.jcr</code>
+            <span class="island-mark-tag">shadow</span>
+          </div>
+          <h2>Island: tip (shadow)</h2>
+          <p class="host-hint">
+            Same kit with <code>shadow: true</code> — island CSS stays inside the
+            shadow root and does not leak into this host page.
+          </p>
+          <div class="island-mark-slot" id="tip-island">
+            <p class="host-loading">Loading tip…</p>
+          </div>
         </div>
       </aside>
     </main>

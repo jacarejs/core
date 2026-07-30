@@ -26,14 +26,16 @@ export default function App() {
           <p>
             This page is a normal React app (<code>createRoot</code>, hooks, state).
             The widgets below are compiled <code>.jcr</code> modules mounted with{' '}
-            <code>@jacare/core/island</code> — React owns the shell; Jacaré owns the island.
+            <code>@jacare/core/island</code> — React owns the shell; Jacaré owns the
+            island. Look for the green <strong>Jacaré · .jcr</strong> frames: they name
+            the source file so you can tell host JSX apart from the compiled widget.
           </p>
         </article>
 
-        <aside className="host-aside">
+        <aside className="host-aside host-aside--panel">
           <h2>Host controls (React state → island props)</h2>
           <p className="host-hint">
-            Changing these remounts the counter island with new props.
+            Changing these updates the counter island props without remounting the shell.
           </p>
           <div className="host-controls">
             <label>
@@ -56,17 +58,53 @@ export default function App() {
         </aside>
 
         <aside className="host-aside">
-          <h2>Island: counter</h2>
-          <p className="host-hint">Light mount — shares the host document.</p>
-          <JacareCounter start={start} label={label} />
+          <div className="island-mark">
+            <div className="island-mark-head">
+              <span className="island-mark-badge">
+                <img
+                  className="island-mark-logo"
+                  src="/jacare-logo.png"
+                  alt=""
+                  width="20"
+                  height="20"
+                />
+                Jacaré · .jcr
+              </span>
+              <code className="island-mark-file">CounterIsland.jcr</code>
+            </div>
+            <h2>Island: counter</h2>
+            <p className="host-hint">Light mount — shares the host document.</p>
+            <div className="island-mark-slot">
+              <JacareCounter start={start} label={label} />
+            </div>
+          </div>
         </aside>
 
         <aside className="host-aside">
-          <h2>Island: tip (shadow)</h2>
-          <p className="host-hint">
-            <code>shadow: true</code> — island CSS stays inside the shadow root.
-          </p>
-          <JacareTip topic="react + jacaré" />
+          <div className="island-mark island-mark-shadow">
+            <div className="island-mark-head">
+              <span className="island-mark-badge">
+                <img
+                  className="island-mark-logo"
+                  src="/jacare-logo.png"
+                  alt=""
+                  width="20"
+                  height="20"
+                />
+                Jacaré · .jcr
+              </span>
+              <code className="island-mark-file">TipIsland.jcr</code>
+              <span className="island-mark-tag">shadow</span>
+            </div>
+            <h2>Island: tip (shadow)</h2>
+            <p className="host-hint">
+              Same kit with <code>shadow: true</code> — island CSS stays inside the
+              shadow root and does not leak into this React host.
+            </p>
+            <div className="island-mark-slot">
+              <JacareTip topic="react + jacaré" />
+            </div>
+          </div>
         </aside>
       </main>
 

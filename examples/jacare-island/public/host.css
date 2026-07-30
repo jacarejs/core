@@ -83,10 +83,11 @@ code {
 }
 
 .host-aside {
-  padding: 1.15rem 1.2rem 1.35rem;
+  padding: 0;
   border: 1px solid var(--host-line);
   border-radius: 0.35rem;
   background: var(--host-card);
+  overflow: hidden;
 }
 
 .host-aside h2 {
@@ -102,6 +103,109 @@ code {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-size: 0.88rem;
   color: var(--host-muted);
+}
+
+.island-mark {
+  --j-mark: #189030;
+  --j-mark-soft: rgba(120, 192, 24, 0.18);
+  position: relative;
+  padding: 1.15rem 1.2rem 1.35rem;
+  background:
+    linear-gradient(180deg, rgba(232, 248, 236, 0.55), transparent 42%),
+    var(--host-card);
+  box-shadow: inset 3px 0 0 var(--j-mark);
+}
+
+.island-mark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px dashed color-mix(in srgb, var(--j-mark) 45%, transparent);
+  border-radius: inherit;
+  opacity: 0.85;
+}
+
+.island-mark-shadow {
+  --j-mark: #0b5f4a;
+  background:
+    linear-gradient(180deg, rgba(11, 95, 74, 0.08), transparent 42%),
+    var(--host-card);
+}
+
+.island-mark-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.55rem;
+  margin-bottom: 0.85rem;
+}
+
+.island-mark-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.65rem 0.28rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--j-mark) 35%, white);
+  background: linear-gradient(135deg, #0a2a18, #145c2e);
+  color: #e8fce8;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.island-mark-logo {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: contain;
+}
+
+.island-mark-file {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--j-mark);
+  background: var(--j-mark-soft);
+  border: 1px solid color-mix(in srgb, var(--j-mark) 28%, transparent);
+  padding: 0.22rem 0.55rem;
+  border-radius: 0.4rem;
+}
+
+.island-mark-tag {
+  margin-left: auto;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.35rem;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0b5f4a;
+  background: rgba(11, 95, 74, 0.1);
+  border: 1px solid rgba(11, 95, 74, 0.22);
+}
+
+.island-mark-slot {
+  position: relative;
+  z-index: 1;
+  padding: 0.85rem 0.9rem;
+  border-radius: 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--j-mark) 28%, var(--host-line));
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(240, 252, 242, 0.75));
+  box-shadow: 0 0 0 3px var(--j-mark-soft);
+}
+
+.island-mark > h2,
+.island-mark > .host-hint {
+  position: relative;
+  z-index: 1;
 }
 
 .host-loading {
