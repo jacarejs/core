@@ -1,0 +1,283 @@
+import { pulse, derive } from '@jacare/core'
+import Card from '@jacare/ui/Card'
+import Button from '@jacare/ui/Button'
+import Badge from '@jacare/ui/Badge'
+import Field from '@jacare/ui/Field'
+import Switch from '@jacare/ui/Switch'
+import Alert from '@jacare/ui/Alert'
+import Progress from '@jacare/ui/Progress'
+import Stack from '@jacare/ui/Stack'
+import Select from '@jacare/ui/Select'
+import Avatar from '@jacare/ui/Avatar'
+import Text from '@jacare/ui/Text'
+import Divider from '@jacare/ui/Divider'
+import Checkbox from '@jacare/ui/Checkbox'
+import Rate from '@jacare/ui/Rate'
+import Slider from '@jacare/ui/Slider'
+import InputNumber from '@jacare/ui/InputNumber'
+import Spinner from '@jacare/ui/Spinner'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import { appHref } from '../app-base.js'
+import { t, translate } from '../i18n.js'
+import { lessonTitle } from '../topics.js'
+import {
+  uiInstallCode,
+  uiCardCode,
+  uiFieldCode,
+  uiFeedbackCode,
+  uiSelectCode,
+  uiDisplayCode,
+  uiControlsCode,
+} from '../snippets/ui.js'
+
+const UI_DOCS = 'https://jacarejs.github.io/ui/'
+const UI_COMPONENTS = 'https://jacarejs.github.io/ui/components'
+const UI_I18N = 'https://jacarejs.github.io/ui/i18n'
+const UI_THEME = 'https://jacarejs.github.io/ui/theme'
+const UI_SELECT = 'https://jacarejs.github.io/ui/components/select'
+const UI_GITHUB = 'https://github.com/jacarejs/ui'
+
+const clicks = pulse(0)
+const clicksLabel = derive(() => translate('uiPage.demo.card.clicks', { count: clicks() }))
+const name = pulse('')
+const notify = pulse(true)
+const progress = pulse(35)
+const greeting = derive(() =>
+  translate('uiPage.demo.form.greeting', {
+    name: name().trim() || translate('uiPage.demo.form.anon'),
+    notify: translate(notify() ? 'uiPage.yes' : 'uiPage.no'),
+  }),
+)
+
+const role = pulse('editor')
+const roleOptions = [
+  { value: 'viewer', labelKey: 'uiPage.demo.select.viewer' },
+  { value: 'editor', labelKey: 'uiPage.demo.select.editor' },
+  { value: 'admin', labelKey: 'uiPage.demo.select.admin' },
+]
+const roleSelectOptions = derive(() =>
+  roleOptions.map((opt) => ({ value: opt.value, label: translate(opt.labelKey) })),
+)
+const roleSummary = derive(() =>
+  translate('uiPage.demo.select.summary', {
+    role: translate(
+      roleOptions.find((opt) => opt.value === role())?.labelKey || 'uiPage.demo.select.viewer',
+    ),
+  }),
+)
+
+const accepted = pulse(false)
+const rating = pulse(4)
+const volume = pulse(40)
+const qty = pulse(2)
+const busy = pulse(false)
+const controlsSummary = derive(() =>
+  translate('uiPage.demo.controls.summary', {
+    accepted: translate(accepted() ? 'uiPage.yes' : 'uiPage.no'),
+    rating: rating(),
+    volume: volume(),
+    qty: qty(),
+  }),
+)
+
+const pillars = [
+  { titleKey: 'uiPage.pillars.signal.title', bodyKey: 'uiPage.pillars.signal.body' },
+  { titleKey: 'uiPage.pillars.theme.title', bodyKey: 'uiPage.pillars.theme.body' },
+  { titleKey: 'uiPage.pillars.contract.title', bodyKey: 'uiPage.pillars.contract.body' },
+]
+
+const catalog = [
+  { name: 'Button · Field · Switch · Select · Input*', detailKey: 'uiPage.catalog.forms' },
+  { name: 'Card · Badge · Avatar · Text', detailKey: 'uiPage.catalog.display' },
+  { name: 'Alert · Progress · Spinner', detailKey: 'uiPage.catalog.feedback' },
+  { name: 'Dialog · Confirm', detailKey: 'uiPage.catalog.overlay' },
+  { name: 'Stack · Flex · Grid · Divider', detailKey: 'uiPage.catalog.layout' },
+  { name: 'LocaleToggle · ThemeToggle · Icon', detailKey: 'uiPage.catalog.chrome' },
+]
+
+function onSave() {
+  clicks.update((n) => n + 1)
+}
+
+function bumpProgress() {
+  progress.update((n) => (n >= 100 ? 15 : Math.min(100, n + 15)))
+}
+
+function toggleBusy() {
+  busy.update((on) => !on)
+}
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">${t('uiPage.kicker')}</p>
+      <h1 class="page-title">${t('uiPage.title')}</h1>
+      <p class="page-lead">${t('uiPage.lead')}</p>
+      <div class="row" style="margin-top:0.75rem;flex-wrap:wrap;gap:0.5rem">
+        <a class="btn btn-primary" href=${UI_DOCS} target="_blank" rel="noopener noreferrer">${t('uiPage.links.docs')}</a>
+        <a class="btn btn-outline" href=${UI_GITHUB} target="_blank" rel="noopener noreferrer">${t('uiPage.links.github')}</a>
+        <a class="btn btn-outline" href=${UI_COMPONENTS} target="_blank" rel="noopener noreferrer">${t('uiPage.links.components')}</a>
+        <a class="btn btn-outline" href=${UI_SELECT} target="_blank" rel="noopener noreferrer">${t('uiPage.links.select')}</a>
+        <a class="btn btn-outline" href=${UI_I18N} target="_blank" rel="noopener noreferrer">${t('uiPage.links.i18n')}</a>
+        <a class="btn btn-outline" jacare-go="/i18n" href=${appHref('/i18n')}>${lessonTitle('i18n')}</a>
+      </div>
+    </header>
+
+    <Tip :text=${translate('uiPage.tip')} />
+
+    <article class="ref-card">
+      <h3>${t('uiPage.pillarsHeading')}</h3>
+      <div class="nav-live">
+        #for pillars as row (row.titleKey)
+          <div class="nav-live-row">
+            <code>${t(row.titleKey)}</code>
+            <span>${t(row.bodyKey)}</span>
+          </div>
+        #end
+      </div>
+    </article>
+
+    <div class="lesson-grid">
+      <Demo :title=${t('uiPage.demo.install.title')} :lead=${t('uiPage.demo.install.lead')} :code=${uiInstallCode}>
+        <p class="muted">${t('uiPage.demo.install.note')}</p>
+        <pre class="ui-pre"><code>import '@jacare/ui/theme.css'
+import Button from '@jacare/ui/Button'
+import Select from '@jacare/ui/Select'</code></pre>
+      </Demo>
+
+      <Demo :title=${t('uiPage.demo.card.title')} :lead=${t('uiPage.demo.card.lead')} :code=${uiCardCode}>
+        <Card :title=${t('uiPage.demo.card.cardTitle')}>
+          <Stack :gap=${'sm'}>
+            <p class="muted">${t('uiPage.demo.card.body')}</p>
+            <div class="row" style="flex-wrap:wrap;gap:0.5rem;align-items:center">
+              <Badge :text=${t('uiPage.demo.card.badge')} :tone=${'success'} />
+              <Badge :text=${clicksLabel} :tone=${'info'} />
+            </div>
+            <div class="row" style="flex-wrap:wrap;gap:0.5rem">
+              <Button :variant=${'primary'} on-press=${onSave}>${t('uiPage.demo.card.save')}</Button>
+              <Button :variant=${'outline'} on-press=${() => clicks.set(0)}>${t('uiPage.demo.card.reset')}</Button>
+            </div>
+          </Stack>
+        </Card>
+      </Demo>
+
+      <Demo :title=${t('uiPage.demo.form.title')} :lead=${t('uiPage.demo.form.lead')} :code=${uiFieldCode}>
+        <Stack :gap=${'md'}>
+          <Field
+            :label=${t('uiPage.demo.form.nameLabel')}
+            bind-value=${name}
+            :placeholder=${t('uiPage.demo.form.namePlaceholder')}
+            :hint=${t('uiPage.demo.form.nameHint')}
+          />
+          <Switch :label=${t('uiPage.demo.form.notify')} bind-checked=${notify} />
+          <p class="muted">${greeting}</p>
+        </Stack>
+      </Demo>
+
+      <Demo :title=${t('uiPage.demo.select.title')} :lead=${t('uiPage.demo.select.lead')} :code=${uiSelectCode}>
+        <Stack :gap=${'md'}>
+          <Select
+            :label=${t('uiPage.demo.select.label')}
+            :options=${roleSelectOptions}
+            :placeholder=${t('uiPage.demo.select.placeholder')}
+            :searchable=${false}
+            bind-value=${role}
+          />
+          <p class="muted">${roleSummary}</p>
+          <a class="text-link" href=${UI_SELECT} target="_blank" rel="noopener noreferrer">${t('uiPage.links.selectDocs')}</a>
+        </Stack>
+      </Demo>
+
+      <Demo :title=${t('uiPage.demo.display.title')} :lead=${t('uiPage.demo.display.lead')} :code=${uiDisplayCode}>
+        <Stack :gap=${'md'}>
+          <Stack :direction=${'row'} :gap=${'md'} :align=${'center'}>
+            <Avatar :name=${t('uiPage.demo.display.name')} :tone=${'success'} />
+            <Stack :gap=${'xs'}>
+              <Text :weight=${'bold'}>${t('uiPage.demo.display.name')}</Text>
+              <Badge :text=${t('uiPage.demo.display.badge')} :tone=${'info'} />
+            </Stack>
+          </Stack>
+          <Divider :label=${t('uiPage.demo.display.divider')} />
+          <Text :tone=${'muted'}>${t('uiPage.demo.display.note')}</Text>
+        </Stack>
+      </Demo>
+
+      <Demo :title=${t('uiPage.demo.controls.title')} :lead=${t('uiPage.demo.controls.lead')} :code=${uiControlsCode}>
+        <Stack :gap=${'md'}>
+          <Checkbox :label=${t('uiPage.demo.controls.accept')} bind-checked=${accepted} />
+          <Rate bind-value=${rating} :showText=${true} />
+          <Slider bind-value=${volume} :min=${0} :max=${100} :showTooltip=${true} />
+          <InputNumber
+            :label=${t('uiPage.demo.controls.qty')}
+            bind-value=${qty}
+            :min=${1}
+            :max=${99}
+          />
+          <div class="row" style="flex-wrap:wrap;gap:0.5rem;align-items:center">
+            <Button :variant=${'outline'} on-press=${toggleBusy}>
+              ${busy() ? t('uiPage.demo.controls.stop') : t('uiPage.demo.controls.spin')}
+            </Button>
+            #if busy()
+              <Spinner :label=${t('uiPage.demo.controls.saving')} />
+            #end
+          </div>
+          <p class="muted">${controlsSummary}</p>
+        </Stack>
+      </Demo>
+
+      <Demo :title=${t('uiPage.demo.feedback.title')} :lead=${t('uiPage.demo.feedback.lead')} :code=${uiFeedbackCode}>
+        <Stack :gap=${'md'}>
+          <Alert :tone=${'info'} :title=${t('uiPage.demo.feedback.alertTitle')}>
+            ${t('uiPage.demo.feedback.alertBody')}
+          </Alert>
+          <Progress
+            :value=${progress}
+            :showValue=${true}
+            :label=${t('uiPage.demo.feedback.progressLabel')}
+          />
+          <Button :variant=${'outline'} on-press=${bumpProgress}>${t('uiPage.demo.feedback.bump')}</Button>
+        </Stack>
+      </Demo>
+    </div>
+
+    <article class="ref-card">
+      <h3>${t('uiPage.catalog.title')}</h3>
+      <p class="muted">${t('uiPage.catalog.lead')}</p>
+      <div class="nav-live">
+        #for catalog as row (row.name)
+          <div class="nav-live-row">
+            <code>${row.name}</code>
+            <span>${t(row.detailKey)}</span>
+          </div>
+        #end
+      </div>
+      <p class="ui-kit-links" style="margin-top:0.85rem">
+        <a class="text-link" href=${UI_COMPONENTS} target="_blank" rel="noopener noreferrer">${t('uiPage.links.fullCatalog')}</a>
+        <span aria-hidden="true">·</span>
+        <a class="text-link" href=${UI_THEME} target="_blank" rel="noopener noreferrer">${t('uiPage.links.theme')}</a>
+        <span aria-hidden="true">·</span>
+        <a class="text-link" href=${UI_GITHUB} target="_blank" rel="noopener noreferrer">${t('uiPage.links.github')}</a>
+      </p>
+    </article>
+  </section>
+</view>
+
+export <style>
+.ui-pre {
+  margin: 0.65rem 0 0;
+  padding: 0.75rem 0.85rem;
+  overflow-x: auto;
+  border-radius: 0.55rem;
+  background: color-mix(in oklab, var(--panel, #111) 92%, transparent);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.ui-kit-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+</style>
