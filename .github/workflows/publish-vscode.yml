@@ -54,7 +54,7 @@ jobs:
         working-directory: packages/vscode-jacare
 
       - name: Publish to Visual Studio Marketplace
-        run: npx @vscode/vsce publish
+        run: npx @vscode/vsce publish --no-yarn
         working-directory: packages/vscode-jacare
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

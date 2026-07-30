@@ -5,3 +5,8 @@ tsconfig.json
 **/*.map
 **/*.ts
 !dist/**
+**/*.vsix
+.gitignore
+node_modules/@jacare/**
+../**
+../../**
