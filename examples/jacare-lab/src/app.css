@@ -299,7 +299,9 @@ body {
 }
 
 .main {
+  min-width: 0;
   padding: 1.25rem clamp(1rem, 3vw, 2rem) 2rem;
+  overflow-x: clip;
 }
 
 .site-footer {
@@ -327,6 +329,8 @@ body {
 
 .page {
   width: min(54rem, 100%);
+  max-width: 100%;
+  min-width: 0;
   margin: 0 auto;
   display: grid;
   gap: 1.25rem;
@@ -404,6 +408,7 @@ body {
 .lesson-grid {
   display: grid;
   gap: 1rem;
+  min-width: 0;
 }
 
 .home-grid {
@@ -443,11 +448,23 @@ body {
 .demo {
   display: grid;
   gap: 0.85rem;
+  min-width: 0;
   padding: 1rem 1.1rem 1.15rem;
   border-radius: calc(var(--radius) + 0.15rem);
   border: 1px solid var(--line);
   background: var(--panel);
   box-shadow: var(--shadow);
+}
+
+.demo-live {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border-radius: 0.85rem;
+  background:
+    linear-gradient(180deg, rgba(231, 246, 236, 0.65), rgba(255, 255, 255, 0.5));
+  border: 1px dashed color-mix(in srgb, var(--leaf) 28%, transparent);
 }
 
 .demo-head {
@@ -475,16 +492,6 @@ body {
   font-size: 0.9rem;
   line-height: 1.45;
   color: var(--muted);
-}
-
-.demo-live {
-  display: grid;
-  gap: 0.75rem;
-  padding: 0.85rem;
-  border-radius: 0.85rem;
-  background:
-    linear-gradient(180deg, rgba(231, 246, 236, 0.65), rgba(255, 255, 255, 0.5));
-  border: 1px dashed color-mix(in srgb, var(--leaf) 28%, transparent);
 }
 
 .binding-compare {
@@ -1758,26 +1765,13 @@ body {
   .nav-setup-head {
     flex-direction: column;
   }
-
-  .nav-live-row {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
-  }
-
-  .nav-live-row span {
-    padding-top: 0;
-    max-width: 100%;
-  }
-
-  .nav-live-row code {
-    width: 100%;
-    max-width: 100%;
-  }
 }
 
 .nav-live {
   display: grid;
   gap: 0.55rem;
+  container-type: inline-size;
+  container-name: nav-live;
 }
 
 .nav-live-row {
@@ -1794,12 +1788,15 @@ body {
   font-size: 0.82rem;
   line-height: 1.45;
   padding-top: 0.35rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .nav-live-row code {
   display: block;
-  width: max-content;
-  max-width: min(100%, 22rem);
+  width: fit-content;
+  max-width: min(100%, 16rem);
   min-width: 0;
   padding: 0.4rem 0.65rem;
   border-radius: 0.55rem;
@@ -1811,6 +1808,48 @@ body {
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+@media (max-width: 900px) {
+  .nav-live-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .nav-live-row span {
+    padding-top: 0;
+    max-width: 100%;
+    font-weight: 550;
+    color: var(--ink);
+  }
+
+  .nav-live-row code {
+    width: auto;
+    max-width: 100%;
+  }
+
+  .ref-card {
+    padding: 0.85rem 0.8rem;
+  }
+}
+
+@container nav-live (max-width: 34rem) {
+  .nav-live-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .nav-live-row span {
+    padding-top: 0;
+    max-width: 100%;
+    font-weight: 550;
+    color: var(--ink);
+  }
+
+  .nav-live-row code {
+    width: auto;
+    max-width: 100%;
+  }
 }
 
 .nav-live-cli {

@@ -224,14 +224,30 @@ export <style>
 .i18n-pre {
   margin: 0.65rem 0 0;
   padding: 0.75rem 0.85rem;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
   border-radius: 0.55rem;
   background: color-mix(in oklab, var(--panel, #111) 92%, transparent);
   font-size: 0.82rem;
   line-height: 1.45;
 }
+.i18n-pitfall-row {
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+}
+
 .i18n-pitfall-row code {
+  width: auto;
+  max-width: 100%;
   color: color-mix(in oklab, tomato 70%, white);
+}
+
+.i18n-pitfall-row span {
+  padding-top: 0;
+  font-weight: 650;
 }
 .ui-kit-card {
   margin-top: 0.35rem;
@@ -281,20 +297,30 @@ export <style>
   overflow: visible;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .page {
     overflow-x: clip;
     max-width: 100%;
   }
 
   .page .nav-live-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
     align-items: start;
   }
 
-  .page .nav-live-row code,
-  .page .nav-live-row span {
+  .page .nav-live-row code {
+    width: auto;
+    max-width: 100%;
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  .page .nav-live-row span {
+    padding-top: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   .i18n-select-demo .jui-select__panel {
