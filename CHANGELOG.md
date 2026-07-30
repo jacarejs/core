@@ -10,6 +10,52 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.1.16](https://github.com/jacarejs/core/compare/v0.1.15...v0.1.16) - 2026-07-30
+
+### Added
+
+- **lab:** add i18n with en, pt-BR, and es locales ([10f691e](https://github.com/jacarejs/core/commit/10f691e5dd194ad753f7e82c0a8fa12683910745))
+- **vscode:** surface compile() errors in Problems panel ([09eaaf3](https://github.com/jacarejs/core/commit/09eaaf3d98d59c6309616842c2bbaa74b0013462))
+- **core:** live props for mountIsland without remount ([4e5e66a](https://github.com/jacarejs/core/commit/4e5e66a91989f5b3b33a92f79f106d7594ec9668))
+- **vscode:** hover and go-to-def for @bag/key mesh addresses ([790d3ec](https://github.com/jacarejs/core/commit/790d3ec1ca5b8a3c34ca2e48756efdea659cf84a))
+
+### Fixed
+
+- **release:** stop syncing @jacare/ui to monorepo versions ([ce5e776](https://github.com/jacarejs/core/commit/ce5e77637d466788055cfa0c9cced20c155ee4ca))
+- **lab:** keep locale Select panel inside the viewport ([0fb1f0f](https://github.com/jacarejs/core/commit/0fb1f0ffb419c75951a1b9d276458690d1280e8f))
+- **lab:** stop i18n mobile overflow and cramped API rows ([508b673](https://github.com/jacarejs/core/commit/508b6735470df0ebaa782d5e36ed482976919ddf))
+- **vscode:** prefer pulse in signal snippet (#72) ([9c039a5](https://github.com/jacarejs/core/commit/9c039a59282c5c259aa900528342c0cf2bf292e0))
+- **core:** add createForm.dispose for field effects (#61) ([a6bec74](https://github.com/jacarejs/core/commit/a6bec7449075dd80cadde45312a43ae4659a665a))
+- **core:** make createForm handleSubmit safe when destructured (#62) ([220d7de](https://github.com/jacarejs/core/commit/220d7de5349ec99650f47461b904ce47a16651e7))
+- **core:** preserve number type in bindModel (#60) ([b1f5ac1](https://github.com/jacarejs/core/commit/b1f5ac11f51f171dcb641fd068df5f10c30289f8))
+- **compiler:** pass dotted component props eagerly for form fields ([59f3358](https://github.com/jacarejs/core/commit/59f33584d60f0a2d798ce66bdd9e79b778f22111))
+- **lab:** make browser playground load without esbuild/process ([eb2de23](https://github.com/jacarejs/core/commit/eb2de23f2037ac43652ed94064fb840e66bb89d3))
+- **devtools:** prune orphan pulse graph nodes on page change (#59) ([75b35aa](https://github.com/jacarejs/core/commit/75b35aac35c7736a65736758915a9e7219c8b5df))
+- **core:** add dispose() to computed/derive (#55) ([e8768d9](https://github.com/jacarejs/core/commit/e8768d94467fa1734319c02fb1224568b3acbdd0))
+- **ci:** bump VS Code extension past Marketplace versions ([e8921d8](https://github.com/jacarejs/core/commit/e8921d868cf68b67ba2e620d74dcb1ba98fefee6))
+
+### Changed
+
+- **lab:** polish topbar locale Select and pin it right ([639fb4e](https://github.com/jacarejs/core/commit/639fb4e176211e9b13d57c1cdc75658f7f60eef7))
+- **island:** match Jacaré .jcr frame layout on React Vue Angular hosts ([ba206f3](https://github.com/jacarejs/core/commit/ba206f302fe6ac2724a1227c13a0070eaa340abd))
+- **showcase:** drop route page-loader overlay ([3beab46](https://github.com/jacarejs/core/commit/3beab4605495f514164d7710edfbbd98c178de27))
+
+### Documentation
+
+- **lab:** add /ui overview with live @jacare/ui demos ([6fddc0f](https://github.com/jacarejs/core/commit/6fddc0fa75f03c34f6b21109dbf1dfba785f25d4))
+- link Jacaré UI component library ([78f07a4](https://github.com/jacarejs/core/commit/78f07a4cd882ada8e735e81f31d1ee4097bc8508))
+- bump documented test count to 383 ([6e333c0](https://github.com/jacarejs/core/commit/6e333c0a931fe3c23443ab4abde7dc2059d76ca5))
+- **chrome-devtools:** say four tabs to match the panel UI ([fe1e2ee](https://github.com/jacarejs/core/commit/fe1e2eed7a5a2d8102a44c89e3f08f49a3101c04))
+- sync package versions and test counts (#68–#70) ([03e679b](https://github.com/jacarejs/core/commit/03e679b3402134ec5ad73565f7aa3a3897c2a5e9))
+- **lab:** warn that playground preview is a local new Function sandbox (#65) ([8c6e3aa](https://github.com/jacarejs/core/commit/8c6e3aa6584c0c162cea441c58316b1b1417c350))
+- **api:** document DevTools/internal-ish exports (#64) ([66bbe00](https://github.com/jacarejs/core/commit/66bbe00f1b43f7ac35daa241829c9dc153f0db59))
+- **api:** make Pulse Mesh §3b the canonical Mesh guide ([1c7d166](https://github.com/jacarejs/core/commit/1c7d16634bf2a70067afd95ff9f2d12b982f6533))
+- **lab:** add Mesh 30s lesson on /bag with shared checkout screen ([4c2a73b](https://github.com/jacarejs/core/commit/4c2a73bdce32f7a8294f1662f8b171256183dd6b))
+
+### Maintenance
+
+- build Lab on every PR (#66) ([8286ae3](https://github.com/jacarejs/core/commit/8286ae331ce691fa30a8a72b064b639c4d207f9f))
+
 ## [0.1.15](https://github.com/jacarejs/core/compare/v0.1.14...v0.1.15) - 2026-07-28
 
 ### Added

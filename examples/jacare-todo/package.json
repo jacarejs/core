@@ -12,10 +12,10 @@
     "check": "node ../../packages/cli/dist/index.js check"
   },
   "dependencies": {
-    "@jacare/core": "0.1.15"
+    "@jacare/core": "0.1.16"
   },
   "devDependencies": {
-    "@jacare/cli": "0.1.15",
-    "@jacare/devtools": "0.1.15"
+    "@jacare/cli": "0.1.16",
+    "@jacare/devtools": "0.1.16"
   }
 }
