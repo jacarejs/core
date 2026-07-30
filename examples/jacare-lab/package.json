@@ -16,7 +16,7 @@
   "dependencies": {
     "@jacare/compiler": "0.1.15",
     "@jacare/core": "0.1.15",
-    "@jacare/ui": "0.1.2"
+    "@jacare/ui": "0.1.3"
   },
   "devDependencies": {
     "@jacare/cli": "0.1.15",

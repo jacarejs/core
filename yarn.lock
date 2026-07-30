@@ -555,10 +555,10 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.25.12.tgz#9bdad8176be7811ad148d1f8772359041f46c6c5"
   integrity sha512-alJC0uCZpTFrSL0CCDjcgleBXPnCrEAhTBILpeAp7M/OFgoqtAetfBzX0xM00MUsVVPpVjlPuMbREqnZCXaTnA==
 
-"@jacare/ui@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@jacare/ui/-/ui-0.1.2.tgz#7e024f0f227eccff9c62fa15c0865b12567a4638"
-  integrity sha512-5yqitgTmB+ghrnTcB/pMfxoNmGtl6ZPig4ku8NzLSfonfDYv2Z8DPLMOgXYXoVHAmGrhOS4murgbeTIqpiidww==
+"@jacare/ui@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@jacare/ui/-/ui-0.1.3.tgz#01cd698e3ee380b804ccb1ea3235115cd2c094fc"
+  integrity sha512-Xbsh/Ws8vNMyo1KQKH23kOVmXzTKc8kDRALBoH0TkVzBliJ6ileLhlNlKPcJyeW0L0kwNKejVctXIaSYQe5Dvg==
 
 "@jridgewell/gen-mapping@^0.3.12", "@jridgewell/gen-mapping@^0.3.5":
   version "0.3.13"

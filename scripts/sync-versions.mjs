@@ -33,6 +33,9 @@ const VSCODE_PKG = join(ROOT, 'packages/vscode-jacare/package.json')
 const VSCODE_PUBLISHER = 'heberalmeida'
 const VSCODE_NAME = 'jacare'
 
+/** Published outside this monorepo — never rewrite their versions on release. */
+const EXTERNAL_JACARE_PACKAGES = new Set(['@jacare/ui'])
+
 function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'))
 }
@@ -96,6 +99,7 @@ function setDependencyVersions(pkg, version) {
     const deps = pkg[field]
     if (!deps) continue
     for (const name of Object.keys(deps)) {
+      if (EXTERNAL_JACARE_PACKAGES.has(name)) continue
       if (name.startsWith('@jacare/') || name === 'create-jacare') {
         deps[name] = version
       }
