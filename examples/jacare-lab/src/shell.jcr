@@ -3,7 +3,14 @@ import Select from '@jacare/ui/Select'
 import { appHref, assetUrl } from './app-base.js'
 import { LESSONS, lessonTitle, lessonBlurb } from './topics.js'
 import { activeCode, hideCode } from './code-viewer.js'
-import { t, translate, setLocale, localeModel, LOCALE_OPTIONS, LOCALE_LABELS } from './i18n.js'
+import {
+  t,
+  translate,
+  setLocale,
+  localeModel,
+  LOCALE_OPTIONS_COMPACT,
+  LOCALE_LABELS,
+} from './i18n.js'
 import { devtoolsEnabled, toggleDevtools } from './lab-devtools.js'
 import CodeModal from './components/CodeModal.jcr'
 
@@ -69,15 +76,6 @@ export <view>
             ${menuLabel}
           </button>
           <p class="topbar-hint">${t('shell.topbarHint')}</p>
-          <div class="lab-locale">
-            <Select
-              :options=${LOCALE_OPTIONS}
-              :placeholder=${translate('shell.localeLabel')}
-              :searchable=${false}
-              bind-value=${localeModel}
-              on-change=${onLocaleChange}
-            />
-          </div>
           <button
             type="button"
             class="btn btn-outline topbar-devtools"
@@ -88,6 +86,15 @@ export <view>
           >
             ${devtoolsLabel}
           </button>
+          <div class="lab-locale" title=${translate('shell.localeLabel')}>
+            <Select
+              :options=${LOCALE_OPTIONS_COMPACT}
+              :placeholder=${translate('shell.localeLabel')}
+              :searchable=${false}
+              bind-value=${localeModel}
+              on-change=${onLocaleChange}
+            />
+          </div>
         </header>
         <main class="main" jacare-frame></main>
         <footer class="site-footer">

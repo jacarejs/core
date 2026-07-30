@@ -13,6 +13,13 @@ export const LOCALE_OPTIONS = Object.entries(LOCALE_LABELS).map(([value, label])
   label,
 }))
 
+/** Compact codes for the lab topbar Select. */
+export const LOCALE_OPTIONS_COMPACT = [
+  { value: 'en', label: 'EN' },
+  { value: 'pt-BR', label: 'PT' },
+  { value: 'es', label: 'ES' },
+]
+
 const FALLBACK_LOCALE = 'en'
 
 const i18n = createI18n({

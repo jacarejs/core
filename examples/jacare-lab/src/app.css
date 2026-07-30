@@ -169,14 +169,12 @@ body {
 
 .topbar-devtools {
   flex-shrink: 0;
-  font-size: 0.78rem;
-  padding: 0.35rem 0.75rem;
-}
-
-.lab-locale {
-  flex-shrink: 0;
+  min-height: 2rem;
+  height: 2rem;
   display: inline-flex;
   align-items: center;
+  font-size: 0.78rem;
+  padding: 0 0.75rem;
 }
 
 .lab-locale {
@@ -185,20 +183,70 @@ body {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  min-width: 9.5rem;
-  max-width: 12rem;
+  min-width: 0;
 }
 
 .lab-locale .jui-select {
-  width: 100%;
-  min-width: 9.5rem;
+  width: auto;
+  min-width: 0;
 }
 
-.lab-locale .jui-select__trigger {
-  min-height: 2.35rem;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.82rem;
+.lab-locale .jui-select .jui-select__trigger {
+  box-sizing: border-box;
+  min-height: 2rem !important;
+  height: 2rem !important;
+  gap: 0.3rem;
+  padding: 0 0.55rem 0 0.75rem !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--sand) !important;
+  background: white !important;
+  color: var(--canopy) !important;
+  font-size: 0.78rem !important;
   font-weight: 650;
+  line-height: 1;
+  box-shadow: none !important;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.lab-locale .jui-select .jui-select__trigger:hover {
+  border-color: color-mix(in srgb, var(--canopy) 28%, var(--sand)) !important;
+  background: color-mix(in srgb, white 82%, var(--mist)) !important;
+}
+
+.lab-locale .jui-select .jui-select__trigger:focus,
+.lab-locale .jui-select .jui-select__control[open] .jui-select__trigger {
+  border-color: color-mix(in srgb, var(--canopy) 42%, var(--sand)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lime) 26%, transparent) !important;
+}
+
+.lab-locale .jui-select__value {
+  gap: 0;
+}
+
+.lab-locale .jui-select__value-text {
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.lab-locale .jui-select .jui-select__chevron {
+  flex: 0 0 auto;
+  display: block;
+  width: 0.65rem !important;
+  height: 0.65rem !important;
+  overflow: hidden;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+  opacity: 0.7;
+  background-color: var(--canopy);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23000' d='M3.4 5.9a.85.85 0 0 1 1.2-.05L8 9.05l3.4-3.2a.85.85 0 1 1 1.15 1.25l-4 3.75a.85.85 0 0 1-1.15 0l-4-3.75a.85.85 0 0 1-.05-1.2z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23000' d='M3.4 5.9a.85.85 0 0 1 1.2-.05L8 9.05l3.4-3.2a.85.85 0 1 1 1.15 1.25l-4 3.75a.85.85 0 0 1-1.15 0l-4-3.75a.85.85 0 0 1-.05-1.2z'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
 .lab-locale .jui-select__control[open] {
@@ -207,11 +255,25 @@ body {
 
 .lab-locale .jui-select__panel {
   z-index: 70;
+  left: auto;
+  right: 0;
+  min-width: 7.5rem;
+  padding: 0.35rem;
+  border-radius: 0.85rem;
 }
 
 .lab-locale .jui-select__list {
   max-height: none;
+  margin-top: 0;
   overflow: visible;
+}
+
+.lab-locale .jui-select__option {
+  min-height: 2rem !important;
+  padding: 0.35rem 0.65rem !important;
+  border-radius: 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 650;
 }
 
 .visually-hidden {
@@ -1255,6 +1317,14 @@ body {
 
   .topbar-hint {
     display: none;
+  }
+
+  .topbar-devtools {
+    margin-left: auto;
+  }
+
+  .lab-locale {
+    margin-left: 0;
   }
 
   .helper-row {
