@@ -126,6 +126,10 @@ function syncNpmVersion(version) {
     setDependencyVersions(pkg, version)
     writeJson(path, pkg)
   }
+
+  const vscodePkg = readJson(VSCODE_PKG)
+  setDependencyVersions(vscodePkg, version)
+  writeJson(VSCODE_PKG, vscodePkg)
 }
 
 function syncVscodeVersion(version) {

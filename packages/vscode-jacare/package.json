@@ -128,7 +128,7 @@
     "esbuild": "^0.25.0"
   },
   "devDependencies": {
-    "@jacare/compiler": "0.1.15",
+    "@jacare/compiler": "0.1.16",
     "@types/node": "^22.10.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.2.1",
