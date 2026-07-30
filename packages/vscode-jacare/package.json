@@ -2,7 +2,7 @@
   "name": "jacare",
   "displayName": "Jacaré",
   "description": "Syntax highlighting, Mesh hover, compile diagnostics, snippets, and icons for Jacaré .jcr files",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "publisher": "heberalmeida",
   "author": {
     "name": "Heber Almeida"
