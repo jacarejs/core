@@ -255,9 +255,11 @@ body {
 
 .lab-locale .jui-select__panel {
   z-index: 70;
-  left: auto;
-  right: 0;
-  min-width: 7.5rem;
+  left: auto !important;
+  right: 0 !important;
+  width: max-content;
+  min-width: 6.5rem;
+  max-width: min(12rem, calc(100vw - 2rem));
   padding: 0.35rem;
   border-radius: 0.85rem;
 }
