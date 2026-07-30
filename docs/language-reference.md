@@ -6,7 +6,7 @@
 
 Complete reference for **reserved words**, **bindings**, **`<view>` / `<style>` / `<contract>`**, **control flow**, and **CLI** commands (`create` / `dev` / `build` / `check`).
 
-Companion docs: [api.md](api.md) (API walkthrough) · [syntax.md](syntax.md) (cheatsheet) · [Jacaré Lab](https://jacarejs.github.io/core/lab/) (live demos) · [Jacaré Studio](https://jacarejs.github.io/core/studio/) (shareable playground) · Lab lesson [`/language`](https://jacarejs.github.io/core/lab/#/language)
+Companion docs: [api.md](api.md) (API walkthrough) · [syntax.md](syntax.md) (cheatsheet) · [Jacaré Lab](https://jacarejs.github.io/core/lab/) (live demos) · [Jacaré Studio](https://jacarejs.github.io/core/studio/) (shareable playground) · [Jacaré UI](https://jacarejs.github.io/ui/) (`@jacare/ui` components) · Lab lesson [`/language`](https://jacarejs.github.io/core/lab/#/language)
 
 ---
 

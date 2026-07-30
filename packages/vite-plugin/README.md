@@ -341,8 +341,8 @@ export default { base: '/my-repo/' }
 - [Repository](https://github.com/jacarejs/core)
 - [Example app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
 - [Jacaré Lab](https://jacarejs.github.io/core/lab/)
-- Related: [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)
-- Related: [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli)
+- [Jacaré UI](https://jacarejs.github.io/ui/) — `@jacare/ui` component library
+- Related: [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/ui](https://www.npmjs.com/package/@jacare/ui)
 
 ## License
 

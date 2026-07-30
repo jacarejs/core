@@ -440,9 +440,10 @@ Run `npm install` in the project directory after `jacare new`.
 - [Repository](https://github.com/jacarejs/core)
 - [Live demo](https://jacarejs.github.io/core/todo/)
 - [Jacaré Lab](https://jacarejs.github.io/core/lab/)
+- [Jacaré UI](https://jacarejs.github.io/ui/) — `@jacare/ui` component library
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Example todo app](https://github.com/jacarejs/core/tree/main/examples/jacare-todo)
-- Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta)
+- Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta) · [@jacare/ui](https://www.npmjs.com/package/@jacare/ui)
 
 ## License
 

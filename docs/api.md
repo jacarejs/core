@@ -8,6 +8,7 @@
   <a href="https://www.npmjs.com/package/@jacare/core"><img src="https://img.shields.io/npm/v/@jacare/core.svg?label=%40jacare%2Fcore&color=189030" alt="npm" /></a>
   <a href="https://github.com/jacarejs/core/actions/workflows/ci.yml"><img src="https://github.com/jacarejs/core/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://jacarejs.github.io/core/lab/"><img src="https://img.shields.io/badge/demo-Lab-78c018.svg" alt="Lab" /></a>
+  <a href="https://jacarejs.github.io/ui/"><img src="https://img.shields.io/badge/docs-Jacaré%20UI-78c018.svg" alt="Jacaré UI" /></a>
   <a href="https://github.com/jacarejs/core/blob/main/LICENSE"><img src="https://img.shields.io/github/license/jacarejs/core.svg?color=189030" alt="MIT" /></a>
 </p>
 
@@ -20,18 +21,21 @@ For syntax details see [syntax.md](syntax.md). For the **full language reference
 ## Tutorial — Jacaré Lab
 
 > **Featured interactive tutorial.** Prefer learning by running demos? Open **[Jacaré Lab](https://jacarejs.github.io/core/lab/)** — one lesson per API topic, each with a live example and a **View code** modal.  
-> Want a live shareable editor? Open **[Jacaré Studio](https://jacarejs.github.io/core/studio/)** — type `.jcr`, compile in the browser, share a link (`yarn studio:dev` → http://localhost:3005).
+> Want a live shareable editor? Open **[Jacaré Studio](https://jacarejs.github.io/core/studio/)** — type `.jcr`, compile in the browser, share a link (`yarn studio:dev` → http://localhost:3005).  
+> Building product UI? Use **[Jacaré UI](https://jacarejs.github.io/ui/)** (`@jacare/ui`) — accessible, themeable components powered by signals.
 
 | | |
 |---|---|
 | **Live** | [https://jacarejs.github.io/core/lab/](https://jacarejs.github.io/core/lab/) |
 | **Studio** | [https://jacarejs.github.io/core/studio/](https://jacarejs.github.io/core/studio/) · [`examples/jacare-studio`](../examples/jacare-studio) |
+| **Jacaré UI** | [https://jacarejs.github.io/ui/](https://jacarejs.github.io/ui/) · [`@jacare/ui`](https://www.npmjs.com/package/@jacare/ui) · [github.com/jacarejs/ui](https://github.com/jacarejs/ui) |
 | **Local** | `yarn lab:dev` → http://localhost:3003 |
 | **Source** | [`examples/jacare-lab`](../examples/jacare-lab) |
 | **Matches this doc** | Reactivity → tooling (§3–§19), including contracts, forms, nav, cookbook, and [language reference](language-reference.md) |
 
 [![Open Jacaré Lab](https://img.shields.io/badge/Open%20Jacaré%20Lab-interactive%20tutorial-78c018?style=for-the-badge)](https://jacarejs.github.io/core/lab/)
 [![Open Jacaré Studio](https://img.shields.io/badge/Open%20Jacaré%20Studio-live%20playground-78c018?style=for-the-badge)](https://jacarejs.github.io/core/studio/)
+[![Open Jacaré UI](https://img.shields.io/badge/Open%20Jacaré%20UI-component%20library-78c018?style=for-the-badge)](https://jacarejs.github.io/ui/)
 
 **Language deep-dive:** [language-reference.md](language-reference.md) · Lab [`/language`](https://jacarejs.github.io/core/lab/#/language) (reserved words, all binds, view/style/contract, CLI).
 

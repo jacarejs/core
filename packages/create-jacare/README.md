@@ -70,6 +70,7 @@ npm run preview
 - [Repository](https://github.com/jacarejs/core)
 - [API reference](https://github.com/jacarejs/core/blob/main/docs/api.md)
 - [Jacaré Lab](https://jacarejs.github.io/core/lab/)
+- [Jacaré UI](https://jacarejs.github.io/ui/) — `@jacare/ui` component library
 - [Syntax guide](https://github.com/jacarejs/core/blob/main/docs/syntax.md)
 - [Templates](https://github.com/jacarejs/core/tree/main/templates)
 - Related: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin)

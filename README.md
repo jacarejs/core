@@ -28,6 +28,7 @@
   <a href="https://jacarejs.github.io/core/bmi/"><img src="https://img.shields.io/badge/demo-Scale%20BMI-78c018.svg" alt="BMI demo" /></a>
   <a href="https://jacarejs.github.io/core/lab/"><img src="https://img.shields.io/badge/demo-Lab%20API%20tutorial-78c018.svg" alt="Lab demo" /></a>
   <a href="https://jacarejs.github.io/core/studio/"><img src="https://img.shields.io/badge/demo-Studio-78c018.svg" alt="Studio demo" /></a>
+  <a href="https://jacarejs.github.io/ui/"><img src="https://img.shields.io/badge/docs-Jacaré%20UI-78c018.svg" alt="Jacaré UI" /></a>
 </p>
 
 **Jacaré** is a front-end framework for building fast, reactive web apps with plain JavaScript — no Virtual DOM and no component re-renders — plain JavaScript modules with a small `.jcr` template surface.
@@ -54,6 +55,7 @@ Repository: [github.com/jacarejs/core](https://github.com/jacarejs/core)
 |-------|------|
 | **Tutorial (Jacaré Lab)** | [Live](https://jacarejs.github.io/core/lab/) · [`examples/jacare-lab`](examples/jacare-lab) · `yarn lab:dev` |
 | **Studio (playground)** | [Live](https://jacarejs.github.io/core/studio/) · [`examples/jacare-studio`](examples/jacare-studio) · `yarn studio:dev` |
+| **Jacaré UI** | [Docs](https://jacarejs.github.io/ui/) · [`@jacare/ui`](https://www.npmjs.com/package/@jacare/ui) · [github.com/jacarejs/ui](https://github.com/jacarejs/ui) — accessible, themeable components |
 | **Island (embed)** | [Live](https://jacarejs.github.io/core/island/) · [`examples/jacare-island`](examples/jacare-island) · `yarn island:dev` · [docs/island.md](docs/island.md) |
 | **Island × React** | [Live](https://jacarejs.github.io/core/island-react/) · [`examples/jacare-island-react`](examples/jacare-island-react) · `yarn island-react:dev` |
 | **Island × Vue** | [Live](https://jacarejs.github.io/core/island-vue/) · [`examples/jacare-island-vue`](examples/jacare-island-vue) · `yarn island-vue:dev` |
@@ -183,10 +185,11 @@ Jacaré asks a different question: **why re-render anything when only one text n
 | Tooling | `@jacare/cli`, `@jacare/vite-plugin` | `jacare dev`, `jacare build`, HMR |
 | DevTools | `@jacare/devtools` | Pulse Graph — signals, Mesh (`@bag/key`), Scope |
 | Scaffolding | `create-jacare` | `npm create jacare@latest` |
+| UI kit | [`@jacare/ui`](https://www.npmjs.com/package/@jacare/ui) | Accessible, themeable components — [docs](https://jacarejs.github.io/ui/) |
 
-Live demos: [**Lab (tutorial)**](https://jacarejs.github.io/core/lab/) · [**Studio**](https://jacarejs.github.io/core/studio/) · [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/)
+Live demos: [**Lab (tutorial)**](https://jacarejs.github.io/core/lab/) · [**Studio**](https://jacarejs.github.io/core/studio/) · [Todo app](https://jacarejs.github.io/core/todo/) · [Showcase](https://jacarejs.github.io/core/showcase/) · [Scale BMI](https://jacarejs.github.io/core/bmi/) · [**Jacaré UI**](https://jacarejs.github.io/ui/)
 
-Full docs: [API](docs/api.md) · [Pulse bags](docs/api.md#3b-pulse-bags-shared-state) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Cookbook](docs/api.md#13b-cookbook--if--for--events--props--lifecycle)
+Full docs: [API](docs/api.md) · [Jacaré UI](https://jacarejs.github.io/ui/) · [Pulse bags](docs/api.md#3b-pulse-bags-shared-state) · [Events](docs/api.md#6-events-on---) · [`#if`](docs/api.md#7-control-flow--if) · [`#for`](docs/api.md#8-control-flow--for) · [Cookbook](docs/api.md#13b-cookbook--if--for--events--props--lifecycle)
 
 ## Pulse Mesh — shared state (native)
 
@@ -642,13 +645,14 @@ npm install @jacare/core
 npm install -D @jacare/cli @jacare/vite-plugin vite
 ```
 
-See also: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta)
+See also: [@jacare/core](https://www.npmjs.com/package/@jacare/core) · [@jacare/compiler](https://www.npmjs.com/package/@jacare/compiler) · [@jacare/vite-plugin](https://www.npmjs.com/package/@jacare/vite-plugin) · [@jacare/cli](https://www.npmjs.com/package/@jacare/cli) · [@jacare/devtools](https://www.npmjs.com/package/@jacare/devtools) · [@jacare/meta](https://www.npmjs.com/package/@jacare/meta) · [@jacare/ui](https://www.npmjs.com/package/@jacare/ui)
 
 ## Live demos
 
 | Demo | Badges | URL | What to explore |
 |------|--------|-----|-----------------|
 | **Lab (tutorial)** | [![demo](https://img.shields.io/badge/tutorial-featured-78c018.svg)](https://jacarejs.github.io/core/lab/) | [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) | **Featured** — full API walkthrough with View code modals |
+| **Jacaré UI** | [![docs](https://img.shields.io/badge/docs-live-78c018.svg)](https://jacarejs.github.io/ui/) | [jacarejs.github.io/ui](https://jacarejs.github.io/ui/) | Official component library — accessible, themeable, signal-powered |
 | **Studio** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/studio/) | [jacarejs.github.io/core/studio](https://jacarejs.github.io/core/studio/) | Live `.jcr` editor — compile, mount, share URL |
 | **Todo app** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/todo/) | [jacarejs.github.io/core/todo](https://jacarejs.github.io/core/todo/) | Tasks, forms, keyed lists, tutorial routes |
 | **Showcase** | [![demo](https://img.shields.io/badge/demo-live-78c018.svg)](https://jacarejs.github.io/core/showcase/) | [jacarejs.github.io/core/showcase](https://jacarejs.github.io/core/showcase/) | CPW, `style---`, components, slots, cart |
