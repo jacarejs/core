@@ -1,6 +1,7 @@
 import { pulse } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { t } from '../i18n.js'
 import {
   scaffoldCode,
   appJcrCode,
@@ -17,36 +18,36 @@ function increment() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §1</p>
-      <h1 class="page-title">Quick start</h1>
-      <p class="page-lead">Scaffold a project, write a tiny .jcr counter, boot it from JavaScript, and drop it into an HTML shell.</p>
+      <p class="page-kicker">${t('quickStart.kicker')}</p>
+      <h1 class="page-title">${t('quickStart.title')}</h1>
+      <p class="page-lead">${t('quickStart.lead')}</p>
     </header>
 
-    <Tip :text=${'The Vite plugin compiles .jcr files on import. No virtual DOM — only the nodes bound to signals re-run when data changes.'} />
+    <Tip :text=${t('quickStart.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Step 1 — Scaffold a project'} :lead=${'Use the CLI, create-jacare, or the monorepo jacare new command — then install and start the dev server.'} :code=${scaffoldCode}>
+      <Demo :title=${t('quickStart.scaffold.title')} :lead=${t('quickStart.scaffold.lead')} :code=${scaffoldCode}>
         <div class="stack">
-          <p class="muted">create-jacare and CLI scaffolds default to <code>http://localhost:3000</code>.</p>
+          <p class="muted">${t('quickStart.scaffold.note')} <code>http://localhost:3000</code>.</p>
           <pre class="log">${scaffoldCode}</pre>
         </div>
       </Demo>
 
-      <Demo :title=${'Step 2 — Create src/app.jcr'} :lead=${'A signal, an update handler, and an export view block — the smallest useful Jacaré app.'} :code=${appJcrCode}>
+      <Demo :title=${t('quickStart.app.title')} :lead=${t('quickStart.app.lead')} :code=${appJcrCode}>
         <div class="stack">
           <div class="row">
             <span class="metric">${count}</span>
             <button type="button" class="btn" on-click=${increment}>+1</button>
           </div>
-          <p class="muted">This counter is the live version of the View code sample.</p>
+          <p class="muted">${t('quickStart.app.note')}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'Step 3 — Boot in src/boot.js'} :lead=${'Import the compiled mount export, attach it to #app, and dispose on HMR.'} :code=${bootJsCode}>
+      <Demo :title=${t('quickStart.boot.title')} :lead=${t('quickStart.boot.lead')} :code=${bootJsCode}>
         <pre class="log">${bootJsCode}</pre>
       </Demo>
 
-      <Demo :title=${'Step 4 — HTML shell (index.html)'} :lead=${'A plain HTML page loads boot.js as a module. The Vite plugin handles .jcr compilation from there.'} :code=${htmlShellCode}>
+      <Demo :title=${t('quickStart.htmlShell.title')} :lead=${t('quickStart.htmlShell.lead')} :code=${htmlShellCode}>
         <pre class="log">${htmlShellCode}</pre>
       </Demo>
     </div>

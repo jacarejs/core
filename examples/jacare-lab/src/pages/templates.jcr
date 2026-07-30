@@ -1,11 +1,14 @@
 import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { t, translate } from '../i18n.js'
 import { textBindingCode, attrCode, progressCode, multiAttrCode, trendCode } from '../snippets/templates.js'
 
 const name = pulse('Jacaré')
 const bareSyntax = '${name}'
 const mixedSyntax = 'Hello, ${name()}!'
+const mixedHello = derive(() => translate('templates.demo.text.hello', { name: name() }))
+const staticTitle = translate('templates.demo.attr.staticTitle')
 
 const avatarKind = pulse('leaf')
 const avatarSrc = derive(() =>
@@ -34,7 +37,9 @@ function bump(delta) {
 
 const seats = pulse(3)
 const maxSeats = pulse(5)
-const seatsLabel = derive(() => seats() + ' / ' + maxSeats() + ' seats booked')
+const seatsLabel = derive(() =>
+  translate('templates.demo.multiAttr.seats', { booked: seats(), max: maxSeats() }),
+)
 const atCapacity = derive(() => seats() >= maxSeats())
 
 function bookSeat() {
@@ -49,52 +54,58 @@ function nudge(delta) {
   price.update((n) => Math.round((n + delta) * 100) / 100)
 }
 
-const trendLabel = derive(() => (price() > previous() ? '▲ Up' : price() < previous() ? '▼ Down' : '– Flat'))
+const trendLabel = derive(() =>
+  price() > previous()
+    ? translate('templates.demo.trend.up')
+    : price() < previous()
+      ? translate('templates.demo.trend.down')
+      : translate('templates.demo.trend.flat'),
+)
 
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §4</p>
-      <h1 class="page-title">Templates</h1>
-      <p class="page-lead">Templates compile at build time — the compiler emits direct DOM calls and binding hooks, never a virtual tree.</p>
+      <p class="page-kicker">${t('templates.kicker')}</p>
+      <h1 class="page-title">${t('templates.title')}</h1>
+      <p class="page-lead">${t('templates.lead')}</p>
     </header>
 
-    <Tip :text=${'A bare ${signal} in text compiles to a text binding. As soon as you mix it with other text or call it, the compiler falls back to an effect — always write ${name()} in mixed text.'} />
+    <Tip :text=${t('templates.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Bare vs mixed text'} :lead=${'Bare ${name} compiles to a text binding. Mix static text with a signal and you must call it — Hello, ${name()}!'} :code=${textBindingCode}>
+      <Demo :title=${t('templates.demo.text.title')} :lead=${t('templates.demo.text.lead')} :code=${textBindingCode}>
         <div class="stack binding-compare">
-          <input class="input" bind-value=${name} placeholder="Type a name" />
+          <input class="input" bind-value=${name} :placeholder=${translate('templates.demo.text.placeholder')} />
           <div class="binding-row">
-            <span class="binding-label">Bare</span>
+            <span class="binding-label">${t('templates.demo.text.bare')}</span>
             <code class="binding-syntax">${bareSyntax}</code>
             <span class="binding-arrow" aria-hidden="true">→</span>
             <strong class="binding-value">${name}</strong>
           </div>
           <div class="binding-row">
-            <span class="binding-label">Mixed</span>
+            <span class="binding-label">${t('templates.demo.text.mixed')}</span>
             <code class="binding-syntax">${mixedSyntax}</code>
             <span class="binding-arrow" aria-hidden="true">→</span>
-            <span class="binding-value">Hello, ${name()}!</span>
+            <span class="binding-value">${mixedHello}</span>
           </div>
         </div>
       </Demo>
 
-      <Demo :title=${'Static attribute vs :src / bind-href'} :lead=${'A plain string attribute never changes; :src and bind-href track a signal.'} :code=${attrCode}>
+      <Demo :title=${t('templates.demo.attr.title')} :lead=${t('templates.demo.attr.lead')} :code=${attrCode}>
         <div class="stack">
           <div class="row">
-            <span class="badge" title="This title never changes">Static attribute</span>
-            <img :src=${avatarSrc} width="32" height="32" alt="Avatar" />
-            <button type="button" class="btn btn-outline" on-click=${swapAvatar}>Swap :src</button>
+            <span class="badge" title=${staticTitle}>${t('templates.demo.attr.staticBadge')}</span>
+            <img :src=${avatarSrc} width="32" height="32" :alt=${translate('templates.demo.attr.avatarAlt')} />
+            <button type="button" class="btn btn-outline" on-click=${swapAvatar}>${t('templates.demo.attr.swapSrc')}</button>
           </div>
           <div class="row">
-            <a class="text-link" bind-href=${linkLabel}>Reactive link → ${linkLabel}</a>
-            <button type="button" class="btn btn-outline" on-click=${swapLink}>Swap bind-href</button>
+            <a class="text-link" bind-href=${linkLabel}>${t('templates.demo.attr.reactiveLink')} → ${linkLabel}</a>
+            <button type="button" class="btn btn-outline" on-click=${swapLink}>${t('templates.demo.attr.swapHref')}</button>
           </div>
         </div>
       </Demo>
 
-      <Demo :title=${'Reactive CSS variable: style---pct'} :lead=${'style---name binds a signal straight to a CSS custom property.'} :code=${progressCode}>
+      <Demo :title=${t('templates.demo.progress.title')} :lead=${t('templates.demo.progress.lead')} :code=${progressCode}>
         <div class="stack">
           <div class="progress">
             <div class="progress-fill" style---pct=${pct}></div>
@@ -107,7 +118,7 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'Multiple reactive attributes on one element'} :lead=${':disabled and :title both track derived signals on the exact same button.'} :code=${multiAttrCode}>
+      <Demo :title=${t('templates.demo.multiAttr.title')} :lead=${t('templates.demo.multiAttr.lead')} :code=${multiAttrCode}>
         <div class="stack">
           <p class="muted">${seatsLabel}</p>
           <button
@@ -117,12 +128,12 @@ export <view>
             :title=${seatsLabel}
             on-click=${bookSeat}
           >
-            Book a seat
+            ${t('templates.demo.multiAttr.book')}
           </button>
         </div>
       </Demo>
 
-      <Demo :title=${'Conditional text + class from expressions'} :lead=${'trendLabel is a ternary inside derive(); the badge classes come from inline expressions, not bare signals.'} :code=${trendCode}>
+      <Demo :title=${t('templates.demo.trend.title')} :lead=${t('templates.demo.trend.lead')} :code=${trendCode}>
         <div class="stack">
           <p class="metric">${price}</p>
           <div class="row">

@@ -1,6 +1,7 @@
 import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { t, translate } from '../i18n.js'
 import {
   clickCode,
   forCode,
@@ -23,9 +24,9 @@ function handleClick() {
 }
 
 const fruits = pulse([
-  { id: 'a', label: 'Apple', picks: 0 },
-  { id: 'b', label: 'Banana', picks: 0 },
-  { id: 'c', label: 'Cherry', picks: 0 },
+  { id: 'apple', picks: 0 },
+  { id: 'banana', picks: 0 },
+  { id: 'cherry', picks: 0 },
 ])
 
 function pick(id) {
@@ -54,9 +55,13 @@ function onNoteChange(event) {
 }
 
 const focused = pulse(false)
-const focusLabel = derive(() => (focused() ? 'focused' : 'blurred'))
+const focusLabel = derive(() =>
+  focused() ? translate('events.demo.focus.focused') : translate('events.demo.focus.blurred'),
+)
 const focusLog = pulse([])
-const focusLogText = derive(() => focusLog().join(' · ') || 'none yet')
+const focusLogText = derive(
+  () => focusLog().join(' · ') || translate('events.demo.focus.empty'),
+)
 
 function onFocus() {
   focused.set(true)
@@ -69,12 +74,17 @@ function onBlur() {
 }
 
 const formName = pulse('')
-const formMsg = pulse('Waiting for submit…')
+const formResult = pulse({ key: 'events.demo.submit.waiting' })
+const formMsg = derive(() => translate(formResult().key, formResult().params))
 
 function onFormSubmit(event) {
   event.preventDefault()
   const name = formName().trim()
-  formMsg.set(name ? 'Saved "' + name + '" (no page reload)' : 'Name is required')
+  formResult.set(
+    name
+      ? { key: 'events.demo.submit.saved', params: { name } }
+      : { key: 'events.demo.submit.required' },
+  )
 }
 
 const padX = pulse(50)
@@ -82,7 +92,9 @@ const padY = pulse(50)
 const padXPct = derive(() => padX() + '%')
 const padYPct = derive(() => padY() + '%')
 const pointerDown = pulse(false)
-const pointerLabel = derive(() => (pointerDown() ? 'pressing' : 'idle'))
+const pointerLabel = derive(() =>
+  pointerDown() ? translate('events.demo.pad.pressing') : translate('events.demo.pad.idle'),
+)
 
 function onPadMove(event) {
   const rect = event.currentTarget.getBoundingClientRect()
@@ -121,7 +133,11 @@ function onLinkClick(event) {
 
 const hovering = pulse(false)
 const hovers = pulse(0)
-const hoveringLabel = derive(() => (hovering() ? 'yes' : 'no'))
+const hoverHint = derive(() =>
+  translate('events.demo.hover.hint', {
+    state: hovering() ? translate('events.demo.hover.yes') : translate('events.demo.hover.no'),
+  }),
+)
 
 function onCardEnter() {
   hovering.set(true)
@@ -141,73 +157,73 @@ function onDoubleClick() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §6</p>
-      <h1 class="page-title">Events</h1>
-      <p class="page-lead">on-* and @* both wire a real addEventListener with automatic cleanup on unmount. Any DOM event name works.</p>
+      <p class="page-kicker">${t('events.kicker')}</p>
+      <h1 class="page-title">${t('events.title')}</h1>
+      <p class="page-lead">${t('events.lead')}</p>
     </header>
 
-    <Tip :text=${'Prefer named handlers for readability. Inline arrows are great inside loops when you need to capture the current item. For text fields, prefer bind-value — use on-input / on-change when you need the raw event.'} />
+    <Tip :text=${t('events.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Named handler vs @click'} :lead=${'on-click and @click compile to the exact same addEventListener call.'} :code=${clickCode}>
+      <Demo :title=${t('events.demo.click.title')} :lead=${t('events.demo.click.lead')} :code=${clickCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn" on-click=${handleClick}>on-click (named)</button>
-            <button type="button" class="btn btn-outline" @click=${() => clicks.update((n) => n + 1)}>@click (inline)</button>
+            <button type="button" class="btn" on-click=${handleClick}>${t('events.demo.click.named')}</button>
+            <button type="button" class="btn btn-outline" @click=${() => clicks.update((n) => n + 1)}>${t('events.demo.click.inline')}</button>
           </div>
-          <p class="muted">Clicks: ${clicks}</p>
+          <p class="muted">${t('events.demo.click.clicks')}: ${clicks}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'Inline arrow inside a loop'} :lead=${'Each row needs its own handler bound to that specific fruit.id.'} :code=${forCode}>
+      <Demo :title=${t('events.demo.loop.title')} :lead=${t('events.demo.loop.lead')} :code=${forCode}>
         <ul class="list">
           #for fruits() as fruit (fruit.id)
             <li class="list-item">
-              <span class="item-label">${fruit.label} · ${fruit.picks}</span>
-              <button type="button" class="btn btn-outline" on-click=${() => pick(fruit.id)}>Pick</button>
+              <span class="item-label">${t('events.demo.loop.fruits.' + fruit.id)} · ${fruit.picks}</span>
+              <button type="button" class="btn btn-outline" on-click=${() => pick(fruit.id)}>${t('events.demo.loop.pick')}</button>
             </li>
           #end
         </ul>
       </Demo>
 
-      <Demo :title=${'on-keydown: submit on Enter'} :lead=${'A plain keyboard handler — no special form syntax required.'} :code=${keydownCode}>
+      <Demo :title=${t('events.demo.keydown.title')} :lead=${t('events.demo.keydown.lead')} :code=${keydownCode}>
         <div class="stack">
-          <input class="input" bind-value=${searchDraft} placeholder="Type and press Enter" on-keydown=${onSearchKeydown} />
-          <p class="muted">Submitted: ${submittedSearch}</p>
+          <input class="input" bind-value=${searchDraft} :placeholder=${translate('events.demo.keydown.placeholder')} on-keydown=${onSearchKeydown} />
+          <p class="muted">${t('events.demo.keydown.submitted')}: ${submittedSearch}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'on-input vs on-change'} :lead=${'input fires on every keystroke; change fires when the value is committed (blur / Enter on text fields).'} :code=${inputChangeCode}>
+      <Demo :title=${t('events.demo.inputChange.title')} :lead=${t('events.demo.inputChange.lead')} :code=${inputChangeCode}>
         <div class="stack">
           <input
             class="input"
             bind-value=${note}
-            placeholder="Type, then blur or press Enter"
+            :placeholder=${translate('events.demo.inputChange.placeholder')}
             on-input=${onNoteInput}
             on-change=${onNoteChange}
           />
-          <p class="muted">on-input (live): ${noteLive}</p>
-          <p class="muted">on-change (committed): ${noteCommitted}</p>
+          <p class="muted">${t('events.demo.inputChange.live')}: ${noteLive}</p>
+          <p class="muted">${t('events.demo.inputChange.committed')}: ${noteCommitted}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'on-focus / on-blur'} :lead=${'Track focus transitions with the same listener pattern as click.'} :code=${focusBlurCode}>
+      <Demo :title=${t('events.demo.focus.title')} :lead=${t('events.demo.focus.lead')} :code=${focusBlurCode}>
         <div class="stack">
-          <input class="input" placeholder="Click in, then click away" on-focus=${onFocus} on-blur=${onBlur} />
-          <p class="muted">State: ${focusLabel}</p>
-          <p class="muted">Log: ${focusLogText}</p>
+          <input class="input" :placeholder=${translate('events.demo.focus.placeholder')} on-focus=${onFocus} on-blur=${onBlur} />
+          <p class="muted">${t('events.demo.focus.state')}: ${focusLabel}</p>
+          <p class="muted">${t('events.demo.focus.log')}: ${focusLogText}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'on-submit + preventDefault'} :lead=${'Stop the browser from reloading the page, then handle the values yourself.'} :code=${submitCode}>
+      <Demo :title=${t('events.demo.submit.title')} :lead=${t('events.demo.submit.lead')} :code=${submitCode}>
         <form class="stack" on-submit=${onFormSubmit}>
-          <input class="input" bind-value=${formName} placeholder="Your name" />
-          <button type="submit" class="btn">Submit</button>
+          <input class="input" bind-value=${formName} :placeholder=${translate('events.demo.submit.placeholder')} />
+          <button type="submit" class="btn">${t('events.demo.submit.submit')}</button>
           <p class="muted">${formMsg}</p>
         </form>
       </Demo>
 
-      <Demo :title=${'Pointer pad'} :lead=${'on-pointermove drives CSS variables; down / up / leave track press state.'} :code=${padCode}>
+      <Demo :title=${t('events.demo.pad.title')} :lead=${t('events.demo.pad.lead')} :code=${padCode}>
         <div class="stack">
           <div
             class="pad"
@@ -222,48 +238,48 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'stopPropagation: nested buttons'} :lead=${'The inner button stops the click from also firing the card handler.'} :code=${stopCode}>
+      <Demo :title=${t('events.demo.stop.title')} :lead=${t('events.demo.stop.lead')} :code=${stopCode}>
         <div class="stack">
           <article class="card" on-click=${onOuterClick}>
-            <p class="muted">Click anywhere in this card.</p>
-            <button type="button" class="btn" on-click=${onInnerClick}>Inner button (stops propagation)</button>
+            <p class="muted">${t('events.demo.stop.cardHint')}</p>
+            <button type="button" class="btn" on-click=${onInnerClick}>${t('events.demo.stop.inner')}</button>
           </article>
-          <p class="muted">outer: ${outerClicks} · inner: ${innerClicks}</p>
+          <p class="muted">${t('events.demo.stop.outerCount')}: ${outerClicks} · ${t('events.demo.stop.innerCount')}: ${innerClicks}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'preventDefault on a link'} :lead=${'Block navigation and run your own logic instead.'} :code=${preventLinkCode}>
+      <Demo :title=${t('events.demo.preventLink.title')} :lead=${t('events.demo.preventLink.lead')} :code=${preventLinkCode}>
         <div class="stack">
           <a class="btn btn-outline" href="https://example.com" on-click=${onLinkClick}>
-            External link (blocked)
+            ${t('events.demo.preventLink.link')}
           </a>
-          <p class="muted">preventDefault calls: ${linkBlocked}</p>
+          <p class="muted">${t('events.demo.preventLink.calls')}: ${linkBlocked}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'on-mouseenter / on-mouseleave'} :lead=${'Hover tracking with the same cleanup rules as every other listener.'} :code=${hoverCode}>
+      <Demo :title=${t('events.demo.hover.title')} :lead=${t('events.demo.hover.lead')} :code=${hoverCode}>
         <div class="stack">
           <article class="card" on-mouseenter=${onCardEnter} on-mouseleave=${onCardLeave}>
-            <p class="muted">Hover this card — hovering: ${hoveringLabel}</p>
+            <p class="muted">${hoverHint}</p>
           </article>
-          <p class="muted">Times entered: ${hovers}</p>
+          <p class="muted">${t('events.demo.hover.entered')}: ${hovers}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'on-dblclick'} :lead=${'Any DOM event name works — including dblclick.'} :code=${dblClickCode}>
+      <Demo :title=${t('events.demo.dblclick.title')} :lead=${t('events.demo.dblclick.lead')} :code=${dblClickCode}>
         <div class="stack">
-          <button type="button" class="btn" on-dblclick=${onDoubleClick}>Double-click me</button>
-          <p class="muted">dblclick count: ${doubles}</p>
+          <button type="button" class="btn" on-dblclick=${onDoubleClick}>${t('events.demo.dblclick.button')}</button>
+          <p class="muted">${t('events.demo.dblclick.count')}: ${doubles}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'<debug>: event state'} :lead=${'Inspect reactive state after clicks — use copy to grab the JSON.'} :code=${debugEventsCode}>
+      <Demo :title=${t('events.demo.debug.title')} :lead=${t('events.demo.debug.lead')} :code=${debugEventsCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn" on-click=${handleClick}>Click</button>
-            <button type="button" class="btn btn-outline" on-click=${() => pick('a')}>Pick apple</button>
+            <button type="button" class="btn" on-click=${handleClick}>${t('events.demo.debug.click')}</button>
+            <button type="button" class="btn btn-outline" on-click=${() => pick('apple')}>${t('events.demo.debug.pickApple')}</button>
           </div>
-          <p class="muted">Clicks: ${clicks}</p>
+          <p class="muted">${t('events.demo.click.clicks')}: ${clicks}</p>
           <debug copy label="events">${{ clicks, fruits, outerClicks, innerClicks }}</debug>
         </div>
       </Demo>

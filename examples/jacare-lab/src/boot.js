@@ -1,8 +1,13 @@
 import './app.css'
+import '@jacare/ui/theme.css'
 import { effect } from '@jacare/core'
+import { applyTheme } from '@jacare/ui/theme'
 import { nav } from './nav.js'
 import { restoreSpaPath } from './app-base.js'
 import { syncDevtools, teardownDevtools } from './lab-devtools.js'
+import './i18n.js'
+
+applyTheme('system')
 
 const root = document.getElementById('app')
 if (!root) throw new Error('Missing #app')

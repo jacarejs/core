@@ -1,4 +1,5 @@
-import { pulse } from '@jacare/core'
+import { derive, pulse } from '@jacare/core'
+import { t, translate } from '../i18n.js'
 
 export <contract>
   props: {
@@ -12,15 +13,20 @@ function toggle() {
   open.update((v) => !v)
 }
 
+const toggleLabel = derive(() =>
+  translate(open() ? 'islandPage.tipWidget.hide' : 'islandPage.tipWidget.show'),
+)
+
 export <view>
   <section class="lab-island-tip" data-jacare-island>
     <button type="button" class="lab-island-tip-btn" on-click=${toggle}>
-      ${() => (open() ? 'Hide tip' : 'Show tip')}
+      ${toggleLabel}
     </button>
     #if open()
       <p class="lab-island-tip-body">
-        Shadow island — host page CSS does not restyle this box.
-        Topic: <code>${topic}</code>.
+        ${t('islandPage.tipWidget.body')}
+        ${' '}
+        ${t('islandPage.tipWidget.topic')} <code>${topic}</code>.
       </p>
     #end
   </section>

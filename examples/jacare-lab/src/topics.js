@@ -1,137 +1,41 @@
+import { t } from './i18n.js'
+
 export const LESSONS = [
-  {
-    path: '/',
-    title: 'Start',
-    blurb: 'Lab overview, install notes, and lesson index',
-  },
-  {
-    path: '/quick-start',
-    title: 'Quick start',
-    blurb: 'API §1 — scaffold, app.jcr, boot.js, HTML shell',
-  },
-  {
-    path: '/module',
-    title: 'Module format',
-    blurb: 'API §2 — .jcr layout, view/style syntax, compiled exports',
-  },
-  {
-    path: '/typescript',
-    title: 'TypeScript',
-    blurb: '// @jacare-ts · sibling *.jcr.ts · jacare.d.ts — optional types',
-  },
-  {
-    path: '/language',
-    title: 'Language reference',
-    blurb: 'Reserved words, @route, jacare-when, runtime map, CLI',
-  },
-  {
-    path: '/binding-ir',
-    title: 'Binding IR',
-    blurb: 'MountPlan · check --bindings · one forest for client/SSR/CPW',
-  },
-  {
-    path: '/reactivity',
-    title: 'Reactivity',
-    blurb: 'signal, computed, effect, batch, Patience, untrack, aliases',
-  },
-  {
-    path: '/bag',
-    title: 'Pulse bags',
-    blurb: 'Shared mesh, Mesh Ports, lazy publish — native & light',
-  },
-  {
-    path: '/templates',
-    title: 'Templates',
-    blurb: 'Text, attributes, style--- CSS variables',
-  },
-  {
-    path: '/bindings',
-    title: 'Bindings',
-    blurb: 'bind-value, class-*, style vars, Binding IR + CPW',
-  },
-  {
-    path: '/events',
-    title: 'Events',
-    blurb: 'on-*, @*, keyboard, pointer, stopPropagation',
-  },
-  {
-    path: '/debug',
-    title: 'Debug',
-    blurb: '<debug> syntax — JSON panels, label, copy, shorthand',
-  },
-  {
-    path: '/why',
-    title: 'Why',
-    blurb: '$why · Why card · ReactiveCycleError · jacare why file:line',
-  },
-  {
-    path: '/if',
-    title: '#if',
-    blurb: 'Branches, jacare-when, nested conditions, empty states',
-  },
-  {
-    path: '/case',
-    title: '#case',
-    blurb: 'Match one value — #when arms, #else fallback',
-  },
-  {
-    path: '/for',
-    title: '#for',
-    blurb: 'Keyed lists, reorder, fragments, stable parents',
-  },
-  {
-    path: '/components',
-    title: 'Components',
-    blurb: 'Props, slots, contracts, emit, model bind-',
-  },
-  {
-    path: '/css',
-    title: 'Scoped CSS',
-    blurb: 'export <style>, isolation, :global, reactive if/for/case',
-  },
-  {
-    path: '/nav',
-    title: 'Navigation',
-    blurb: 'createNav, createRoute, @route, focus grip, guards',
-  },
-  {
-    path: '/forms',
-    title: 'Forms',
-    blurb: 'createForm, Field, validate, submit, reset',
-  },
-  {
-    path: '/lifecycle',
-    title: 'Lifecycle',
-    blurb: 'onMount, onActivate, dispose, registerScope',
-  },
-  {
-    path: '/cookbook',
-    title: 'Cookbook',
-    blurb: 'Tasks screen combining if + for + events + props',
-  },
-  {
-    path: '/playground',
-    title: 'Playground',
-    blurb: 'Type .jcr source and see a live mount',
-  },
-  {
-    path: '/ssr',
-    title: 'SSR',
-    blurb: 'render, resume, streaming — reference cards',
-  },
-  {
-    path: '/island',
-    title: 'Islands',
-    blurb: 'API §14b — mountIsland, shadow, React/Vue/Angular hosts',
-  },
-  {
-    path: '/tooling',
-    title: 'Tooling',
-    blurb: 'CLI, check --bindings/--routes, why file:line, Binding IR, DevTools',
-  },
-  {
-    path: '/helpers',
-    title: 'Import catalog',
-    blurb: 'Every import — detailed English explanation, import line, example',
-  },
+  { path: '/', id: 'start' },
+  { path: '/quick-start', id: 'quick-start' },
+  { path: '/module', id: 'module' },
+  { path: '/typescript', id: 'typescript' },
+  { path: '/language', id: 'language' },
+  { path: '/binding-ir', id: 'binding-ir' },
+  { path: '/reactivity', id: 'reactivity' },
+  { path: '/bag', id: 'bag' },
+  { path: '/templates', id: 'templates' },
+  { path: '/bindings', id: 'bindings' },
+  { path: '/events', id: 'events' },
+  { path: '/debug', id: 'debug' },
+  { path: '/why', id: 'why' },
+  { path: '/if', id: 'if' },
+  { path: '/case', id: 'case' },
+  { path: '/for', id: 'for' },
+  { path: '/components', id: 'components' },
+  { path: '/css', id: 'css' },
+  { path: '/nav', id: 'nav' },
+  { path: '/forms', id: 'forms' },
+  { path: '/lifecycle', id: 'lifecycle' },
+  { path: '/cookbook', id: 'cookbook' },
+  { path: '/playground', id: 'playground' },
+  { path: '/ssr', id: 'ssr' },
+  { path: '/island', id: 'island' },
+  { path: '/tooling', id: 'tooling' },
+  { path: '/helpers', id: 'helpers' },
+  { path: '/i18n', id: 'i18n' },
+  { path: '/ui', id: 'ui' },
 ]
+
+export function lessonTitle(id) {
+  return t(`lesson.${id}.title`)
+}
+
+export function lessonBlurb(id) {
+  return t(`lesson.${id}.blurb`)
+}

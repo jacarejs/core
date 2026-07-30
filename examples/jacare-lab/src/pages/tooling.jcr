@@ -1,4 +1,5 @@
 import { pulse, derive } from '@jacare/core'
+import { t, translate } from '../i18n.js'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import { assetUrl, appHref } from '../app-base.js'
@@ -29,15 +30,15 @@ function bump() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §16 - §19</p>
-      <h1 class="page-title">Tooling</h1>
-      <p class="page-lead">The CLI, Vite plugin, Binding IR, compiler, DevTools — and the VS Code extension for .jcr files.</p>
+      <p class="page-kicker">${t('toolingPage.kicker')}</p>
+      <h1 class="page-title">${t('toolingPage.title')}</h1>
+      <p class="page-lead">${t('toolingPage.lead')}</p>
     </header>
 
-    <Tip :text=${'DevTools: top-bar toggle (DevTools on/off). Overlay tabs: State | Mesh | Scope (↗ pops out). Prefer the Chrome extension tab Jacaré for simpler debug. Try /bag for Mesh, Lifecycle for Scope, /binding-ir for the compiler forest.'} />
+    <Tip :text=${translate('toolingPage.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Named pulses + DOM highlight'} :lead=${'Compiler injects { name, file, line } in DEV. Hover a State node to outline this counter.'} :code=${namedPulsesCode}>
+      <Demo :title=${translate('toolingPage.demo.named.title')} :lead=${translate('toolingPage.demo.named.lead')} :code=${namedPulsesCode}>
         <div class="stack">
           <div class="row">
             <button type="button" class="btn" on-click=${bump}>count++</button>
@@ -52,83 +53,101 @@ export <view>
           src=${marketplaceImg}
           width="360"
           height="123"
-          alt="Jacaré available in the VS Code Marketplace"
+          alt=${translate('toolingPage.vscode.alt')}
         />
         <div class="vscode-card-copy">
-          <strong>Jacaré for VS Code</strong>
-          <span>Syntax highlighting (JS + optional // @jacare-ts / *.jcr.ts), snippets (screen/nav/a11y), class:/style: aliases, Lab lesson command — install from the Marketplace.</span>
+          <strong>${t('toolingPage.vscode.title')}</strong>
+          <span>${t('toolingPage.vscode.body')}</span>
           <span class="vscode-card-link">marketplace.visualstudio.com/items?itemName=heberalmeida.jacare</span>
         </div>
       </a>
 
-      <div class="ref-card">
-        <h3>TypeScript (optional)</h3>
+      <article class="ref-card">
+        <h3>${t('toolingPage.uiKit.title')}</h3>
+        <p class="muted">${t('toolingPage.uiKit.body')}</p>
         <p class="muted">
-          Sibling <code>*.jcr.ts</code>, <code>// @jacare-ts</code>, or import from <code>.ts</code> —
-          reference cards (no live mount):
+          <a
+            class="text-link"
+            href="https://jacarejs.github.io/ui/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >${t('toolingPage.uiKit.link')}</a>
+          <span aria-hidden="true"> · </span>
+          <a class="text-link" jacare-go="/ui" href=${appHref('/ui')}>/ui</a>
+          <span aria-hidden="true"> · </span>
+          <a class="text-link" jacare-go="/i18n" href=${appHref('/i18n')}>/i18n</a>
+        </p>
+      </article>
+
+      <div class="ref-card">
+        <h3>${t('toolingPage.typescript.title')}</h3>
+        <p class="muted">
+          ${t('toolingPage.typescript.body1')} <code>*.jcr.ts</code>, <code>// @jacare-ts</code>,
+          ${t('toolingPage.typescript.body2')} <code>.ts</code>
+          ${t('toolingPage.typescript.body3')}
           <a class="text-link" jacare-go="/typescript" href=${appHref('/typescript')}>/typescript</a>.
         </p>
       </div>
 
-      <Demo :title=${'CLI commands'} :lead=${'jacare new / dev / build / compile / check wrap Vite and the compiler. Pass --bindings for IR sites, --routes for static jacare-go vs createNav screens.'} :code=${cliCode}>
+      <Demo :title=${translate('toolingPage.demo.cli.title')} :lead=${translate('toolingPage.demo.cli.lead')} :code=${cliCode}>
         <pre class="log">${cliCode}</pre>
       </Demo>
 
       <div class="ref-card">
-        <h3>jacare check --bindings</h3>
-        <p class="muted">Prints every lowered binding site from the Binding IR — the same classification used for client and SSR emit.</p>
+        <h3>${t('toolingPage.card.checkBindings.title')}</h3>
+        <p class="muted">${t('toolingPage.card.checkBindings.body')}</p>
         <pre><code>${checkBindingsCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>jacare check --routes</h3>
-        <p class="muted">Opt-in: compares static jacare-go="/…" targets to createNav screen patterns. Dynamic links are skipped.</p>
+        <h3>${t('toolingPage.card.checkRoutes.title')}</h3>
+        <p class="muted">${t('toolingPage.card.checkRoutes.body')}</p>
         <pre><code>${checkRoutesCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>Expression style</h3>
-        <p class="muted">Prefer bare calls when there is no loop local. jacare check warns on redundant nullary arrows.</p>
+        <h3>${t('toolingPage.card.expression.title')}</h3>
+        <p class="muted">${t('toolingPage.card.expression.body')}</p>
         <pre><code>${expressionStyleCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>Binding IR (compiler)</h3>
+        <h3>${t('toolingPage.card.bindingIr.title')}</h3>
         <p class="muted">
-          Templates lower once into MountPlan; mount() and render() walk the same forest.
-          Full lesson:
+          ${t('toolingPage.card.bindingIr.body1')}
+          ${t('toolingPage.card.bindingIr.body2')}
           <a class="text-link" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>/binding-ir</a>.
         </p>
         <pre><code>${bindingIrCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>Vite plugin options</h3>
-        <p class="muted">emit and cpw default to "auto" — production client builds get CPW automatically.</p>
+        <h3>${t('toolingPage.card.vite.title')}</h3>
+        <p class="muted">${t('toolingPage.card.vite.body')}</p>
         <pre><code>${vitePluginCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>Compiler API</h3>
-        <p class="muted">Use @jacare/compiler directly to inspect generated code outside of Vite.</p>
+        <h3>${t('toolingPage.card.compiler.title')}</h3>
+        <p class="muted">${t('toolingPage.card.compiler.body')}</p>
         <pre><code>${compileApiCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>DevTools</h3>
-        <p class="muted">State shows named pulses + DOM highlight; Scope shows registerScope() entries.</p>
+        <h3>${t('toolingPage.card.devtools.title')}</h3>
+        <p class="muted">${t('toolingPage.card.devtools.body')}</p>
         <pre><code>${devtoolsCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>Testing</h3>
-        <p class="muted">Compile + mount in Vitest with happy-dom for full integration coverage.</p>
+        <h3>${t('toolingPage.card.testing.title')}</h3>
+        <p class="muted">${t('toolingPage.card.testing.body')}</p>
         <pre><code>${testingCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>package.json scripts</h3>
-        <p class="muted">A typical project wires dev / build / check / test straight to the CLI.</p>
+        <h3>${t('toolingPage.card.scripts.title')}</h3>
+        <p class="muted">${t('toolingPage.card.scripts.body')}</p>
         <pre><code>${scriptsCode}</code></pre>
       </div>
     </div>

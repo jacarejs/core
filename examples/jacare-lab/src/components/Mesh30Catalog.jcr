@@ -1,20 +1,21 @@
 import { mesh30 } from '../bags/mesh30.js'
+import { t, translate } from '../i18n.js'
 
-const ITEMS = ['Tea', 'Cap', 'Zine']
+const ITEMS = ['tea', 'cap', 'zine']
 
 export <view>
   <div class="mesh30-screen" data-screen="catalog">
     <header class="mesh30-screen-head">
-      <span class="mesh30-screen-label">Screen A · Catalog</span>
-      <span class="mesh30-badge" title="Import path: mesh30.count">
-        cart · ${mesh30.count}
+      <span class="mesh30-screen-label">${t('bag.mesh30Catalog.screenLabel')}</span>
+      <span class="mesh30-badge" :title=${translate('bag.mesh30Catalog.badgeTitle')}>
+        ${t('bag.mesh30Catalog.cart')} · ${mesh30.count}
       </span>
     </header>
-    <p class="mesh30-screen-lead">Import the bag and call <code>ripple</code> via <code>add</code>.</p>
+    <p class="mesh30-screen-lead">${t('bag.mesh30Catalog.lead')}</p>
     <div class="row">
-      #for ITEMS as label (label)
-        <button type="button" class="btn btn-outline" on-click=${() => mesh30.add(label)}>
-          Add ${label}
+      #for ITEMS as item (item)
+        <button type="button" class="btn btn-outline" on-click=${() => mesh30.add(translate('bag.mesh30Catalog.items.' + item))}>
+          ${t('bag.mesh30Catalog.add')} ${t('bag.mesh30Catalog.items.' + item)}
         </button>
       #end
     </div>

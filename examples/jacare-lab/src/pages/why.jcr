@@ -1,6 +1,7 @@
-import { pulse } from '@jacare/core'
+import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { t, translate } from '../i18n.js'
 import {
   consoleWhyCode,
   cliWhyCode,
@@ -9,6 +10,9 @@ import {
 
 const count = pulse(0, { name: 'count' })
 const label = pulse('idle', { name: 'label' })
+const labelText = derive(() =>
+  label() === 'idle' || label() === 'once' ? translate('why.demo.' + label()) : label(),
+)
 
 function bump() {
   count.update((n) => n + 1)
@@ -18,40 +22,37 @@ function bump() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §15 · why()</p>
-      <h1 class="page-title">Why</h1>
-      <p class="page-lead">
-        One question — why is this UI like this? — answered the same way in the console,
-        overlay, cycle errors, and <code>jacare why file:line</code>.
-      </p>
+      <p class="page-kicker">${t('why.kicker')}</p>
+      <h1 class="page-title">${t('why.title')}</h1>
+      <p class="page-lead">${t('why.lead')}</p>
     </header>
 
-    <Tip :text=${'Enable DevTools (Lab toggle or connectJacareDevtools). Then $why($0) on a selected element, click a State/Mesh value for the Why card, or run jacare why src/pages/why.jcr:NN in the terminal.'} />
+    <Tip :text=${t('why.tip')} />
 
-    <Demo :title=${'$why in the console'} :lead=${'Select the badge below in DevTools Elements, then run $why($0). Same chain as the overlay Why card.'} :code=${consoleWhyCode}>
+    <Demo :title=${t('why.demo.title')} :lead=${t('why.demo.lead')} :code=${consoleWhyCode}>
       <div class="stack">
         <div class="row">
           <button type="button" class="btn" on-click=${bump}>bump</button>
           <span class="badge why-demo-badge">${count}</span>
-          <span class="muted">${label}</span>
+          <span class="muted">${labelText}</span>
         </div>
       </div>
     </Demo>
 
     <div class="ref-card">
-      <h3>Console · overlay · error</h3>
+      <h3>${t('why.console.title')}</h3>
       <pre><code>${consoleWhyCode}</code></pre>
     </div>
 
     <div class="ref-card">
-      <h3>jacare why (static IR)</h3>
-      <p class="muted">No browser — Binding IR sites for a file:line (sibling of check --bindings).</p>
+      <h3>${t('why.cli.title')}</h3>
+      <p class="muted">${t('why.cli.body')}</p>
       <pre><code>${cliWhyCode}</code></pre>
     </div>
 
     <div class="ref-card">
-      <h3>ReactiveCycleError includes why</h3>
-      <p class="muted">With DevTools enabled, cycle errors append the same WhyChain text.</p>
+      <h3>${t('why.cycle.title')}</h3>
+      <p class="muted">${t('why.cycle.body')}</p>
       <pre><code>${cycleWhyCode}</code></pre>
     </div>
   </section>

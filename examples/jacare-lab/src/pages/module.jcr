@@ -2,6 +2,7 @@ import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import Badge from '../components/Badge.jcr'
+import { t, translate } from '../i18n.js'
 import {
   layoutCode,
   viewSyntaxCode,
@@ -10,63 +11,63 @@ import {
   liveModuleCode,
 } from '../snippets/module.js'
 
-const title = pulse('Hello')
-const subtitle = derive(() => 'Updated: ' + title())
+const title = pulse(translate('module.live.initial'))
+const subtitle = derive(() => translate('module.live.updated', { value: title() }))
 
 function onSave() {
-  title.set('Saved')
+  title.set(translate('module.live.saved'))
 }
 
 const exports = [
-  { name: 'mount(target, props?)', role: 'Client render; returns dispose' },
-  { name: 'render(props?)', role: 'Server HTML + binding state' },
-  { name: 'resume(target, state, props?)', role: 'Hydrate from SSR state' },
-  { name: 'default', role: 'Alias for mount' },
+  { name: 'mount(target, props?)', roleKey: 'module.compiled.roles.mount' },
+  { name: 'render(props?)', roleKey: 'module.compiled.roles.render' },
+  { name: 'resume(target, state, props?)', roleKey: 'module.compiled.roles.resume' },
+  { name: 'default', roleKey: 'module.compiled.roles.default' },
 ]
 
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §2</p>
-      <h1 class="page-title">Module format (.jcr)</h1>
-      <p class="page-lead">A .jcr file is a JavaScript module with optional script logic and one or more exported blocks — view required, style optional.</p>
+      <p class="page-kicker">${t('module.kicker')}</p>
+      <h1 class="page-title">${t('module.title')}</h1>
+      <p class="page-lead">${t('module.lead')}</p>
     </header>
 
-    <Tip :text=${'Recommended order inside a .jcr file: imports → state/logic → export view → export style last. Optional TypeScript: /typescript.'} />
+    <Tip :text=${t('module.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Recommended layout'} :lead=${'Imports, state, view, then scoped styles. The view block is required; style is optional and should come last.'} :code=${layoutCode}>
+      <Demo :title=${t('module.layout.title')} :lead=${t('module.layout.lead')} :code=${layoutCode}>
         <pre class="log">${layoutCode}</pre>
       </Demo>
 
-      <Demo :title=${'Live mini-module'} :lead=${'Same layout as the sample above — pulse + derive + handlers + view (+ style in the source panel).'} :code=${liveModuleCode}>
+      <Demo :title=${t('module.live.title')} :lead=${t('module.live.lead')} :code=${liveModuleCode}>
         <div class="stack">
           <p class="metric">${title}</p>
           <p class="muted">${subtitle}</p>
           <div class="row">
             <input class="input" bind-value=${title} />
-            <button type="button" class="btn" on-click=${onSave}>Save</button>
+            <button type="button" class="btn" on-click=${onSave}>${t('module.live.save')}</button>
           </div>
         </div>
       </Demo>
 
-      <Demo :title=${'Supported view syntax'} :lead=${'Block form is recommended. Tagged templates and factory return blocks are also accepted.'} :code=${viewSyntaxCode}>
+      <Demo :title=${t('module.viewSyntax.title')} :lead=${t('module.viewSyntax.lead')} :code=${viewSyntaxCode}>
         <div class="stack">
-          <Badge :text=${'export view block recommended'} />
+          <Badge :text=${t('module.viewSyntax.badge')} />
           <pre class="log">${viewSyntaxCode}</pre>
         </div>
       </Demo>
 
-      <Demo :title=${'Supported style syntax'} :lead=${'export style is scoped by default. lang is parsed as styleLang; SCSS/Less pass through until a preprocessor is wired.'} :code=${styleSyntaxCode}>
+      <Demo :title=${t('module.styleSyntax.title')} :lead=${t('module.styleSyntax.lead')} :code=${styleSyntaxCode}>
         <pre class="log">${styleSyntaxCode}</pre>
       </Demo>
 
-      <Demo :title=${'Compiled output'} :lead=${'Every .jcr file compiles to mount, render, resume, and a default alias for mount.'} :code=${compiledExportsCode}>
+      <Demo :title=${t('module.compiled.title')} :lead=${t('module.compiled.lead')} :code=${compiledExportsCode}>
         <div class="nav-live">
           #for exports as item (item.name)
             <div class="nav-live-row">
               <span>${item.name}</span>
-              <code>${item.role}</code>
+              <code>${t(item.roleKey)}</code>
             </div>
           #end
         </div>

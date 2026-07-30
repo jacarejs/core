@@ -1,9 +1,10 @@
+import { t } from '../i18n.js'
 import BagDepth from './BagDepth.jcr'
 import BagTreeLeaf from './BagTreeLeaf.jcr'
 
 export <view>
-  <BagDepth :label=${'Grandchild · no bag import (pass-through)'}>
-    <p class="muted">This level only nests — it never touches the bag.</p>
+  <BagDepth :label=${t('bagTree.grandLabel')}>
+    <p class="muted">${t('bagTree.grandNote')}</p>
     <BagTreeLeaf />
   </BagDepth>
 </view>

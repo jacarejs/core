@@ -1,4 +1,5 @@
 import { pulse, derive } from '@jacare/core'
+import { t, translate } from '../i18n.js'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import {
@@ -18,7 +19,7 @@ function bumpMirror() {
 const hydrated = pulse(false)
 const postHydrateClicks = pulse(0)
 const hydrationStatus = derive(() =>
-  hydrated() ? 'Hydrated — listeners attached' : 'Server HTML only — no listeners yet',
+  translate(hydrated() ? 'ssrPage.hydration.done' : 'ssrPage.hydration.pending'),
 )
 
 function simulateResume() {
@@ -33,45 +34,45 @@ function onHydratedClick() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §14</p>
-      <h1 class="page-title">SSR and hydration</h1>
-      <p class="page-lead">Every .jcr file compiles to three exports — mount, render, and resume — so the same source runs on the server and the client.</p>
+      <p class="page-kicker">${t('ssrPage.kicker')}</p>
+      <h1 class="page-title">${t('ssrPage.title')}</h1>
+      <p class="page-lead">${t('ssrPage.lead')}</p>
     </header>
 
-    <Tip :text=${'This lab is served client-only, so the SSR cards below are reference demos with a live mental model — the View code always shows the full module including the view block. Under the hood, render() walks the same MountPlan as mount(), so dynamic class / attr / text stay in sync with the Binding IR.'} />
+    <Tip :text=${translate('ssrPage.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'render(props): server HTML + state'} :lead=${'render() never touches the DOM — it returns escaped HTML plus a small state object describing each dynamic binding.'} :code=${renderCode}>
+      <Demo :title=${translate('ssrPage.demo.render.title')} :lead=${translate('ssrPage.demo.render.lead')} :code=${renderCode}>
         <div class="stack">
           <span class="metric">${mirrorCount}</span>
-          <button type="button" class="btn" on-click=${bumpMirror}>Bump (client-only mirror)</button>
-          <p class="muted">On the server this button does not exist yet — render() only produces the initial HTML for this counter's starting value.</p>
+          <button type="button" class="btn" on-click=${bumpMirror}>${t('ssrPage.demo.render.bump')}</button>
+          <p class="muted">${t('ssrPage.demo.render.note')}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'The resume() mental model'} :lead=${'Before resume(), the button looks real but has no listener. Simulate resume() to attach it — no DOM is recreated.'} :code=${resumeMentalModelCode}>
+      <Demo :title=${translate('ssrPage.demo.mental.title')} :lead=${translate('ssrPage.demo.mental.lead')} :code=${resumeMentalModelCode}>
         <div class="stack">
           <p class="muted">${hydrationStatus}</p>
           <div class="row">
             <button type="button" class="btn" disabled=${!hydrated()} on-click=${onHydratedClick}>
-              Click me (needs resume())
+              ${t('ssrPage.demo.mental.click')}
             </button>
-            <button type="button" class="btn btn-outline" on-click=${simulateResume}>Simulate resume()</button>
+            <button type="button" class="btn btn-outline" on-click=${simulateResume}>${t('ssrPage.demo.mental.simulate')}</button>
           </div>
-          <p class="muted">Clicks after hydration: ${postHydrateClicks}</p>
+          <p class="muted">${t('ssrPage.demo.mental.clicks')} ${postHydrateClicks}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'resume(target, state, props)'} :lead=${'resume() walks state.bindings and re-attaches signal subscriptions to the existing server-rendered nodes.'} :code=${resumeCode}>
-        <p class="muted">Hydration keeps the server HTML in place — only listeners and bindings are wired up on the client.</p>
+      <Demo :title=${translate('ssrPage.demo.resume.title')} :lead=${translate('ssrPage.demo.resume.lead')} :code=${resumeCode}>
+        <p class="muted">${t('ssrPage.demo.resume.note')}</p>
       </Demo>
 
-      <Demo :title=${'renderToString: one HTML string'} :lead=${'A thin wrapper around render() for handlers that just need a string to send.'} :code=${renderToStringCode}>
-        <p class="muted">Useful for classic request/response servers that buffer the full page before writing.</p>
+      <Demo :title=${translate('ssrPage.demo.string.title')} :lead=${translate('ssrPage.demo.string.lead')} :code=${renderToStringCode}>
+        <p class="muted">${t('ssrPage.demo.string.note')}</p>
       </Demo>
 
-      <Demo :title=${'renderToStream: chunked HTML'} :lead=${'Splits the rendered markup into top-level chunks so a server can start flushing early.'} :code=${renderToStreamCode}>
-        <p class="muted">Same .jcr source — only the delivery strategy changes on the server.</p>
+      <Demo :title=${translate('ssrPage.demo.stream.title')} :lead=${translate('ssrPage.demo.stream.lead')} :code=${renderToStreamCode}>
+        <p class="muted">${t('ssrPage.demo.stream.note')}</p>
       </Demo>
     </div>
   </section>

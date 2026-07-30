@@ -1,1074 +1,636 @@
 /** Import catalog for Lab /helpers — mirrors docs/api.md §20.
- *  Each entry: name, short usage, detailed English `about`, import line, example.
+ *  Copy lives in locales/fragments/helpers-catalog.*.js (usage / about / groups).
  */
 
 export const IMPORT_CATALOG = [
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'pulse',
+    id: "pulse",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "pulse",
     importLine: "import { pulse } from '@jacare/core'",
-    usage: 'Create reactive state. Call to read, .set / .update to write.',
-    about:
-      'pulse is Jacaré’s primary reactive cell (preferred name). Create one with an initial value, call it like a function to read, and write with .set(value) or .update(fn). Reads inside effects, derives, and template bindings subscribe automatically so only the dependent UI updates. Prefer pulse over signal in new Jacaré code.',
-    example: `import { pulse } from '@jacare/core'
-
-const count = pulse(0)
-count()           // → 0
-count.set(1)      // → 1
-count.update(n => n + 1)  // → 2`,
-    path: '/reactivity',
+    example: "import { pulse } from '@jacare/core'\n\nconst count = pulse(0)\ncount()           // → 0\ncount.set(1)      // → 1\ncount.update(n => n + 1)  // → 2",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'signal',
+    id: "signal",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "signal",
     importLine: "import { signal } from '@jacare/core'",
-    usage: 'Alias of pulse — same API.',
-    about:
-      'signal is the same runtime primitive as pulse — an alias for familiarity with other fine-grained libraries. Methods (.set, .update, .peek, .subscribe) and template use are identical. Prefer writing pulse in Jacaré apps so docs and Lab stay consistent.',
-    example: `import { signal } from '@jacare/core'
-
-const open = signal(false)
-open()
-open.set(true)`,
-    path: '/reactivity',
+    example: "import { signal } from '@jacare/core'\n\nconst open = signal(false)\nopen()\nopen.set(true)",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'derive',
+    id: "derive",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "derive",
     importLine: "import { derive } from '@jacare/core'",
-    usage: 'Computed value that updates when dependencies change.',
-    about:
-      'derive builds a cached computed value from other pulses or derives. The function re-runs only when a dependency it actually read has changed. Read it like a pulse: doubled(). Call dispose() when you create derives dynamically (e.g. per list item) and tear them down — long-lived derives in bags/forms/nav usually do not need it.',
-    example: `import { pulse, derive } from '@jacare/core'
-
-const n = pulse(2)
-const doubled = derive(() => n() * 2)
-doubled()  // → 4
-doubled.dispose()`,
-    path: '/reactivity',
+    example: "import { pulse, derive } from '@jacare/core'\n\nconst n = pulse(2)\nconst doubled = derive(() => n() * 2)\ndoubled()  // → 4\ndoubled.dispose()",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'computed',
+    id: "computed",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "computed",
     importLine: "import { computed } from '@jacare/core'",
-    usage: 'Alias of derive.',
-    about:
-      'computed is an alias of derive with the same lazy, cached dependency tracking and dispose(). Prefer derive in new Jacaré code; keep computed only when matching external examples that use that name.',
-    example: `import { pulse, computed } from '@jacare/core'
-
-const price = pulse(10)
-const tax = computed(() => price() * 0.1)
-tax.dispose()`,
-    path: '/reactivity',
+    example: "import { pulse, computed } from '@jacare/core'\n\nconst price = pulse(10)\nconst tax = computed(() => price() * 0.1)\ntax.dispose()",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'effect',
+    id: "effect",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "effect",
     importLine: "import { effect } from '@jacare/core'",
-    usage: 'Run side effects when pulses change. Call .dispose() to stop.',
-    about:
-      'effect runs a side-effect whenever its tracked pulses change (logging, document.title, fetch, imperative DOM). It may return a cleanup that runs before the next execution and on dispose(). Call dispose() when you created the effect yourself and the owner unmounts — compiled template bindings dispose for you.',
-    example: `import { pulse, effect } from '@jacare/core'
-
-const n = pulse(0)
-const { dispose } = effect(() => {
-  console.log('n is', n())
-})
-// later: dispose()`,
-    path: '/reactivity',
+    example: "import { pulse, effect } from '@jacare/core'\n\nconst n = pulse(0)\nconst { dispose } = effect(() => {\n  console.log('n is', n())\n})\n// later: dispose()",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'watch',
+    id: "watch",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "watch",
     importLine: "import { watch } from '@jacare/core'",
-    usage: 'Alias of effect.',
-    about:
-      'watch is an alias of effect. Prefer watch when the intent reads as “watch this state”; prefer effect when matching older examples. Same dispose and cleanup contract.',
-    example: `import { pulse, watch } from '@jacare/core'
-
-const title = pulse('Hi')
-watch(() => {
-  document.title = title()
-})`,
-    path: '/reactivity',
+    example: "import { pulse, watch } from '@jacare/core'\n\nconst title = pulse('Hi')\nwatch(() => {\n  document.title = title()\n})",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'batch',
+    id: "batch",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "batch",
     importLine: "import { batch } from '@jacare/core'",
-    usage: 'Group writes so effects run once after all updates.',
-    about:
-      'batch groups multiple pulse writes so dependent effects and DOM updates flush once after the callback finishes. Use it when one user action updates several cells (form submit, cart count + total) to avoid intermediate flicker and extra work.',
-    example: `import { pulse, batch, effect } from '@jacare/core'
-
-const a = pulse(0)
-const b = pulse(0)
-effect(() => console.log(a() + b()))
-
-batch(() => {
-  a.set(1)
-  b.set(2)
-})  // effect runs once → 3`,
-    path: '/reactivity',
+    example: "import { pulse, batch, effect } from '@jacare/core'\n\nconst a = pulse(0)\nconst b = pulse(0)\neffect(() => console.log(a() + b()))\n\nbatch(() => {\n  a.set(1)\n  b.set(2)\n})  // effect runs once → 3",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'enablePatience',
+    id: "enablePatience",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "enablePatience",
     importLine: "import { enablePatience, flushSync, disablePatience } from '@jacare/core'",
-    usage: 'Opt-in: coalesce writes outside batch into one microtask.',
-    about:
-      'Default schedule is synchronous — set() updates effects on the same turn. enablePatience() turns on Patience: writes outside batch queue and flush once in a microtask (safety net for bursty sockets/timers). With Patience on, the runtime uses internal lanes (input → default → idle): bindModel marks input; idle uses requestIdleCallback. Authors do not pick lanes — no startTransition API. Prefer batch/ripple for explicit groups. flushSync() drains every lane now (tests and escape hatch). disablePatience() flushes and restores sync.',
-    example: `import { pulse, effect, enablePatience, flushSync } from '@jacare/core'
-
-enablePatience()
-const count = pulse(0)
-effect(() => console.log(count()))
-
-count.set(1)
-count.set(2)
-count.set(3)
-// log not yet — pending microtask
-flushSync()  // logs 3 once`,
-    path: '/reactivity',
+    example: "import { pulse, effect, enablePatience, flushSync } from '@jacare/core'\n\nenablePatience()\nconst count = pulse(0)\neffect(() => console.log(count()))\n\ncount.set(1)\ncount.set(2)\ncount.set(3)\n// log not yet — pending microtask\nflushSync()  // logs 3 once",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'flushSync',
+    id: "flushSync",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "flushSync",
     importLine: "import { flushSync } from '@jacare/core'",
-    usage: 'Drain pending reactive updates immediately.',
-    about:
-      'flushSync runs any queued subscribers now (every Patience lane: input, default, idle). Required after enablePatience() when tests or UI need the DOM on the same turn. Harmless when the queue is empty. batch/ripple already flush synchronously at the end of their callback.',
-    example: `import { flushSync } from '@jacare/core'
-
-count.set(1)
-flushSync()
-expect(label.textContent).toBe('1')`,
-    path: '/reactivity',
+    example: "import { flushSync } from '@jacare/core'\n\ncount.set(1)\nflushSync()\nexpect(label.textContent).toBe('1')",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'disablePatience',
+    id: "disablePatience",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "disablePatience",
     importLine: "import { disablePatience } from '@jacare/core'",
-    usage: 'Turn off Patience and restore sync schedule.',
-    about:
-      'disablePatience drains any pending updates with flushSync semantics, then sets the scheduler back to synchronous default. Use when leaving a demo or tearing down a test that called enablePatience().',
-    example: `import { disablePatience } from '@jacare/core'
-
-disablePatience()`,
-    path: '/reactivity',
+    example: "import { disablePatience } from '@jacare/core'\n\ndisablePatience()",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'isPatienceEnabled',
+    id: "isPatienceEnabled",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "isPatienceEnabled",
     importLine: "import { isPatienceEnabled } from '@jacare/core'",
-    usage: 'Read whether Patience coalesce is on.',
-    about:
-      'isPatienceEnabled() returns true after enablePatience() and false after disablePatience() (or by default). Useful in demos and tests — not needed in most apps.',
-    example: `import { isPatienceEnabled, enablePatience } from '@jacare/core'
-
-enablePatience()
-isPatienceEnabled() // true`,
-    path: '/reactivity',
+    example: "import { isPatienceEnabled, enablePatience } from '@jacare/core'\n\nenablePatience()\nisPatienceEnabled() // true",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'runAsLane',
+    id: "runAsLane",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "runAsLane",
     importLine: "import { runAsLane } from '@jacare/core'",
-    usage: 'Runtime/tooling: mark write origin for Patience lanes.',
-    about:
-      'runAsLane(lane, fn) runs fn while tagging writes as input, default, or idle. bindModel already uses input. Apps should not pick lanes — this is for the runtime and rare tooling. Without enablePatience(), schedule stays synchronous and the lane tag is ignored for flush timing.',
-    example: `import { pulse, runAsLane, enablePatience, flushSync } from '@jacare/core'
-
-enablePatience()
-const bg = pulse(0)
-runAsLane('idle', () => bg.set(1))
-flushSync()  // drains idle too`,
-    path: '/reactivity',
+    example: "import { pulse, runAsLane, enablePatience, flushSync } from '@jacare/core'\n\nenablePatience()\nconst bg = pulse(0)\nrunAsLane('idle', () => bg.set(1))\nflushSync()  // drains idle too",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'untrack',
+    id: "untrack",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "untrack",
     importLine: "import { untrack } from '@jacare/core'",
-    usage: 'Read pulses without subscribing the current effect.',
-    about:
-      'untrack runs a function without registering pulse reads as dependencies of the current effect or derive. Use it to peek at values without re-running when they change, or to avoid accidental subscriptions. For a single cell, pulse.peek is often clearer.',
-    example: `import { pulse, effect, untrack } from '@jacare/core'
-
-const a = pulse(1)
-const b = pulse(2)
-effect(() => {
-  console.log(a(), untrack(() => b()))
-  // only a() triggers re-runs
-})`,
-    path: '/reactivity',
+    example: "import { pulse, effect, untrack } from '@jacare/core'\n\nconst a = pulse(1)\nconst b = pulse(2)\neffect(() => {\n  console.log(a(), untrack(() => b()))\n  // only a() triggers re-runs\n})",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Reactivity',
-    name: 'ReactiveCycleError',
+    id: "ReactiveCycleError",
+    pkg: "@jacare/core",
+    groupId: "reactivity",
+    name: "ReactiveCycleError",
     importLine: "import { ReactiveCycleError } from '@jacare/core'",
-    usage: 'Error thrown when updates never settle.',
-    about:
-      'Updates are delivered synchronously by default, so two effects that write to each other would recurse forever. Jacaré stops the cascade after 200 nested levels and throws ReactiveCycleError instead of a stack overflow. error.depth carries the limit that was hit. Break the loop with pulse.peek, pulse.update(fn) or untrack.',
-    example: `import { pulse, effect, ReactiveCycleError } from '@jacare/core'
-
-const a = pulse(0)
-const b = pulse(0)
-effect(() => { a(); b.set(b() + 1) })
-effect(() => { b(); a.set(a() + 1) })
-
-try {
-  a.set(1)
-} catch (error) {
-  if (error instanceof ReactiveCycleError) console.warn(error.message)
-}`,
-    path: '/reactivity',
+    example: "import { pulse, effect, ReactiveCycleError } from '@jacare/core'\n\nconst a = pulse(0)\nconst b = pulse(0)\neffect(() => { a(); b.set(b() + 1) })\neffect(() => { b(); a.set(a() + 1) })\n\ntry {\n  a.set(1)\n} catch (error) {\n  if (error instanceof ReactiveCycleError) console.warn(error.message)\n}",
+    path: "/reactivity",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Pulse bags',
-    name: 'createBag',
+    id: "createBag",
+    pkg: "@jacare/core",
+    groupId: "pulseBags",
+    name: "createBag",
     importLine: "import { createBag, pulse } from '@jacare/core'",
-    usage: 'Register a shared bag of pulses (Mesh).',
-    about:
-      'createBag registers a named shared store on the Pulse Mesh. The factory stays lazy until a property is first read. Export the bag from a module and reuse it across screens. Duplicate ids throw. Each published field becomes addressable as @id/key in templates.',
-    example: `import { createBag, pulse } from '@jacare/core'
-
-export const cart = createBag('cart', () => ({
-  count: pulse(0),
-  total: pulse(0),
-}))
-
-cart.count.set(3)`,
-    path: '/bag',
+    example: "import { createBag, pulse } from '@jacare/core'\n\nexport const cart = createBag('cart', () => ({\n  count: pulse(0),\n  total: pulse(0),\n}))\n\ncart.count.set(3)",
+    path: "/bag",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Pulse bags',
-    name: 'getBag',
+    id: "getBag",
+    pkg: "@jacare/core",
+    groupId: "pulseBags",
+    name: "getBag",
     importLine: "import { getBag } from '@jacare/core'",
-    usage: 'Look up a bag by id from anywhere.',
-    about:
-      'getBag looks up a bag by string id from anywhere (another module or a screen that did not import the bag). Returns undefined if missing. Reading a property on the handle still triggers lazy factory publish.',
-    example: `import { getBag } from '@jacare/core'
-
-const cart = getBag('cart')
-cart?.count()  // → current count`,
-    path: '/bag',
+    example: "import { getBag } from '@jacare/core'\n\nconst cart = getBag('cart')\ncart?.count()  // → current count",
+    path: "/bag",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Pulse bags',
-    name: 'listBags',
+    id: "listBags",
+    pkg: "@jacare/core",
+    groupId: "pulseBags",
+    name: "listBags",
     importLine: "import { listBags } from '@jacare/core'",
-    usage: 'List registered bag ids.',
-    about:
-      'listBags returns the ids of every bag registered in the page so far (including not-yet-published lazy bags). Useful for DevTools, debugging, and tests — rarely needed in app UI.',
-    example: `import { listBags } from '@jacare/core'
-
-listBags()  // → ['cart', 'theme', …]`,
-    path: '/bag',
+    example: "import { listBags } from '@jacare/core'\n\nlistBags()  // → ['cart', 'theme', …]",
+    path: "/bag",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Pulse bags',
-    name: 'ripple',
+    id: "ripple",
+    pkg: "@jacare/core",
+    groupId: "pulseBags",
+    name: "ripple",
     importLine: "import { ripple } from '@jacare/core'",
-    usage: 'Batch bag writes into one Mesh notification wave.',
-    about:
-      'ripple(fn) runs a function inside a batch and records which mesh cells changed so DevTools Mesh can show one notification wave. Signature is ripple(fn) — not ripple(port, fn). Wrap multi-field bag writes together.',
-    example: `import { ripple } from '@jacare/core'
-import { cart } from './bags.js'
-
-ripple(() => {
-  cart.items.set([])
-})`,
-    path: '/bag',
+    example: "import { ripple } from '@jacare/core'\nimport { cart } from './bags.js'\n\nripple(() => {\n  cart.items.set([])\n})",
+    path: "/bag",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Pulse bags',
-    name: 'bag.snap / hydrate / reset',
-    importLine: '(methods on a bag instance)',
-    usage: 'Persist, restore, or reset bag ports.',
-    about:
-      'Methods on the bag handle from createBag. snap() copies writable pulse values to a plain object (e.g. localStorage). hydrate(data) writes those values back in one wave. reset() restores factory defaults while keeping the same cell identities so bindings stay alive.',
-    example: `const data = cart.snap()
-localStorage.setItem('cart', JSON.stringify(data))
-
-cart.hydrate(JSON.parse(localStorage.getItem('cart')))
-cart.reset()`,
-    path: '/bag',
+    id: "bagSnap",
+    pkg: "@jacare/core",
+    groupId: "pulseBags",
+    name: "bag.snap / hydrate / reset",
+    importLine: "(methods on a bag instance)",
+    example: "const data = cart.snap()\nlocalStorage.setItem('cart', JSON.stringify(data))\n\ncart.hydrate(JSON.parse(localStorage.getItem('cart')))\ncart.reset()",
+    path: "/bag",
   },
   {
-    pkg: '.jcr template',
-    group: 'Pulse bags',
-    name: '${@bag/key}',
-    importLine: '(Mesh address in templates)',
-    usage: 'Read a bag port directly in the view.',
-    about:
-      'Mesh address syntax inside .jcr templates. ${@cart/count} reads the published port without importing the bag into the script (compiler emits getBag). Ideal for shared chrome such as a header cart badge. Prefer normal cart.count() in the module that owns the bag.',
-    example: `<span>Items: \${@cart/count}</span>
-<button on-click=\${() => cart.count.update(n => n + 1)}>
-  Add
-</button>`,
-    path: '/bag',
+    id: "bagKey",
+    pkg: ".jcr template",
+    groupId: "pulseBags",
+    name: "${@bag/key}",
+    importLine: "(Mesh address in templates)",
+    example: "<span>Items: ${@cart/count}</span>\n<button on-click=${() => cart.count.update(n => n + 1)}>\n  Add\n</button>",
+    path: "/bag",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DOM (emitted)',
-    name: 'bindText',
-    importLine: 'Emitted from ${expr} text',
-    usage: 'You write ${count}; compiler emits bindText.',
-    about:
-      'Compiler-emitted helper that keeps a text node’s data in sync with a pulse or expression. You almost never import it — write ${count} or ${label()} in the view. Only that text node updates when the source changes.',
-    example: `<!-- .jcr -->
-<span>\${count}</span>
-
-<!-- roughly emitted -->
-bindText(node, () => count())`,
-    path: '/bindings',
+    id: "bindText",
+    pkg: "@jacare/core",
+    groupId: "dom",
+    name: "bindText",
+    importLine: "Emitted from ${expr} text",
+    example: "<!-- .jcr -->\n<span>${count}</span>\n\n<!-- roughly emitted -->\nbindText(node, () => count())",
+    path: "/bindings",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DOM (emitted)',
-    name: 'bindAttribute',
-    importLine: 'Emitted from :attr=${expr}',
-    usage: 'Dynamic HTML attributes.',
-    about:
-      'Emitted for :attr=${expr}. Updates or removes the attribute when the expression changes. Use for href, title, aria-*, and boolean attributes that should appear or disappear with state.',
-    example: `<!-- .jcr -->
-<a :href=\${url} :title=\${label}>Open</a>`,
-    path: '/bindings',
+    id: "bindAttribute",
+    pkg: "@jacare/core",
+    groupId: "dom",
+    name: "bindAttribute",
+    importLine: "Emitted from :attr=${expr}",
+    example: "<!-- .jcr -->\n<a :href=${url} :title=${label}>Open</a>",
+    path: "/bindings",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DOM (emitted)',
-    name: 'bindClass',
-    importLine: 'Emitted from class-name=${bool}',
-    usage: 'Toggle a CSS class from a boolean.',
-    about:
-      'Emitted for class-name=${bool} (for example class-open=${open}). Toggles a single CSS class via classList. Prefer this over rebuilding full className strings on every update.',
-    example: `<!-- .jcr -->
-<div class-open=\${open} class-busy=\${loading}>…</div>`,
-    path: '/bindings',
+    id: "bindClass",
+    pkg: "@jacare/core",
+    groupId: "dom",
+    name: "bindClass",
+    importLine: "Emitted from class-name=${bool}",
+    example: "<!-- .jcr -->\n<div class-open=${open} class-busy=${loading}>…</div>",
+    path: "/bindings",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DOM (emitted)',
-    name: 'bindStyleVar',
-    importLine: 'Emitted from style---name=${expr}',
-    usage: 'Set a CSS custom property.',
-    about:
-      'Emitted for style---name=${expr}, which maps to CSS custom properties (style---pct → --pct). Lets CSS drive layout from reactive numbers without large inline style objects.',
-    example: `<!-- .jcr -->
-<div style---pct=\${pct}>…</div>
-/* CSS: width: calc(var(--pct) * 1%) */`,
-    path: '/bindings',
+    id: "bindStyleVar",
+    pkg: "@jacare/core",
+    groupId: "dom",
+    name: "bindStyleVar",
+    importLine: "Emitted from style---name=${expr}",
+    example: "<!-- .jcr -->\n<div style---pct=${pct}>…</div>\n/* CSS: width: calc(var(--pct) * 1%) */",
+    path: "/bindings",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DOM (emitted)',
-    name: 'bindModel',
-    importLine: 'Emitted from bind-value / bind-checked',
-    usage: 'Two-way input binding.',
-    about:
-      'Emitted for bind-value and bind-checked. Keeps an input’s value or checked state aligned with a pulse and writes back on input/change. Prefer pulses or createForm fields as the source of truth.',
-    example: `<!-- .jcr -->
-<input bind-value=\${name} />
-<input type="checkbox" bind-checked=\${ok} />`,
-    path: '/bindings',
+    id: "bindModel",
+    pkg: "@jacare/core",
+    groupId: "dom",
+    name: "bindModel",
+    importLine: "Emitted from bind-value / bind-checked",
+    example: "<!-- .jcr -->\n<input bind-value=${name} />\n<input type=\"checkbox\" bind-checked=${ok} />",
+    path: "/bindings",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Control flow (emitted)',
-    name: 'branch / showIf',
-    importLine: 'Emitted from #if / #case',
-    usage: 'Conditional blocks in templates.',
-    about:
-      'Runtime helpers behind #if / #elif / #else / #case. They mount one branch at a time and dispose the previous branch’s bindings when the condition changes. You write the directives; the compiler emits branch or showIf.',
-    example: `#if loading()
-  <p>Loading…</p>
-#elif error()
-  <p>Error</p>
-#else
-  <p>Ready</p>
-#end`,
-    path: '/if',
+    id: "branch",
+    pkg: "@jacare/core",
+    groupId: "controlFlow",
+    name: "branch / showIf",
+    importLine: "Emitted from #if / #case",
+    example: "#if loading()\n  <p>Loading…</p>\n#elif error()\n  <p>Error</p>\n#else\n  <p>Ready</p>\n#end",
+    path: "/if",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Control flow (emitted)',
-    name: 'reconcileKeyedList',
-    importLine: 'Emitted from #for',
-    usage: 'Keyed list reconciliation.',
-    about:
-      'Runtime behind #for list as item (key). Diffs by key: reuses existing item mounts, creates new keys, disposes removed keys, and reorders DOM nodes. Always pass a stable key (item.id), not the index, if the list can reorder.',
-    example: `#for items() as item (item.id)
-  <li>\${item.name}</li>
-#end`,
-    path: '/for',
+    id: "reconcileKeyedList",
+    pkg: "@jacare/core",
+    groupId: "controlFlow",
+    name: "reconcileKeyedList",
+    importLine: "Emitted from #for",
+    example: "#for items() as item (item.id)\n  <li>${item.name}</li>\n#end",
+    path: "/for",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Slots (emitted)',
-    name: 'mountSlot',
-    importLine: 'Emitted from <slot>',
-    usage: 'Default and named slots.',
-    about:
-      'Runtime behind <slot> and named slots. Parent content is projected into the child component’s slot outlets. You write slot markup; the compiler emits mountSlot.',
-    example: `<!-- parent -->
-<Card>
-  <slot name="title">Hello</slot>
-  <p>Body</p>
-</Card>
-
-<!-- Card.jcr -->
-<header><slot name="title" /></header>
-<slot />`,
-    path: '/components',
+    id: "mountSlot",
+    pkg: "@jacare/core",
+    groupId: "slots",
+    name: "mountSlot",
+    importLine: "Emitted from <slot>",
+    example: "<!-- parent -->\n<Card>\n  <slot name=\"title\">Hello</slot>\n  <p>Body</p>\n</Card>\n\n<!-- Card.jcr -->\n<header><slot name=\"title\" /></header>\n<slot />",
+    path: "/components",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'createNav',
+    id: "createNav",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "createNav",
     importLine: "import { createNav } from '@jacare/core'",
-    usage: 'Create the app router.',
-    about:
-      'Creates the SPA router: layout shell, screen table, missing page, optional beforeGo guard and base path. Returns nav with where (current place as a pulse), attach, go, swap, undo, and warm. One nav per app is typical.',
-    example: `import { createNav, lazy, screen } from '@jacare/core'
-import Shell from './Shell.jcr'
-import Home from './Home.jcr'
-
-export const nav = createNav({
-  layout: Shell,
-  screens: {
-    '/': { use: screen(Home), title: 'Home' },
-    '/about': { use: lazy(() => import('./About.jcr')), title: 'About' },
-  },
-})`,
-    path: '/nav',
+    example: "import { createNav, lazy, screen } from '@jacare/core'\nimport Shell from './Shell.jcr'\nimport Home from './Home.jcr'\n\nexport const nav = createNav({\n  layout: Shell,\n  screens: {\n    '/': { use: screen(Home), title: 'Home' },\n    '/about': { use: lazy(() => import('./About.jcr')), title: 'About' },\n  },\n})",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'lazy',
+    id: "lazy",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "lazy",
     importLine: "import { lazy } from '@jacare/core'",
-    usage: 'Lazy-load a screen module.',
-    about:
-      'Marks a dynamic import as a lazy screen loader for createNav. The .jcr module loads on first visit (or after warm). Keeps the initial bundle small for multi-page apps.',
-    example: `lazy(() => import('./About.jcr'))`,
-    path: '/nav',
+    example: "lazy(() => import('./About.jcr'))",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'screen',
+    id: "screen",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "screen",
     importLine: "import { screen } from '@jacare/core'",
-    usage: 'Wrap an eagerly imported screen.',
-    about:
-      'Wraps an already-imported screen module for eager use in createNav (for example the home page). Opposite of lazy — included in the parent chunk instead of loaded on demand.',
-    example: `import Home from './Home.jcr'
-screen(Home)`,
-    path: '/nav',
+    example: "import Home from './Home.jcr'\nscreen(Home)",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'nav.attach / go / swap / undo / warm',
-    importLine: '(methods on createNav() instance)',
-    usage: 'Mount, navigate, preload.',
-    about:
-      'Instance methods after createNav. attach(el) mounts the layout and frame and listens to history. go(path) pushes a new history entry; swap replaces; undo goes back; warm(path) preloads a lazy screen without navigating.',
-    example: `nav.attach(document.getElementById('app'))
-nav.go('/about')
-nav.go('/settings', { focus: true })  // focus [data-jacare-focus]
-nav.warm('/cart')   // preload
-nav.undo()          // back`,
-    path: '/nav',
+    id: "navMethods",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "nav.attach / go / swap / undo / warm",
+    importLine: "(methods on createNav() instance)",
+    example: "nav.attach(document.getElementById('app'))\nnav.go('/about')\nnav.go('/settings', { focus: true })  // focus [data-jacare-focus]\nnav.warm('/cart')   // preload\nnav.undo()          // back",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'createRoute',
+    id: "createRoute",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "createRoute",
     importLine: "import { createRoute } from '@jacare/core'",
-    usage: 'Helpers around nav.where.',
-    about:
-      'Builds a small helper object around nav.where so routeParam and routeSearch stay ergonomic. Export one route next to nav in larger apps.',
-    example: `import { createRoute } from '@jacare/core'
-import { nav } from './nav.js'
-
-export const route = createRoute(nav.where)`,
-    path: '/nav',
+    example: "import { createRoute } from '@jacare/core'\nimport { nav } from './nav.js'\n\nexport const route = createRoute(nav.where)",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'getRouteParam',
+    id: "getRouteParam",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "getRouteParam",
     importLine: "import { getRouteParam } from '@jacare/core'",
-    usage: 'Reactive getter for an active nav path param.',
-    about:
-      'Used by template sugar ${@route/id}. Returns a getter that tracks nav.where. Prefer createRoute(nav.where) in JS for typed helpers and search keys.',
-    example: `import { getRouteParam } from '@jacare/core'
-
-const id = getRouteParam('id')
-id()  // → '42' when path is /orders/42
-
-// template:
-// <p>\${@route/id}</p>`,
-    path: '/nav',
+    example: "import { getRouteParam } from '@jacare/core'\n\nconst id = getRouteParam('id')\nid()  // → '42' when path is /orders/42\n\n// template:\n// <p>${@route/id}</p>",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'routeParam',
+    id: "routeParam",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "routeParam",
     importLine: "import { routeParam } from '@jacare/core'",
-    usage: 'Read a path param as a reactive getter.',
-    about:
-      'Returns a getter for a path parameter (for example :id). Call id() in script or templates; it tracks navigation so the UI updates when the param changes.',
-    example: `import { routeParam } from '@jacare/core'
-import { route } from './route.js'
-
-const id = routeParam(route, 'id')
-id()  // → '42' when path is /item/42`,
-    path: '/nav',
+    example: "import { routeParam } from '@jacare/core'\nimport { route } from './route.js'\n\nconst id = routeParam(route, 'id')\nid()  // → '42' when path is /item/42",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'routeSearch',
+    id: "routeSearch",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "routeSearch",
     importLine: "import { routeSearch } from '@jacare/core'",
-    usage: 'Read a query string value.',
-    about:
-      'Same idea as routeParam for ?query= values. The getter is reactive to search changes on the current place.',
-    example: `import { routeSearch } from '@jacare/core'
-import { route } from './route.js'
-
-const q = routeSearch(route, 'q')
-q()  // → 'tea' when URL has ?q=tea`,
-    path: '/nav',
+    example: "import { routeSearch } from '@jacare/core'\nimport { route } from './route.js'\n\nconst q = routeSearch(route, 'q')\nq()  // → 'tea' when URL has ?q=tea",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'routeHref',
+    id: "routeHref",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "routeHref",
     importLine: "import { routeHref } from '@jacare/core'",
-    usage: 'Build an href from path + params/search.',
-    about:
-      'Pure helper that builds a path string from a pattern and params or search. Replaces each :name / :name* token (no substring collisions such as :id inside :idea). Useful for jacare-go targets and tests. It does not navigate by itself.',
-    example: `import { routeHref } from '@jacare/core'
-
-routeHref('/item/:id', { id: '7' })              // → '/item/7'
-routeHref('/a/:idea/:id', { idea: 'x', id: '1' }) // → '/a/x/1'
-routeHref('/files/:path*', { path: 'a/b' })       // → '/files/a/b'`,
-    path: '/nav',
+    example: "import { routeHref } from '@jacare/core'\n\nrouteHref('/item/:id', { id: '7' })              // → '/item/7'\nrouteHref('/a/:idea/:id', { idea: 'x', id: '1' }) // → '/a/x/1'\nrouteHref('/files/:path*', { path: 'a/b' })       // → '/files/a/b'",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Navigation',
-    name: 'setNavTitle / getNavTitle',
+    id: "navTitle",
+    pkg: "@jacare/core",
+    groupId: "navigation",
+    name: "setNavTitle / getNavTitle",
     importLine: "import { setNavTitle, getNavTitle } from '@jacare/core'",
-    usage: 'Update document.title at runtime.',
-    about:
-      'setNavTitle updates document.title (and nav title plumbing). getNavTitle reads the current title string. Often used inside an effect or a screen title function when the title depends on pulses.',
-    example: `import { setNavTitle, getNavTitle, effect } from '@jacare/core'
-
-effect(() => {
-  setNavTitle(\`Cart · \${count()}\`)
-})
-getNavTitle()  // current title string`,
-    path: '/lifecycle',
+    example: "import { setNavTitle, getNavTitle, effect } from '@jacare/core'\n\neffect(() => {\n  setNavTitle(`Cart · ${count()}`)\n})\ngetNavTitle()  // current title string",
+    path: "/lifecycle",
   },
   {
-    pkg: '.jcr template',
-    group: 'Navigation',
-    name: 'jacare-frame / jacare-go / jacare-here',
-    importLine: '(attributes in view)',
-    usage: 'Outlet + SPA links + active match.',
-    about:
-      'Template attributes (not JS imports). jacare-frame is the outlet where screens mount. jacare-go intercepts clicks for SPA navigation (keep href for progressive enhancement). jacare-here marks the active link match for styling. jacare-when={cond} is a one-liner #if. data-jacare-focus is the default focus target for nav.go(path, { focus: true }).',
-    example: `<main jacare-frame></main>
-<a jacare-go="/about" href="/about">About</a>
-<a jacare-go="/shop" jacare-here class-active>Shop</a>`,
-    path: '/nav',
+    id: "jacareAttrs",
+    pkg: ".jcr template",
+    groupId: "navigation",
+    name: "jacare-frame / jacare-go / jacare-here",
+    importLine: "(attributes in view)",
+    example: "<main jacare-frame></main>\n<a jacare-go=\"/about\" href=\"/about\">About</a>\n<a jacare-go=\"/shop\" jacare-here class-active>Shop</a>",
+    path: "/nav",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Forms',
-    name: 'createForm',
+    id: "createForm",
+    pkg: "@jacare/core",
+    groupId: "forms",
+    name: "createForm",
     importLine: "import { createForm } from '@jacare/core'",
-    usage: 'Reactive form fields, validation, submit.',
-    about:
-      'Builds a reactive form from a field schema (initial value + optional validate). Each field behaves like a pulse with .error(), .touched(), .dirty(), and .blur(). handleSubmit(fn) validates then calls fn(values). Pair fields with bind-value in the view.',
-    example: `import { createForm } from '@jacare/core'
-
-const form = createForm({
-  email: {
-    value: '',
-    validate: (v) => (v.includes('@') ? undefined : 'Invalid email'),
-  },
-})
-
-<form on-submit=\${form.handleSubmit((values) => console.log(values))}>
-  <input bind-value=\${form.fields.email} />
-  <span>\${form.fields.email.error()}</span>
-</form>`,
-    path: '/forms',
+    example: "import { createForm } from '@jacare/core'\n\nconst form = createForm({\n  email: {\n    value: '',\n    validate: (v) => (v.includes('@') ? undefined : 'Invalid email'),\n  },\n})\n\n<form on-submit=${form.handleSubmit((values) => console.log(values))}>\n  <input bind-value=${form.fields.email} />\n  <span>${form.fields.email.error()}</span>\n</form>",
+    path: "/forms",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Lifecycle',
-    name: 'createLifecycle',
+    id: "createLifecycle",
+    pkg: "@jacare/core",
+    groupId: "lifecycle",
+    name: "createLifecycle",
     importLine: "import { createLifecycle } from '@jacare/core'",
-    usage: 'Screen mount / activate / deactivate hooks.',
-    about:
-      'Export lifecycle from a screen module so nav can call onMount, onActivate, onDeactivate, and onUnmount. Use activate/deactivate for work that should run when the screen is shown or hidden without a full unmount. Return cleanups from hooks when needed.',
-    example: `import { createLifecycle } from '@jacare/core'
-
-export const lifecycle = createLifecycle({
-  onMount() { console.log('mounted') },
-  onActivate() { console.log('visible') },
-  onDeactivate() { console.log('hidden') },
-  onUnmount() { console.log('gone') },
-})`,
-    path: '/lifecycle',
+    example: "import { createLifecycle } from '@jacare/core'\n\nexport const lifecycle = createLifecycle({\n  onMount() { console.log('mounted') },\n  onActivate() { console.log('visible') },\n  onDeactivate() { console.log('hidden') },\n  onUnmount() { console.log('gone') },\n})",
+    path: "/lifecycle",
   },
   {
-    pkg: '@jacare/core',
-    group: 'Lifecycle',
-    name: 'registerScope',
+    id: "registerScope",
+    pkg: "@jacare/core",
+    groupId: "lifecycle",
+    name: "registerScope",
     importLine: "import { registerScope } from '@jacare/core'",
-    usage: 'Expose a value in the DevTools Scope panel.',
-    about:
-      'Registers a labeled getter in the DevTools Scope panel (for example draft state while debugging). Usually returned from onActivate so it unregisters on deactivate. Not required for production UI.',
-    example: `import { createLifecycle, registerScope } from '@jacare/core'
-
-export const lifecycle = createLifecycle({
-  onActivate() {
-    return registerScope('draft', 'Draft', () => draft())
-  },
-})`,
-    path: '/lifecycle',
+    example: "import { createLifecycle, registerScope } from '@jacare/core'\n\nexport const lifecycle = createLifecycle({\n  onActivate() {\n    return registerScope('draft', 'Draft', () => draft())\n  },\n})",
+    path: "/lifecycle",
   },
   {
-    pkg: '@jacare/core',
-    group: 'SSR',
-    name: 'renderToString',
+    id: "renderToString",
+    pkg: "@jacare/core",
+    groupId: "ssr",
+    name: "renderToString",
     importLine: "import { renderToString } from '@jacare/core'",
-    usage: 'SSR a page render() to one HTML string.',
-    about:
-      'Calls your page’s render(props) and returns the HTML string. Use on the server or in build scripts. Pair with the .jcr module’s render export — it is not a replacement for client mount.',
-    example: `import { renderToString } from '@jacare/core'
-import { render } from './Page.jcr'
-
-const html = renderToString(render, { title: 'Hi' })`,
-    path: '/ssr',
+    example: "import { renderToString } from '@jacare/core'\nimport { render } from './Page.jcr'\n\nconst html = renderToString(render, { title: 'Hi' })",
+    path: "/ssr",
   },
   {
-    pkg: '@jacare/core',
-    group: 'SSR',
-    name: 'renderToStream',
+    id: "renderToStream",
+    pkg: "@jacare/core",
+    groupId: "ssr",
+    name: "renderToStream",
     importLine: "import { renderToStream } from '@jacare/core'",
-    usage: 'Stream SSR chunks (async iterable).',
-    about:
-      'Async-iterates HTML chunks derived from a full render (top-level element split). Useful to start writing response bytes early. It is not a fully incremental component stream like React Server Components.',
-    example: `import { renderToStream } from '@jacare/core'
-import { render } from './Page.jcr'
-
-for await (const chunk of renderToStream(render)) {
-  res.write(chunk)
-}`,
-    path: '/ssr',
+    example: "import { renderToStream } from '@jacare/core'\nimport { render } from './Page.jcr'\n\nfor await (const chunk of renderToStream(render)) {\n  res.write(chunk)\n}",
+    path: "/ssr",
   },
   {
-    pkg: '@jacare/core',
-    group: 'SSR',
-    name: 'resumeBindings',
+    id: "resumeBindings",
+    pkg: "@jacare/core",
+    groupId: "ssr",
+    name: "resumeBindings",
     importLine: "import { resumeBindings } from '@jacare/core'",
-    usage: 'Low-level: rebind data-jacare-bind nodes.',
-    about:
-      'Low-level hydration: finds [data-jacare-bind] nodes and attaches text bindings from SSR state. Prefer the compiled resume() from the .jcr module in apps; this helper is for custom SSR pipelines.',
-    example: `import { resumeBindings } from '@jacare/core'
-
-resumeBindings(rootEl, state)
-// Prefer resume() from the .jcr module in apps.`,
-    path: '/ssr',
+    example: "import { resumeBindings } from '@jacare/core'\n\nresumeBindings(rootEl, state)\n// Prefer resume() from the .jcr module in apps.",
+    path: "/ssr",
   },
   {
-    pkg: '@jacare/core/island',
-    group: 'Islands',
-    name: 'mountIsland',
+    id: "mountIsland",
+    pkg: "@jacare/core/island",
+    groupId: "islands",
+    name: "mountIsland",
     importLine: "import { mountIsland } from '@jacare/core/island'",
-    usage: 'Embed a compiled .jcr widget into a host element (static/React/Vue/Angular).',
-    about:
-      'Thin island entry: resolve a host (selector or Element), optionally attach a shadow root, call the widget’s mount, mark the host with data-jacare-island, and return dispose. Plain props become live pulses by default — call dispose.update(next) without remounting. Does not pull nav/forms/DevTools. Prefer shadow: true when the host has aggressive global CSS.',
-    example: `import { mountIsland } from '@jacare/core/island'
-import Widget from './Widget.jcr'
-
-const island = mountIsland('#slot', Widget, {
-  props: { start: 2 },
-  shadow: true,
-})
-
-island.update({ start: 5 })
-island()`,
-    path: '/island',
+    example: "import { mountIsland } from '@jacare/core/island'\nimport Widget from './Widget.jcr'\n\nconst island = mountIsland('#slot', Widget, {\n  props: { start: 2 },\n  shadow: true,\n})\n\nisland.update({ start: 5 })\nisland()",
+    path: "/island",
   },
   {
-    pkg: '@jacare/core',
-    group: 'SSR',
-    name: 'escapeHtml',
+    id: "escapeHtml",
+    pkg: "@jacare/core",
+    groupId: "ssr",
+    name: "escapeHtml",
     importLine: "import { escapeHtml } from '@jacare/core'",
-    usage: 'Escape text before injecting into SSR HTML.',
-    about:
-      'Escapes &, <, >, and " for safe HTML text and attribute interpolation. The compiler inserts escapeHtml in SSR codegen; call it yourself only if you build HTML strings manually.',
-    example: `import { escapeHtml } from '@jacare/core'
-
-escapeHtml('<script>')  // → '&lt;script&gt;'`,
-    path: '/ssr',
+    example: "import { escapeHtml } from '@jacare/core'\n\nescapeHtml('<script>')  // → '&lt;script&gt;'",
+    path: "/ssr",
   },
   {
-    pkg: '.jcr module',
-    group: 'SSR / client',
-    name: 'mount',
+    id: "mount",
+    pkg: ".jcr module",
+    groupId: "ssrClient",
+    name: "mount",
     importLine: "import { mount } from './Page.jcr'",
-    usage: 'Client: create DOM + bind. Returns dispose.',
-    about:
-      'Default client entry exported by every compiled .jcr file. mount(element, props?) creates DOM, wires bindings, and returns dispose(). Used by boot scripts and by nav when attaching screens.',
-    example: `import { mount } from './Counter.jcr'
-
-const dispose = mount(document.getElementById('app'), { start: 0 })
-// later: dispose()`,
-    path: '/module',
+    example: "import { mount } from './Counter.jcr'\n\nconst dispose = mount(document.getElementById('app'), { start: 0 })\n// later: dispose()",
+    path: "/module",
   },
   {
-    pkg: '.jcr module',
-    group: 'SSR / client',
-    name: 'render',
+    id: "render",
+    pkg: ".jcr module",
+    groupId: "ssrClient",
+    name: "render",
     importLine: "import { render } from './Page.jcr'",
-    usage: 'SSR: return { html, state }.',
-    about:
-      'SSR export from a .jcr module. render(props?) returns { html, state }. Send html in the response and pass state to resume on the client.',
-    example: `import { render } from './Page.jcr'
-
-const { html, state } = render({ title: 'Hi' })`,
-    path: '/ssr',
+    example: "import { render } from './Page.jcr'\n\nconst { html, state } = render({ title: 'Hi' })",
+    path: "/ssr",
   },
   {
-    pkg: '.jcr module',
-    group: 'SSR / client',
-    name: 'resume',
+    id: "resume",
+    pkg: ".jcr module",
+    groupId: "ssrClient",
+    name: "resume",
     importLine: "import { resume } from './Page.jcr'",
-    usage: 'Hydrate existing SSR HTML.',
-    about:
-      'Client hydration export. resume(element, state, props?) binds to existing SSR markup instead of recreating it. Use after render or renderToString on the server.',
-    example: `import { resume } from './Page.jcr'
-
-resume(document.getElementById('app'), window.__STATE__)`,
-    path: '/ssr',
+    example: "import { resume } from './Page.jcr'\n\nresume(document.getElementById('app'), window.__STATE__)",
+    path: "/ssr",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DevTools (core)',
-    name: 'enableDevtools',
+    id: "enableDevtools",
+    pkg: "@jacare/core",
+    groupId: "devtoolsCore",
+    name: "enableDevtools",
     importLine: "import { enableDevtools } from '@jacare/core'",
-    usage: 'Turn on pulse graph collection.',
-    about:
-      'Turns on the in-core pulse graph registry (dependency edges and names). Apps usually call connectJacareDevtools instead, which enables this for you. Keep behind DEV flags.',
-    example: `import { enableDevtools } from '@jacare/core'
-
-enableDevtools()
-// Prefer connectJacareDevtools from @jacare/devtools`,
-    path: '/tooling',
+    example: "import { enableDevtools } from '@jacare/core'\n\nenableDevtools()\n// Prefer connectJacareDevtools from @jacare/devtools",
+    path: "/tooling",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DevTools (core)',
-    name: 'why',
+    id: "why",
+    pkg: "@jacare/core",
+    groupId: "devtoolsCore",
+    name: "why",
     importLine: "import { why, whyLast, formatWhyChain } from '@jacare/core'",
-    usage: 'Causal chain: element → binding → pulse → last write.',
-    about:
-      'why(target) builds a WhyChain from the DevTools registry and write ledger. Targets: Element/Node, pulse, pulse id, or mesh name (@bag/key). whyLast() uses the last recorded write. formatWhyChain prints the tree used by $why, the overlay Why card, and ReactiveCycleError. Requires enableDevtools / connectJacareDevtools so writes are ledgered.',
-    example: `import { why, formatWhyChain } from '@jacare/core'
-
-const chain = why(document.querySelector('.badge'))
-console.log(formatWhyChain(chain))
-// With the page hook: $why($0) · $why.last()`,
-    path: '/why',
+    example: "import { why, formatWhyChain } from '@jacare/core'\n\nconst chain = why(document.querySelector('.badge'))\nconsole.log(formatWhyChain(chain))\n// With the page hook: $why($0) · $why.last()",
+    path: "/why",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DevTools (core)',
-    name: 'namePulse',
+    id: "namePulse",
+    pkg: "@jacare/core",
+    groupId: "devtoolsCore",
+    name: "namePulse",
     importLine: "import { namePulse } from '@jacare/core'",
-    usage: 'Label a pulse in the graph.',
-    about:
-      'Attaches a human label (and optional file/line) to a pulse for the graph UI. The compiler often emits this in DEV automatically for const pulses in .jcr modules.',
-    example: `import { pulse, namePulse } from '@jacare/core'
-
-const count = pulse(0)
-namePulse(count, 'count')`,
-    path: '/tooling',
+    example: "import { pulse, namePulse } from '@jacare/core'\n\nconst count = pulse(0)\nnamePulse(count, 'count')",
+    path: "/tooling",
   },
   {
-    pkg: '@jacare/core',
-    group: 'DevTools (core)',
-    name: 'getPulseGraph',
+    id: "getPulseGraph",
+    pkg: "@jacare/core",
+    groupId: "devtoolsCore",
+    name: "getPulseGraph",
     importLine: "import { getPulseGraph } from '@jacare/core'",
-    usage: 'Snapshot of the pulse graph.',
-    about:
-      'Returns a snapshot of pulses, effects, and edges for custom tooling or tests. The overlay UI uses subscribePulseGraph; you rarely need this in application code.',
-    example: `import { getPulseGraph } from '@jacare/core'
-
-const graph = getPulseGraph()
-console.log(graph.pulses)`,
-    path: '/tooling',
+    example: "import { getPulseGraph } from '@jacare/core'\n\nconst graph = getPulseGraph()\nconsole.log(graph.pulses)",
+    path: "/tooling",
   },
   {
-    pkg: '@jacare/devtools',
-    group: 'DevTools UI',
-    name: 'connectJacareDevtools',
+    id: "connectJacareDevtools",
+    pkg: "@jacare/devtools",
+    groupId: "devtoolsUi",
+    name: "connectJacareDevtools",
     importLine: "import { connectJacareDevtools } from '@jacare/devtools'",
-    usage: 'Mount the overlay UI. Returns dispose.',
-    about:
-      'Mounts the Jacaré DevTools overlay (Pulse Graph, optional Scope and Mesh tabs). Returns a stop function. Use only in development or behind an explicit Lab toggle — not as a production default.',
-    example: `import { connectJacareDevtools } from '@jacare/devtools'
-
-const stop = connectJacareDevtools({
-  position: 'bottom-right',
-  scope: true,
-  mesh: true,
-})
-// stop() removes the overlay`,
-    path: '/tooling',
+    example: "import { connectJacareDevtools } from '@jacare/devtools'\n\nconst stop = connectJacareDevtools({\n  position: 'bottom-right',\n  scope: true,\n  mesh: true,\n})\n// stop() removes the overlay",
+    path: "/tooling",
   },
   {
-    pkg: '@jacare/compiler',
-    group: 'Compiler API',
-    name: 'compile',
+    id: "compile",
+    pkg: "@jacare/compiler",
+    groupId: "compiler",
+    name: "compile",
     importLine: "import { compile } from '@jacare/compiler'",
-    usage: 'Compile .jcr source to JS (tooling / tests).',
-    about:
-      'Programmatic compiler: .jcr source string → JavaScript module code (and optional source map). Used by the Vite plugin, CLI, Lab playground, and tests. Production apps do not call compile in the browser.',
-    example: `import { compile } from '@jacare/compiler'
-
-const { code } = compile(source, {
-  filename: 'Page.jcr',
-  mode: 'module',
-})`,
-    path: '/tooling',
+    example: "import { compile } from '@jacare/compiler'\n\nconst { code } = compile(source, {\n  filename: 'Page.jcr',\n  mode: 'module',\n})",
+    path: "/tooling",
   },
   {
-    pkg: '@jacare/compiler',
-    group: 'Compiler API',
-    name: 'parseModule / parseTemplate',
+    id: "parseModule",
+    pkg: "@jacare/compiler",
+    groupId: "compiler",
+    name: "parseModule / parseTemplate",
     importLine: "import { parseModule, parseTemplate } from '@jacare/compiler'",
-    usage: 'Parse AST for tools.',
-    about:
-      'Lower-level parsers that return ASTs for tooling (linters, IR inspectors, IDE features). Prefer compile() unless you are building developer tools on top of Jacaré.',
-    example: `import { parseModule } from '@jacare/compiler'
-
-const ast = parseModule(source, 'Page.jcr')`,
-    path: '/tooling',
+    example: "import { parseModule } from '@jacare/compiler'\n\nconst ast = parseModule(source, 'Page.jcr')",
+    path: "/tooling",
   },
   {
-    pkg: '@jacare/compiler',
-    group: 'Compiler API',
-    name: 'inspectTemplateBindings',
+    id: "inspectTemplateBindings",
+    pkg: "@jacare/compiler",
+    groupId: "compiler",
+    name: "inspectTemplateBindings",
     importLine: "import { inspectTemplateBindings } from '@jacare/compiler'",
-    usage: 'Binding IR sites (same as jacare check --bindings).',
-    about:
-      'Returns Binding IR sites for a template — the same data jacare check --bindings prints. Use it to teach, test, or visualize how each ${} / bind becomes a runtime helper.',
-    example: `import { inspectTemplateBindings } from '@jacare/compiler'
-
-const sites = inspectTemplateBindings(source, 'Page.jcr')
-console.log(sites)`,
-    path: '/binding-ir',
+    example: "import { inspectTemplateBindings } from '@jacare/compiler'\n\nconst sites = inspectTemplateBindings(source, 'Page.jcr')\nconsole.log(sites)",
+    path: "/binding-ir",
   },
   {
-    pkg: '@jacare/compiler',
-    group: 'Compiler API',
-    name: 'lowerMountAst',
+    id: "lowerMountAst",
+    pkg: "@jacare/compiler",
+    groupId: "compiler",
+    name: "lowerMountAst",
     importLine: "import { lowerMountAst } from '@jacare/compiler'",
-    usage: 'Lower template AST to MountPlan forest.',
-    about:
-      'Lowers a parsed template AST into a MountPlan forest (structured mount instructions). Advanced compiler and IR tooling — see the Binding IR lesson.',
-    example: `import { parseTemplate, lowerMountAst } from '@jacare/compiler'
-
-const ast = parseTemplate(viewSource)
-const plan = lowerMountAst(ast)`,
-    path: '/binding-ir',
+    example: "import { parseTemplate, lowerMountAst } from '@jacare/compiler'\n\nconst ast = parseTemplate(viewSource)\nconst plan = lowerMountAst(ast)",
+    path: "/binding-ir",
   },
   {
-    pkg: '@jacare/vite-plugin',
-    group: 'Vite',
-    name: 'jacare',
+    id: "jacare",
+    pkg: "@jacare/vite-plugin",
+    groupId: "vite",
+    name: "jacare",
     importLine: "import jacare from '@jacare/vite-plugin'",
-    usage: 'Vite plugin for .jcr transform + HMR.',
-    about:
-      'Default Vite plugin. Transforms .jcr on the fly, enables HMR, turns on CPW optimizations in production, and strips debug binds. Add plugins: [jacare()] to your Vite config.',
-    example: `import { defineConfig } from 'vite'
-import jacare from '@jacare/vite-plugin'
-
-export default defineConfig({
-  plugins: [jacare()],
-})`,
-    path: '/tooling',
+    example: "import { defineConfig } from 'vite'\nimport jacare from '@jacare/vite-plugin'\n\nexport default defineConfig({\n  plugins: [jacare()],\n})",
+    path: "/tooling",
   },
   {
-    pkg: '@jacare/vite-plugin',
-    group: 'Vite',
-    name: 'createJacareViteConfig',
+    id: "createJacareViteConfig",
+    pkg: "@jacare/vite-plugin",
+    groupId: "vite",
+    name: "createJacareViteConfig",
     importLine: "import { createJacareViteConfig } from '@jacare/vite-plugin'",
-    usage: 'Opinionated Vite config helper.',
-    about:
-      'Helper that returns a ready-made Vite config with the Jacaré plugin and sensible defaults (title, and related options). Useful for scaffolds; customize when you outgrow it.',
-    example: `import { createJacareViteConfig } from '@jacare/vite-plugin'
-
-export default createJacareViteConfig({
-  title: 'My App',
-})`,
-    path: '/tooling',
+    example: "import { createJacareViteConfig } from '@jacare/vite-plugin'\n\nexport default createJacareViteConfig({\n  title: 'My App',\n})",
+    path: "/tooling",
   },
   {
-    pkg: '@jacare/meta',
-    group: 'Meta / file routes',
-    name: 'jacareMeta',
+    id: "jacareMeta",
+    pkg: "@jacare/meta",
+    groupId: "meta",
+    name: "jacareMeta",
     importLine: "import { jacareMeta } from '@jacare/meta/vite'",
-    usage: 'Vite plugin for file-based routes.',
-    about:
-      'Optional Vite plugin for file-based routing (a pages directory becomes a route table). Import from @jacare/meta/vite — the main @jacare/meta entry stays browser-safe.',
-    example: `import { jacareMeta } from '@jacare/meta/vite'
-
-plugins: [jacareMeta({ pagesDir: 'src/pages' })]`,
-    path: '/helpers',
+    example: "import { jacareMeta } from '@jacare/meta/vite'\n\nplugins: [jacareMeta({ pagesDir: 'src/pages' })]",
+    path: "/helpers",
   },
   {
-    pkg: '@jacare/meta',
-    group: 'Meta / file routes',
-    name: 'discoverRoutes',
+    id: "discoverRoutes",
+    pkg: "@jacare/meta",
+    groupId: "meta",
+    name: "discoverRoutes",
     importLine: "import { discoverRoutes } from '@jacare/meta/vite'",
-    usage: 'Map pages/** files to route paths.',
-    about:
-      'Scans a pages directory and maps file paths to URL patterns (including dynamic segments). Used by meta tooling at build time — import from @jacare/meta/vite.',
-    example: `import { discoverRoutes } from '@jacare/meta/vite'
-
-const routes = discoverRoutes({ pagesDir: 'src/pages' })
-// → [{ path: '/', file: '…' }, …]`,
-    path: '/helpers',
+    example: "import { discoverRoutes } from '@jacare/meta/vite'\n\nconst routes = discoverRoutes({ pagesDir: 'src/pages' })\n// → [{ path: '/', file: '…' }, …]",
+    path: "/helpers",
   },
   {
-    pkg: '@jacare/meta',
-    group: 'Meta / file routes',
-    name: 'createJacareApp',
+    id: "createJacareApp",
+    pkg: "@jacare/meta",
+    groupId: "meta",
+    name: "createJacareApp",
     importLine: "import { createJacareApp } from '@jacare/meta'",
-    usage: 'Bootstrap nav from an explicit screens map.',
-    about:
-      'Wraps createNav when you already have screens. Does not scan pagesDir at runtime — for file routes use jacareMeta() + createJacareAppFromRoutes({ routeLoaders }) from virtual:jacare-routes.',
-    example: `import { createJacareApp } from '@jacare/meta'
-
-const app = createJacareApp({
-  layout: Shell,
-  screens: { '/': Home },
-})
-app.attach(document.getElementById('app'))`,
-    path: '/helpers',
+    example: "import { createJacareApp } from '@jacare/meta'\n\nconst app = createJacareApp({\n  layout: Shell,\n  screens: { '/': Home },\n})\napp.attach(document.getElementById('app'))",
+    path: "/helpers",
   },
   {
-    pkg: '@jacare/cli',
-    group: 'CLI',
-    name: 'jacare new / dev / build / check',
-    importLine: '(CLI — not a JS import)',
-    usage: 'Scaffold, develop, build, and inspect.',
-    about:
-      'Command-line tools (not a JavaScript import). new scaffolds an app; dev runs Vite; build writes production output; check compiles project .jcr files; check --bindings prints Binding IR. You can also run npm create jacare@latest.',
-    example: `npm create jacare@latest my-app
-jacare new my-app --template=todo
-jacare dev
-jacare build
-jacare check --bindings`,
-    path: '/tooling',
+    id: "jacareCli",
+    pkg: "@jacare/cli",
+    groupId: "cli",
+    name: "jacare new / dev / build / check",
+    importLine: "(CLI — not a JS import)",
+    example: "npm create jacare@latest my-app\njacare new my-app --template=todo\njacare dev\njacare build\njacare check --bindings",
+    path: "/tooling",
   },
   {
-    pkg: '.jcr syntax',
-    group: 'Language',
-    name: 'export <view>',
-    importLine: '(required module block)',
-    usage: 'The page or component template.',
-    about:
-      'Required template block in a .jcr module — the UI tree with bindings, directives, and components. The compiler turns it into mount, render, and resume. Script above the view stays plain JavaScript.',
-    example: `import { pulse } from '@jacare/core'
-
-const count = pulse(0)
-
-export <view>
-  <button on-click=\${() => count.update(n => n + 1)}>
-    \${count}
-  </button>
-</view>`,
-    path: '/language',
+    id: "exportView",
+    pkg: ".jcr syntax",
+    groupId: "language",
+    name: "export <view>",
+    importLine: "(required module block)",
+    example: "import { pulse } from '@jacare/core'\n\nconst count = pulse(0)\n\nexport <view>\n  <button on-click=${() => count.update(n => n + 1)}>\n    ${count}\n  </button>\n</view>",
+    path: "/language",
   },
   {
-    pkg: '.jcr syntax',
-    group: 'Language',
-    name: 'export <style>',
-    importLine: '(optional scoped CSS)',
-    usage: 'CSS scoped to this module.',
-    about:
-      'Optional scoped CSS for this module. Selectors are rewritten so styles do not leak globally. Styles may be static or reactive depending on content.',
-    example: `export <style>
-  button { color: green; }
-</style>`,
-    path: '/language',
+    id: "exportStyle",
+    pkg: ".jcr syntax",
+    groupId: "language",
+    name: "export <style>",
+    importLine: "(optional scoped CSS)",
+    example: "export <style>\n  button { color: green; }\n</style>",
+    path: "/language",
   },
   {
-    pkg: '.jcr syntax',
-    group: 'Language',
-    name: 'export <contract>',
-    importLine: '(optional contract surface)',
-    usage: 'Declare props / events for tooling.',
-    about:
-      'Optional declaration of props, emits, slots, and related surface for tooling and validation. Helps catch misuse of components at compile or check time.',
-    example: `export <contract>
-  props: { title: string }
-</contract>`,
-    path: '/language',
+    id: "exportContract",
+    pkg: ".jcr syntax",
+    groupId: "language",
+    name: "export <contract>",
+    importLine: "(optional contract surface)",
+    example: "export <contract>\n  props: { title: string }\n</contract>",
+    path: "/language",
   },
   {
-    pkg: '.jcr syntax',
-    group: 'Language',
-    name: 'on-* / @* events',
-    importLine: '(template attributes)',
-    usage: 'DOM events with automatic cleanup.',
-    about:
-      'Template event attributes. Prefer on-click=${handler}; @click is an alias. Listeners are registered on mount and removed on dispose — no manual removeEventListener in app code.',
-    example: `<button on-click=\${() => count.update(n => n + 1)}>
-  Click
-</button>`,
-    path: '/events',
+    id: "events",
+    pkg: ".jcr syntax",
+    groupId: "language",
+    name: "on-* / @* events",
+    importLine: "(template attributes)",
+    example: "<button on-click=${() => count.update(n => n + 1)}>\n  Click\n</button>",
+    path: "/events",
   },
   {
-    pkg: '.jcr syntax',
-    group: 'Language',
-    name: '<debug>',
-    importLine: '(template tag — stripped in prod)',
-    usage: 'Inline debug panel for selected values.',
-    about:
-      'Dev-only template tag that shows a small panel of selected values. Stripped or no-op in production builds. Handy while teaching reactivity on a page.',
-    example: `<debug count=\${count} cart=\${cart}></debug>`,
-    path: '/debug',
+    id: "debugTag",
+    pkg: ".jcr syntax",
+    groupId: "language",
+    name: "<debug>",
+    importLine: "(template tag — stripped in prod)",
+    example: "<debug count=${count} cart=${cart}></debug>",
+    path: "/debug",
   },
 ]

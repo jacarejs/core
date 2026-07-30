@@ -1,6 +1,7 @@
 import { pulse, derive } from '@jacare/core'
 import { appHref, assetUrl } from '../app-base.js'
-import { LESSONS } from '../topics.js'
+import { LESSONS, lessonTitle, lessonBlurb } from '../topics.js'
+import { t, translate } from '../i18n.js'
 import Demo from '../components/Demo.jcr'
 import Tip from '../components/Tip.jcr'
 import { quickStartCode, bootCode, greetingCode, highlightCode } from '../snippets/start.js'
@@ -12,7 +13,7 @@ function increment() {
 }
 
 const learnerName = pulse('friend')
-const greeting = derive(() => 'Hello, ' + learnerName() + '!')
+const greeting = derive(() => translate('home.hello', { name: learnerName() }))
 
 const highlighted = pulse(false)
 
@@ -34,8 +35,8 @@ export <view>
   <section class="page">
     <header class="page-hero">
       <img class="lab-logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
-      <h1 class="page-title lab-brand">Jacaré Lab</h1>
-      <p class="page-lead">A complete, live tour of the API — every lesson pairs a short explanation with a running demo. Open <strong>View code</strong>${' '}to see the source.</p>
+      <h1 class="page-title lab-brand">${t('home.title')}</h1>
+      <p class="page-lead">${t('home.lead')}</p>
       <div class="lab-links">
         <a
           class="lab-badge-link"
@@ -67,64 +68,64 @@ export <view>
           target="_blank"
           rel="noopener noreferrer"
         >
-          GitHub repository
+          ${t('home.github')}
         </a>
       </div>
     </header>
 
-    <Tip :text=${'Every Demo card below has a "View code" button in its header — it opens the exact source for that example in a modal.'} />
+    <Tip :text=${translate('home.tip')} />
 
     <div class="intro-stack">
       <article class="intro-card">
-        <h2 class="intro-title">What is Jacaré?</h2>
-        <p class="intro-copy">Jacaré is a compile-time front-end framework for building fast, reactive web apps with plain JavaScript. You write <code>.jcr</code>${' '}modules — normal JS plus an HTML-like view — and the compiler turns them into direct DOM updates. No virtual DOM, no whole-tree re-renders: when state changes, only the nodes that depend on it update.</p>
-        <p class="intro-copy">This lab is a guided tour of that API. Each lesson ships a live demo and a <strong>View code</strong>${' '}button so you can read the exact source that is running.</p>
+        <h2 class="intro-title">${t('home.whatTitle')}</h2>
+        <p class="intro-copy">${t('home.whatBody1')}</p>
+        <p class="intro-copy">${t('home.whatBody2')}</p>
       </article>
 
       <article class="intro-card">
-        <h2 class="intro-title">Install</h2>
-        <p class="intro-copy">Scaffold a new app with the official create package (npm, pnpm, or yarn all work):</p>
+        <h2 class="intro-title">${t('home.installTitle')}</h2>
+        <p class="intro-copy">${t('home.installBody1')}</p>
         <pre class="log">${installCreate}</pre>
-        <p class="intro-copy">Or install the CLI globally and scaffold with <code>jacare new</code>:</p>
+        <p class="intro-copy">${t('home.installBody2')}</p>
         <pre class="log">${installCli}</pre>
       </article>
 
       <article class="intro-card">
-        <h2 class="intro-title">Start a project</h2>
-        <p class="intro-copy">From the project folder, start the dev server with <code>npm run dev</code>${' '}(create-jacare) or <code>jacare dev</code>${' '}(CLI scaffold). Create-jacare and <code>jacare new</code>${' '}apps default to <code>http://localhost:3000</code>.</p>
+        <h2 class="intro-title">${t('home.startTitle')}</h2>
+        <p class="intro-copy">${t('home.startBody1')}</p>
         <pre class="log">${startDev}</pre>
-        <p class="intro-copy">Edit <code>src/app.jcr</code>${' '}(or the screens under <code>src/pages/</code>${' '}if you picked a nav template) and the page hot-reloads. When you are ready to explore the full API, walk the lessons in the sidebar — or jump into the Playground and type.</p>
+        <p class="intro-copy">${t('home.startBody2')}</p>
       </article>
     </div>
 
     <div class="lesson-grid">
-      <Demo :title=${'Quick start'} :lead=${'A pulse, a button, one line of reactive text — the smallest possible Jacaré app.'} :code=${quickStartCode}>
+      <Demo :title=${translate('home.demo.quick.title')} :lead=${translate('home.demo.quick.lead')} :code=${quickStartCode}>
         <div class="stack">
           <div class="row">
             <span class="metric">${quickCount}</span>
             <button type="button" class="btn" on-click=${increment}>+1</button>
           </div>
-          <p class="muted">This is the whole counter shown in the code panel — no extra wiring.</p>
+          <p class="muted">${t('home.demo.quick.note')}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'App boot pattern'} :lead=${'How boot.js wires app.css, the nav, and hot reload together in this lab.'} :code=${bootCode}>
+      <Demo :title=${translate('home.demo.boot.title')} :lead=${translate('home.demo.boot.lead')} :code=${bootCode}>
         <div class="stack">
-          <p class="muted">Jacaré Lab boots through <code>nav.attach(root)</code> — the same pattern every navigation lesson builds on.</p>
+          <p class="muted">${t('home.demo.boot.note')}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'A signal and a derive, together'} :lead=${'Every lesson in this lab is a variation on these two calls.'} :code=${greetingCode}>
+      <Demo :title=${translate('home.demo.greeting.title')} :lead=${translate('home.demo.greeting.lead')} :code=${greetingCode}>
         <div class="stack">
-          <input class="input" bind-value=${learnerName} placeholder="Your name" />
+          <input class="input" bind-value=${learnerName} placeholder=${translate('home.namePlaceholder')} />
           <p class="metric">${greeting}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'A class toggled from a signal'} :lead=${'The bindings and CSS lessons build entirely on this one idea.'} :code=${highlightCode}>
+      <Demo :title=${translate('home.demo.highlight.title')} :lead=${translate('home.demo.highlight.lead')} :code=${highlightCode}>
         <div class="row">
-          <span class="badge" class-badge-warn=${highlighted}>Lesson preview</span>
-          <button type="button" class="btn btn-outline" on-click=${toggleHighlight}>Toggle class</button>
+          <span class="badge" class-badge-warn=${highlighted}>${t('home.demo.highlight.badge')}</span>
+          <button type="button" class="btn btn-outline" on-click=${toggleHighlight}>${t('home.demo.highlight.toggle')}</button>
         </div>
       </Demo>
     </div>
@@ -132,8 +133,8 @@ export <view>
     <div class="home-grid">
       #for LESSONS as lesson (lesson.path)
         <a class="home-card" jacare-go=${lesson.path} href=${appHref(lesson.path)}>
-          <strong>${lesson.title}</strong>
-          <span>${lesson.blurb}</span>
+          <strong>${lessonTitle(lesson.id)}</strong>
+          <span>${lessonBlurb(lesson.id)}</span>
         </a>
       #end
     </div>

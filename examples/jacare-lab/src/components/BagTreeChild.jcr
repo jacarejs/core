@@ -1,10 +1,11 @@
 import { treeCart } from '../bags/cart.js'
+import { t } from '../i18n.js'
 import BagDepth from './BagDepth.jcr'
 import BagTreeGrand from './BagTreeGrand.jcr'
 
 export <view>
-  <BagDepth :label=${'Child · reads cart.money'}>
-    <p class="muted">Total: <strong>${treeCart.money}</strong></p>
+  <BagDepth :label=${t('bagTree.childLabel')}>
+    <p class="muted">${t('bagTree.childNote')} <strong>${treeCart.money}</strong></p>
     <BagTreeGrand />
   </BagDepth>
 </view>

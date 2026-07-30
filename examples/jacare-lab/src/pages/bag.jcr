@@ -8,6 +8,7 @@ import { demoCart } from '../bags/cart.js'
 import '../bags/mesh30.js'
 import { lazyBag, lazyFactoryRuns } from '../bags/lazy.js'
 import { appHref } from '../app-base.js'
+import { t, translate } from '../i18n.js'
 import {
   defineBagCode,
   useBagCode,
@@ -21,150 +22,130 @@ import {
 } from '../snippets/bag.js'
 
 const PRODUCTS = [
-  { id: 'tea', name: 'Mate tea', price: 9 },
-  { id: 'cap', name: 'Cap', price: 22 },
-  { id: 'zine', name: 'Zine', price: 12 },
+  { id: 'tea', price: 9 },
+  { id: 'cap', price: 22 },
+  { id: 'zine', price: 12 },
 ]
 
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API · Pulse bags</p>
-      <h1 class="page-title">Pulse bags</h1>
-      <p class="page-lead">
-        Jacaré’s own shared-state model: named pulses on an addressable mesh, wired at compile time —
-        light, native, and built on the same cells as local reactivity.
-      </p>
+      <p class="page-kicker">${t('bag.kicker')}</p>
+      <h1 class="page-title">${t('bag.title')}</h1>
+      <p class="page-lead">${t('bag.lead')}</p>
     </header>
 
     <Demo
-      :title=${'Mesh 30s — no useStore()'}
-      :lead=${'One bag, two screens, one address. Read this card (~30s), tap Add, watch both badges move — then open the real checkout screen.'}
+      :title=${t('bag.mesh30.title')}
+      :lead=${t('bag.mesh30.lead')}
       :code=${mesh30LessonCode}
     >
       <div class="mesh30">
         <ol class="mesh30-steps">
-          <li><strong>createBag</strong> — publish ports on the Mesh</li>
-          <li><strong>Screen A</strong> — import + <code>ripple</code> via <code>add</code></li>
-          <li><strong>Screen B</strong> — <code>${'@lab-mesh30/count'}</code> (no import)</li>
+          <li><strong>createBag</strong> — ${t('bag.mesh30.step1')}</li>
+          <li><strong>${t('bag.mesh30.screenA')}</strong> — <code>import</code> + <code>ripple</code> ${t('bag.mesh30.step2')} <code>add</code></li>
+          <li><strong>${t('bag.mesh30.screenB')}</strong> — <code>${'@lab-mesh30/count'}</code> (${t('bag.mesh30.step3')})</li>
         </ol>
 
-        <div class="mesh30-screens" aria-label="Two screens sharing one bag">
+        <div class="mesh30-screens" :aria-label=${translate('bag.mesh30.screensAria')}>
           <Mesh30Catalog />
           <Mesh30Chrome />
         </div>
 
         <p class="mesh30-foot">
           <a class="btn" jacare-go="/bag/checkout" href=${appHref('/bag/checkout')}>
-            Open real Screen B · /bag/checkout
+            ${t('bag.mesh30.openCheckout')}
           </a>
-          <span class="muted">Same bag id <code>lab-mesh30</code> — bookmarkable URL.</span>
+          <span class="muted">${t('bag.mesh30.sameBag')} <code>lab-mesh30</code> — ${t('bag.mesh30.bookmarkable')}</span>
         </p>
       </div>
     </Demo>
 
-    <Tip :text=${'Prefer bare cart.count() or ${@cart/count} when there is no loop local. Factory stays lazy until first property read — unused bag modules tree-shake out. Compiled views emit /* jacare-mesh-ports: … */ for ports they touch.'} />
+    <Tip :text=${t('bag.tip')} />
 
     <div class="arch-panel">
       <div class="arch-panel__intro">
-        <h2 class="arch-panel__title">Architecture · Pulse Mesh + Pulse Bag</h2>
-        <p class="arch-panel__lead">
-          This is a <strong>Jacaré-native</strong> design — not a port of another store library.
-          The pulse / <code>DependencyCell</code> graph already existed; <strong>Pulse Mesh</strong> makes those cells
-          addressable (<code>@cart/total</code>), and <strong>Pulse Bag</strong> is the DX that publishes a named group
-          with <code>createBag</code>. Any <code>.jcr</code> plugs in via import, contract <code>links</code>, or address sugar — same cell, O(1) update.
-        </p>
+        <h2 class="arch-panel__title">${t('bag.arch.title')}</h2>
+        <p class="arch-panel__lead">${t('bag.arch.lead')}</p>
       </div>
 
-      <pre class="arch-diagram" aria-label="Pulse Mesh layers">${meshArchDiagram}</pre>
+      <pre class="arch-diagram" :aria-label=${translate('bag.arch.diagramAria')}>${meshArchDiagram}</pre>
 
       <div class="arch-grid">
         <article class="ref-card">
-          <h3>The idea</h3>
-          <p class="muted">
-            Share state across any component without props drilling and without a second reactivity system.
-            A write goes into a pulse; only DOM (and derives) that actually read that cell update —
-            the mesh is the existing graph, with stable addresses for tooling and compile wiring.
-          </p>
+          <h3>${t('bag.arch.idea.title')}</h3>
+          <p class="muted">${t('bag.arch.idea.body')}</p>
           <ul class="arch-list">
-            <li>No provider / context wrapper around the tree</li>
-            <li>No store proxy or parallel <code>state</code> object</li>
-            <li>Mutations use <code>ripple()</code> (one flush wave), not a dispatcher</li>
+            <li>${t('bag.arch.idea.item1')}</li>
+            <li>${t('bag.arch.idea.item2')}</li>
+            <li>${t('bag.arch.idea.item3')}</li>
           </ul>
         </article>
 
         <article class="ref-card">
-          <h3>How it works</h3>
-          <p class="muted">
-            <code>createBag</code> registers an id. The factory runs on the first property read (lazy publish).
-            Cells get stable addresses for DevTools and SSR snap. Templates that read
-            <code>cart.count</code> or <code>@cart/count</code> lower to <strong>Mesh Ports</strong> —
-            <code>bindText(node, cell)</code> / CPW peek+subscribe — the cell pointer is fixed at mount.
-          </p>
+          <h3>${t('bag.arch.how.title')}</h3>
+          <p class="muted">${t('bag.arch.how.body')}</p>
           <ul class="arch-list">
-            <li><code>ripple</code> = batch + mesh meta (one flush wave)</li>
-            <li><code>snap</code> / <code>hydrate</code> / soft <code>reset</code> keep cell identity</li>
-            <li>Mesh tab in DevTools lists <code>@id/key</code> and last ripple</li>
+            <li>${t('bag.arch.how.item1')}</li>
+            <li>${t('bag.arch.how.item2')}</li>
+            <li>${t('bag.arch.how.item3')}</li>
           </ul>
         </article>
 
         <article class="ref-card">
-          <h3>Why it’s light &amp; native</h3>
-          <p class="muted">
-            Bags are not a second reactivity system. They name and group the pulses you already know.
-            Runtime is a thin registry + lazy ensure. Hot path matches a local pulse once the Mesh Port is wired.
-          </p>
+          <h3>${t('bag.arch.light.title')}</h3>
+          <p class="muted">${t('bag.arch.light.body')}</p>
           <ul class="arch-list">
-            <li>Ships in <code>@jacare/core</code> — no extra store package</li>
-            <li>Unused bag modules tree-shake (never imported → not in the chunk)</li>
-            <li>Compiler emits <code>/* jacare-mesh-ports: … */</code> slice hints</li>
-            <li>Caps via contract <code>links</code> (read / write / mirror) without Inject</li>
+            <li>${t('bag.arch.light.item1')}</li>
+            <li>${t('bag.arch.light.item2')}</li>
+            <li>${t('bag.arch.light.item3')}</li>
+            <li>${t('bag.arch.light.item4')}</li>
           </ul>
         </article>
 
         <article class="ref-card">
-          <h3>What shipped</h3>
-          <p class="muted">Capabilities you can exercise in the demos below.</p>
+          <h3>${t('bag.arch.shipped.title')}</h3>
+          <p class="muted">${t('bag.arch.shipped.body')}</p>
           <ul class="arch-list">
-            <li><code>createBag</code>, <code>ripple</code>, snap / hydrate / soft reset</li>
-            <li>DevTools Mesh (<code>@lab-cart/*</code>, pop-out)</li>
-            <li>Mesh Port IR — <code>cart.count</code> binds the cell directly</li>
-            <li>Contract <code>links</code> + <code>jacare check</code> for published ports</li>
-            <li>Lazy factory + <code>/* jacare-mesh-ports */</code> slice hints</li>
-            <li>Address sugar <code>@bag/key</code> via <code>getBag</code></li>
+            <li>${t('bag.arch.shipped.item1')}</li>
+            <li>${t('bag.arch.shipped.item2')}</li>
+            <li>${t('bag.arch.shipped.item3')}</li>
+            <li>${t('bag.arch.shipped.item4')}</li>
+            <li>${t('bag.arch.shipped.item5')}</li>
+            <li>${t('bag.arch.shipped.item6')}</li>
           </ul>
         </article>
       </div>
     </div>
 
     <div class="lesson-grid">
-      <Demo :title=${'createBag + live cart'} :lead=${'Add from the catalog — count and total update through the same bag instance.'} :code=${defineBagCode}>
+      <Demo :title=${t('bag.demo.define.title')} :lead=${t('bag.demo.define.lead')} :code=${defineBagCode}>
         <div class="stack">
           <div class="row">
             #for PRODUCTS as product (product.id)
               <button type="button" class="btn btn-outline" on-click=${() => demoCart.add(product)}>
-                ${product.name}
+                ${t('bag.products.' + product.id)}
               </button>
             #end
           </div>
           <p class="metric">${demoCart.count} · ${demoCart.money}</p>
           <div class="row">
-            <button type="button" class="btn btn-ghost" on-click=${demoCart.clear}>Clear bag</button>
+            <button type="button" class="btn btn-ghost" on-click=${demoCart.clear}>${t('bag.demo.define.clear')}</button>
           </div>
         </div>
       </Demo>
 
-      <Demo :title=${'Same bag, another view'} :lead=${'A second surface imports the identical bag — no props, no provider.'} :code=${useBagCode}>
+      <Demo :title=${t('bag.demo.use.title')} :lead=${t('bag.demo.use.lead')} :code=${useBagCode}>
         <div class="stack">
           #if demoCart.count() === 0
-            <p class="muted">Cart is empty.</p>
+            <p class="muted">${t('bag.demo.use.empty')}</p>
           #else
             <ul class="list">
               #for demoCart.items() as line (line.id)
                 <li class="list-item">
-                  <span class="item-label">${line.name} × ${line.qty}</span>
+                  <span class="item-label">${t('bag.products.' + line.id)} × ${line.qty}</span>
                   <button type="button" class="btn btn-outline" on-click=${() => demoCart.remove(line.id)}>
-                    Remove
+                    ${t('bag.demo.use.remove')}
                   </button>
                 </li>
               #end
@@ -174,20 +155,20 @@ export <view>
       </Demo>
 
       <Demo
-        :title=${'Contract links (no bag import)'}
-        :lead=${'Reusable leaf declares links in the contract — getBag resolves @lab-cart/* at mount. jacare check verifies the port is published.'}
+        :title=${t('bag.demo.links.title')}
+        :lead=${t('bag.demo.links.lead')}
         :code=${contractLinksCode}
       >
         <CartLinkBadge />
       </Demo>
 
       <Demo
-        :title=${'Lazy publish'}
-        :lead=${'Importing the bag module only registers the id. The factory runs on the first property read — factory runs stay at 0 until you touch the bag.'}
+        :title=${t('bag.demo.lazy.title')}
+        :lead=${t('bag.demo.lazy.lead')}
         :code=${lazyPublishCode}
       >
         <div class="stack">
-          <p class="metric">factory runs · ${lazyFactoryRuns}</p>
+          <p class="metric">${t('bag.demo.lazy.runs')} · ${lazyFactoryRuns}</p>
           <div class="row">
             <button
               type="button"
@@ -197,38 +178,38 @@ export <view>
                 void lazyBag.ticks
               }}
             >
-              Touch bag
+              ${t('bag.demo.lazy.touch')}
             </button>
             <button type="button" class="btn btn-outline" on-click=${() => lazyBag.bump()}>
-              Bump (also publishes)
+              ${t('bag.demo.lazy.bump')}
             </button>
           </div>
-          <p class="muted">Mesh stays unpublished until the first property read. Open DevTools → Mesh for @lab-lazy/*.</p>
+          <p class="muted">${t('bag.demo.lazy.note')}</p>
         </div>
       </Demo>
 
       <Demo
-        :title=${'Address sugar @bag/key'}
-        :lead=${'No bag import — @lab-cart/count and @lab-cart/clear resolve via getBag at the mesh address.'}
+        :title=${t('bag.demo.address.title')}
+        :lead=${t('bag.demo.address.lead')}
         :code=${addressSugarCode}
       >
         <div class="stack">
           <p class="metric">@lab-cart · ${@lab-cart/count} · ${@lab-cart/money}</p>
           <button type="button" class="btn btn-ghost" on-click=${@lab-cart/clear}>
-            Clear via @lab-cart/clear
+            ${t('bag.demo.address.clear')}
           </button>
         </div>
       </Demo>
 
       <Demo
-        :title=${'Parent → child → grandchild → leaf'}
-        :lead=${'Four nested components on a separate bag (lab-tree). Parent/child read; leaf writes. Live cart above stays on lab-cart.'}
+        :title=${t('bag.demo.tree.title')}
+        :lead=${t('bag.demo.tree.lead')}
         :code=${deepTreeCode}
       >
         <BagTreeParent />
       </Demo>
 
-      <Demo :title=${'snap / hydrate / reset'} :lead=${'Persist writable pulses, restore them, or soft-reset to factory defaults (same cells — UI stays live).'} :code=${snapHydrateCode}>
+      <Demo :title=${t('bag.demo.snap.title')} :lead=${t('bag.demo.snap.lead')} :code=${snapHydrateCode}>
         <div class="row">
           <button
             type="button"
@@ -238,7 +219,7 @@ export <view>
               sessionStorage.setItem('jacare-lab:cart', JSON.stringify(snap))
             }}
           >
-            Snap to session
+            ${t('bag.demo.snap.snap')}
           </button>
           <button
             type="button"
@@ -249,10 +230,10 @@ export <view>
               demoCart.hydrate(JSON.parse(raw))
             }}
           >
-            Hydrate
+            ${t('bag.demo.snap.hydrate')}
           </button>
           <button type="button" class="btn btn-ghost" on-click=${() => demoCart.reset()}>
-            Reset bag
+            ${t('bag.demo.snap.reset')}
           </button>
         </div>
       </Demo>

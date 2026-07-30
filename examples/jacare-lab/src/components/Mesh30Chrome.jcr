@@ -1,16 +1,16 @@
+import { t, translate } from '../i18n.js'
+
 export <view>
   <div class="mesh30-screen" data-screen="chrome">
     <header class="mesh30-screen-head">
-      <span class="mesh30-screen-label">Screen B · Chrome</span>
-      <span class="mesh30-badge mesh30-badge-address" title="Address sugar — no bag import">
-        ${@lab-mesh30/count} in cart
+      <span class="mesh30-screen-label">${t('bag.mesh30Chrome.screenLabel')}</span>
+      <span class="mesh30-badge mesh30-badge-address" :title=${translate('bag.mesh30Chrome.badgeTitle')}>
+        ${@lab-mesh30/count} ${t('bag.mesh30Chrome.inCart')}
       </span>
     </header>
-    <p class="mesh30-screen-lead">
-      Same cells via address sugar — no <code>import</code> in this file.
-    </p>
+    <p class="mesh30-screen-lead">${t('bag.mesh30Chrome.lead')}</p>
     <button type="button" class="btn btn-ghost" on-click=${@lab-mesh30/clear}>
-      Clear via @lab-mesh30/clear
+      ${t('bag.mesh30Chrome.clear')}
     </button>
   </div>
 </view>

@@ -2,6 +2,7 @@ import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import { appHref } from '../app-base.js'
+import { t } from '../i18n.js'
 import {
   singleCode,
   labelCopyCode,
@@ -66,62 +67,59 @@ function renameUser() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §7c</p>
-      <h1 class="page-title">Debug</h1>
-      <p class="page-lead">
-        Pretty-print reactive state as JSON in development. Prefer
-        <code>&lt;debug&gt;</code> over dumping objects into normal text nodes when you want readable quotes and live updates.
-      </p>
+      <p class="page-kicker">${t('debug.kicker')}</p>
+      <h1 class="page-title">${t('debug.title')}</h1>
+      <p class="page-lead">${t('debug.lead')}</p>
     </header>
 
-    <Tip :text=${'<debug> is stripped from production builds (Vite passes debug: !isProduction). SSR render() skips it too. Bare pulse names inside { score, mood } become score() / mood() automatically.'} />
+    <Tip :text=${t('debug.tip')} />
 
     <div class="ref-card">
-      <h3>Syntax</h3>
-      <p class="muted">Body must be a single <code>${'${expr}'}</code>. Optional <code>label</code> and boolean <code>copy</code>.</p>
+      <h3>${t('debug.syntax.title')}</h3>
+      <p class="muted">${t('debug.syntax.body')}</p>
       <pre><code>${syntaxCard}</code></pre>
       <p class="muted">
-        Also used live in
-        <a class="text-link" jacare-go="/components" href=${appHref('/components')}>Components</a>
-        and
-        <a class="text-link" jacare-go="/events" href=${appHref('/events')}>Events</a>.
+        ${t('debug.syntax.alsoUsedIn')}
+        <a class="text-link" jacare-go="/components" href=${appHref('/components')}>${t('lesson.components.title')}</a>
+        ${t('debug.syntax.and')}
+        <a class="text-link" jacare-go="/events" href=${appHref('/events')}>${t('lesson.events.title')}</a>.
       </p>
     </div>
 
     <div class="lesson-grid">
-      <Demo :title=${'Single pulse'} :lead=${'Pass one signal — the panel updates whenever the value changes.'} :code=${singleCode}>
+      <Demo :title=${t('debug.demo.single.title')} :lead=${t('debug.demo.single.lead')} :code=${singleCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn" on-click=${addItem}>Add line</button>
-            <button type="button" class="btn btn-outline" on-click=${bumpQty}>Bump first qty</button>
+            <button type="button" class="btn" on-click=${addItem}>${t('debug.demo.single.add')}</button>
+            <button type="button" class="btn btn-outline" on-click=${bumpQty}>${t('debug.demo.single.bump')}</button>
           </div>
           <debug>${cart}</debug>
         </div>
       </Demo>
 
-      <Demo :title=${'label + copy'} :lead=${'label captions the header; copy adds a Copy JSON button.'} :code=${labelCopyCode}>
+      <Demo :title=${t('debug.demo.labelCopy.title')} :lead=${t('debug.demo.labelCopy.lead')} :code=${labelCopyCode}>
         <div class="stack">
-          <p class="muted">Same cart pulse — try Copy JSON in the panel.</p>
+          <p class="muted">${t('debug.demo.labelCopy.note')}</p>
           <debug copy label="cart">${cart}</debug>
         </div>
       </Demo>
 
-      <Demo :title=${'Object shorthand'} :lead=${'{ score, mood, removed } unwraps each pulse — no score() needed inside the literal.'} :code=${shorthandCode}>
+      <Demo :title=${t('debug.demo.shorthand.title')} :lead=${t('debug.demo.shorthand.lead')} :code=${shorthandCode}>
         <div class="stack">
           <div class="row">
             <button type="button" class="btn" on-click=${bumpScore}>score++</button>
-            <button type="button" class="btn btn-outline" on-click=${cycleMood}>cycle mood</button>
+            <button type="button" class="btn btn-outline" on-click=${cycleMood}>${t('debug.demo.shorthand.cycleMood')}</button>
             <button type="button" class="btn btn-outline" on-click=${bumpRemoved}>removed++</button>
           </div>
           <debug copy label="props">${{ score, mood, removed }}</debug>
         </div>
       </Demo>
 
-      <Demo :title=${'Derived object'} :lead=${'Any expression works — here a derive bundles nested pulses into one snapshot.'} :code=${nestedCode}>
+      <Demo :title=${t('debug.demo.nested.title')} :lead=${t('debug.demo.nested.lead')} :code=${nestedCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn" on-click=${renameUser}>Rename user</button>
-            <button type="button" class="btn btn-outline" on-click=${toggleDark}>Toggle dark</button>
+            <button type="button" class="btn" on-click=${renameUser}>${t('debug.demo.nested.rename')}</button>
+            <button type="button" class="btn btn-outline" on-click=${toggleDark}>${t('debug.demo.nested.toggleDark')}</button>
           </div>
           <debug copy label="summary">${summary}</debug>
         </div>

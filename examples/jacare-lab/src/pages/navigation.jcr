@@ -5,6 +5,7 @@ import { showCode } from '../code-viewer.js'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import Badge from '../components/Badge.jcr'
+import { t, translate } from '../i18n.js'
 import {
   setupCode,
   titleCode,
@@ -36,8 +37,10 @@ const hashLabel = derive(() => {
 const paramsJson = derive(() => JSON.stringify(nav.where().params))
 const searchJson = derive(() => JSON.stringify(nav.where().search))
 
-const lastAction = pulse('Ready')
+const lastAction = pulse(translate('nav.live.ready'))
+const lastActionLabel = derive(() => translate('nav.live.lastAction', { action: lastAction() }))
 const draftQuery = pulse(qSearch() ?? '')
+const filteringLabel = derive(() => translate('nav.demo.query.filtering', { q: qSearch() ?? '' }))
 
 function mark(action) {
   lastAction.set(action)
@@ -103,12 +106,15 @@ function armGuard() {
 }
 
 const prefetchTargets = [
-  { path: '/css', label: 'Scoped CSS' },
-  { path: '/forms', label: 'Forms' },
-  { path: '/playground', label: 'Playground' },
+  { path: '/css', labelKey: 'lesson.css.title' },
+  { path: '/forms', labelKey: 'lesson.forms.title' },
+  { path: '/playground', labelKey: 'lesson.playground.title' },
 ]
 const warmed = pulse([])
-const warmedLabel = derive(() => (warmed().length > 0 ? warmed().join(', ') : 'none yet'))
+const warmedLabel = derive(() =>
+  warmed().length > 0 ? warmed().join(', ') : translate('nav.demo.prefetch.none'),
+)
+const warmedSummary = derive(() => translate('nav.demo.prefetch.warmed', { list: warmedLabel() }))
 
 function warmOnHover(path) {
   nav.warm(path)
@@ -116,118 +122,97 @@ function warmOnHover(path) {
 }
 
 const createNavOptions = [
-  { name: 'layout', detail: 'Persistent shell; must contain an element with jacare-frame' },
-  { name: 'screens', detail: 'Map of path → screen() / lazy() / mount / { use, title }. Use :param for dynamic segments' },
-  { name: 'missing', detail: 'Fallback screen when no pattern matches' },
-  { name: 'base', detail: 'URL prefix stripped before matching (e.g. /core/lab on GitHub Pages)' },
-  { name: 'beforeGo', detail: 'Guard: return false (cancel), a path string (redirect), or void to continue' },
+  { name: 'layout', detailKey: 'nav.options.layout' },
+  { name: 'screens', detailKey: 'nav.options.screens' },
+  { name: 'missing', detailKey: 'nav.options.missing' },
+  { name: 'base', detailKey: 'nav.options.base' },
+  { name: 'beforeGo', detailKey: 'nav.options.beforeGo' },
 ]
 
 const useCases = [
-  {
-    name: 'Shell + lazy pages',
-    detail: 'layout stays mounted; screens swap in jacare-frame. Use screen() for home, lazy() for the rest.',
-  },
-  {
-    name: 'Entity URL /:id',
-    detail: 'Declare /item/:id, build links with routeHref, read id as a mount prop or route.param("id").',
-  },
-  {
-    name: 'Filters & tabs (?q=)',
-    detail: 'Put shareable UI state in search. Prefer nav.swap for tabs so Back does not walk every tab.',
-  },
-  {
-    name: 'Auth / onboarding gate',
-    detail: 'beforeGo can redirect to /login or return false to block a path.',
-  },
-  {
-    name: 'Prefetch on hover',
-    detail: 'Call nav.warm(path) on pointerenter so the lazy chunk is ready before click.',
-  },
-  {
-    name: 'Deploy under a subpath',
-    detail: 'Set base (Lab uses APP_BASE) so matching ignores /core/lab while screens stay at /nav.',
-  },
-  {
-    name: 'Live document title',
-    detail: 'Static: { use, title } in createNav. Live: setNavTitle inside an effect (see Todo /focus).',
-  },
+  { nameKey: 'nav.useCases.shellName', detailKey: 'nav.useCases.shellDetail' },
+  { nameKey: 'nav.useCases.entityName', detailKey: 'nav.useCases.entityDetail' },
+  { nameKey: 'nav.useCases.filtersName', detailKey: 'nav.useCases.filtersDetail' },
+  { nameKey: 'nav.useCases.authName', detailKey: 'nav.useCases.authDetail' },
+  { nameKey: 'nav.useCases.prefetchName', detailKey: 'nav.useCases.prefetchDetail' },
+  { nameKey: 'nav.useCases.subpathName', detailKey: 'nav.useCases.subpathDetail' },
+  { nameKey: 'nav.useCases.titleName', detailKey: 'nav.useCases.titleDetail' },
 ]
 
 const navMethods = [
-  { name: 'attach(target)', detail: 'Mount layout and sync to the current URL' },
-  { name: 'go(path)', detail: 'Push a new history entry and mount the screen' },
-  { name: 'swap(path)', detail: 'Replace the current history entry' },
-  { name: 'undo()', detail: 'history.back()' },
-  { name: 'warm(path)', detail: 'Preload a lazy screen chunk' },
-  { name: 'where', detail: 'Signal<NavPlace> — path, params, search, hash' },
+  { name: 'attach(target)', detailKey: 'nav.methods.attach' },
+  { name: 'go(path)', detailKey: 'nav.methods.go' },
+  { name: 'swap(path)', detailKey: 'nav.methods.swap' },
+  { name: 'undo()', detailKey: 'nav.methods.undo' },
+  { name: 'warm(path)', detailKey: 'nav.methods.warm' },
+  { name: 'where', detailKey: 'nav.methods.where' },
 ]
 
 const templateAttrs = [
-  { name: 'jacare-frame', detail: 'Outlet inside the layout where screens mount' },
-  { name: 'jacare-go', detail: 'In-app link — intercepts click and calls nav.go' },
-  { name: 'jacare-here', detail: 'Applied automatically to the active jacare-go link' },
+  { name: 'jacare-frame', detailKey: 'nav.attrs.frame' },
+  { name: 'jacare-go', detailKey: 'nav.attrs.go' },
+  { name: 'jacare-here', detailKey: 'nav.attrs.here' },
 ]
 
 export <view>
   <section class="page page-nav">
     <header class="page-hero">
-      <p class="page-kicker">API §11</p>
-      <h1 class="page-title">Navigation</h1>
-      <p class="page-lead">createNav keeps a persistent layout around jacare-frame. createRoute exposes a reactive read of path, params, and search for any screen. Matches API §11 — only APIs that ship today.</p>
+      <p class="page-kicker">${t('nav.kicker')}</p>
+      <h1 class="page-title">${t('nav.title')}</h1>
+      <p class="page-lead">${t('nav.lead')}</p>
     </header>
 
-    <Tip :text=${'Boot order: createNav({ layout, screens, … }) → export route = createRoute(nav.where) → nav.attach(#app). Links use jacare-go; the active one gets jacare-here. Full write-up: docs/api.md §11.'} />
+    <Tip :text=${t('nav.tip')} />
 
     <article class="nav-setup">
       <header class="nav-setup-head">
         <div>
-          <Badge :text=${'how it boots'} />
-          <h2 class="nav-setup-title">Initial routing flow</h2>
-          <p class="nav-setup-lead">Shell stays mounted. Screens swap inside jacare-frame. URL changes update nav.where, and createRoute turns that into reactive path / param / search reads.</p>
+          <Badge :text=${t('nav.setup.badge')} />
+          <h2 class="nav-setup-title">${t('nav.setup.title')}</h2>
+          <p class="nav-setup-lead">${t('nav.setup.lead')}</p>
         </div>
-        <button type="button" class="btn btn-ghost" on-click=${() => showCode('createNav setup', setupCode)}>View code</button>
+        <button type="button" class="btn btn-ghost" on-click=${() => showCode(translate('nav.setup.codeTitle'), setupCode)}>${t('shell.viewCode')}</button>
       </header>
 
       <ol class="nav-flow">
-        <li><strong>createNav</strong> — register layout, screen map, optional base / missing / beforeGo</li>
-        <li><strong>createRoute(nav.where)</strong> — reactive helpers for path, param(), search()</li>
-        <li><strong>nav.attach(#app)</strong> — mount shell, match the current URL, load the screen</li>
-        <li><strong>Navigate</strong> — jacare-go links or nav.go / swap / undo update history and remount the frame</li>
+        <li><strong>createNav</strong> — ${t('nav.setup.flowCreateNav')}</li>
+        <li><strong>createRoute(nav.where)</strong> — ${t('nav.setup.flowCreateRoute')}</li>
+        <li><strong>nav.attach(#app)</strong> — ${t('nav.setup.flowAttach')}</li>
+        <li><strong>${t('nav.setup.navigateName')}</strong> — ${t('nav.setup.flowNavigate')}</li>
       </ol>
 
       <div class="nav-options-grid">
         <section class="nav-options-card">
-          <h3 class="nav-options-title">createNav options</h3>
+          <h3 class="nav-options-title">${t('nav.setup.optionsTitle')}</h3>
           <div class="nav-live">
             #for createNavOptions as option (option.name)
               <div class="nav-live-row">
                 <span>${option.name}</span>
-                <code>${option.detail}</code>
+                <code>${t(option.detailKey)}</code>
               </div>
             #end
           </div>
         </section>
 
         <section class="nav-options-card">
-          <h3 class="nav-options-title">Nav methods</h3>
+          <h3 class="nav-options-title">${t('nav.setup.methodsTitle')}</h3>
           <div class="nav-live">
             #for navMethods as method (method.name)
               <div class="nav-live-row">
                 <span>${method.name}</span>
-                <code>${method.detail}</code>
+                <code>${t(method.detailKey)}</code>
               </div>
             #end
           </div>
         </section>
 
         <section class="nav-options-card">
-          <h3 class="nav-options-title">Template attributes</h3>
+          <h3 class="nav-options-title">${t('nav.setup.attrsTitle')}</h3>
           <div class="nav-live">
             #for templateAttrs as attr (attr.name)
               <div class="nav-live-row">
                 <span>${attr.name}</span>
-                <code>${attr.detail}</code>
+                <code>${t(attr.detailKey)}</code>
               </div>
             #end
           </div>
@@ -238,24 +223,24 @@ export <view>
     <article class="nav-setup">
       <header class="nav-setup-head">
         <div>
-          <Badge :text=${'use cases'} />
-          <h2 class="nav-setup-title">What you build with this API</h2>
-          <p class="nav-setup-lead">Patterns that already work in Lab, Showcase, and Todo — no experimental APIs.</p>
+          <Badge :text=${t('nav.useCases.badge')} />
+          <h2 class="nav-setup-title">${t('nav.useCases.title')}</h2>
+          <p class="nav-setup-lead">${t('nav.useCases.lead')}</p>
         </div>
-        <button type="button" class="btn btn-ghost" on-click=${() => showCode('Navigation use cases', useCasesCode)}>View code</button>
+        <button type="button" class="btn btn-ghost" on-click=${() => showCode(translate('nav.useCases.codeTitle'), useCasesCode)}>${t('shell.viewCode')}</button>
       </header>
       <div class="nav-live">
-        #for useCases as item (item.name)
+        #for useCases as item (item.nameKey)
           <div class="nav-live-row">
-            <span>${item.name}</span>
-            <code>${item.detail}</code>
+            <span>${t(item.nameKey)}</span>
+            <code>${t(item.detailKey)}</code>
           </div>
         #end
       </div>
     </article>
 
     <div class="nav-summary">
-      <Badge :text=${'live route'} />
+      <Badge :text=${t('nav.live.badge')} />
       <div class="nav-live">
         <div class="nav-live-row"><span>path</span><code>${pathLabel}</code></div>
         <div class="nav-live-row"><span>?visited</span><code>${visitedLabel}</code></div>
@@ -266,15 +251,15 @@ export <view>
         <div class="nav-live-row"><span>params</span><code>${paramsJson}</code></div>
         <div class="nav-live-row"><span>search</span><code>${searchJson}</code></div>
       </div>
-      <p class="muted">Last action: ${lastAction}</p>
+      <p class="muted">${lastActionLabel}</p>
     </div>
 
     <div class="lesson-grid">
-      <Demo :title=${'Screen title in nav + setNavTitle'} :lead=${'Static titles: { use, title } in createNav. Live titles: setNavTitle from the page (see Focus in the Todo suite).'} :code=${titleCode}>
-        <p class="muted">This route sets <code>title</code> in <code>nav.js</code>. Topic routes use a function title with <code>params.slug</code>.</p>
+      <Demo :title=${t('nav.demo.title.title')} :lead=${t('nav.demo.title.lead')} :code=${titleCode}>
+        <p class="muted">${t('nav.demo.title.noteA')} <code>title</code> ${t('nav.demo.title.noteB')} <code>nav.js</code>. ${t('nav.demo.title.noteC')} <code>params.slug</code>.</p>
       </Demo>
 
-      <Demo :title=${'Live route reads'} :lead=${'route comes from createRoute(nav.where). Use the buttons below to drive every read — path, search keys, params.slug, and hash.'} :code=${routeCode}>
+      <Demo :title=${t('nav.demo.routes.title')} :lead=${t('nav.demo.routes.lead')} :code=${routeCode}>
         <div class="stack">
           <div class="nav-live">
             <div class="nav-live-row"><span>path</span><code>${pathLabel}</code></div>
@@ -302,7 +287,7 @@ export <view>
               <div class="row">
                 <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?visited=1', '?visited=1')}>visited=1</button>
                 <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?visited=swap', '?visited=swap')}>visited=swap</button>
-                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?visited')}>clear</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?visited')}>${t('nav.demo.routes.clear')}</button>
               </div>
             </div>
 
@@ -311,16 +296,16 @@ export <view>
               <div class="row">
                 <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?q=jacare', '?q=jacare')}>q=jacare</button>
                 <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?q=lab', '?q=lab')}>q=lab</button>
-                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?q')}>clear</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?q')}>${t('nav.demo.routes.clear')}</button>
               </div>
             </div>
 
             <div class="nav-sim-group">
               <span class="nav-sim-label">?guard</span>
               <div class="row">
-                <button type="button" class="btn btn-outline" on-click=${armGuard}>arm + go</button>
+                <button type="button" class="btn btn-outline" on-click=${armGuard}>${t('nav.demo.routes.armGo')}</button>
                 <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav?guard=blocked', '?guard=blocked')}>guard=blocked</button>
-                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?guard')}>clear</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear ?guard')}>${t('nav.demo.routes.clear')}</button>
               </div>
             </div>
 
@@ -336,7 +321,7 @@ export <view>
                     ${topic.label}
                   </button>
                 #end
-                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear params.slug')}>back to /nav</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear params.slug')}>${t('nav.demo.routes.backToNav')}</button>
               </div>
             </div>
 
@@ -345,52 +330,52 @@ export <view>
               <div class="row">
                 <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav#demo', 'hash → #demo')}>#demo</button>
                 <button type="button" class="btn btn-outline" on-click=${() => simulate('/nav#live', 'hash → #live')}>#live</button>
-                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear hash')}>clear</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'clear hash')}>${t('nav.demo.routes.clear')}</button>
               </div>
             </div>
 
             <div class="nav-sim-group">
-              <span class="nav-sim-label">combined</span>
+              <span class="nav-sim-label">${t('nav.demo.routes.combined')}</span>
               <div class="row">
                 <button type="button" class="btn" on-click=${() => simulate('/nav?visited=1&q=jacare#demo', 'visited + q + hash')}>visited + q + hash</button>
                 <button type="button" class="btn btn-outline" on-click=${() => simulate('/topic/beta?q=lab#focus', 'slug + q + hash')}>slug + q + hash</button>
-                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'reset all')}>reset all</button>
+                <button type="button" class="btn btn-ghost" on-click=${() => simulate('/nav', 'reset all')}>${t('nav.demo.routes.resetAll')}</button>
               </div>
             </div>
           </div>
         </div>
       </Demo>
 
-      <Demo :title=${'nav.go / swap / undo / warm'} :lead=${'go() pushes history, swap() replaces it, undo() goes back, warm() preloads a lazy screen. Pass { focus: true } to focus [data-jacare-focus] after mount.'} :code=${navApiCode}>
+      <Demo :title=${t('nav.demo.api.title')} :lead=${t('nav.demo.api.lead')} :code=${navApiCode}>
         <div class="stack">
-          <h2 data-jacare-focus tabindex="-1" class="page-title" style="font-size:1.1rem;margin:0">Focus target</h2>
+          <h2 data-jacare-focus tabindex="-1" class="page-title" style="font-size:1.1rem;margin:0">${t('nav.demo.api.focusTarget')}</h2>
           <div class="row">
             <button type="button" class="btn" on-click=${goHelpers}>nav.go</button>
-            <button type="button" class="btn btn-outline" on-click=${goFocus}>go + focus</button>
+            <button type="button" class="btn btn-outline" on-click=${goFocus}>${t('nav.demo.api.goFocus')}</button>
             <button type="button" class="btn btn-outline" on-click=${swapHelpers}>nav.swap</button>
             <button type="button" class="btn btn-outline" on-click=${undoHelpers}>nav.undo</button>
             <button type="button" class="btn btn-ghost" on-click=${warmForms}>nav.warm('/forms')</button>
           </div>
-          <p class="muted">Try go, then undo — history restores the previous query string. “go + focus” moves keyboard focus to the heading above.</p>
+          <p class="muted">${t('nav.demo.api.note')}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'Search query with route.search'} :lead=${'Write a query, apply it with nav.go, and watch route.search("q") update live in the summary above.'} :code=${queryCode}>
+      <Demo :title=${t('nav.demo.query.title')} :lead=${t('nav.demo.query.lead')} :code=${queryCode}>
         <div class="stack">
           <div class="row">
-            <input class="input" bind-value=${draftQuery} placeholder="e.g. jacare" />
-            <button type="button" class="btn" on-click=${applyQuery}>Apply ?q=</button>
-            <button type="button" class="btn btn-outline" on-click=${clearQuery}>Clear</button>
+            <input class="input" bind-value=${draftQuery} placeholder=${t('nav.demo.query.placeholder')} />
+            <button type="button" class="btn" on-click=${applyQuery}>${t('nav.demo.query.apply')}</button>
+            <button type="button" class="btn btn-outline" on-click=${clearQuery}>${t('nav.demo.query.clear')}</button>
           </div>
           #if qSearch()
-            <p class="muted">Filtering mental model: showing results for “${qSearch()}”.</p>
+            <p class="muted">${filteringLabel}</p>
           #else
-            <p class="muted">No ?q= yet — apply one to see route.search react.</p>
+            <p class="muted">${t('nav.demo.query.empty')}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'routeHref + param routes'} :lead=${'routeHref fills :slug and returns a path you can put in jacare-go / href.'} :code=${linksCode}>
+      <Demo :title=${t('nav.demo.links.title')} :lead=${t('nav.demo.links.lead')} :code=${linksCode}>
         <div class="stack">
           <div class="row">
             #for topics as topic (topic.slug)
@@ -399,26 +384,26 @@ export <view>
                 jacare-go=${topicHref(topic.slug)}
                 href=${appHref(topicHref(topic.slug))}
               >
-                Topic: ${topic.label}
+                ${t('nav.demo.links.topicLabel')} ${topic.label}
               </a>
             #end
           </div>
-          <p class="muted">Opens /topic/:slug — params arrive as mount props on that screen.</p>
+          <p class="muted">${t('nav.demo.links.note')}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'beforeGo guard'} :lead=${'Arm a sessionStorage flag, navigate to /nav, and the guard redirects to ?guard=blocked. Return false to cancel, a path to redirect, or void to continue.'} :code=${guardCode}>
+      <Demo :title=${t('nav.demo.guard.title')} :lead=${t('nav.demo.guard.lead')} :code=${guardCode}>
         <div class="stack">
-          <button type="button" class="btn" on-click=${armGuard}>Arm guard + nav.go('/nav')</button>
+          <button type="button" class="btn" on-click=${armGuard}>${t('nav.demo.guard.arm')}</button>
           #if guardSearch() === 'blocked'
-            <p class="nav-alert">Guard fired — redirected to /nav?guard=blocked.</p>
+            <p class="nav-alert">${t('nav.demo.guard.fired')}</p>
           #else
-            <p class="muted">beforeGo: false cancels · string redirects · otherwise continue.</p>
+            <p class="muted">${t('nav.demo.guard.hint')}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Prefetch on hover'} :lead=${'Hover warms the lazy chunk; click navigates with jacare-go.'} :code=${warmOnHoverCode}>
+      <Demo :title=${t('nav.demo.prefetch.title')} :lead=${t('nav.demo.prefetch.lead')} :code=${warmOnHoverCode}>
         <div class="stack">
           <div class="row">
             #for prefetchTargets as item (item.path)
@@ -428,18 +413,18 @@ export <view>
                 href=${appHref(item.path)}
                 on-pointerenter=${() => warmOnHover(item.path)}
               >
-                ${item.label}
+                ${t(item.labelKey)}
               </a>
             #end
           </div>
-          <p class="muted">Warmed so far: ${warmedLabel}</p>
+          <p class="muted">${warmedSummary}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'Layout + lazy screens'} :lead=${'Shell owns the sidebar; screens mount into jacare-frame. Lazy imports keep lesson chunks small.'} :code=${shellCode}>
+      <Demo :title=${t('nav.demo.shell.title')} :lead=${t('nav.demo.shell.lead')} :code=${shellCode}>
         <div class="stack">
-          <p class="muted">This lab’s shell.jcr already uses jacare-frame. Every lesson link in the sidebar is a jacare-go navigation.</p>
-          <a class="btn btn-outline" jacare-go="/playground" href=${appHref('/playground')}>Open Playground</a>
+          <p class="muted">${t('nav.demo.shell.note')}</p>
+          <a class="btn btn-outline" jacare-go="/playground" href=${appHref('/playground')}>${t('nav.demo.shell.open')}</a>
         </div>
       </Demo>
     </div>

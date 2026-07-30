@@ -1,16 +1,17 @@
 import { treeCart } from '../bags/cart.js'
+import { t } from '../i18n.js'
 import BagDepth from './BagDepth.jcr'
 
 const SAMPLE = { id: 'depth', name: 'Depth kit', price: 15 }
 
 export <view>
-  <BagDepth :label=${'Great-grandchild · writes cart.add'}>
-    <p class="muted">Deep leaf imports the same bag — no props from ancestors.</p>
+  <BagDepth :label=${t('bagTree.leafLabel')}>
+    <p class="muted">${t('bagTree.leafNote')}</p>
     <div class="row">
       <button type="button" class="btn" on-click=${() => treeCart.add(SAMPLE)}>
-        Add from leaf
+        ${t('bagTree.leafAdd')}
       </button>
-      <span class="muted">count ${treeCart.count}</span>
+      <span class="muted">${t('bagTree.leafCount')} ${treeCart.count}</span>
     </div>
   </BagDepth>
 </view>

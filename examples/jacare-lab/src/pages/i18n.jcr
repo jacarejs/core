@@ -1,0 +1,309 @@
+import { pulse, derive } from '@jacare/core'
+import Card from '@jacare/ui/Card'
+import Button from '@jacare/ui/Button'
+import Select from '@jacare/ui/Select'
+import Tip from '../components/Tip.jcr'
+import Demo from '../components/Demo.jcr'
+import Badge from '../components/Badge.jcr'
+import { appHref } from '../app-base.js'
+import { lessonTitle } from '../topics.js'
+import {
+  t,
+  translate,
+  setLocale,
+  locale,
+  localeModel,
+  te,
+  availableLocales,
+  LOCALE_OPTIONS,
+  LOCALE_LABELS,
+} from '../i18n.js'
+import {
+  i18nSetupCode,
+  i18nMessagesCode,
+  i18nMessagesSample,
+  i18nTemplateCode,
+  i18nParamsCode,
+  i18nSelectCode,
+  i18nPitfallsCode,
+} from '../snippets/i18n.js'
+
+const UI_DOCS = 'https://jacarejs.github.io/ui/'
+const UI_COMPONENTS = 'https://jacarejs.github.io/ui/components'
+const UI_GITHUB = 'https://github.com/jacarejs/ui'
+
+const visitorName = pulse('')
+const greeting = derive(() =>
+  translate('i18nPage.hello', {
+    name: visitorName().trim() || translate('i18nPage.helloFallback'),
+  }),
+)
+const localeLabel = derive(() => translate('i18nPage.inspect.locale', { locale: locale() }))
+const teKnown = derive(() =>
+  translate('i18nPage.inspect.teKnown', {
+    value: te('i18nPage.title') ? translate('i18nPage.yes') : translate('i18nPage.no'),
+  }),
+)
+const teMissing = derive(() =>
+  translate('i18nPage.inspect.teMissing', {
+    value: te('i18nPage.missing.key') ? translate('i18nPage.yes') : translate('i18nPage.no'),
+  }),
+)
+const localesList = derive(() =>
+  translate('i18nPage.inspect.available', { list: availableLocales().join(', ') }),
+)
+
+const apiRows = [
+  { name: 'createI18n(opts)', detailKey: 'i18nPage.api.createI18n' },
+  { name: 't(key, params?)', detailKey: 'i18nPage.api.t' },
+  { name: 'translate(key, params?)', detailKey: 'i18nPage.api.translate' },
+  { name: 'setLocale(id)', detailKey: 'i18nPage.api.setLocale' },
+  { name: 'locale()', detailKey: 'i18nPage.api.locale' },
+  { name: 'te(key)', detailKey: 'i18nPage.api.te' },
+  { name: 'availableLocales()', detailKey: 'i18nPage.api.availableLocales' },
+  { name: 'addMessages(id, bag)', detailKey: 'i18nPage.api.addMessages' },
+]
+
+const pitfallRows = [
+  { bad: 'i18nPage.pitfalls.badTop', good: 'i18nPage.pitfalls.goodTop' },
+  { bad: 'i18nPage.pitfalls.badArray', good: 'i18nPage.pitfalls.goodArray' },
+  { bad: 'i18nPage.pitfalls.badDerive', good: 'i18nPage.pitfalls.goodDerive' },
+]
+
+function onLocaleChange(next) {
+  const id = String(next || '')
+  if (!LOCALE_LABELS[id]) {
+    setLocale('en')
+    return
+  }
+  setLocale(id)
+}
+
+export <view>
+  <section class="page">
+    <header class="page-hero">
+      <p class="page-kicker">${t('i18nPage.kicker')}</p>
+      <h1 class="page-title">${t('i18nPage.title')}</h1>
+      <p class="page-lead">${t('i18nPage.lead')}</p>
+      <div class="row" style="margin-top:0.75rem;flex-wrap:wrap;gap:0.5rem">
+        <a class="btn btn-outline" href=${UI_DOCS} target="_blank" rel="noopener noreferrer">${t('i18nPage.links.docs')}</a>
+        <a class="btn btn-outline" href=${UI_COMPONENTS} target="_blank" rel="noopener noreferrer">${t('i18nPage.links.components')}</a>
+        <a class="btn btn-outline" href=${UI_GITHUB} target="_blank" rel="noopener noreferrer">${t('i18nPage.links.github')}</a>
+      </div>
+    </header>
+
+    <Tip :text=${translate('i18nPage.tip')} />
+
+    <article class="ref-card">
+      <h3>${t('i18nPage.api.title')}</h3>
+      <p class="muted">${t('i18nPage.api.lead')}</p>
+      <div class="nav-live">
+        #for apiRows as row (row.name)
+          <div class="nav-live-row">
+            <code>${row.name}</code>
+            <span>${t(row.detailKey)}</span>
+          </div>
+        #end
+      </div>
+    </article>
+
+    <div class="lesson-grid">
+      <Demo :title=${t('i18nPage.demo.live.title')} :lead=${t('i18nPage.demo.live.lead')} :code=${i18nTemplateCode}>
+        <div class="stack i18n-sample">
+          <Card :title=${t('i18nPage.sampleTitle')}>
+            <p class="muted">${t('i18nPage.sampleBody')}</p>
+            <div class="row" style="flex-wrap:wrap;gap:0.5rem;align-items:center">
+              <Button :variant=${'primary'}>${t('i18nPage.sampleAction')}</Button>
+              <Badge :text=${localeLabel} />
+            </div>
+          </Card>
+        </div>
+      </Demo>
+
+      <Demo :title=${t('i18nPage.demo.params.title')} :lead=${t('i18nPage.demo.params.lead')} :code=${i18nParamsCode}>
+        <div class="stack">
+          <label class="stack" style="gap:0.35rem">
+            <span class="field-label">${t('i18nPage.nameLabel')}</span>
+            <input
+              class="input"
+              bind-value=${visitorName}
+              placeholder=${t('i18nPage.namePlaceholder')}
+            />
+          </label>
+          <p class="i18n-greeting">${greeting}</p>
+          <p class="muted">${t('i18nPage.demo.params.note')}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${t('i18nPage.demo.select.title')} :lead=${t('i18nPage.demo.select.lead')} :code=${i18nSelectCode}>
+        <div class="stack i18n-select-demo">
+          <Select
+            :label=${t('i18nPage.demo.select.label')}
+            :options=${LOCALE_OPTIONS}
+            :placeholder=${t('shell.localeLabel')}
+            :searchable=${false}
+            bind-value=${localeModel}
+            on-change=${onLocaleChange}
+          />
+          <p class="muted">${t('i18nPage.demo.select.note')}</p>
+        </div>
+      </Demo>
+
+      <Demo :title=${t('i18nPage.demo.inspect.title')} :lead=${t('i18nPage.demo.inspect.lead')} :code=${i18nSetupCode}>
+        <div class="nav-live">
+          <div class="nav-live-row">
+            <code>locale()</code>
+            <span>${localeLabel}</span>
+          </div>
+          <div class="nav-live-row">
+            <code>te('i18nPage.title')</code>
+            <span>${teKnown}</span>
+          </div>
+          <div class="nav-live-row">
+            <code>te('i18nPage.missing.key')</code>
+            <span>${teMissing}</span>
+          </div>
+          <div class="nav-live-row">
+            <code>availableLocales()</code>
+            <span>${localesList}</span>
+          </div>
+        </div>
+      </Demo>
+
+      <Demo :title=${t('i18nPage.demo.messages.title')} :lead=${t('i18nPage.demo.messages.lead')} :code=${i18nMessagesCode}>
+        <p class="muted">${t('i18nPage.demo.messages.note')}</p>
+        <pre class="i18n-pre"><code>${i18nMessagesSample}</code></pre>
+      </Demo>
+
+      <Demo :title=${t('i18nPage.demo.pitfalls.title')} :lead=${t('i18nPage.demo.pitfalls.lead')} :code=${i18nPitfallsCode}>
+        <div class="nav-live">
+          #for pitfallRows as row (row.bad)
+            <div class="nav-live-row i18n-pitfall-row">
+              <code>${t(row.bad)}</code>
+              <span>${t(row.good)}</span>
+            </div>
+          #end
+        </div>
+      </Demo>
+    </div>
+
+    <article class="ref-card ui-kit-card">
+      <h3>${t('i18nPage.uiKit.title')}</h3>
+      <p class="muted">${t('i18nPage.uiKit.body')}</p>
+      <ul class="ui-kit-list">
+        <li>${t('i18nPage.uiKit.item1')}</li>
+        <li>${t('i18nPage.uiKit.item2')}</li>
+        <li>${t('i18nPage.uiKit.item3')}</li>
+      </ul>
+      <p class="ui-kit-links">
+        <a class="text-link" jacare-go="/ui" href=${appHref('/ui')}>${lessonTitle('ui')}</a>
+        <span aria-hidden="true">·</span>
+        <a class="text-link" href=${UI_DOCS} target="_blank" rel="noopener noreferrer">${t('i18nPage.uiKit.linkDocs')}</a>
+        <span aria-hidden="true">·</span>
+        <a class="text-link" href=${UI_COMPONENTS} target="_blank" rel="noopener noreferrer">${t('i18nPage.uiKit.linkComponents')}</a>
+        <span aria-hidden="true">·</span>
+        <a class="text-link" href=${UI_GITHUB} target="_blank" rel="noopener noreferrer">${t('i18nPage.uiKit.linkGithub')}</a>
+      </p>
+    </article>
+  </section>
+</view>
+
+export <style>
+.i18n-sample {
+  gap: 1rem;
+}
+.i18n-sample .muted {
+  margin: 0.35rem 0 0.75rem;
+}
+.i18n-greeting {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.i18n-pre {
+  margin: 0.65rem 0 0;
+  padding: 0.75rem 0.85rem;
+  overflow-x: auto;
+  border-radius: 0.55rem;
+  background: color-mix(in oklab, var(--panel, #111) 92%, transparent);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.i18n-pitfall-row code {
+  color: color-mix(in oklab, tomato 70%, white);
+}
+.ui-kit-card {
+  margin-top: 0.35rem;
+}
+.ui-kit-list {
+  margin: 0.55rem 0 0.75rem;
+  padding-left: 1.15rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.ui-kit-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.i18n-select-demo {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+.demo:has(.i18n-select-demo) {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+.demo:has(.i18n-select-demo .jui-select__control[open]) {
+  z-index: 60;
+}
+
+.i18n-select-demo .jui-select__control[open] {
+  z-index: 70;
+}
+
+.i18n-select-demo .jui-select__panel {
+  z-index: 80;
+}
+
+.i18n-select-demo .jui-select__list {
+  max-height: none;
+  overflow: visible;
+}
+
+@media (max-width: 720px) {
+  .page {
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  .page .nav-live-row {
+    align-items: start;
+  }
+
+  .page .nav-live-row code,
+  .page .nav-live-row span {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .i18n-select-demo .jui-select__panel {
+    top: auto;
+    bottom: calc(100% + 0.4rem);
+  }
+
+  .i18n-pre {
+    max-width: 100%;
+  }
+}
+</style>

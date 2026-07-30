@@ -1,5 +1,7 @@
 import Tip from '../components/Tip.jcr'
 import { appHref } from '../app-base.js'
+import { t } from '../i18n.js'
+import { lessonTitle } from '../topics.js'
 import {
   overviewCode,
   siblingTsCode,
@@ -15,57 +17,55 @@ const docsHref = 'https://github.com/jacarejs/core/blob/main/docs/syntax.md#type
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">Optional · TypeScript</p>
-      <h1 class="page-title">TypeScript</h1>
+      <p class="page-kicker">${t('typescript.kicker')}</p>
+      <h1 class="page-title">${t('typescript.title')}</h1>
       <p class="page-lead">
-        Jacaré stays JS-first. Use a sibling <code>.jcr.ts</code>, a
-        <code>// @jacare-ts</code> pragma, or a normal <code>.ts</code> import —
-        types are stripped at compile; these cards show the patterns (no live mount).
+        ${t('typescript.lead', { sibling: '.jcr.ts', pragma: '// @jacare-ts', ts: '.ts' })}
       </p>
     </header>
 
-    <Tip :text=${'Reference only — copy into your app. Full write-up: docs/syntax.md § TypeScript. VS Code extension highlights // @jacare-ts and *.jcr.ts.'} />
+    <Tip :text=${t('typescript.tip')} />
 
     <div class="ref-card">
-      <h3>Overview</h3>
+      <h3>${t('typescript.overviewTitle')}</h3>
       <pre><code>${overviewCode}</code></pre>
     </div>
 
     <div class="ref-card">
-      <h3>1 · Sibling <code>Foo.jcr.ts</code> (recommended)</h3>
-      <p class="muted">Typed logic next to a clean view. Compiler prepends the stripped sibling automatically.</p>
+      <h3>1 · ${t('typescript.sibling.titlePre')} <code>Foo.jcr.ts</code> ${t('typescript.sibling.titleNote')}</h3>
+      <p class="muted">${t('typescript.sibling.body')}</p>
       <pre><code>${siblingTsCode}</code></pre>
       <pre><code>${siblingJcrCode}</code></pre>
     </div>
 
     <div class="ref-card">
-      <h3>2 · Pragma <code>// @jacare-ts</code></h3>
-      <p class="muted">One line at the top of the .jcr — script region is TypeScript until compile strip.</p>
+      <h3>2 · ${t('typescript.pragma.titlePre')} <code>// @jacare-ts</code></h3>
+      <p class="muted">${t('typescript.pragma.body')}</p>
       <pre><code>${pragmaCode}</code></pre>
     </div>
 
     <div class="ref-card">
-      <h3>3 · Import any <code>.ts</code> module</h3>
-      <p class="muted">No Jacaré special case — Vite compiles the .ts; the .jcr only imports.</p>
+      <h3>3 · ${t('typescript.importTs.titlePre')} <code>.ts</code> ${t('typescript.importTs.titlePost')}</h3>
+      <p class="muted">${t('typescript.importTs.body')}</p>
       <pre><code>${importTsCode}</code></pre>
     </div>
 
     <div class="ref-card">
-      <h3>4 · <code>jacare.d.ts</code> for host imports</h3>
-      <p class="muted">Type <code>import App from './app.jcr'</code> in a TypeScript entry.</p>
+      <h3>4 · <code>jacare.d.ts</code> ${t('typescript.dts.titleSuffix')}</h3>
+      <p class="muted">${t('typescript.dts.bodyPre')} <code>import App from './app.jcr'</code> ${t('typescript.dts.bodyPost')}</p>
       <pre><code>${dtsCode}</code></pre>
     </div>
 
     <div class="ref-card">
-      <h3>Rules</h3>
+      <h3>${t('typescript.rulesTitle')}</h3>
       <pre><code>${rulesCode}</code></pre>
     </div>
 
     <p class="muted">
-      Also see
-      <a jacare-go="/module" href=${appHref('/module')}>Module format</a>
+      ${t('typescript.alsoSee')}
+      <a jacare-go="/module" href=${appHref('/module')}>${lessonTitle('module')}</a>
       ·
-      <a jacare-go="/tooling" href=${appHref('/tooling')}>Tooling / VS Code</a>
+      <a jacare-go="/tooling" href=${appHref('/tooling')}>${t('typescript.toolingLink')}</a>
       ·
       <a href=${docsHref} target="_blank" rel="noopener noreferrer">syntax.md § TypeScript</a>
     </p>

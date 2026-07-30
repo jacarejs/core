@@ -1,6 +1,8 @@
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import { appHref } from '../app-base.js'
+import { t } from '../i18n.js'
+import { lessonTitle } from '../topics.js'
 import {
   bindingIrCode,
   checkBindingsCode,
@@ -16,37 +18,37 @@ const pipelineRows = [
 ]
 
 const siteRows = [
-  { kind: 'text', helper: 'bindText', note: '${expr} in text nodes' },
-  { kind: 'attr', helper: 'bindAttribute', note: 'bind-* / :* attributes' },
-  { kind: 'class', helper: 'bindClass', note: 'class-* toggles' },
-  { kind: 'styleVar', helper: 'bindStyleVar', note: 'style---* / style:*' },
-  { kind: 'model', helper: 'bindModel', note: 'bind-value / bind-checked' },
-  { kind: 'if', helper: 'branch', note: '#if / #elif / #else' },
-  { kind: 'list', helper: 'reconcileKeyedList', note: '#for … (key)' },
-  { kind: 'mesh', helper: 'Mesh Port', note: 'stable bag.key → direct bind' },
+  { kind: 'text', helper: 'bindText', noteKey: 'bindingIr.sites.notes.text' },
+  { kind: 'attr', helper: 'bindAttribute', noteKey: 'bindingIr.sites.notes.attr' },
+  { kind: 'class', helper: 'bindClass', noteKey: 'bindingIr.sites.notes.class' },
+  { kind: 'styleVar', helper: 'bindStyleVar', noteKey: 'bindingIr.sites.notes.styleVar' },
+  { kind: 'model', helper: 'bindModel', noteKey: 'bindingIr.sites.notes.model' },
+  { kind: 'if', helper: 'branch', noteKey: 'bindingIr.sites.notes.if' },
+  { kind: 'list', helper: 'reconcileKeyedList', noteKey: 'bindingIr.sites.notes.list' },
+  { kind: 'mesh', helper: 'Mesh Port', noteKey: 'bindingIr.sites.notes.mesh' },
 ]
 
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">Compiler · Binding IR</p>
-      <h1 class="page-title">One forest. Every emitter.</h1>
+      <p class="page-kicker">${t('bindingIr.kicker')}</p>
+      <h1 class="page-title">${t('bindingIr.title')}</h1>
       <p class="page-lead">
-        Templates lower once into a Binding IR / MountPlan. Client mount, SSR render/resume,
-        CPW, and <code>jacare check --bindings</code> all walk the same classification —
-        no triple-maintained codegen heuristics.
+        ${t('bindingIr.leadPre')}
+        <code>jacare check --bindings</code>
+        ${t('bindingIr.leadPost')}
       </p>
       <div class="row" style="margin-top:0.75rem;flex-wrap:wrap;gap:0.5rem">
-        <a class="btn btn-primary" jacare-go="/bindings" href=${appHref('/bindings')}>Bindings lesson</a>
-        <a class="btn btn-outline" jacare-go="/tooling" href=${appHref('/tooling')}>Tooling</a>
-        <a class="btn btn-outline" jacare-go="/playground" href=${appHref('/playground')}>Playground</a>
+        <a class="btn btn-primary" jacare-go="/bindings" href=${appHref('/bindings')}>${t('bindingIr.links.bindings')}</a>
+        <a class="btn btn-outline" jacare-go="/tooling" href=${appHref('/tooling')}>${lessonTitle('tooling')}</a>
+        <a class="btn btn-outline" jacare-go="/playground" href=${appHref('/playground')}>${lessonTitle('playground')}</a>
       </div>
     </header>
 
-    <Tip :text=${'Binding IR is delivered (compiler fatias 0–6). When something looks wrong in SSR vs client, inspect the same sites with jacare check --bindings or inspectTemplateBindings().'} />
+    <Tip :text=${t('bindingIr.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Pipeline'} :lead=${'AST → IR → MountPlan → emit. Client and SSR share the forest.'} :code=${bindingIrCode}>
+      <Demo :title=${t('bindingIr.pipeline.title')} :lead=${t('bindingIr.pipeline.lead')} :code=${bindingIrCode}>
         <div class="nav-live">
           #for pipelineRows as row (row.step)
             <div class="nav-live-row">
@@ -57,44 +59,44 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'Site kinds'} :lead=${'Every binding site gets a kind + helper. Mesh Ports are IR-level specializations.'} :code=${checkBindingsCode}>
+      <Demo :title=${t('bindingIr.sites.title')} :lead=${t('bindingIr.sites.lead')} :code=${checkBindingsCode}>
         <div class="nav-live">
           #for siteRows as row (row.kind)
             <div class="nav-live-row">
               <code>${row.kind} → ${row.helper}</code>
-              <span>${row.note}</span>
+              <span>${t(row.noteKey)}</span>
             </div>
           #end
         </div>
       </Demo>
 
       <div class="ref-card">
-        <h3>jacare check --bindings</h3>
-        <p class="muted">Prints every lowered site — the same list the emitters consume.</p>
+        <h3>${t('bindingIr.check.title')}</h3>
+        <p class="muted">${t('bindingIr.check.body')}</p>
         <pre><code>${checkBindingsCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>Inspect from @jacare/compiler</h3>
-        <p class="muted">parseModule → parseTemplate → inspectTemplateBindings / lowerMountAst.</p>
+        <h3>${t('bindingIr.inspect.title')}</h3>
+        <p class="muted">${t('bindingIr.inspect.body')}</p>
         <pre><code>${bindingIrCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>Expression style</h3>
-        <p class="muted">Prefer bare ${count} when there is no loop local. Redundant nullary arrows are a soft warn.</p>
+        <h3>${t('bindingIr.expression.title')}</h3>
+        <p class="muted">${t('bindingIr.expression.body')}</p>
         <pre><code>${expressionStyleCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>compile() API</h3>
-        <p class="muted">mode client | server | full · cpw for production wiring.</p>
+        <h3>${t('bindingIr.compileApi.title')}</h3>
+        <p class="muted">${t('bindingIr.compileApi.body')}</p>
         <pre><code>${compileApiCode}</code></pre>
       </div>
 
       <div class="ref-card">
-        <h3>Test the IR</h3>
-        <p class="muted">Assert site kinds in Vitest without mounting the whole app.</p>
+        <h3>${t('bindingIr.testing.title')}</h3>
+        <p class="muted">${t('bindingIr.testing.body')}</p>
         <pre><code>${testingCode}</code></pre>
       </div>
     </div>

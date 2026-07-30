@@ -1,6 +1,7 @@
 import { signal, computed, effect, watch, batch, untrack, pulse, derive, ReactiveCycleError, enablePatience, disablePatience, flushSync, isPatienceEnabled } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { t, translate } from '../i18n.js'
 import {
   signalCode,
   computedCode,
@@ -17,6 +18,7 @@ import {
 
 const count = signal(0)
 const peeked = signal(null)
+const lastPeekText = derive(() => translate('reactivity.signal.lastPeek', { value: peeked() }))
 
 function incrementCount() {
   count.update((n) => n + 1)
@@ -33,12 +35,15 @@ function peekCount() {
 const price = signal(12)
 const qty = signal(3)
 const total = computed(() => Number(price()) * Number(qty()))
+const totalText = derive(() => translate('reactivity.computed.total', { value: total() }))
 
 const log = signal([])
 const ticker = signal(0)
 
 effect(() => {
-  log.update((lines) => [...lines.slice(-4), 'ticker is now ' + ticker()])
+  const value = ticker()
+  const line = untrack(() => translate('reactivity.effect.line', { value }))
+  log.update((lines) => [...lines.slice(-4), line])
 })
 
 function bumpTicker() {
@@ -50,6 +55,9 @@ const logText = computed(() => log().join('\n'))
 const batchA = signal(0)
 const batchB = signal(0)
 const batchRuns = signal(0)
+const batchStatus = derive(() =>
+  translate('reactivity.batch.status', { a: batchA(), b: batchB(), runs: batchRuns() }),
+)
 
 effect(() => {
   batchA()
@@ -73,6 +81,16 @@ const patienceA = signal(0)
 const patienceB = signal(0)
 const patienceRuns = signal(0)
 const patienceOn = signal(false)
+const patienceStatus = derive(() =>
+  translate('reactivity.patience.status', {
+    state: patienceOn()
+      ? translate('reactivity.patience.on')
+      : translate('reactivity.patience.off'),
+    a: patienceA(),
+    b: patienceB(),
+    runs: patienceRuns(),
+  }),
+)
 
 effect(() => {
   patienceA()
@@ -102,6 +120,13 @@ function flushPatienceNow() {
 const tracked = signal(0)
 const untrackedSource = signal(0)
 const trackedRuns = signal(0)
+const untrackStatus = derive(() =>
+  translate('reactivity.untrack.status', {
+    tracked: tracked(),
+    untracked: untrackedSource(),
+    runs: trackedRuns(),
+  }),
+)
 
 effect(() => {
   tracked()
@@ -117,8 +142,9 @@ function bumpUntrackedSource() {
   untrackedSource.update((n) => n + 1)
 }
 
-const cycleStatus = signal('Not run yet.')
+const cycleStatus = signal(translate('reactivity.cycle.notRun'))
 const settled = signal(0)
+const settledText = derive(() => translate('reactivity.cycle.settledAt', { value: settled() }))
 
 function triggerCycle() {
   const a = signal(0)
@@ -133,7 +159,7 @@ function triggerCycle() {
       a.set(a() + 1)
     })
     a.set(1)
-    cycleStatus.set('Settled — no cycle.')
+    cycleStatus.set(translate('reactivity.cycle.settledOk'))
   } catch (error) {
     cycleStatus.set(error instanceof ReactiveCycleError ? error.message : String(error))
   }
@@ -149,6 +175,9 @@ function triggerSettling() {
 
 const aliasCount = pulse(0)
 const aliasDoubled = derive(() => aliasCount() * 2)
+const aliasDoubledText = derive(() =>
+  translate('reactivity.alias.doubled', { value: aliasDoubled() }),
+)
 
 function bumpAlias() {
   aliasCount.update((n) => n + 1)
@@ -157,9 +186,9 @@ function bumpAlias() {
 const score = pulse(50)
 const scoreCategory = derive(() => {
   const n = Number(score())
-  if (n < 34) return 'Low'
-  if (n < 67) return 'Medium'
-  return 'High'
+  if (n < 34) return translate('reactivity.range.low')
+  if (n < 67) return translate('reactivity.range.medium')
+  return translate('reactivity.range.high')
 })
 
 const temp = signal(20)
@@ -167,11 +196,15 @@ const effectLog = signal([])
 const watchLog = signal([])
 
 effect(() => {
-  effectLog.update((lines) => [...lines.slice(-3), 'effect saw ' + temp() + '°C'])
+  const value = temp()
+  const line = untrack(() => translate('reactivity.watch.effectLine', { value }))
+  effectLog.update((lines) => [...lines.slice(-3), line])
 })
 
 watch(() => {
-  watchLog.update((lines) => [...lines.slice(-3), 'watch saw ' + temp() + '°C'])
+  const value = temp()
+  const line = untrack(() => translate('reactivity.watch.watchLine', { value }))
+  watchLog.update((lines) => [...lines.slice(-3), line])
 })
 
 const effectLogText = computed(() => effectLog().join('\n'))
@@ -184,116 +217,123 @@ function bumpTemp(delta) {
 const meters = signal(2)
 const centimeters = computed(() => meters() * 100)
 const millimeters = computed(() => centimeters() * 10)
+const unitsText = derive(() =>
+  translate('reactivity.nested.units', {
+    m: meters(),
+    cm: centimeters(),
+    mm: millimeters(),
+  }),
+)
 
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §3</p>
-      <h1 class="page-title">Reactivity</h1>
-      <p class="page-lead">Signals are the whole state model. Everything else — computed, effect, forms, nav — is built on top of them.</p>
+      <p class="page-kicker">${t('reactivity.kicker')}</p>
+      <h1 class="page-title">${t('reactivity.title')}</h1>
+      <p class="page-lead">${t('reactivity.lead')}</p>
     </header>
 
-    <Tip :text=${'signal is the canonical name. pulse is an identical alias for the exact same function — this lab mixes both on purpose so you recognize either style.'} />
-    <Tip :text=${'Prefer batch/ripple for grouped writes. Patience (enablePatience) is an opt-in safety net for bursts; with it on, internal lanes flush input → default → idle (bindModel marks input). Default schedule stays synchronous.'} />
+    <Tip :text=${t('reactivity.tip1')} />
+    <Tip :text=${t('reactivity.tip2')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'signal: set, update, peek'} :lead=${'set() replaces the value, update() derives the next one, peek reads without subscribing.'} :code=${signalCode}>
+      <Demo :title=${t('reactivity.signal.title')} :lead=${t('reactivity.signal.lead')} :code=${signalCode}>
         <div class="stack">
           <div class="row">
             <span class="metric">${count}</span>
             <button type="button" class="btn" on-click=${incrementCount}>+1</button>
-            <button type="button" class="btn btn-outline" on-click=${resetCount}>Reset</button>
-            <button type="button" class="btn btn-ghost" on-click=${peekCount}>Peek</button>
+            <button type="button" class="btn btn-outline" on-click=${resetCount}>${t('reactivity.signal.reset')}</button>
+            <button type="button" class="btn btn-ghost" on-click=${peekCount}>${t('reactivity.signal.peek')}</button>
           </div>
           #if peeked() !== null
-            <p class="muted">Last peek: ${peeked}</p>
+            <p class="muted">${lastPeekText}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'computed: price × qty'} :lead=${'computed() recomputes only when price or qty actually changes.'} :code=${computedCode}>
+      <Demo :title=${t('reactivity.computed.title')} :lead=${t('reactivity.computed.lead')} :code=${computedCode}>
         <div class="stack">
           <div class="row">
             <label class="field">
-              <span class="field-label">Price</span>
+              <span class="field-label">${t('reactivity.computed.price')}</span>
               <input class="input" type="number" min="0" bind-value=${price} />
             </label>
             <label class="field">
-              <span class="field-label">Qty</span>
+              <span class="field-label">${t('reactivity.computed.qty')}</span>
               <input class="input" type="number" min="0" bind-value=${qty} />
             </label>
           </div>
-          <p class="metric">Total: ${total}</p>
+          <p class="metric">${totalText}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'effect: write to a log'} :lead=${'This effect tracks ticker and appends a line every time it changes.'} :code=${effectCode}>
+      <Demo :title=${t('reactivity.effect.title')} :lead=${t('reactivity.effect.lead')} :code=${effectCode}>
         <div class="stack">
-          <button type="button" class="btn" on-click=${bumpTicker}>Bump ticker</button>
+          <button type="button" class="btn" on-click=${bumpTicker}>${t('reactivity.effect.bump')}</button>
           <pre class="log">${logText}</pre>
         </div>
       </Demo>
 
-      <Demo :title=${'batch: coalesce updates'} :lead=${'Two writes inside batch() notify the effect below once instead of twice.'} :code=${batchCode}>
+      <Demo :title=${t('reactivity.batch.title')} :lead=${t('reactivity.batch.lead')} :code=${batchCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn btn-outline" on-click=${bumpSeparately}>Bump a + b separately</button>
-            <button type="button" class="btn" on-click=${bumpBatched}>Bump a + b in batch()</button>
+            <button type="button" class="btn btn-outline" on-click=${bumpSeparately}>${t('reactivity.batch.separately')}</button>
+            <button type="button" class="btn" on-click=${bumpBatched}>${t('reactivity.batch.batched')}</button>
           </div>
-          <p class="muted">a: ${batchA} · b: ${batchB} · effect runs: ${batchRuns}</p>
+          <p class="muted">${batchStatus}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'Patience: microtask coalesce (opt-in)'} :lead=${'Default stays sync. enablePatience() queues writes outside batch into one microtask (lanes: input → default → idle); flushSync() drains now. Prefer batch for explicit groups.'} :code=${patienceCode}>
+      <Demo :title=${t('reactivity.patience.title')} :lead=${t('reactivity.patience.lead')} :code=${patienceCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn" on-click=${togglePatience}>Toggle Patience</button>
-            <button type="button" class="btn btn-outline" on-click=${bumpPatienceBurst}>Burst a + b</button>
+            <button type="button" class="btn" on-click=${togglePatience}>${t('reactivity.patience.toggle')}</button>
+            <button type="button" class="btn btn-outline" on-click=${bumpPatienceBurst}>${t('reactivity.patience.burst')}</button>
             <button type="button" class="btn btn-ghost" on-click=${flushPatienceNow}>flushSync()</button>
           </div>
-          <p class="muted">Patience: ${() => (patienceOn() ? 'on' : 'off')} · a: ${patienceA} · b: ${patienceB} · effect runs: ${patienceRuns}</p>
+          <p class="muted">${patienceStatus}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'untrack: skip a dependency'} :lead=${'The effect below only reruns when the tracked signal changes, not the untracked one.'} :code=${untrackCode}>
+      <Demo :title=${t('reactivity.untrack.title')} :lead=${t('reactivity.untrack.lead')} :code=${untrackCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn" on-click=${bumpTracked}>Bump tracked</button>
-            <button type="button" class="btn btn-outline" on-click=${bumpUntrackedSource}>Bump untracked</button>
+            <button type="button" class="btn" on-click=${bumpTracked}>${t('reactivity.untrack.bumpTracked')}</button>
+            <button type="button" class="btn btn-outline" on-click=${bumpUntrackedSource}>${t('reactivity.untrack.bumpUntracked')}</button>
           </div>
-          <p class="muted">tracked: ${tracked} · untracked: ${untrackedSource} · effect runs: ${trackedRuns}</p>
+          <p class="muted">${untrackStatus}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'Cycle guard: updates that never settle'} :lead=${'Updates are synchronous, so two effects writing to each other would recurse forever. Jacaré stops after 200 nested levels and throws ReactiveCycleError instead of crashing the tab. A self-write that ends is still fine.'} :code=${cycleGuardCode}>
+      <Demo :title=${t('reactivity.cycle.title')} :lead=${t('reactivity.cycle.lead')} :code=${cycleGuardCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn" on-click=${triggerCycle}>Run a cycle</button>
-            <button type="button" class="btn btn-outline" on-click=${triggerSettling}>Run a self-write that settles</button>
+            <button type="button" class="btn" on-click=${triggerCycle}>${t('reactivity.cycle.run')}</button>
+            <button type="button" class="btn btn-outline" on-click=${triggerSettling}>${t('reactivity.cycle.settle')}</button>
           </div>
           <pre class="log">${cycleStatus}</pre>
-          <p class="muted">Self-write settled at: ${settled}</p>
+          <p class="muted">${settledText}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'pulse / derive aliases'} :lead=${'pulse and derive are the exact same functions as signal and computed — just different names.'} :code=${aliasCode}>
+      <Demo :title=${t('reactivity.alias.title')} :lead=${t('reactivity.alias.lead')} :code=${aliasCode}>
         <div class="stack">
           <div class="row">
             <span class="metric">${aliasCount}</span>
             <button type="button" class="btn" on-click=${bumpAlias}>+1</button>
           </div>
-          <p class="muted">doubled: ${aliasDoubled}</p>
+          <p class="muted">${aliasDoubledText}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'derive: a category from a range'} :lead=${'Move the slider — category is a pure derive() of the score, nothing else.'} :code=${rangeCode}>
+      <Demo :title=${t('reactivity.range.title')} :lead=${t('reactivity.range.lead')} :code=${rangeCode}>
         <div class="stack">
           <input class="input" type="range" min="0" max="100" bind-value=${score} />
           <p class="metric">${score} → ${scoreCategory}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'watch: an alias for effect'} :lead=${'watch and effect are the same function — both logs below react to the same signal.'} :code=${watchCode}>
+      <Demo :title=${t('reactivity.watch.title')} :lead=${t('reactivity.watch.lead')} :code=${watchCode}>
         <div class="stack">
           <div class="row">
             <button type="button" class="btn btn-outline" on-click=${() => bumpTemp(-1)}>−1°C</button>
@@ -305,10 +345,10 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'Nested computed: unit chain'} :lead=${'millimeters reads centimeters, which reads meters — a computed built on another computed.'} :code=${nestedComputedCode}>
+      <Demo :title=${t('reactivity.nested.title')} :lead=${t('reactivity.nested.lead')} :code=${nestedComputedCode}>
         <div class="stack">
           <input class="input" type="number" min="0" step="0.1" bind-value=${meters} />
-          <p class="muted">${meters} m = ${centimeters} cm = ${millimeters} mm</p>
+          <p class="muted">${unitsText}</p>
         </div>
       </Demo>
     </div>

@@ -3,6 +3,7 @@ import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import ScopedA from '../components/ScopedA.jcr'
 import ScopedB from '../components/ScopedB.jcr'
+import { t } from '../i18n.js'
 import {
   scopedCode,
   globalCode,
@@ -59,80 +60,80 @@ function shuffleAccents() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §10</p>
-      <h1 class="page-title">Scoped CSS</h1>
-      <p class="page-lead">Style blocks are scoped per file — and can use the same if / for / case control flow as the view to rebuild CSS from pulses.</p>
+      <p class="page-kicker">${t('css.kicker')}</p>
+      <h1 class="page-title">${t('css.title')}</h1>
+      <p class="page-lead">${t('css.lead')}</p>
     </header>
 
-    <Tip :text=${'Put control-flow directives on their own lines inside export style. The compiler rebuilds and re-scopes the sheet when a pulse changes.'} />
+    <Tip :text=${t('css.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Same class name, two components'} :lead=${'ScopedA and ScopedB both use class="box" — their styles never leak into each other.'} :code=${scopedCode}>
+      <Demo :title=${t('css.demo.scoped.title')} :lead=${t('css.demo.scoped.lead')} :code=${scopedCode}>
         <div class="row">
           <ScopedA />
           <ScopedB />
         </div>
       </Demo>
 
-      <Demo :title=${'Global opt-out'} :lead=${'This page declares a global .shared-outline rule and toggles it on the row above.'} :code=${globalCode}>
+      <Demo :title=${t('css.demo.global.title')} :lead=${t('css.demo.global.lead')} :code=${globalCode}>
         <div class="stack">
           <div class="row" class-shared-outline=${outlineOn}>
             <ScopedA />
             <ScopedB />
           </div>
-          <button type="button" class="btn btn-outline" on-click=${toggleOutline}>Toggle outline</button>
+          <button type="button" class="btn btn-outline" on-click=${toggleOutline}>${t('css.demo.global.toggle')}</button>
         </div>
       </Demo>
 
-      <Demo :title=${'Toggle a locally scoped class'} :lead=${'.spotlight is a normal (non-global) rule in this file — toggling it works exactly like any other class-* binding.'} :code=${spotlightCode}>
+      <Demo :title=${t('css.demo.spotlight.title')} :lead=${t('css.demo.spotlight.lead')} :code=${spotlightCode}>
         <div class="stack">
           <div class="card" class-spotlight=${spotlightOn}>
-            <p class="muted">The spotlight class only exists in this file's own scoped style block.</p>
+            <p class="muted">${t('css.demo.spotlight.note')}</p>
           </div>
-          <button type="button" class="btn btn-outline" on-click=${toggleSpotlight}>Toggle spotlight</button>
+          <button type="button" class="btn btn-outline" on-click=${toggleSpotlight}>${t('css.demo.spotlight.toggle')}</button>
         </div>
       </Demo>
 
-      <Demo :title=${'Scoped style, reactive CSS variable'} :lead=${'hue-chip is scoped to this file; style---hue still binds a signal straight to its --hue custom property.'} :code=${hueChipCode}>
+      <Demo :title=${t('css.demo.hue.title')} :lead=${t('css.demo.hue.lead')} :code=${hueChipCode}>
         <div class="stack">
           <div class="hue-chip" style---hue=${accentHue}></div>
           <input class="input" type="range" min="0" max="360" bind-value=${accentHue} />
         </div>
       </Demo>
 
-      <Demo :title=${'if inside style'} :lead=${'Theme switches CSS properties without remounting the card — only the stylesheet updates.'} :code=${styleIfCode}>
+      <Demo :title=${t('css.demo.styleIf.title')} :lead=${t('css.demo.styleIf.lead')} :code=${styleIfCode}>
         <div class="stack">
           <div class="row">
-            #for themes as t (t)
-              <button type="button" class="btn btn-outline" class-active=${() => theme() === t} on-click=${() => setTheme(t)}>${t}</button>
+            #for themes as themeId (themeId)
+              <button type="button" class="btn btn-outline" class-active=${() => theme() === themeId} on-click=${() => setTheme(themeId)}>${themeId}</button>
             #end
           </div>
           <div class="theme-card">
-            <strong>Theme card</strong>
-            <p>Background and text come from style if branches.</p>
+            <strong>${t('css.demo.styleIf.cardTitle')}</strong>
+            <p>${t('css.demo.styleIf.cardBody')}</p>
           </div>
         </div>
       </Demo>
 
-      <Demo :title=${'case inside style'} :lead=${'Match a tone pulse to whole badge rulesets with when arms.'} :code=${styleCaseCode}>
+      <Demo :title=${t('css.demo.styleCase.title')} :lead=${t('css.demo.styleCase.lead')} :code=${styleCaseCode}>
         <div class="stack">
           <div class="row">
-            #for tones as t (t)
-              <button type="button" class="btn btn-outline" class-active=${() => tone() === t} on-click=${() => setTone(t)}>${t}</button>
+            #for tones as toneId (toneId)
+              <button type="button" class="btn btn-outline" class-active=${() => tone() === toneId} on-click=${() => setTone(toneId)}>${toneId}</button>
             #end
           </div>
-          <span class="tone-badge">Tone badge</span>
+          <span class="tone-badge">${t('css.demo.styleCase.badge')}</span>
         </div>
       </Demo>
 
-      <Demo :title=${'for inside style'} :lead=${'Generate chip selectors from a pulse list — ids and colors interpolate into CSS.'} :code=${styleForCode}>
+      <Demo :title=${t('css.demo.styleFor.title')} :lead=${t('css.demo.styleFor.lead')} :code=${styleForCode}>
         <div class="stack">
           <div class="row">
             #for accents() as accent (accent.id)
               <span class=${'chip-' + accent.id}>${accent.id}</span>
             #end
           </div>
-          <button type="button" class="btn btn-outline" on-click=${shuffleAccents}>Rotate accents</button>
+          <button type="button" class="btn btn-outline" on-click=${shuffleAccents}>${t('css.demo.styleFor.rotate')}</button>
         </div>
       </Demo>
     </div>

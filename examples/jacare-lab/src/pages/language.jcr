@@ -2,6 +2,8 @@ import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import { appHref } from '../app-base.js'
+import { t, translate } from '../i18n.js'
+import { lessonTitle } from '../topics.js'
 import {
   reservedBlocksCode,
   reservedDirectivesCode,
@@ -22,136 +24,176 @@ const tab = pulse('a')
 const show = pulse(true)
 const email = pulse('')
 const err = pulse('')
+const okText = derive(() => translate('language.bindsIf.ok', { email: email() }))
 
 const blockRows = [
-  { token: 'export <' + 'view>', role: 'Markup + bindings (required)' },
-  { token: 'export <' + 'style>', role: 'Scoped CSS (optional, last)' },
-  { token: 'export <' + 'contract>', role: 'props · pulses · slots · emits · links' },
+  { token: 'export <' + 'view>', roleKey: 'language.blocks.roles.view' },
+  { token: 'export <' + 'style>', roleKey: 'language.blocks.roles.style' },
+  { token: 'export <' + 'contract>', roleKey: 'language.blocks.roles.contract' },
 ]
 
 const directiveRows = [
-  { token: '#if / #elif / #else / #end', role: 'Conditional branches (@if alias)' },
-  { token: '#case / #when / #else', role: 'Match one value (Object.is)' },
-  { token: '#for list as item (key)', role: 'Keyed list (@each alias)' },
+  { token: '#if / #elif / #else / #end', roleKey: 'language.directives.roles.if' },
+  { token: '#case / #when / #else', roleKey: 'language.directives.roles.case' },
+  { token: '#for list as item (key)', roleKey: 'language.directives.roles.for' },
 ]
 
 const prefixRows = [
-  { token: 'on-* / @*', role: 'DOM events' },
-  { token: 'bind-*', role: 'Attr / two-way model / model prop' },
-  { token: ':*', role: 'One-way attr or component prop' },
-  { token: 'class-* / class:*', role: 'Toggle class' },
-  { token: 'style---* / style:*', role: 'CSS var --*' },
-  { token: '${@bag/key}', role: 'Pulse Mesh address' },
-  { token: '${@route/key}', role: 'Active nav path param (getRouteParam)' },
+  { token: 'on-* / @*', roleKey: 'language.prefixes.roles.events' },
+  { token: 'bind-*', roleKey: 'language.prefixes.roles.bind' },
+  { token: ':*', roleKey: 'language.prefixes.roles.prop' },
+  { token: 'class-* / class:*', roleKey: 'language.prefixes.roles.class' },
+  { token: 'style---* / style:*', roleKey: 'language.prefixes.roles.styleVar' },
+  { token: '${@bag/key}', roleKey: 'language.prefixes.roles.mesh' },
+  { token: '${@route/key}', roleKey: 'language.prefixes.roles.route' },
 ]
 
 const specialRows = [
-  { token: '<slot> / slot="name"', role: 'Content projection' },
-  { token: '<debug>', role: 'Dev JSON inspector (prod-stripped)' },
-  { token: 'jacare-frame / jacare-go', role: 'Nav mount + client links' },
-  { token: 'jacare-when={expr}', role: 'One-liner #if (same IR)' },
-  { token: 'data-jacare-focus', role: 'Focus target after nav.go({ focus })' },
+  { token: '<slot> / slot="name"', roleKey: 'language.special.roles.slot' },
+  { token: '<debug>', roleKey: 'language.special.roles.debug' },
+  { token: 'jacare-frame / jacare-go', roleKey: 'language.special.roles.frame' },
+  { token: 'jacare-when={expr}', roleKey: 'language.special.roles.when' },
+  { token: 'data-jacare-focus', roleKey: 'language.special.roles.focus' },
 ]
 
 const cliRows = [
-  { token: 'jacare new / create-jacare', role: 'Scaffold project' },
-  { token: 'jacare dev', role: 'Dev server + HMR' },
-  { token: 'jacare build', role: 'Production → dist/' },
-  { token: 'jacare check [--bindings]', role: 'Contracts + Mesh links + IR' },
-  { token: 'jacare check --routes', role: 'Static jacare-go vs createNav screens' },
-  { token: 'jacare compile', role: 'Single-file compile' },
+  { token: 'jacare new / create-jacare', roleKey: 'language.cli.roles.new' },
+  { token: 'jacare dev', roleKey: 'language.cli.roles.dev' },
+  { token: 'jacare build', roleKey: 'language.cli.roles.build' },
+  { token: 'jacare check [--bindings]', roleKey: 'language.cli.roles.check' },
+  { token: 'jacare check --routes', roleKey: 'language.cli.roles.routes' },
+  { token: 'jacare compile', roleKey: 'language.cli.roles.compile' },
 ]
 
 const runtimeRows = [
-  { area: 'State', mechanism: 'signal / pulse · computed / derive' },
-  { area: 'Effects', mechanism: 'effect / watch · batch · Patience (opt-in) · untrack' },
-  { area: 'Shared', mechanism: 'createBag / getBag · ripple · snap / hydrate' },
-  { area: 'Text / attrs', mechanism: 'bindText · bindAttribute · bindClass · bindStyleVar' },
-  { area: 'Model', mechanism: 'bindModel (bind-value / bind-checked)' },
-  { area: 'Conditional', mechanism: 'branch / showIf (#if · jacare-when · #case)' },
-  { area: 'List', mechanism: 'reconcileKeyedList (#for … (key))' },
-  { area: 'App', mechanism: 'createNav · getRouteParam · createForm · createLifecycle' },
-  { area: 'SSR', mechanism: 'renderToString · renderToStream · resumeBindings' },
-  { area: 'DevTools', mechanism: 'devtoolsBind · registerScope · Pulse / Mesh / Scope' },
-  { area: 'Compiler', mechanism: 'Binding IR · MountPlan · CPW · jacare check [--routes]' },
+  { id: 'state', areaKey: 'language.runtime.areas.state', mechanism: 'signal / pulse · computed / derive' },
+  {
+    id: 'effects',
+    areaKey: 'language.runtime.areas.effects',
+    mechanism: 'effect / watch · batch · Patience (opt-in) · untrack',
+  },
+  {
+    id: 'shared',
+    areaKey: 'language.runtime.areas.shared',
+    mechanism: 'createBag / getBag · ripple · snap / hydrate',
+  },
+  {
+    id: 'text',
+    areaKey: 'language.runtime.areas.text',
+    mechanism: 'bindText · bindAttribute · bindClass · bindStyleVar',
+  },
+  {
+    id: 'model',
+    areaKey: 'language.runtime.areas.model',
+    mechanism: 'bindModel (bind-value / bind-checked)',
+  },
+  {
+    id: 'conditional',
+    areaKey: 'language.runtime.areas.conditional',
+    mechanism: 'branch / showIf (#if · jacare-when · #case)',
+  },
+  {
+    id: 'list',
+    areaKey: 'language.runtime.areas.list',
+    mechanism: 'reconcileKeyedList (#for … (key))',
+  },
+  {
+    id: 'app',
+    areaKey: 'language.runtime.areas.app',
+    mechanism: 'createNav · getRouteParam · createForm · createLifecycle',
+  },
+  {
+    id: 'ssr',
+    areaKey: 'language.runtime.areas.ssr',
+    mechanism: 'renderToString · renderToStream · resumeBindings',
+  },
+  {
+    id: 'devtools',
+    areaKey: 'language.runtime.areas.devtools',
+    mechanism: 'devtoolsBind · registerScope · Pulse / Mesh / Scope',
+  },
+  {
+    id: 'compiler',
+    areaKey: 'language.runtime.areas.compiler',
+    mechanism: 'Binding IR · MountPlan · CPW · jacare check [--routes]',
+  },
 ]
 
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">Language reference</p>
-      <h1 class="page-title">Reserved words & bindings</h1>
+      <p class="page-kicker">${t('language.kicker')}</p>
+      <h1 class="page-title">${t('language.title')}</h1>
       <p class="page-lead">
-        Complete map of Jacaré — runtime mechanisms, module blocks, directives, attribute prefixes,
-        every bind form, and CLI create / run / build. Written docs:
+        ${t('language.lead1')}
         <code>docs/language-reference.md</code>
-        and
+        ${t('language.leadAnd')}
         <code>docs/api.md</code>
         §2b · §5 · §17 · §20
-        <a class="text-link" jacare-go="/helpers" href=${appHref('/helpers')}>Import catalog</a>.
-        Featured compiler lesson:
-        <a class="text-link" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>Binding IR</a>.
+        <a class="text-link" jacare-go="/helpers" href=${appHref('/helpers')}>${lessonTitle('helpers')}</a>.
+        ${t('language.leadFeatured')}
+        <a class="text-link" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>${lessonTitle('binding-ir')}</a>.
       </p>
     </header>
 
-    <Tip :text=${'Jacaré files are plain JavaScript. Tokens below are reserved by the compiler or runtime in the positions shown — not all are JS keywords. Prefer bare ${count} over redundant ${() => count()} when there is no loop local to capture. Toggle DevTools from the top bar anytime.'} />
+    <Tip :text=${t('language.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Runtime map'} :lead=${'What powers templates under the hood — the same surface as the private architecture notes.'} :code=${reservedBlocksCode}>
+      <Demo :title=${t('language.runtime.title')} :lead=${t('language.runtime.lead')} :code=${reservedBlocksCode}>
         <div class="nav-live">
-          #for runtimeRows as row (row.area)
+          #for runtimeRows as row (row.id)
             <div class="nav-live-row">
-              <code>${row.area}</code>
+              <code>${t(row.areaKey)}</code>
               <span>${row.mechanism}</span>
             </div>
           #end
         </div>
         <div class="row" style="margin-top:0.75rem;flex-wrap:wrap;gap:0.5rem">
-          <a class="btn btn-outline" jacare-go="/reactivity" href=${appHref('/reactivity')}>Reactivity</a>
-          <a class="btn btn-outline" jacare-go="/bag" href=${appHref('/bag')}>Pulse bags</a>
-          <a class="btn btn-outline" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>Binding IR</a>
-          <a class="btn btn-outline" jacare-go="/nav" href=${appHref('/nav')}>Navigation</a>
-          <a class="btn btn-outline" jacare-go="/forms" href=${appHref('/forms')}>Forms</a>
-          <a class="btn btn-outline" jacare-go="/ssr" href=${appHref('/ssr')}>SSR</a>
-          <a class="btn btn-outline" jacare-go="/island" href=${appHref('/island')}>Islands</a>
-          <a class="btn btn-outline" jacare-go="/helpers" href=${appHref('/helpers')}>Imports</a>
+          <a class="btn btn-outline" jacare-go="/reactivity" href=${appHref('/reactivity')}>${lessonTitle('reactivity')}</a>
+          <a class="btn btn-outline" jacare-go="/bag" href=${appHref('/bag')}>${lessonTitle('bag')}</a>
+          <a class="btn btn-outline" jacare-go="/binding-ir" href=${appHref('/binding-ir')}>${lessonTitle('binding-ir')}</a>
+          <a class="btn btn-outline" jacare-go="/nav" href=${appHref('/nav')}>${lessonTitle('nav')}</a>
+          <a class="btn btn-outline" jacare-go="/forms" href=${appHref('/forms')}>${lessonTitle('forms')}</a>
+          <a class="btn btn-outline" jacare-go="/ssr" href=${appHref('/ssr')}>${lessonTitle('ssr')}</a>
+          <a class="btn btn-outline" jacare-go="/island" href=${appHref('/island')}>${lessonTitle('island')}</a>
+          <a class="btn btn-outline" jacare-go="/helpers" href=${appHref('/helpers')}>${t('language.links.imports')}</a>
         </div>
       </Demo>
 
-      <Demo :title=${'Module blocks'} :lead=${'view is required. style is scoped. contract declares the public surface for jacare check.'} :code=${reservedBlocksCode}>
+      <Demo :title=${t('language.blocks.title')} :lead=${t('language.blocks.lead')} :code=${reservedBlocksCode}>
         <div class="nav-live">
           #for blockRows as row (row.token)
             <div class="nav-live-row">
               <code>${row.token}</code>
-              <span>${row.role}</span>
+              <span>${t(row.roleKey)}</span>
             </div>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Directives'} :lead=${'Must start on their own line. Work inside view and inside style.'} :code=${reservedDirectivesCode}>
+      <Demo :title=${t('language.directives.title')} :lead=${t('language.directives.lead')} :code=${reservedDirectivesCode}>
         <div class="nav-live">
           #for directiveRows as row (row.token)
             <div class="nav-live-row">
               <code>${row.token}</code>
-              <span>${row.role}</span>
+              <span>${t(row.roleKey)}</span>
             </div>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Attribute prefixes'} :lead=${'Parsed before HTML attributes. On PascalCase tags, : is a prop and bind- is a model prop.'} :code=${allBindsCode}>
+      <Demo :title=${t('language.prefixes.title')} :lead=${t('language.prefixes.lead')} :code=${allBindsCode}>
         <div class="nav-live">
           #for prefixRows as row (row.token)
             <div class="nav-live-row">
               <code>${row.token}</code>
-              <span>${row.role}</span>
+              <span>${t(row.roleKey)}</span>
             </div>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'All binds live'} :lead=${'bind-value, bind-checked, bind-href, :disabled, class-active, style---pct on one panel.'} :code=${allBindsCode}>
+      <Demo :title=${t('language.bindsLive.title')} :lead=${t('language.bindsLive.lead')} :code=${allBindsCode}>
         <div class="stack">
           <input class="input" bind-value=${draft} placeholder="bind-value" />
           <label class="row"><input type="checkbox" bind-checked=${on} /> bind-checked</label>
@@ -169,43 +211,43 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'Binds + #if'} :lead=${'Two-way inputs nest cleanly inside conditionals — inactive arms leave the DOM.'} :code=${bindsWithIfCode}>
+      <Demo :title=${t('language.bindsIf.title')} :lead=${t('language.bindsIf.lead')} :code=${bindsWithIfCode}>
         <div class="stack">
-          <label class="row"><input type="checkbox" bind-checked=${show} /> Show form</label>
+          <label class="row"><input type="checkbox" bind-checked=${show} /> ${t('language.bindsIf.showForm')}</label>
           #if show()
-            <input class="input" bind-value=${email} placeholder="Email" />
+            <input class="input" bind-value=${email} placeholder=${t('language.bindsIf.emailPlaceholder')} />
             #if err()
               <p class="muted">${err}</p>
             #else
-              <p class="muted">Looks good — ${email}</p>
+              <p class="muted">${okText}</p>
             #end
           #else
-            <p class="muted">Form hidden</p>
+            <p class="muted">${t('language.bindsIf.hidden')}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Contract + model bind'} :lead=${'Parents must use bind-name for model: true props — :name fails jacare check.'} :code=${contractBindCode}>
+      <Demo :title=${t('language.contract.title')} :lead=${t('language.contract.lead')} :code=${contractBindCode}>
         <pre class="log">${contractBindCode}</pre>
       </Demo>
 
-      <Demo :title=${'Special tags'} :lead=${'slot, debug, and nav attributes are Jacaré-reserved in templates.'} :code=${reservedBlocksCode}>
+      <Demo :title=${t('language.special.title')} :lead=${t('language.special.lead')} :code=${reservedBlocksCode}>
         <div class="nav-live">
           #for specialRows as row (row.token)
             <div class="nav-live-row">
               <code>${row.token}</code>
-              <span>${row.role}</span>
+              <span>${t(row.roleKey)}</span>
             </div>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Create · run · build'} :lead=${'Scaffold with create-jacare or jacare new, then dev / build / check.'} :code=${cliCreateRunBuildCode}>
+      <Demo :title=${t('language.cli.title')} :lead=${t('language.cli.lead')} :code=${cliCreateRunBuildCode}>
         <div class="nav-live nav-live-cli">
           #for cliRows as row (row.token)
             <div class="nav-live-row">
               <code>${row.token}</code>
-              <span>${row.role}</span>
+              <span>${t(row.roleKey)}</span>
             </div>
           #end
         </div>

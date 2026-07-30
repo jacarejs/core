@@ -1,4 +1,5 @@
 import { pulse, derive } from '@jacare/core'
+import { t, translate } from '../i18n.js'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import Badge from '../components/Badge.jcr'
@@ -8,12 +9,22 @@ import { cookbookCode, searchCode } from '../snippets/cookbook.js'
 const draft = pulse('')
 const nextId = pulse(3)
 const tasks = pulse([
-  { id: '1', label: 'Read the API docs', done: true },
-  { id: '2', label: 'Build a lesson page', done: false },
+  { id: '1', key: 'readDocs', done: true },
+  { id: '2', key: 'buildLesson', done: false },
 ])
 
+const visibleTasks = derive(() =>
+  tasks().map((task) => ({
+    ...task,
+    label: task.key ? translate(`cookbookPage.task.${task.key}`) : task.label,
+  })),
+)
 const remaining = derive(() => tasks().filter((task) => !task.done).length)
-const remainingLabel = derive(() => remaining() + ' left')
+const remainingLabel = derive(() =>
+  translate(remaining() === 1 ? 'cookbookPage.remainingOne' : 'cookbookPage.remainingMany', {
+    count: remaining(),
+  }),
+)
 const isEmpty = derive(() => tasks().length === 0)
 
 function addTask() {
@@ -39,52 +50,63 @@ function onDraftKeydown(event) {
 
 const contactQuery = pulse('')
 const contactBook = [
-  { id: 'a', name: 'Ada Lovelace', role: 'Engineer' },
-  { id: 'b', name: 'Grace Hopper', role: 'Engineer' },
-  { id: 'c', name: 'Alan Turing', role: 'Mathematician' },
-  { id: 'd', name: 'Katherine Johnson', role: 'Mathematician' },
+  { id: 'a', name: 'Ada Lovelace', roleKey: 'engineer' },
+  { id: 'b', name: 'Grace Hopper', roleKey: 'engineer' },
+  { id: 'c', name: 'Alan Turing', roleKey: 'mathematician' },
+  { id: 'd', name: 'Katherine Johnson', roleKey: 'mathematician' },
 ]
+
+const contacts = derive(() =>
+  contactBook.map((person) => ({
+    ...person,
+    role: translate(`cookbookPage.role.${person.roleKey}`),
+  })),
+)
 
 const matches = derive(() => {
   const q = contactQuery().trim().toLowerCase()
-  if (!q) return contactBook
-  return contactBook.filter(
+  if (!q) return contacts()
+  return contacts().filter(
     (person) => person.name.toLowerCase().includes(q) || person.role.toLowerCase().includes(q),
   )
 })
-const matchLabel = derive(() => matches().length + ' match' + (matches().length === 1 ? '' : 'es'))
+const matchLabel = derive(() =>
+  translate(matches().length === 1 ? 'cookbookPage.matchOne' : 'cookbookPage.matchMany', {
+    count: matches().length,
+  }),
+)
 
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §13b</p>
-      <h1 class="page-title">Cookbook</h1>
-      <p class="page-lead">One screen combining conditionals, loops, events, immutable updates, and two shared components.</p>
+      <p class="page-kicker">${t('cookbookPage.kicker')}</p>
+      <h1 class="page-title">${t('cookbookPage.title')}</h1>
+      <p class="page-lead">${t('cookbookPage.lead')}</p>
     </header>
 
-    <Tip :text=${'This is the same shape as any real screen: pulses for state, plain functions for actions, and a template that reads them back.'} />
+    <Tip :text=${translate('cookbookPage.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Task list'} :lead=${'Add, toggle, and remove tasks with immutable updates so the list can reconcile efficiently.'} :code=${cookbookCode}>
+      <Demo :title=${translate('cookbookPage.demo.tasks.title')} :lead=${translate('cookbookPage.demo.tasks.lead')} :code=${cookbookCode}>
         <div class="stack">
           <div class="row">
             <Badge :text=${remainingLabel} />
-            <span class="muted">${tasks().length} total</span>
+            <span class="muted">${tasks().length} ${t('cookbookPage.total')}</span>
           </div>
 
           <div class="row">
-            <input class="input" bind-value=${draft} placeholder="What needs to be done?" on-keydown=${onDraftKeydown} />
-            <button type="button" class="btn" on-click=${addTask}>Add</button>
+            <input class="input" bind-value=${draft} placeholder=${translate('cookbookPage.draftPlaceholder')} on-keydown=${onDraftKeydown} />
+            <button type="button" class="btn" on-click=${addTask}>${t('cookbookPage.add')}</button>
           </div>
 
           #if isEmpty()
-            <p class="muted">No tasks yet — add one above.</p>
+            <p class="muted">${t('cookbookPage.emptyTasks')}</p>
           #else
             <ul class="list">
-              #for tasks() as task (task.id)
+              #for visibleTasks() as task (task.id)
                 <li class="list-item" class-done=${task.done}>
                   <span class="item-label" on-click=${() => toggleTask(task.id)}>${task.label}</span>
-                  <IconButton :label=${'Delete'} on-press=${() => removeTask(task.id)} />
+                  <IconButton :label=${translate('cookbookPage.delete')} on-press=${() => removeTask(task.id)} />
                 </li>
               #end
             </ul>
@@ -92,14 +114,14 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'Search + filter'} :lead=${'A single derive() drives the badge count, the empty state, and the filtered list together.'} :code=${searchCode}>
+      <Demo :title=${translate('cookbookPage.demo.search.title')} :lead=${translate('cookbookPage.demo.search.lead')} :code=${searchCode}>
         <div class="stack">
           <div class="row">
-            <input class="input" bind-value=${contactQuery} placeholder="Search name or role" />
+            <input class="input" bind-value=${contactQuery} placeholder=${translate('cookbookPage.searchPlaceholder')} />
             <Badge :text=${matchLabel} />
           </div>
           #if matches().length === 0
-            <p class="muted">Nobody matches that search.</p>
+            <p class="muted">${t('cookbookPage.emptySearch')}</p>
           #else
             <ul class="list">
               #for matches() as person (person.id)

@@ -1,6 +1,8 @@
-import { createLifecycle, effect, pulse, registerScope } from '@jacare/core'
+import { createLifecycle, derive, effect, pulse, registerScope } from '@jacare/core'
 import { appHref } from '../app-base.js'
 import { showCode } from '../code-viewer.js'
+import { t, translate } from '../i18n.js'
+import { lessonTitle } from '../topics.js'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import Badge from '../components/Badge.jcr'
@@ -18,6 +20,7 @@ const activations = pulse(0)
 const deactivations = pulse(0)
 const unmounts = pulse(0)
 const activePhase = pulse('active')
+const phaseLabel = derive(() => translate(`lifecyclePage.phase.${activePhase()}`))
 let timer
 
 
@@ -56,31 +59,37 @@ function toggleBlock() {
   showBlock.update((on) => !on)
 }
 
+const blockToggleLabel = derive(() =>
+  translate(
+    showBlock() ? 'lifecyclePage.demo.dispose.unmountBlock' : 'lifecyclePage.demo.dispose.mountBlock',
+  ),
+)
+
 const quickLinks = [
-  { path: '/reactivity', label: 'Reactivity' },
-  { path: '/nav', label: 'Navigation' },
-  { path: '/forms', label: 'Forms' },
+  { path: '/reactivity', id: 'reactivity' },
+  { path: '/nav', id: 'nav' },
+  { path: '/forms', id: 'forms' },
 ]
 
 export <view>
   <section class="page page-lifecycle">
     <header class="page-hero">
-      <p class="page-kicker">API §13</p>
-      <h1 class="page-title">Lifecycle and Scope</h1>
-      <p class="page-lead">Nav wraps each lazy screen with screen() — hooks fire in a fixed order when you enter and leave a route.</p>
+      <p class="page-kicker">${t('lifecyclePage.kicker')}</p>
+      <h1 class="page-title">${t('lifecyclePage.title')}</h1>
+      <p class="page-lead">${t('lifecyclePage.lead')}</p>
     </header>
 
     <article class="lifecycle-cycle">
       <header class="lifecycle-cycle-head">
         <div>
-          <Badge :text=${'live cycle'} />
-          <h2 class="lifecycle-cycle-title">Screen lifecycle flow</h2>
-          <p class="lifecycle-cycle-lead">Enter: onActivate → onMount → mount the view. Leave: onDeactivate → onUnmount → run every cleanup.</p>
+          <Badge :text=${translate('lifecyclePage.cycle.badge')} />
+          <h2 class="lifecycle-cycle-title">${t('lifecyclePage.cycle.title')}</h2>
+          <p class="lifecycle-cycle-lead">${t('lifecyclePage.cycle.lead')}</p>
         </div>
-        <button type="button" class="btn btn-ghost" on-click=${() => showCode('screen() lifecycle order', cycleFlowCode)}>View code</button>
+        <button type="button" class="btn btn-ghost" on-click=${() => showCode(translate('lifecyclePage.cycle.codeTitle'), cycleFlowCode)}>${t('shell.viewCode')}</button>
       </header>
 
-      <div class="lifecycle-orbit" aria-label="Screen lifecycle diagram">
+      <div class="lifecycle-orbit" aria-label=${translate('lifecyclePage.cycle.diagramAria')}>
         <svg class="lifecycle-orbit-svg" viewBox="0 0 360 360" aria-hidden="true">
           <defs>
             <marker id="cycle-arrow-enter" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
@@ -99,86 +108,86 @@ export <view>
 
         <div class="lifecycle-orbit-layout">
           <div class="lifecycle-orbit-center">
-            <span class="lifecycle-orbit-phase">${activePhase}</span>
-            <span class="lifecycle-orbit-timer">${ticks}s on screen</span>
-            <span class="muted">This page is running the hooks below.</span>
+            <span class="lifecycle-orbit-phase">${phaseLabel}</span>
+            <span class="lifecycle-orbit-timer">${ticks}${t('lifecyclePage.orbit.timerSuffix')}</span>
+            <span class="muted">${t('lifecyclePage.orbit.note')}</span>
           </div>
 
           <div class="lifecycle-orbit-node lifecycle-orbit-node--activate">
-            <span class="lifecycle-orbit-step">1 · enter</span>
+            <span class="lifecycle-orbit-step">${t('lifecyclePage.orbit.activate.step')}</span>
             <code>onActivate</code>
-            <p>Analytics, registerScope</p>
+            <p>${t('lifecyclePage.orbit.activate.desc')}</p>
             <strong class="lifecycle-orbit-count">${activations}</strong>
           </div>
 
           <div class="lifecycle-orbit-node lifecycle-orbit-node--mount">
-            <span class="lifecycle-orbit-step">2 · enter</span>
+            <span class="lifecycle-orbit-step">${t('lifecyclePage.orbit.mount.step')}</span>
             <code>onMount</code>
-            <p>Timers, subscriptions — return cleanup</p>
+            <p>${t('lifecyclePage.orbit.mount.desc')}</p>
             <strong class="lifecycle-orbit-count">${ticks}</strong>
           </div>
 
           <div class="lifecycle-orbit-node lifecycle-orbit-node--deactivate">
-            <span class="lifecycle-orbit-step">3 · leave</span>
+            <span class="lifecycle-orbit-step">${t('lifecyclePage.orbit.deactivate.step')}</span>
             <code>onDeactivate</code>
-            <p>Screen hidden, still may be cached</p>
+            <p>${t('lifecyclePage.orbit.deactivate.desc')}</p>
             <strong class="lifecycle-orbit-count">${deactivations}</strong>
           </div>
 
           <div class="lifecycle-orbit-node lifecycle-orbit-node--unmount">
-            <span class="lifecycle-orbit-step">4 · leave</span>
+            <span class="lifecycle-orbit-step">${t('lifecyclePage.orbit.unmount.step')}</span>
             <code>onUnmount</code>
-            <p>Final teardown after dispose</p>
+            <p>${t('lifecyclePage.orbit.unmount.desc')}</p>
             <strong class="lifecycle-orbit-count">${unmounts}</strong>
           </div>
         </div>
       </div>
 
       <div class="lifecycle-orbit-legend">
-        <span class="lifecycle-legend lifecycle-legend--enter">Enter path</span>
-        <span class="lifecycle-legend lifecycle-legend--leave">Leave path</span>
+        <span class="lifecycle-legend lifecycle-legend--enter">${t('lifecyclePage.legend.enter')}</span>
+        <span class="lifecycle-legend lifecycle-legend--leave">${t('lifecyclePage.legend.leave')}</span>
       </div>
 
       <div class="lifecycle-orbit-actions">
-        <p class="muted">Leave this lesson and come back — onActivate bumps again; onDeactivate / onUnmount fire when nav disposes the screen.</p>
+        <p class="muted">${t('lifecyclePage.actions')}</p>
         <div class="row">
           #for quickLinks as link (link.path)
-            <a class="btn btn-outline" jacare-go=${link.path} href=${appHref(link.path)}>${link.label}</a>
+            <a class="btn btn-outline" jacare-go=${link.path} href=${appHref(link.path)}>${lessonTitle(link.id)}</a>
           #end
         </div>
       </div>
     </article>
 
-    <Tip :text=${'Static titles go in createNav as { use, title }. Live titles use setNavTitle inside an effect from onActivate. Use onMount for timers — always return a cleanup from it.'} />
+    <Tip :text=${translate('lifecyclePage.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Screen title + setNavTitle'} :lead=${'Static titles live in createNav. For a live tab title (countdown, totals), call setNavTitle from an effect started in onActivate.'} :code=${titleCode}>
-        <p class="muted">See Todo suite <code>/focus</code> for a live <code>setNavTitle</code> + timer example.</p>
+      <Demo :title=${translate('lifecyclePage.demo.title.title')} :lead=${translate('lifecyclePage.demo.title.lead')} :code=${titleCode}>
+        <p class="muted">${t('lifecyclePage.demo.title.note')}</p>
       </Demo>
 
-      <Demo :title=${'Full lifecycle export'} :lead=${'This page exports lifecycle with all four hooks — the orbit counters above are wired to them.'} :code=${hooksCode}>
+      <Demo :title=${translate('lifecyclePage.demo.hooks.title')} :lead=${translate('lifecyclePage.demo.hooks.lead')} :code=${hooksCode}>
         <div class="nav-live">
-          <div class="nav-live-row"><span>phase</span><code>${activePhase}</code></div>
+          <div class="nav-live-row"><span>${t('lifecyclePage.phaseLabel')}</span><code>${phaseLabel}</code></div>
           <div class="nav-live-row"><span>onActivate</span><code>${activations}</code></div>
           <div class="nav-live-row"><span>onDeactivate</span><code>${deactivations}</code></div>
           <div class="nav-live-row"><span>onUnmount</span><code>${unmounts}</code></div>
         </div>
       </Demo>
 
-      <Demo :title=${'registerScope for DevTools'} :lead=${'Registered values show up live in the Scope panel (bottom-left by default) while @jacare/devtools is connected.'} :code=${scopeCode}>
-        <p class="muted">Open the Scope panel and look for "Lifecycle ticks" — it mirrors the timer in the orbit center. Use ⚙ on the Pulse Graph to move panels or Clear Scope.</p>
+      <Demo :title=${translate('lifecyclePage.demo.scope.title')} :lead=${translate('lifecyclePage.demo.scope.lead')} :code=${scopeCode}>
+        <p class="muted">${t('lifecyclePage.demo.scope.note')}</p>
       </Demo>
 
-      <Demo :title=${'onActivate on every visit'} :lead=${'Navigate away to another lesson and back — activations increments again while the onMount timer keeps counting if the screen stayed cached.'} :code=${activationCode}>
+      <Demo :title=${translate('lifecyclePage.demo.activation.title')} :lead=${translate('lifecyclePage.demo.activation.lead')} :code=${activationCode}>
         <p class="metric">${activations}</p>
       </Demo>
 
-      <Demo :title=${'Effect dispose (same idea as onMount cleanup)'} :lead=${"A plain effect's cleanup runs before every rerun and on final dispose — the same mechanism behind onUnmount."} :code=${disposeCode}>
+      <Demo :title=${translate('lifecyclePage.demo.dispose.title')} :lead=${translate('lifecyclePage.demo.dispose.lead')} :code=${disposeCode}>
         <div class="stack">
-          <button type="button" class="btn" on-click=${toggleBlock}>${showBlock() ? 'Unmount' : 'Mount'} block</button>
-          <p class="muted">mounts: ${mounts} · disposals: ${disposals}</p>
+          <button type="button" class="btn" on-click=${toggleBlock}>${blockToggleLabel}</button>
+          <p class="muted">${t('lifecyclePage.demo.dispose.mounts')}: ${mounts} · ${t('lifecyclePage.demo.dispose.disposals')}: ${disposals}</p>
           #if showBlock()
-            <p class="muted">This block is currently mounted.</p>
+            <p class="muted">${t('lifecyclePage.demo.dispose.mounted')}</p>
           #end
         </div>
       </Demo>

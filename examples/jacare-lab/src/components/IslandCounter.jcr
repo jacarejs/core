@@ -1,9 +1,10 @@
 import { pulse } from '@jacare/core'
+import { t, translate } from '../i18n.js'
 
 export <contract>
   props: {
     start: { type: 'number', default: 0 }
-    label: { type: 'string', default: 'Clicks' }
+    label: { type: 'string', default: '' }
   }
 </contract>
 
@@ -17,13 +18,18 @@ function reset() {
   clicks.set(0)
 }
 
+const resolvedLabel = () => {
+  const value = typeof label === 'function' ? label() : label
+  return value || translate('shell.clicks')
+}
+
 export <view>
   <section class="lab-island-counter" data-jacare-island>
-    <p class="lab-island-label">${label}</p>
+    <p class="lab-island-label">${resolvedLabel}</p>
     <p class="lab-island-value">${() => (Number(typeof start === 'function' ? start() : start) || 0) + clicks()}</p>
     <div class="lab-island-actions">
       <button type="button" class="btn" on-click=${bump}>+1</button>
-      <button type="button" class="btn btn-outline" on-click=${reset}>Reset</button>
+      <button type="button" class="btn btn-outline" on-click=${reset}>${t('shell.reset')}</button>
     </div>
   </section>
 </view>

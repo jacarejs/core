@@ -1,16 +1,16 @@
 import { appHref } from '../app-base.js'
+import { t } from '../i18n.js'
 
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">404</p>
-      <h1 class="page-title">This lesson doesn't exist yet</h1>
+      <p class="page-kicker">${t('notFoundPage.kicker')}</p>
+      <h1 class="page-title">${t('notFoundPage.title')}</h1>
       <p class="page-lead">
-        The route you followed doesn't match any screen in <code>nav.js</code>. Head back to the
-        start and pick a lesson from the sidebar.
+        ${t('notFoundPage.lead1')} <code>nav.js</code>${t('notFoundPage.lead2')}
       </p>
     </header>
 
-    <a class="btn" jacare-go="/" href=${appHref('/')}>← Back to Start</a>
+    <a class="btn" jacare-go="/" href=${appHref('/')}>${t('notFoundPage.back')}</a>
   </section>
 </view>

@@ -39,6 +39,7 @@ const LESSONS: LabLesson[] = [
   { path: '/island', label: 'Islands', keywords: ['island', 'mountisland'] },
   { path: '/tooling', label: 'Tooling', keywords: ['tooling', 'cli', 'check', 'vite', 'devtools', 'vscode'] },
   { path: '/helpers', label: 'Import catalog', keywords: ['helpers', 'import', 'catalog', 'api'] },
+  { path: '/i18n', label: 'i18n', keywords: ['i18n', 'locale', 'translate', 'select', '@jacare/ui', 'components'] },
 ]
 
 function normalizeToken(raw: string): string {

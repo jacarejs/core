@@ -1,6 +1,7 @@
 import { pulse } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { t } from '../i18n.js'
 import { roleCode, statusCode, themeCode, numericCode } from '../snippets/case.js'
 
 const role = pulse('member')
@@ -38,15 +39,15 @@ function gradeKey() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §7b</p>
-      <h1 class="page-title">The case directive</h1>
-      <p class="page-lead">Match one value once — each when-arm mounts only when Object.is agrees; inactive arms stay out of the DOM.</p>
+      <p class="page-kicker">${t('case.kicker')}</p>
+      <h1 class="page-title">${t('case.title')}</h1>
+      <p class="page-lead">${t('case.lead')}</p>
     </header>
 
-    <Tip :text=${'Prefer case when you compare the same expression to several literals. Keep if for open boolean conditions.'} />
+    <Tip :text=${t('case.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Role switch'} :lead=${'One scrutinee, three when arms, and a fallback else.'} :code=${roleCode}>
+      <Demo :title=${t('case.demo.role.title')} :lead=${t('case.demo.role.lead')} :code=${roleCode}>
         <div class="stack">
           <div class="row">
             #for roles as r (r)
@@ -55,16 +56,16 @@ export <view>
           </div>
           #case role()
             #when 'admin'
-              <p class="muted">Admin panel unlocked.</p>
+              <p class="muted">${t('case.demo.role.admin')}</p>
             #when 'guest'
-              <p class="muted">Guest preview only.</p>
+              <p class="muted">${t('case.demo.role.guest')}</p>
             #else
-              <p class="muted">Member workspace.</p>
+              <p class="muted">${t('case.demo.role.member')}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Status machine'} :lead=${'Cleaner than a long elif chain when every branch checks the same pulse.'} :code=${statusCode}>
+      <Demo :title=${t('case.demo.status.title')} :lead=${t('case.demo.status.lead')} :code=${statusCode}>
         <div class="stack">
           <div class="row">
             #for statuses as s (s)
@@ -73,30 +74,30 @@ export <view>
           </div>
           #case status()
             #when 'loading'
-              <p class="muted" role="status" aria-live="polite">Loading…</p>
+              <p class="muted" role="status" aria-live="polite">${t('case.demo.status.loading')}</p>
             #when 'error'
-              <p class="muted">Something went wrong.</p>
+              <p class="muted">${t('case.demo.status.error')}</p>
             #when 'empty'
-              <p class="muted">No items yet.</p>
+              <p class="muted">${t('case.demo.status.empty')}</p>
             #when 'ready'
-              <p class="muted">Ready — here is your content.</p>
+              <p class="muted">${t('case.demo.status.ready')}</p>
             #else
-              <p class="muted">Unknown status.</p>
+              <p class="muted">${t('case.demo.status.unknown')}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Theme panels'} :lead=${'Each theme mounts a different panel — same idea as if, with equality matching.'} :code=${themeCode}>
+      <Demo :title=${t('case.demo.theme.title')} :lead=${t('case.demo.theme.lead')} :code=${themeCode}>
         <div class="stack">
           <div class="row">
-            #for themes as t (t)
+            #for themes as themeId (themeId)
               <button
                 type="button"
                 class="btn btn-outline"
-                class-active=${() => theme() === t}
-                on-click=${() => setTheme(t)}
+                class-active=${() => theme() === themeId}
+                on-click=${() => setTheme(themeId)}
               >
-                ${t}
+                ${themeId}
               </button>
             #end
           </div>
@@ -104,44 +105,44 @@ export <view>
           #case theme()
             #when 'day'
               <div class="theme-panel theme-day">
-                <strong>Day</strong>
-                <p>Soft mist background — only this branch is in the DOM.</p>
+                <strong>${t('case.demo.theme.dayTitle')}</strong>
+                <p>${t('case.demo.theme.dayBody')}</p>
               </div>
             #when 'dusk'
               <div class="theme-panel theme-dusk">
-                <strong>Dusk</strong>
-                <p>Warm amber wash — other panels are unmounted.</p>
+                <strong>${t('case.demo.theme.duskTitle')}</strong>
+                <p>${t('case.demo.theme.duskBody')}</p>
               </div>
             #when 'night'
               <div class="theme-panel theme-night">
-                <strong>Night</strong>
-                <p>Deep canopy background — swapped in by the case arm.</p>
+                <strong>${t('case.demo.theme.nightTitle')}</strong>
+                <p>${t('case.demo.theme.nightBody')}</p>
               </div>
             #else
               <div class="theme-panel">
-                <strong>Unknown</strong>
-                <p>Fallback arm.</p>
+                <strong>${t('case.demo.theme.unknownTitle')}</strong>
+                <p>${t('case.demo.theme.unknownBody')}</p>
               </div>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Derived match key'} :lead=${'Compute a discrete key in script, then case that key — keeps template arms literal and readable.'} :code=${numericCode}>
+      <Demo :title=${t('case.demo.grade.title')} :lead=${t('case.demo.grade.lead')} :code=${numericCode}>
         <div class="stack">
           <input class="input" type="range" min="0" max="100" bind-value=${score} />
           <div class="row">
             <span class="metric">${score}</span>
             #case gradeKey()
               #when 'A'
-                <span class="badge">Grade A</span>
+                <span class="badge">${t('case.demo.grade.badge', { grade: 'A' })}</span>
               #when 'B'
-                <span class="badge">Grade B</span>
+                <span class="badge">${t('case.demo.grade.badge', { grade: 'B' })}</span>
               #when 'C'
-                <span class="badge badge-warn">Grade C</span>
+                <span class="badge badge-warn">${t('case.demo.grade.badge', { grade: 'C' })}</span>
               #when 'D'
-                <span class="badge badge-warn">Grade D</span>
+                <span class="badge badge-warn">${t('case.demo.grade.badge', { grade: 'D' })}</span>
               #else
-                <span class="badge badge-danger">Grade F</span>
+                <span class="badge badge-danger">${t('case.demo.grade.badge', { grade: 'F' })}</span>
             #end
           </div>
         </div>

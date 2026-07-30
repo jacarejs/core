@@ -1,16 +1,22 @@
 import { computed, derive, pulse } from '@jacare/core'
+import Select from '@jacare/ui/Select'
 import { appHref, assetUrl } from './app-base.js'
-import { LESSONS } from './topics.js'
+import { LESSONS, lessonTitle, lessonBlurb } from './topics.js'
 import { activeCode, hideCode } from './code-viewer.js'
+import { t, translate, setLocale, localeModel, LOCALE_OPTIONS, LOCALE_LABELS } from './i18n.js'
 import { devtoolsEnabled, toggleDevtools } from './lab-devtools.js'
 import CodeModal from './components/CodeModal.jcr'
 
 const JACARE_VERSION = import.meta.env.JACARE_VERSION
 const menuOpen = pulse(false)
-const menuLabel = computed(() => (menuOpen() ? 'Close' : 'Lessons'))
+const menuLabel = computed(() =>
+  menuOpen() ? translate('shell.menuClose') : translate('shell.menuOpen'),
+)
 const viewerTitle = derive(() => activeCode()?.title ?? '')
 const viewerFiles = derive(() => activeCode()?.files ?? [])
-const devtoolsLabel = derive(() => (devtoolsEnabled() ? 'DevTools on' : 'DevTools off'))
+const devtoolsLabel = derive(() =>
+  translate(devtoolsEnabled() ? 'shell.devtoolsOn' : 'shell.devtoolsOff'),
+)
 
 function toggleMenu() {
   menuOpen.update((open) => !open)
@@ -18,6 +24,15 @@ function toggleMenu() {
 
 function closeMenu() {
   menuOpen.set(false)
+}
+
+function onLocaleChange(next) {
+  const id = String(next || '')
+  if (!LOCALE_LABELS[id]) {
+    setLocale('en')
+    return
+  }
+  setLocale(id)
 }
 
 export <view>
@@ -28,12 +43,12 @@ export <view>
           <img class="brand-logo" src=${assetUrl('jacare-logo.png')} alt="Jacaré" />
           <span class="brand-copy">
             <span class="brand-name">Jacaré Lab</span>
-            <span class="brand-tag">Complete API tutorial</span>
+            <span class="brand-tag">${t('shell.brandTag')}</span>
             <span class="jacare-version" title="@jacare/core">v${JACARE_VERSION}</span>
           </span>
         </a>
 
-        <nav class="side-nav" aria-label="Lessons">
+        <nav class="side-nav" aria-label=${translate('shell.lessonsNav')}>
           #for LESSONS as lesson (lesson.path)
             <a
               class="side-link"
@@ -41,8 +56,8 @@ export <view>
               href=${appHref(lesson.path)}
               on-click=${closeMenu}
             >
-              <span class="side-title">${lesson.title}</span>
-              <span class="side-blurb">${lesson.blurb}</span>
+              <span class="side-title">${lessonTitle(lesson.id)}</span>
+              <span class="side-blurb">${lessonBlurb(lesson.id)}</span>
             </a>
           #end
         </nav>
@@ -53,13 +68,22 @@ export <view>
           <button type="button" class="btn btn-ghost menu-btn" on-click=${toggleMenu}>
             ${menuLabel}
           </button>
-          <p class="topbar-hint">Live demos · View code opens the source for each example</p>
+          <p class="topbar-hint">${t('shell.topbarHint')}</p>
+          <div class="lab-locale">
+            <Select
+              :options=${LOCALE_OPTIONS}
+              :placeholder=${translate('shell.localeLabel')}
+              :searchable=${false}
+              bind-value=${localeModel}
+              on-change=${onLocaleChange}
+            />
+          </div>
           <button
             type="button"
             class="btn btn-outline topbar-devtools"
             class-devtools-on=${devtoolsEnabled}
             aria-pressed=${devtoolsEnabled}
-            title="Toggle Jacaré DevTools overlay"
+            title=${translate('shell.devtoolsTitle')}
             on-click=${() => void toggleDevtools()}
           >
             ${devtoolsLabel}
@@ -68,7 +92,7 @@ export <view>
         <main class="main" jacare-frame></main>
         <footer class="site-footer">
           <p class="site-footer-line">
-            Made in Brazil <span class="site-footer-flag" aria-hidden="true">🇧🇷</span>
+            ${t('shell.footer')} <span class="site-footer-flag" aria-hidden="true">🇧🇷</span>
             · Jacaré v${JACARE_VERSION}
           </p>
         </footer>

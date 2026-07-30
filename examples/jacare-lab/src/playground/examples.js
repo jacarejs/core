@@ -3,7 +3,7 @@ import { viewSnippet } from '../utils/snippet.js'
 export const PLAYGROUND_EXAMPLES = [
   {
     id: 'counter',
-    label: 'Counter',
+    labelKey: 'counter',
     source: viewSnippet(
       `import { pulse } from '@jacare/core'
 
@@ -27,7 +27,7 @@ function reset() {
   },
   {
     id: 'derive',
-    label: 'Derive',
+    labelKey: 'derive',
     source: viewSnippet(
       `import { pulse, derive } from '@jacare/core'
 
@@ -46,7 +46,7 @@ const category = derive(() => {
   },
   {
     id: 'list',
-    label: 'List',
+    labelKey: 'list',
     source: viewSnippet(
       `import { pulse } from '@jacare/core'
 
@@ -87,7 +87,7 @@ function removeItem(id) {
   },
   {
     id: 'if',
-    label: '#if',
+    labelKey: 'if',
     source: viewSnippet(
       `import { pulse } from '@jacare/core'
 
@@ -110,7 +110,7 @@ function toggle() {
   },
   {
     id: 'case',
-    label: '#case',
+    labelKey: 'case',
     source: viewSnippet(
       `import { pulse } from '@jacare/core'
 
@@ -138,7 +138,7 @@ function setRole(next) {
   },
   {
     id: 'events',
-    label: 'Events',
+    labelKey: 'events',
     source: viewSnippet(
       `import { pulse } from '@jacare/core'
 
@@ -161,7 +161,7 @@ function onKeydown(event) {
   },
   {
     id: 'bindings',
-    label: 'Bindings',
+    labelKey: 'bindings',
     source: viewSnippet(
       `import { pulse, derive } from '@jacare/core'
 
@@ -183,7 +183,7 @@ function toggleActive() {
   },
   {
     id: 'form-field',
-    label: 'Form field',
+    labelKey: 'form-field',
     source: viewSnippet(
       `import { pulse, derive } from '@jacare/core'
 

@@ -1,6 +1,7 @@
 import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { t, translate } from '../i18n.js'
 import { mirrorCode, classCode, gaugeCode, numberBindCode, multiClassCode } from '../snippets/bindings.js'
 
 const draft = pulse('')
@@ -14,9 +15,9 @@ function selectTag(tag) {
 }
 
 const tasks = pulse([
-  { id: 'a', label: 'Read the docs', done: true },
-  { id: 'b', label: 'Build a demo', done: false },
-  { id: 'c', label: 'Ship it', done: false },
+  { id: 'docs', done: true },
+  { id: 'demo', done: false },
+  { id: 'ship', done: false },
 ])
 
 function toggleTask(id) {
@@ -40,28 +41,28 @@ function setPriority(next) {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §5</p>
-      <h1 class="page-title">Bindings</h1>
-      <p class="page-lead">bind-value / bind-checked wire two-way inputs. class-* toggles a class. style---* binds a signal to a CSS custom property. Client and SSR share one Binding IR — the compiler classifies each site once.</p>
+      <p class="page-kicker">${t('bindings.kicker')}</p>
+      <h1 class="page-title">${t('bindings.title')}</h1>
+      <p class="page-lead">${t('bindings.lead')}</p>
     </header>
 
-    <Tip :text=${'Prefer bare expressions when there is no loop local to capture — ${count()} and ${() => count()} both react; the first is Jacaré style. Use an arrow for #for items and handlers. jacare check warns on redundant nullary arrows (CPW still inlines class-*, style---*, and one-way bind-* in production).'} />
+    <Tip :text=${t('bindings.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'bind-value / bind-checked mirrors'} :lead=${'Both inputs on each row are bound to the exact same pulse — type or toggle either one.'} :code=${mirrorCode}>
+      <Demo :title=${t('bindings.demo.mirror.title')} :lead=${t('bindings.demo.mirror.lead')} :code=${mirrorCode}>
         <div class="stack">
           <div class="row">
-            <input class="input" bind-value=${draft} placeholder="Type here" />
-            <input class="input" bind-value=${draft} placeholder="Mirrors the field above" />
+            <input class="input" bind-value=${draft} :placeholder=${translate('bindings.demo.mirror.placeholder')} />
+            <input class="input" bind-value=${draft} :placeholder=${translate('bindings.demo.mirror.mirrorPlaceholder')} />
           </div>
           <div class="row">
-            <label class="row"><input type="checkbox" bind-checked=${agreed} /> Agree</label>
-            <label class="row"><input type="checkbox" bind-checked=${agreed} /> Mirrors the checkbox</label>
+            <label class="row"><input type="checkbox" bind-checked=${agreed} /> ${t('bindings.demo.mirror.agree')}</label>
+            <label class="row"><input type="checkbox" bind-checked=${agreed} /> ${t('bindings.demo.mirror.mirrorCheckbox')}</label>
           </div>
         </div>
       </Demo>
 
-      <Demo :title=${'class-active / class-done'} :lead=${'A class-<name> binding toggles that class based on a boolean.'} :code=${classCode}>
+      <Demo :title=${t('bindings.demo.classes.title')} :lead=${t('bindings.demo.classes.lead')} :code=${classCode}>
         <div class="stack">
           <div class="row">
             #for tags as tag (tag)
@@ -71,14 +72,14 @@ export <view>
           <ul class="list">
             #for tasks() as task (task.id)
               <li class="list-item" class-done=${task.done} on-click=${() => toggleTask(task.id)}>
-                <span class="item-label">${task.label}</span>
+                <span class="item-label">${t('bindings.demo.classes.tasks.' + task.id)}</span>
               </li>
             #end
           </ul>
         </div>
       </Demo>
 
-      <Demo :title=${'style--- gauge'} :lead=${'The gauge-mini class reads a --angle custom property set by style---angle.'} :code=${gaugeCode}>
+      <Demo :title=${t('bindings.demo.gauge.title')} :lead=${t('bindings.demo.gauge.lead')} :code=${gaugeCode}>
         <div class="stack">
           <div class="gauge-mini" style---angle=${gaugeAngle}></div>
           <input class="input" type="range" min="0" max="100" bind-value=${gaugeValue} />
@@ -86,14 +87,14 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'bind-value on a number input'} :lead=${'bind-value coerces automatically — quantity is a plain number, not a string.'} :code=${numberBindCode}>
+      <Demo :title=${t('bindings.demo.number.title')} :lead=${t('bindings.demo.number.lead')} :code=${numberBindCode}>
         <div class="stack">
           <input class="input" type="number" min="1" max="99" bind-value=${quantity} />
           <p class="muted">${quantity} × $${unitPrice} = $${total}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'Several class-* bindings on one element'} :lead=${'Each button carries three independent class-* toggles at once.'} :code=${multiClassCode}>
+      <Demo :title=${t('bindings.demo.multiClass.title')} :lead=${t('bindings.demo.multiClass.lead')} :code=${multiClassCode}>
         <div class="row">
           #for priorities as level (level)
             <button
@@ -104,7 +105,7 @@ export <view>
               class-badge-danger=${() => level === 'high' && priority() === level}
               on-click=${() => setPriority(level)}
             >
-              ${level}
+              ${t('bindings.demo.multiClass.levels.' + level)}
             </button>
           #end
         </div>

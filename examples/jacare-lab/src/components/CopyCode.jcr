@@ -1,3 +1,5 @@
+import { translate } from '../i18n.js'
+
 export <contract>
   props: {
     code: { type: 'any', required: true }
@@ -11,14 +13,14 @@ async function copyToClipboard(text, button) {
   const previous = label.textContent
   try {
     await navigator.clipboard.writeText(value)
-    label.textContent = 'Copied'
+    label.textContent = translate('shell.copied')
     button.disabled = true
     setTimeout(() => {
       label.textContent = previous
       button.disabled = false
     }, 1400)
   } catch {
-    label.textContent = 'Failed'
+    label.textContent = translate('shell.copyFailed')
     setTimeout(() => {
       label.textContent = previous
     }, 1400)
@@ -29,10 +31,10 @@ export <view>
   <button
     type="button"
     class="btn btn-copy"
-    aria-label="Copy code"
+    aria-label=${() => translate('shell.copyCode')}
     on-click=${(event) => copyToClipboard(code, event.currentTarget)}
   >
     <span class="btn-copy-icon" aria-hidden="true"></span>
-    <span class="btn-copy-label">Copy</span>
+    <span class="btn-copy-label">${() => translate('shell.copy')}</span>
   </button>
 </view>

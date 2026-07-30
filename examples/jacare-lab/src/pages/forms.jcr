@@ -1,4 +1,5 @@
-import { createForm, pulse } from '@jacare/core'
+import { createForm, derive, pulse } from '@jacare/core'
+import { t, translate } from '../i18n.js'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
 import Field from '../components/Field.jcr'
@@ -7,11 +8,12 @@ import { formCode, touchedDirtyCode, confirmCode, multiValidatorCode } from '../
 const form = createForm({
   name: {
     value: '',
-    validate: (value) => (value.trim().length < 2 ? 'Name is too short' : undefined),
+    validate: (value) =>
+      value.trim().length < 2 ? translate('formsPage.error.nameShort') : undefined,
   },
   email: {
     value: '',
-    validate: (value) => (value.includes('@') ? undefined : 'Enter a valid email'),
+    validate: (value) => (value.includes('@') ? undefined : translate('formsPage.error.email')),
   },
 })
 
@@ -32,7 +34,8 @@ const password = pulse('')
 const confirmForm = createForm({
   confirm: {
     value: '',
-    validate: (value) => (value.length > 0 && value !== password() ? 'Passwords do not match' : undefined),
+    validate: (value) =>
+      value.length > 0 && value !== password() ? translate('formsPage.error.mismatch') : undefined,
   },
 })
 
@@ -40,27 +43,45 @@ const signupForm = createForm({
   username: {
     value: '',
     validate: [
-      (value) => (value.trim().length < 3 ? 'At least 3 characters' : undefined),
-      (value) => (/\s/.test(value) ? 'No spaces allowed' : undefined),
+      (value) =>
+        value.trim().length < 3 ? translate('formsPage.error.usernameShort') : undefined,
+      (value) => (/\s/.test(value) ? translate('formsPage.error.usernameSpaces') : undefined),
     ],
   },
 })
 
+function flag(on) {
+  return translate(on ? 'formsPage.yes' : 'formsPage.no')
+}
+
+const formState = derive(() =>
+  translate('formsPage.state', { valid: flag(form.valid()), dirty: flag(form.dirty()) }),
+)
+const nameTouchedLabel = derive(() =>
+  translate('formsPage.badge.nameTouched', { value: flag(form.fields.name.touched()) }),
+)
+const nameDirtyLabel = derive(() =>
+  translate('formsPage.badge.nameDirty', { value: flag(form.fields.name.dirty()) }),
+)
+const emailTouchedLabel = derive(() =>
+  translate('formsPage.badge.emailTouched', { value: flag(form.fields.email.touched()) }),
+)
+
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §12</p>
-      <h1 class="page-title">Forms</h1>
-      <p class="page-lead">createForm builds signal-backed fields with validation, dirty tracking, and a ready-to-wire submit handler.</p>
+      <p class="page-kicker">${t('formsPage.kicker')}</p>
+      <h1 class="page-title">${t('formsPage.title')}</h1>
+      <p class="page-lead">${t('formsPage.lead')}</p>
     </header>
 
-    <Tip :text=${"Field uses bind-value (model prop) plus :error=${field.error()} so the child receives the message string. Native checkboxes still need bind-checked on a top-level pulse — that is why newsletter lives beside the form schema."} />
+    <Tip :text=${translate('formsPage.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Schema + validation'} :lead=${'Each field tracks its own value, error, touched, and dirty state.'} :code=${formCode}>
+      <Demo :title=${translate('formsPage.demo.schema.title')} :lead=${translate('formsPage.demo.schema.lead')} :code=${formCode}>
         <form class="stack" on-submit=${onSubmit}>
           <Field
-            :label=${'Name'}
+            :label=${translate('formsPage.field.name')}
             bind-value=${form.fields.name}
             :error=${form.fields.name.error()}
             :type=${'text'}
@@ -68,63 +89,63 @@ export <view>
             on-blur=${() => form.fields.name.blur()}
           />
           <Field
-            :label=${'Email'}
+            :label=${translate('formsPage.field.email')}
             bind-value=${form.fields.email}
             :error=${form.fields.email.error()}
             :type=${'email'}
             :placeholder=${'you@jacare.dev'}
             on-blur=${() => form.fields.email.blur()}
           />
-          <label class="row"><input type="checkbox" bind-checked=${newsletter} /> Subscribe to the newsletter</label>
+          <label class="row"><input type="checkbox" bind-checked=${newsletter} /> ${t('formsPage.newsletter')}</label>
           <div class="row">
-            <button type="submit" class="btn">Submit</button>
-            <button type="button" class="btn btn-outline" on-click=${resetForm}>Reset</button>
+            <button type="submit" class="btn">${t('formsPage.submit')}</button>
+            <button type="button" class="btn btn-outline" on-click=${resetForm}>${t('formsPage.reset')}</button>
           </div>
         </form>
       </Demo>
 
-      <Demo :title=${'Submit handler + form state'} :lead=${'handleSubmit blurs every field, validates, and only calls your callback when the form is valid.'} :code=${formCode}>
+      <Demo :title=${translate('formsPage.demo.submit.title')} :lead=${translate('formsPage.demo.submit.lead')} :code=${formCode}>
         <div class="stack">
-          <p class="muted">valid: ${form.valid() ? 'yes' : 'no'} · dirty: ${form.dirty() ? 'yes' : 'no'}</p>
+          <p class="muted">${formState}</p>
           #if submittedValues()
-            <p class="muted">Submitted: ${() => JSON.stringify(submittedValues())}</p>
+            <p class="muted">${t('formsPage.submitted')} ${() => JSON.stringify(submittedValues())}</p>
           #else
-            <p class="muted">Nothing submitted yet.</p>
+            <p class="muted">${t('formsPage.empty')}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Field state: touched + dirty'} :lead=${'Every field exposes its own touched and dirty signals, independent of form.valid and form.dirty.'} :code=${touchedDirtyCode}>
+      <Demo :title=${translate('formsPage.demo.fieldState.title')} :lead=${translate('formsPage.demo.fieldState.lead')} :code=${touchedDirtyCode}>
         <div class="stack">
           <div class="row">
-            <span class="badge" class-badge-warn=${form.fields.name.touched()}>name touched: ${form.fields.name.touched() ? 'yes' : 'no'}</span>
-            <span class="badge" class-badge-warn=${form.fields.name.dirty()}>name dirty: ${form.fields.name.dirty() ? 'yes' : 'no'}</span>
-            <span class="badge" class-badge-warn=${form.fields.email.touched()}>email touched: ${form.fields.email.touched() ? 'yes' : 'no'}</span>
+            <span class="badge" class-badge-warn=${form.fields.name.touched()}>${nameTouchedLabel}</span>
+            <span class="badge" class-badge-warn=${form.fields.name.dirty()}>${nameDirtyLabel}</span>
+            <span class="badge" class-badge-warn=${form.fields.email.touched()}>${emailTouchedLabel}</span>
           </div>
-          <p class="muted">Focus and blur the fields in the schema demo above — these flip in real time.</p>
+          <p class="muted">${t('formsPage.stateHint')}</p>
         </div>
       </Demo>
 
-      <Demo :title=${'Custom validator reading another field'} :lead=${'The validate function closes over the password pulse and reruns whenever either value changes.'} :code=${confirmCode}>
+      <Demo :title=${translate('formsPage.demo.confirm.title')} :lead=${translate('formsPage.demo.confirm.lead')} :code=${confirmCode}>
         <div class="stack">
           <label class="field">
-            <span class="field-label">Password</span>
+            <span class="field-label">${t('formsPage.field.password')}</span>
             <input class="input" type="password" bind-value=${password} />
           </label>
           <Field
-            :label=${'Confirm password'}
+            :label=${translate('formsPage.field.confirm')}
             bind-value=${confirmForm.fields.confirm}
             :error=${confirmForm.fields.confirm.error()}
             :type=${'password'}
-            :placeholder=${'Repeat password'}
+            :placeholder=${translate('formsPage.confirmPlaceholder')}
             on-blur=${() => confirmForm.fields.confirm.blur()}
           />
         </div>
       </Demo>
 
-      <Demo :title=${'Multiple validators on one field'} :lead=${'validate accepts an array — the first validator to return a message wins.'} :code=${multiValidatorCode}>
+      <Demo :title=${translate('formsPage.demo.multi.title')} :lead=${translate('formsPage.demo.multi.lead')} :code=${multiValidatorCode}>
         <Field
-          :label=${'Username'}
+          :label=${translate('formsPage.field.username')}
           bind-value=${signupForm.fields.username}
           :error=${signupForm.fields.username.error()}
           :type=${'text'}

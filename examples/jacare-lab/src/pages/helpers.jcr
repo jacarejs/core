@@ -1,5 +1,6 @@
 import { pulse, derive } from '@jacare/core'
 import { appHref } from '../app-base.js'
+import { t, translate } from '../i18n.js'
 import Tip from '../components/Tip.jcr'
 import { IMPORT_CATALOG } from '../imports-catalog.js'
 
@@ -8,13 +9,25 @@ const pkgFilter = pulse('all')
 
 const packages = ['all', ...new Set(IMPORT_CATALOG.map((row) => row.pkg))]
 
+function catalogUsage(row) {
+  return translate(`helpersCatalog.${row.id}.usage`)
+}
+
+function catalogAbout(row) {
+  return translate(`helpersCatalog.${row.id}.about`)
+}
+
+function catalogGroup(row) {
+  return translate(`helpersCatalog.groups.${row.groupId}`)
+}
+
 const visibleRows = derive(() => {
   const q = query().trim().toLowerCase()
   const pkg = pkgFilter()
   return IMPORT_CATALOG.filter((row) => {
     if (pkg !== 'all' && row.pkg !== pkg) return false
     if (!q) return true
-    const hay = `${row.name} ${row.group} ${row.pkg} ${row.usage} ${row.about} ${row.importLine} ${row.example}`.toLowerCase()
+    const hay = `${row.name} ${catalogGroup(row)} ${row.pkg} ${catalogUsage(row)} ${catalogAbout(row)} ${row.importLine} ${row.example}`.toLowerCase()
     return hay.includes(q)
   })
 })
@@ -23,23 +36,31 @@ function setPkg(name) {
   pkgFilter.set(name)
 }
 
+function pkgLabel(name) {
+  return name === 'all' ? translate('helpersPage.filterAll') : name
+}
+
+const countLabel = derive(
+  () =>
+    `${visibleRows().length} ${translate('helpersPage.countOf')} ${IMPORT_CATALOG.length} ${translate('helpersPage.countSymbols')}`,
+)
+
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §20</p>
-      <h1 class="page-title">Import catalog</h1>
+      <p class="page-kicker">${t('helpersPage.kicker')}</p>
+      <h1 class="page-title">${t('helpersPage.title')}</h1>
       <p class="page-lead">
-        Every importable symbol with a short summary, a detailed English explanation, the import line, and a minimal example.
-        Full tables also live in
+        ${t('helpersPage.lead1')}
         <code>docs/api.md</code>
-        §20.
+        ${t('helpersPage.lead2')}
       </p>
     </header>
 
-    <Tip :text=${'Prefer pulse / derive / watch in new code. DOM helpers (bindText, branch, …) are usually emitted from .jcr syntax — you write ${count}, not the helper call. Filter by package or search the explanations.'} />
+    <Tip :text=${translate('helpersPage.tip')} />
 
     <div class="stack" style="gap:0.75rem">
-      <input class="input" bind-value=${query} placeholder="Filter by name, package, explanation…" />
+      <input class="input" bind-value=${query} placeholder=${translate('helpersPage.filterPlaceholder')} />
       <div class="row" style="flex-wrap:wrap;gap:0.4rem">
         #for packages as pkg (pkg)
           <button
@@ -47,10 +68,10 @@ export <view>
             class="btn btn-outline"
             class-active=${pkgFilter() === pkg}
             on-click=${() => setPkg(pkg)}
-          >${pkg}</button>
+          >${pkgLabel(pkg)}</button>
         #end
       </div>
-      <p class="muted">${() => `${visibleRows().length} of ${IMPORT_CATALOG.length} symbols`}</p>
+      <p class="muted">${countLabel}</p>
     </div>
 
     <div class="helper-table import-catalog">
@@ -58,20 +79,20 @@ export <view>
         <article class="helper-row import-row">
           <div class="import-row-head">
             <code class="import-name">${row.name}</code>
-            <span class="badge">${row.group}</span>
+            <span class="badge">${catalogGroup(row)}</span>
             <span class="badge badge-warn">${row.pkg}</span>
           </div>
-          <p class="import-usage">${row.usage}</p>
-          <p class="import-about">${row.about}</p>
-          <p class="import-label muted">Import</p>
+          <p class="import-usage">${catalogUsage(row)}</p>
+          <p class="import-about">${catalogAbout(row)}</p>
+          <p class="import-label muted">${t('helpersPage.importLabel')}</p>
           <pre class="import-line"><code>${row.importLine}</code></pre>
-          <p class="import-label muted">Example</p>
+          <p class="import-label muted">${t('helpersPage.exampleLabel')}</p>
           <pre class="import-example"><code>${row.example}</code></pre>
-          <a class="btn btn-outline" jacare-go=${row.path} href=${appHref(row.path)}>Open lesson</a>
+          <a class="btn btn-outline" jacare-go=${row.path} href=${appHref(row.path)}>${t('helpersPage.openLesson')}</a>
         </article>
       #end
       #if visibleRows().length === 0
-        <p class="muted">No symbols match that filter.</p>
+        <p class="muted">${t('helpersPage.empty')}</p>
       #end
     </div>
   </section>

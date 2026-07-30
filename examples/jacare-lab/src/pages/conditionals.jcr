@@ -1,6 +1,7 @@
 import { pulse, derive } from '@jacare/core'
 import Tip from '../components/Tip.jcr'
 import Demo from '../components/Demo.jcr'
+import { t, translate } from '../i18n.js'
 import { stateCode, nestedCode, siblingCode, gradeCode, emptyResultsCode, themeBgCode, jacareWhenCode } from '../snippets/conditionals.js'
 
 const state = pulse('loading')
@@ -20,6 +21,10 @@ function logout() {
   user.set(null)
 }
 
+const userName = derive(() => user()?.name ?? '')
+const adminWelcome = derive(() => translate('conditionals.demo.nested.admin', { name: userName() }))
+const memberWelcome = derive(() => translate('conditionals.demo.nested.member', { name: userName() }))
+
 const cartCount = pulse(0)
 
 function addToCart() {
@@ -30,6 +35,8 @@ function clearCart() {
   cartCount.set(0)
 }
 
+const cartLabel = derive(() => translate('conditionals.demo.siblings.count', { n: cartCount() }))
+
 const score = pulse(72)
 const grade = derive(() => {
   const n = Number(score())
@@ -39,6 +46,7 @@ const grade = derive(() => {
   if (n >= 60) return 'D'
   return 'F'
 })
+const gradeBadge = derive(() => translate('conditionals.demo.grade.badge', { grade: grade() }))
 
 const contacts = pulse([
   { id: 'a', name: 'Ada Lovelace' },
@@ -51,6 +59,7 @@ const results = derive(() => {
   if (!q) return contacts()
   return contacts().filter((person) => person.name.toLowerCase().includes(q))
 })
+const noMatchesLabel = derive(() => translate('conditionals.demo.empty.noMatches', { query: query() }))
 
 const theme = pulse('day')
 const themes = ['day', 'dusk', 'night']
@@ -68,15 +77,15 @@ function toggleHint() {
 export <view>
   <section class="page">
     <header class="page-hero">
-      <p class="page-kicker">API §7</p>
-      <h1 class="page-title">The if directive</h1>
-      <p class="page-lead">Conditionals mount exactly one branch at a time — inactive branches are not in the DOM at all.</p>
+      <p class="page-kicker">${t('conditionals.kicker')}</p>
+      <h1 class="page-title">${t('conditionals.title')}</h1>
+      <p class="page-lead">${t('conditionals.lead')}</p>
     </header>
 
-    <Tip :text=${'Call signals as functions inside a condition for clarity, for example checking loading() rather than the bare loading reference.'} />
+    <Tip :text=${t('conditionals.tip')} />
 
     <div class="lesson-grid">
-      <Demo :title=${'Loading / error / empty / ready'} :lead=${'A classic four-state machine driven by one pulse.'} :code=${stateCode}>
+      <Demo :title=${t('conditionals.demo.state.title')} :lead=${t('conditionals.demo.state.lead')} :code=${stateCode}>
         <div class="stack">
           <div class="row">
             #for states as s (s)
@@ -84,76 +93,76 @@ export <view>
             #end
           </div>
           #if state() === 'loading'
-            <p class="muted" role="status" aria-live="polite">Loading…</p>
+            <p class="muted" role="status" aria-live="polite">${t('conditionals.demo.state.loading')}</p>
           #elif state() === 'error'
-            <p class="muted">Something went wrong.</p>
+            <p class="muted">${t('conditionals.demo.state.error')}</p>
           #elif state() === 'empty'
-            <p class="muted">No items yet.</p>
+            <p class="muted">${t('conditionals.demo.state.empty')}</p>
           #else
-            <p class="muted">Ready — here is your content.</p>
+            <p class="muted">${t('conditionals.demo.state.ready')}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Nested conditionals: auth gate'} :lead=${'One outer branch for logged-in vs not, a nested branch for admin vs member.'} :code=${nestedCode}>
+      <Demo :title=${t('conditionals.demo.nested.title')} :lead=${t('conditionals.demo.nested.lead')} :code=${nestedCode}>
         <div class="stack">
           <div class="row">
-            <button type="button" class="btn" on-click=${() => login('admin')}>Log in as admin</button>
-            <button type="button" class="btn btn-outline" on-click=${() => login('member')}>Log in as member</button>
-            <button type="button" class="btn btn-ghost" on-click=${logout}>Log out</button>
+            <button type="button" class="btn" on-click=${() => login('admin')}>${t('conditionals.demo.nested.loginAdmin')}</button>
+            <button type="button" class="btn btn-outline" on-click=${() => login('member')}>${t('conditionals.demo.nested.loginMember')}</button>
+            <button type="button" class="btn btn-ghost" on-click=${logout}>${t('conditionals.demo.nested.logout')}</button>
           </div>
           #if user()
             #if user().admin
-              <p class="muted">Welcome, ${user().name} — admin panel unlocked.</p>
+              <p class="muted">${adminWelcome}</p>
             #else
-              <p class="muted">Welcome, ${user().name} — member view only.</p>
+              <p class="muted">${memberWelcome}</p>
             #end
           #else
-            <p class="muted">Please log in.</p>
+            <p class="muted">${t('conditionals.demo.nested.anonymous')}</p>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'Multi-sibling branches'} :lead=${'Every element inside the active branch mounts together, in source order.'} :code=${siblingCode}>
+      <Demo :title=${t('conditionals.demo.siblings.title')} :lead=${t('conditionals.demo.siblings.lead')} :code=${siblingCode}>
         <div class="stack">
           #if cartCount() > 0
-            <p class="muted">${cartCount} items in cart</p>
+            <p class="muted">${cartLabel}</p>
             <div class="row">
-              <button type="button" class="btn" on-click=${addToCart}>Add one more</button>
-              <button type="button" class="btn btn-outline" on-click=${clearCart}>Clear</button>
+              <button type="button" class="btn" on-click=${addToCart}>${t('conditionals.demo.siblings.addMore')}</button>
+              <button type="button" class="btn btn-outline" on-click=${clearCart}>${t('conditionals.demo.siblings.clear')}</button>
             </div>
           #else
-            <p class="muted">Your cart is empty.</p>
-            <button type="button" class="btn" on-click=${addToCart}>Add an item</button>
+            <p class="muted">${t('conditionals.demo.siblings.empty')}</p>
+            <button type="button" class="btn" on-click=${addToCart}>${t('conditionals.demo.siblings.add')}</button>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'#elif chain: grade tiers'} :lead=${'Five branches, five score ranges — only the matching one ever mounts.'} :code=${gradeCode}>
+      <Demo :title=${t('conditionals.demo.grade.title')} :lead=${t('conditionals.demo.grade.lead')} :code=${gradeCode}>
         <div class="stack">
           <input class="input" type="range" min="0" max="100" bind-value=${score} />
           <div class="row">
             <span class="metric">${score}</span>
             #if score() >= 90
-              <span class="badge">Grade ${grade}</span>
+              <span class="badge">${gradeBadge}</span>
             #elif score() >= 80
-              <span class="badge">Grade ${grade}</span>
+              <span class="badge">${gradeBadge}</span>
             #elif score() >= 70
-              <span class="badge badge-warn">Grade ${grade}</span>
+              <span class="badge badge-warn">${gradeBadge}</span>
             #elif score() >= 60
-              <span class="badge badge-warn">Grade ${grade}</span>
+              <span class="badge badge-warn">${gradeBadge}</span>
             #else
-              <span class="badge badge-danger">Grade ${grade}</span>
+              <span class="badge badge-danger">${gradeBadge}</span>
             #end
           </div>
         </div>
       </Demo>
 
-      <Demo :title=${'Empty-state pattern: search results'} :lead=${'A derived filter drives both the list and the "no matches" message.'} :code=${emptyResultsCode}>
+      <Demo :title=${t('conditionals.demo.empty.title')} :lead=${t('conditionals.demo.empty.lead')} :code=${emptyResultsCode}>
         <div class="stack">
-          <input class="input" bind-value=${query} placeholder="Search contacts" />
+          <input class="input" bind-value=${query} placeholder=${t('conditionals.demo.empty.placeholder')} />
           #if results().length === 0
-            <p class="muted">No contacts match "${query}".</p>
+            <p class="muted">${noMatchesLabel}</p>
           #else
             <ul class="list">
               #for results() as person (person.id)
@@ -164,45 +173,45 @@ export <view>
         </div>
       </Demo>
 
-      <Demo :title=${'Swap backgrounds with if'} :lead=${'Each theme mounts a different panel — inactive backgrounds are not in the DOM at all.'} :code=${themeBgCode}>
+      <Demo :title=${t('conditionals.demo.themeBg.title')} :lead=${t('conditionals.demo.themeBg.lead')} :code=${themeBgCode}>
         <div class="stack">
           <div class="row">
-            #for themes as t (t)
+            #for themes as themeId (themeId)
               <button
                 type="button"
                 class="btn btn-outline"
-                class-active=${() => theme() === t}
-                on-click=${() => setTheme(t)}
+                class-active=${() => theme() === themeId}
+                on-click=${() => setTheme(themeId)}
               >
-                ${t}
+                ${themeId}
               </button>
             #end
           </div>
 
           #if theme() === 'day'
             <div class="theme-panel theme-day">
-              <strong>Day</strong>
-              <p>Soft mist background — only this branch is in the DOM.</p>
+              <strong>${t('conditionals.demo.themeBg.dayTitle')}</strong>
+              <p>${t('conditionals.demo.themeBg.dayBody')}</p>
             </div>
           #elif theme() === 'dusk'
             <div class="theme-panel theme-dusk">
-              <strong>Dusk</strong>
-              <p>Warm amber wash — day and night panels are unmounted.</p>
+              <strong>${t('conditionals.demo.themeBg.duskTitle')}</strong>
+              <p>${t('conditionals.demo.themeBg.duskBody')}</p>
             </div>
           #else
             <div class="theme-panel theme-night">
-              <strong>Night</strong>
-              <p>Deep canopy background — swapped in by the if branch.</p>
+              <strong>${t('conditionals.demo.themeBg.nightTitle')}</strong>
+              <p>${t('conditionals.demo.themeBg.nightBody')}</p>
             </div>
           #end
         </div>
       </Demo>
 
-      <Demo :title=${'jacare-when one-liner'} :lead=${'Attribute form desugars to the same IR as a single #if…#end arm. Keep multi-branch #if for elif/else.'} :code=${jacareWhenCode}>
+      <Demo :title=${t('conditionals.demo.when.title')} :lead=${t('conditionals.demo.when.lead')} :code=${jacareWhenCode}>
         <div class="stack">
-          <button type="button" class="btn btn-outline" on-click=${toggleHint}>Toggle hint</button>
+          <button type="button" class="btn btn-outline" on-click=${toggleHint}>${t('conditionals.demo.when.toggle')}</button>
           <p jacare-when=${showHint} class="muted" role="status">
-            jacare-when mounts this node only while the condition is truthy.
+            ${t('conditionals.demo.when.hint')}
           </p>
         </div>
       </Demo>

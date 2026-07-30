@@ -2,12 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta
       name="description"
       content="Jacaré Lab — interactive tutorial covering the full Jacaré API with live demos and source code"
     />
     <title>Jacaré Lab</title>
+    <script>
+      ;(function () {
+        try {
+          var s = localStorage.getItem('j-locale')
+          if (s) document.documentElement.lang = s
+          else document.documentElement.lang = 'en'
+        } catch (e) {
+          document.documentElement.lang = 'en'
+        }
+      })()
+    </script>
     <link rel="icon" href="/jacare-logo.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

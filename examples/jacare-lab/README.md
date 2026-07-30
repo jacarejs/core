@@ -12,7 +12,9 @@
 
 **Import catalog:** [`docs/api.md` §20](../../docs/api.md#20-import-catalog--everything-you-can-import) · Lab [`/helpers`](https://jacarejs.github.io/core/lab/#/helpers) — every symbol you can import, with a detailed English explanation, import line, and example (`@jacare/core`, compiler, vite-plugin, meta, CLI, and `.jcr` exports).
 
-Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) · Studio: [jacarejs.github.io/core/studio](https://jacarejs.github.io/core/studio/)
+Live: [jacarejs.github.io/core/lab](https://jacarejs.github.io/core/lab/) · Studio: [jacarejs.github.io/core/studio](https://jacarejs.github.io/core/studio/) · UI: [jacarejs.github.io/ui](https://jacarejs.github.io/ui/)
+
+**i18n:** Lab chrome, every lesson page, and home demos use `@jacare/ui` (`createI18n` + `LocaleToggle`) with **English** default, plus **pt-BR** and **es** (~1100 keys). Lesson: [`/i18n`](https://jacarejs.github.io/core/lab/#/i18n).
 
 **Playground note:** Lab `/playground` and Studio compile and run editor source with `new Function` in the browser. Treat that as a local sandbox — only paste code you trust.
 

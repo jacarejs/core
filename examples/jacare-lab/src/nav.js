@@ -40,6 +40,8 @@ export const nav = createNav({
     '/island': { use: lazy(() => import('./pages/island.jcr')), title: 'Jacaré Lab · Islands' },
     '/tooling': { use: lazy(() => import('./pages/tooling.jcr')), title: 'Jacaré Lab · Tooling' },
     '/helpers': { use: lazy(() => import('./pages/helpers.jcr')), title: 'Jacaré Lab · Import catalog' },
+    '/i18n': { use: lazy(() => import('./pages/i18n.jcr')), title: 'Jacaré Lab · i18n' },
+    '/ui': { use: lazy(() => import('./pages/ui.jcr')), title: 'Jacaré Lab · Jacaré UI' },
     '/topic/:slug': {
       use: lazy(() => import('./pages/topic-param.jcr')),
       title: (ctx) => `Jacaré Lab · Topic · ${ctx.params.slug ?? '…'}`,
@@ -80,6 +82,8 @@ for (const path of [
   '/lifecycle',
   '/cookbook',
   '/playground',
+  '/i18n',
+  '/ui',
 ]) {
   nav.warm(path)
 }

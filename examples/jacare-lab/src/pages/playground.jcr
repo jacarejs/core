@@ -1,4 +1,5 @@
-import { createLifecycle, effect, pulse } from '@jacare/core'
+import { createLifecycle, derive, effect, pulse } from '@jacare/core'
+import { t, translate } from '../i18n.js'
 import Tip from '../components/Tip.jcr'
 import { DEFAULT_PLAYGROUND_SOURCE, PLAYGROUND_EXAMPLES } from '../playground/examples.js'
 import { highlightJacare } from '../playground/highlight.js'
@@ -6,12 +7,17 @@ import { runPlayground } from '../playground/run.js'
 
 const source = pulse(DEFAULT_PLAYGROUND_SOURCE)
 const error = pulse('')
-const status = pulse('Ready')
+const status = pulse('ready')
+const statusLabel = derive(() => translate(`playgroundPage.status.${status()}`))
 
 let host = null
 let highlightCode = null
 let disposePreview = null
 let timer = null
+
+function exampleLabel(key) {
+  return translate(`playgroundPage.example.${key}`)
+}
 
 function loadExample(id) {
   const example = PLAYGROUND_EXAMPLES.find((item) => item.id === id)
@@ -38,19 +44,19 @@ function runNow() {
     disposePreview = null
     disposePreview = runPlayground(host, source())
     error.set('')
-    status.set('Live')
+    status.set('live')
   } catch (err) {
     disposePreview?.()
     disposePreview = null
     host.replaceChildren()
     error.set(err?.message || String(err))
-    status.set('Error')
+    status.set('error')
   }
 }
 
 function scheduleRun() {
   clearTimeout(timer)
-  status.set('Compiling…')
+  status.set('compiling')
   timer = setTimeout(runNow, 220)
 }
 
@@ -65,8 +71,8 @@ export const lifecycle = createLifecycle({
       host = document.getElementById('playground-host')
       highlightCode = document.getElementById('playground-highlight-code')
       if (!host) {
-        error.set('Preview host not found')
-        status.set('Error')
+        error.set(translate('playgroundPage.hostMissing'))
+        status.set('error')
         return
       }
       tracker = effect(() => {
@@ -91,34 +97,34 @@ export const lifecycle = createLifecycle({
 export <view>
   <section class="page playground-page">
     <header class="page-hero">
-      <p class="page-kicker">Live lab</p>
-      <h1 class="page-title">Playground</h1>
-      <p class="page-lead">Type Jacaré source on the left — it compiles and mounts on the right as you type.</p>
+      <p class="page-kicker">${t('playgroundPage.kicker')}</p>
+      <h1 class="page-title">${t('playgroundPage.title')}</h1>
+      <p class="page-lead">${t('playgroundPage.lead')}</p>
     </header>
 
-    <Tip :text=${'Sandbox: the preview runs your source with new Function in this browser tab — only paste code you trust. Use a full module: imports, pulses, functions, then an export view block. Presets below are complete starting points. For a full-viewport shareable editor, open Jacaré Studio.'} />
+    <Tip :text=${translate('playgroundPage.tip')} />
 
     <div class="row" style="margin-bottom: 0.75rem">
-      <a class="btn" href="https://jacarejs.github.io/core/studio/" target="_blank" rel="noopener noreferrer">Open Jacaré Studio</a>
-      <a class="btn btn-outline" href="https://github.com/jacarejs/core/blob/main/docs/api.md" target="_blank" rel="noopener noreferrer">API docs</a>
-      <a class="btn btn-outline" href="https://github.com/jacarejs/core/blob/main/docs/language-reference.md" target="_blank" rel="noopener noreferrer">Language reference</a>
+      <a class="btn" href="https://jacarejs.github.io/core/studio/" target="_blank" rel="noopener noreferrer">${t('playgroundPage.link.studio')}</a>
+      <a class="btn btn-outline" href="https://github.com/jacarejs/core/blob/main/docs/api.md" target="_blank" rel="noopener noreferrer">${t('playgroundPage.link.apiDocs')}</a>
+      <a class="btn btn-outline" href="https://github.com/jacarejs/core/blob/main/docs/language-reference.md" target="_blank" rel="noopener noreferrer">${t('playgroundPage.link.languageReference')}</a>
     </div>
 
     <div class="playground-toolbar">
       <div class="row">
         #for PLAYGROUND_EXAMPLES as example (example.id)
           <button type="button" class="btn btn-outline" on-click=${() => loadExample(example.id)}>
-            ${example.label}
+            ${exampleLabel(example.labelKey)}
           </button>
         #end
       </div>
-      <span class="playground-status" class-error=${error().length > 0}>${status}</span>
+      <span class="playground-status" class-error=${error().length > 0}>${statusLabel}</span>
     </div>
 
     <div class="playground-grid">
       <section class="playground-pane">
         <header class="playground-pane-head">
-          <h2 class="playground-pane-title">Source</h2>
+          <h2 class="playground-pane-title">${t('playgroundPage.sourceTitle')}</h2>
           <span class="muted">.jcr</span>
         </header>
         <div class="playground-editor-wrap">
@@ -130,15 +136,15 @@ export <view>
             autocapitalize="off"
             bind-value=${source}
             on-scroll=${syncEditorScroll}
-            aria-label="Jacaré source editor"
+            aria-label=${translate('playgroundPage.editorAria')}
           ></textarea>
         </div>
       </section>
 
       <section class="playground-pane">
         <header class="playground-pane-head">
-          <h2 class="playground-pane-title">Preview</h2>
-          <span class="muted">live mount</span>
+          <h2 class="playground-pane-title">${t('playgroundPage.previewTitle')}</h2>
+          <span class="muted">${t('playgroundPage.previewNote')}</span>
         </header>
         #if error()
           <pre class="playground-error">${error}</pre>
