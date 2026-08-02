@@ -3,6 +3,7 @@ import { JacareCounter } from './JacareCounter.jsx'
 import { JacareTip } from './JacareTip.jsx'
 
 const version = import.meta.env.JACARE_VERSION
+const logoUrl = `${import.meta.env.BASE_URL}jacare-logo.png`
 
 export default function App() {
   const [start, setStart] = useState(2)
@@ -63,7 +64,7 @@ export default function App() {
               <span className="island-mark-badge">
                 <img
                   className="island-mark-logo"
-                  src="/jacare-logo.png"
+                  src={logoUrl}
                   alt=""
                   width="20"
                   height="20"
@@ -86,7 +87,7 @@ export default function App() {
               <span className="island-mark-badge">
                 <img
                   className="island-mark-logo"
-                  src="/jacare-logo.png"
+                  src={logoUrl}
                   alt=""
                   width="20"
                   height="20"

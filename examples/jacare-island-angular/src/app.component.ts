@@ -51,7 +51,7 @@ import { JacareTipComponent } from './jacare-tip.component'
         <div class="island-mark">
           <div class="island-mark-head">
             <span class="island-mark-badge">
-              <img class="island-mark-logo" src="/jacare-logo.png" alt="" width="20" height="20" />
+              <img class="island-mark-logo" [src]="logoUrl" alt="" width="20" height="20" />
               Jacaré · .jcr
             </span>
             <code class="island-mark-file">CounterIsland.jcr</code>
@@ -68,7 +68,7 @@ import { JacareTipComponent } from './jacare-tip.component'
         <div class="island-mark island-mark-shadow">
           <div class="island-mark-head">
             <span class="island-mark-badge">
-              <img class="island-mark-logo" src="/jacare-logo.png" alt="" width="20" height="20" />
+              <img class="island-mark-logo" [src]="logoUrl" alt="" width="20" height="20" />
               Jacaré · .jcr
             </span>
             <code class="island-mark-file">TipIsland.jcr</code>
@@ -104,6 +104,7 @@ import { JacareTipComponent } from './jacare-tip.component'
 })
 export class AppComponent {
   readonly version = import.meta.env.JACARE_VERSION
+  readonly logoUrl = `${import.meta.env.BASE_URL}jacare-logo.png`
   readonly start = signal(2)
   readonly label = signal('Live clicks')
 }

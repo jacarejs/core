@@ -6,6 +6,7 @@ import JacareTip from './JacareTip.vue'
 const start = ref(2)
 const label = ref('Live clicks')
 const version = import.meta.env.JACARE_VERSION
+const logoUrl = `${import.meta.env.BASE_URL}jacare-logo.png`
 </script>
 
 <template>
@@ -48,7 +49,7 @@ const version = import.meta.env.JACARE_VERSION
       <div class="island-mark">
         <div class="island-mark-head">
           <span class="island-mark-badge">
-            <img class="island-mark-logo" src="/jacare-logo.png" alt="" width="20" height="20" />
+            <img class="island-mark-logo" :src="logoUrl" alt="" width="20" height="20" />
             Jacaré · .jcr
           </span>
           <code class="island-mark-file">CounterIsland.jcr</code>
@@ -65,7 +66,7 @@ const version = import.meta.env.JACARE_VERSION
       <div class="island-mark island-mark-shadow">
         <div class="island-mark-head">
           <span class="island-mark-badge">
-            <img class="island-mark-logo" src="/jacare-logo.png" alt="" width="20" height="20" />
+            <img class="island-mark-logo" :src="logoUrl" alt="" width="20" height="20" />
             Jacaré · .jcr
           </span>
           <code class="island-mark-file">TipIsland.jcr</code>
